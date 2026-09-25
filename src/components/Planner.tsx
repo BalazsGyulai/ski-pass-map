@@ -33,7 +33,7 @@ export function Planner() {
   const eastern = resorts.filter((resort) => resort.region !== "Tirol");
   const tirol = resorts.filter((resort) => resort.region === "Tirol");
   const nearbyIds = eastern
-    .filter((resort) => (home ? distanceKm(home, resort) <= 90 : false))
+    .filter((resort) => resort.passes.length > 0 && (home ? distanceKm(home, resort) <= 90 : false))
     .sort((a, b) => (home ? distanceKm(home, a) - distanceKm(home, b) : 0))
     .map((resort) => resort.id);
   const selectedIds = picked ?? nearbyIds;
