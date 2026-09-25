@@ -10,6 +10,7 @@ import { clusterPoints } from "@/lib/cluster";
 import { filterResorts } from "@/lib/filter";
 import { cityNoteLabel } from "@/lib/i18n";
 import { pieSvg } from "@/lib/marker";
+import { OSM_TILE_ATTRIBUTION, OSM_TILE_URL } from "@/lib/basemap";
 import { pisteStyle, type PisteProperties } from "@/lib/pistes";
 import { useApp } from "./AppState";
 
@@ -26,25 +27,7 @@ export default function MapView() {
 }
 
 function BaseTiles() {
-  const { theme } = useApp();
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => setDark(theme === "dark" || (theme !== "light" && media.matches));
-    apply();
-    media.addEventListener("change", apply);
-    return () => media.removeEventListener("change", apply);
-  }, [theme]);
-  const url = dark
-    ? "https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png"
-    : "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
-  return (
-    <TileLayer
-      key={url}
-      url={url}
-      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-    />
-  );
+  return <TileLayer url={OSM_TILE_URL} attribution={OSM_TILE_ATTRIBUTION} maxZoom={19} />;
 }
 
 function mapPadding(map: L.Map): { paddingTopLeft: [number, number]; paddingBottomRight: [number, number] } {
@@ -73,6 +56,7 @@ function MapLayers() {
   const map = useMap();
   const { share, updateShare, home, favourites, highlightId, selectResort, t, lang, theme } = useApp();
   const [pisteNote, setPisteNote] = useState<"idle" | "loading" | "empty" | "ready">("idle");
+  const [layersOpen, setLayersOpen] = useState(false);
   const passNames = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.name])), []);
   const colors = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.color])), []);
 
@@ -259,7 +243,7 @@ function MapLayers() {
   useEffect(() => {
     function onClick(event: L.LeafletMouseEvent) {
       const target = event.originalEvent?.target;
-      if (target instanceof Element && target.closest(".leaflet-control, .leaflet-marker-icon, .leaflet-tooltip, .leaflet-overlay-pane")) return;
+      if (target instanceof Element && target.closest(".leaflet-control, .leaflet-marker-icon, .leaflet-tooltip, .leaflet-overlay-pane, .layers")) return;
       selectResort(null);
     }
     map.on("click", onClick);
@@ -283,42 +267,55 @@ function MapLayers() {
           opacity={0.9}
         />
       ) : null}
-      {share.resort || share.showPistes ? (
-        <details className="piste-legend">
-          <summary>{t("pisteLegend")}</summary>
-          <ul>
-            <li><span className="piste-swatch" style={{ background: "#1f9d55" }} />{t("pisteNovice")}</li>
-            <li><span className="piste-swatch" style={{ background: "#1d6fd8" }} />{t("pisteEasy")}</li>
-            <li><span className="piste-swatch" style={{ background: "#d62728" }} />{t("pisteIntermediate")}</li>
-            <li><span className="piste-swatch" style={{ background: "#161616" }} />{t("pisteAdvanced")}</li>
-            <li><span className="piste-swatch dashed" />{t("pisteFreeride")}</li>
-            <li><span className="piste-swatch" style={{ background: "#1c2430" }} />{t("pisteLift")}</li>
-          </ul>
-          {pisteNote === "loading" ? <p className="piste-note">{t("pisteLoading")}</p> : null}
-          {pisteNote === "empty" ? <p className="piste-note">{t("pisteEmpty")}</p> : null}
-        </details>
-      ) : null}
-    <div className="map-actions">
-      <button type="button" aria-pressed={share.showPistes} onClick={() => updateShare({ showPistes: !share.showPistes })}>
-        {t("showAllPistes")}
-      </button>
-      <button type="button" onClick={() => jump(EAST, 8)}>
-        {t("jumpEast")}
-      </button>
-      <button type="button" onClick={() => jump(TIROL, 8)}>
-        {t("jumpTirol")}
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          if (filtered.length === 0 || !mapHasSize(map)) return;
-          const bounds = L.latLngBounds(filtered.map((resort) => [resort.lat, resort.lon] as [number, number]));
-          map.fitBounds(bounds.pad(0.15), { ...mapPadding(map), maxZoom: 11 });
-        }}
-      >
-        {t("fitResorts")}
-      </button>
-    </div>
+      <div className="layers">
+        <button
+          type="button"
+          className="layers-btn"
+          aria-expanded={layersOpen}
+          aria-controls="map-layers"
+          onClick={() => setLayersOpen((open) => !open)}
+        >
+          {t("layers")}
+        </button>
+        {layersOpen ? (
+          <div id="map-layers" className="layers-panel">
+            <button type="button" aria-pressed={share.showPistes} onClick={() => updateShare({ showPistes: !share.showPistes })}>
+              {t("showAllPistes")}
+            </button>
+            <button type="button" onClick={() => jump(EAST, 8)}>
+              {t("jumpEast")}
+            </button>
+            <button type="button" onClick={() => jump(TIROL, 8)}>
+              {t("jumpTirol")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (filtered.length === 0 || !mapHasSize(map)) return;
+                const bounds = L.latLngBounds(filtered.map((resort) => [resort.lat, resort.lon] as [number, number]));
+                map.fitBounds(bounds.pad(0.15), { ...mapPadding(map), maxZoom: 11 });
+              }}
+            >
+              {t("fitResorts")}
+            </button>
+            {share.resort || share.showPistes ? (
+              <div className="piste-legend">
+                <p>{t("pisteLegend")}</p>
+                <ul>
+                  <li><span className="piste-swatch" style={{ background: "#1f9d55" }} />{t("pisteNovice")}</li>
+                  <li><span className="piste-swatch" style={{ background: "#1d6fd8" }} />{t("pisteEasy")}</li>
+                  <li><span className="piste-swatch" style={{ background: "#d62728" }} />{t("pisteIntermediate")}</li>
+                  <li><span className="piste-swatch" style={{ background: "#161616" }} />{t("pisteAdvanced")}</li>
+                  <li><span className="piste-swatch dashed" />{t("pisteFreeride")}</li>
+                  <li><span className="piste-swatch" style={{ background: "#1c2430" }} />{t("pisteLift")}</li>
+                </ul>
+                {pisteNote === "loading" ? <p className="piste-note">{t("pisteLoading")}</p> : null}
+                {pisteNote === "empty" ? <p className="piste-note">{t("pisteEmpty")}</p> : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
     </>
   );
 }

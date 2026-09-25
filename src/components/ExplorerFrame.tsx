@@ -105,8 +105,8 @@ export function ExplorerFrame() {
         <div className="filters-pane">
           <Filters onClose={closeFilters} />
         </div>
+        {share.resort ? <ResortDetail /> : null}
       </aside>
-      {share.resort ? <ResortDetail /> : null}
       <nav className="bottom-nav" aria-label={t("viewLabel")}>
         <button type="button" aria-pressed={share.view === "map"} onClick={() => updateShare({ view: "map" })}>
           {t("showMap")}
