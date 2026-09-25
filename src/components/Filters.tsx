@@ -1,7 +1,7 @@
 "use client";
 
 import { cities, passes, resorts } from "@/lib/data";
-import { cityNoteLabel, regionLabel } from "@/lib/i18n";
+import { regionLabel } from "@/lib/i18n";
 import { useApp } from "./AppState";
 import type { SortKey } from "@/lib/filter";
 
@@ -39,17 +39,17 @@ export function Filters({ onClose }: { onClose?: () => void }) {
         <span>{t("homeBase")}</span>
         <select
           value={share.home}
-          onChange={(event) => updateShare({ home: event.target.value })}
+          onChange={(event) => {
+            const home = event.target.value;
+            updateShare(home === "geo" ? { home } : { home, geoLat: null, geoLon: null });
+          }}
         >
-          {cities.map((city) => {
-            const note = cityNoteLabel(lang, city.id);
-            return (
-              <option key={city.id} value={city.id}>
-                {city.name}
-                {note ? ` · ${note}` : ""}
-              </option>
-            );
-          })}
+          <option value="">{t("homeNone")}</option>
+          {cities.map((city) => (
+            <option key={city.id} value={city.id}>
+              {city.name}
+            </option>
+          ))}
           <option value="geo">{t("homeGeo")}</option>
         </select>
       </label>
@@ -131,12 +131,12 @@ export function Filters({ onClose }: { onClose?: () => void }) {
       </fieldset>
 
       <label className="check">
-        <input type="checkbox" checked={share.showClosed} onChange={(event) => updateShare({ showClosed: event.target.checked })} />
+        <input type="checkbox" checked={share.showAbandoned} onChange={(event) => updateShare({ showAbandoned: event.target.checked })} />
         <span>{t("showClosed")}</span>
       </label>
       <p className="hint">{t("showClosedHint")}</p>
       <label className="check">
-        <input type="checkbox" checked={share.klima} onChange={(event) => updateShare({ klima: event.target.checked })} />
+        <input type="checkbox" checked={share.transit} onChange={(event) => updateShare({ transit: event.target.checked })} />
         <span>{t("klima")}</span>
       </label>
       <p className="hint">{t("klimaHint")}</p>
@@ -216,7 +216,6 @@ export function Filters({ onClose }: { onClose?: () => void }) {
       <div className="legend">
         <p>{t("legendPie")}</p>
         <p>{t("legendGrey")}</p>
-        <p>{t("legendKlima")}</p>
         <p>{t("legendCluster")}</p>
         <p>{t("legendClosed")}</p>
       </div>

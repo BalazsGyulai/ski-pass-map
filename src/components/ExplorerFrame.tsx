@@ -89,9 +89,9 @@ export function ExplorerFrame() {
             </button>
             <button
               type="button"
-              className={share.showClosed ? "chip is-on" : "chip"}
-              aria-pressed={share.showClosed}
-              onClick={() => updateShare({ showClosed: !share.showClosed })}
+              className={share.showAbandoned ? "chip is-on" : "chip"}
+              aria-pressed={share.showAbandoned}
+              onClick={() => updateShare({ showAbandoned: !share.showAbandoned })}
             >
               {t("showClosed")}
             </button>

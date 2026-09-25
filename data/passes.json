@@ -1,0 +1,525 @@
+{
+  "generated": "2026-09-25",
+  "passes": [
+    {
+      "id": "bergerlebnispass",
+      "name": "Niederösterreichische Bergerlebnispass",
+      "color": "#1f5fd1",
+      "price_note": "Season pass for Lower Austrian mountain lifts, plus Bürgeralpe Mariazell (Styria). Price rises in steps. Children are tied to age at purchase, not birth year. Family bonus until 31 Oct: 1 adult pass lets children up to 10.99 ride free; 2 adult passes let children up to 15.99 ride free.",
+      "url": "https://www.bergerlebnispass.at/",
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Adult (16+)",
+            "birth_year_from": null,
+            "birth_year_to": null,
+            "note": "age-based at purchase, no birth-year cut-off published"
+          },
+          {
+            "label": "Child (up to 15.99 years)",
+            "birth_year_from": null,
+            "birth_year_to": null,
+            "note": "age-based at purchase"
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Adult (16+)",
+            "price_eur": 429,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bergerlebnispass.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Adult (16+)",
+            "price_eur": 500,
+            "valid_until": "2026-11-30",
+            "source": {
+              "sourceUrl": "https://www.bergerlebnispass.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Adult (16+)",
+            "price_eur": 555,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bergerlebnispass.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child (up to 15.99 years)",
+            "price_eur": 170,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bergerlebnispass.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child (up to 15.99 years)",
+            "price_eur": 235,
+            "valid_until": "2026-11-30",
+            "source": {
+              "sourceUrl": "https://www.bergerlebnispass.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child (up to 15.99 years)",
+            "price_eur": 300,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bergerlebnispass.at/",
+              "checkedAt": "2026-09-25"
+            }
+          }
+        ]
+      },
+      "source": {
+        "sourceUrl": "https://www.bergerlebnispass.at/",
+        "checkedAt": "2026-09-25"
+      }
+    },
+    {
+      "id": "ostalpen",
+      "name": "Skiregion Ostalpen Card",
+      "color": "#1a9a3a",
+      "price_note": "2026/27 season card for 20 areas in Lower Austria and Styria. Regular prices listed; presale dates were not stated.",
+      "url": "https://www.skiregion-ostalpen.at/tarife",
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Adult",
+            "birth_year_from": null,
+            "birth_year_to": 1999
+          },
+          {
+            "label": "U25",
+            "birth_year_from": 2000,
+            "birth_year_to": 2006
+          },
+          {
+            "label": "Youth",
+            "birth_year_from": 2007,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Child",
+            "birth_year_from": 2011,
+            "birth_year_to": 2019
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Adult",
+            "price_eur": 773,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "U25",
+            "price_eur": 587,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Youth",
+            "price_eur": 587,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child",
+            "price_eur": 399,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+              "checkedAt": "2026-09-25"
+            }
+          }
+        ]
+      },
+      "source": {
+        "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+        "checkedAt": "2026-09-25"
+      }
+    },
+    {
+      "id": "murmuerz",
+      "name": "Mur-Mürz Skiberge Saisonkarte",
+      "color": "#ff8c00",
+      "price_note": "2026/27. Early-bird price until 2026-12-15, regular price after. Also valid at Klippitztörl (Carinthia), which is not in this dataset.",
+      "url": "https://www.skiberge.at/saisonkarte",
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Adult",
+            "birth_year_from": null,
+            "birth_year_to": 1997
+          },
+          {
+            "label": "U28",
+            "birth_year_from": 1998,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Youth",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Child",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Adult",
+            "price_eur": 835,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Adult",
+            "price_eur": 919,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "U28",
+            "price_eur": 610,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "U28",
+            "price_eur": 671,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Youth",
+            "price_eur": 610,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Youth",
+            "price_eur": 671,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child",
+            "price_eur": 460,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child",
+            "price_eur": 506,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte",
+              "checkedAt": "2026-09-25"
+            }
+          }
+        ]
+      },
+      "source": {
+        "sourceUrl": "https://www.skiberge.at/saisonkarte",
+        "checkedAt": "2026-09-25"
+      }
+    },
+    {
+      "id": "joker",
+      "name": "Steiermark Joker",
+      "color": "#d62728",
+      "price_note": "2026/27. Presale until 2026-12-03, regular price after. The 27 partner areas come from the official partner list.",
+      "url": "https://www.steiermarkjoker.at/partner",
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Adult",
+            "birth_year_from": null,
+            "birth_year_to": 1997
+          },
+          {
+            "label": "U28",
+            "birth_year_from": 1998,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Youth",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Child",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Adult",
+            "price_eur": 1148,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.steiermarkjoker.at/partner",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Adult",
+            "price_eur": 1264,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.steiermarkjoker.at/partner",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "U28",
+            "price_eur": 837,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.steiermarkjoker.at/partner",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "U28",
+            "price_eur": 923,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.steiermarkjoker.at/partner",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Youth",
+            "price_eur": 837,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.steiermarkjoker.at/partner",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Youth",
+            "price_eur": 923,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.steiermarkjoker.at/partner",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child",
+            "price_eur": 620,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.steiermarkjoker.at/partner",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child",
+            "price_eur": 683,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.steiermarkjoker.at/partner",
+              "checkedAt": "2026-09-25"
+            }
+          }
+        ]
+      },
+      "source": {
+        "sourceUrl": "https://www.steiermarkjoker.at/partner",
+        "checkedAt": "2026-09-25"
+      }
+    },
+    {
+      "id": "superskicard",
+      "name": "Salzburger Super Ski Card",
+      "color": "#8e44ad",
+      "price_note": "2026/27. Presale until 2026-12-03. From 2026-12-04 everyone 18+ pays one price. Child and youth prices were not captured. Figures come from earlier research and were not re-verified because the price page loads via JavaScript. Most areas are in Salzburg and are out of scope; only the Styrian and Tirol partners are included.",
+      "url": "https://www.superskicard.com/",
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Adult",
+            "birth_year_from": null,
+            "birth_year_to": 2000
+          },
+          {
+            "label": "U25",
+            "birth_year_from": 2001,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Everyone 18+ (from 2026-12-04)",
+            "birth_year_from": null,
+            "birth_year_to": null,
+            "note": "single price for all adults incl. U25 after presale; exact birth-year cut-off not captured"
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Adult",
+            "price_eur": 1049,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "U25",
+            "price_eur": 890,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Everyone 18+ (from 2026-12-04)",
+            "price_eur": 1190,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/",
+              "checkedAt": "2026-09-25"
+            }
+          }
+        ]
+      },
+      "source": {
+        "sourceUrl": "https://www.superskicard.com/",
+        "checkedAt": "2026-09-25"
+      }
+    },
+    {
+      "id": "snowcardtirol",
+      "name": "Snow Card Tirol",
+      "color": "#00a3a3",
+      "price_note": "2026/27. Presale from 2026-09-26 until 2026-10-31, regular price after. Children born 2021 or later ride free when accompanied.",
+      "url": "https://www.snowcard.tirol.at/",
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Adult",
+            "birth_year_from": null,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Youth",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Child",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Adult",
+            "price_eur": 1080,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.snowcard.tirol.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Adult",
+            "price_eur": 1227,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.snowcard.tirol.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Youth",
+            "price_eur": 658,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.snowcard.tirol.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Youth",
+            "price_eur": 982,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.snowcard.tirol.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child",
+            "price_eur": 367,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.snowcard.tirol.at/",
+              "checkedAt": "2026-09-25"
+            }
+          },
+          {
+            "bracket": "Child",
+            "price_eur": 613,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.snowcard.tirol.at/",
+              "checkedAt": "2026-09-25"
+            }
+          }
+        ]
+      },
+      "source": {
+        "sourceUrl": "https://www.snowcard.tirol.at/",
+        "checkedAt": "2026-09-25"
+      }
+    }
+  ]
+}

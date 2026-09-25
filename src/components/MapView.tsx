@@ -4,24 +4,22 @@ import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import site from "../../config/site.json";
 import { cities, passes, resorts } from "@/lib/data";
 import { clusterPoints } from "@/lib/cluster";
 import { filterResorts } from "@/lib/filter";
-import { cityNoteLabel } from "@/lib/i18n";
 import { pieSvg } from "@/lib/marker";
+import { BASE_PATH } from "@/lib/site";
 import { OSM_TILE_ATTRIBUTION, OSM_TILE_URL } from "@/lib/basemap";
 import { escapeHtml } from "@/lib/html";
 import { mapFitPadding } from "@/lib/map-padding";
 import { pisteStyle, type PisteProperties } from "@/lib/pistes";
 import { useApp } from "./AppState";
 
-const EAST: L.LatLngExpression = [47.55, 15.55];
-const TIROL: L.LatLngExpression = [47.2, 11.65];
+const AUSTRIA: L.LatLngExpression = [47.5, 13.35];
 
 export default function MapView() {
   return (
-    <MapContainer center={EAST} zoom={8} minZoom={6} maxZoom={16} className="map-canvas" scrollWheelZoom zoomControl={false}>
+    <MapContainer center={AUSTRIA} zoom={7} minZoom={4} maxZoom={16} className="map-canvas" scrollWheelZoom zoomControl={false}>
       <BaseTiles />
       <MapLayers />
     </MapContainer>
@@ -54,7 +52,7 @@ function mapHasSize(map: L.Map): boolean {
 
 function MapLayers() {
   const map = useMap();
-  const { share, updateShare, home, favourites, highlightId, selectResort, t, lang, theme } = useApp();
+  const { share, updateShare, home, favourites, highlightId, selectResort, t, theme } = useApp();
   const [pisteNote, setPisteNote] = useState<"idle" | "loading" | "empty" | "ready">("idle");
   const [layersOpen, setLayersOpen] = useState(false);
   const passNames = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.name])), []);
@@ -85,7 +83,7 @@ function MapLayers() {
             className: "resort-marker",
             html: pieSvg(
               resort.passes.map((id) => colors.get(id) ?? "#8b938e"),
-              { selected: marked, klima: resort.klimaticket, closed: resort.status === "closed?" },
+              { selected: marked, closed: resort.abandoned },
             ),
             iconSize: [28, 32],
             iconAnchor: [14, 14],
@@ -136,12 +134,10 @@ function MapLayers() {
   useEffect(() => {
     const layer = L.layerGroup().addTo(map);
     cities.forEach((city) => {
-      const note = cityNoteLabel(lang, city.id);
-      const label = note ? `${city.name} (${note})` : city.name;
-      const homeCity = share.home === city.id;
+      const label = city.name;
       const icon = L.divIcon({
         className: "city-marker",
-        html: `<span class="city-star${homeCity ? " is-home" : ""}">★</span>`,
+        html: `<span class="city-star">★</span>`,
         iconSize: [22, 22],
         iconAnchor: [11, 11],
       });
@@ -152,7 +148,7 @@ function MapLayers() {
     return () => {
       map.removeLayer(layer);
     };
-  }, [map, lang, share.home]);
+  }, [map]);
 
   useEffect(() => {
     if (!share.resort) {
@@ -194,7 +190,7 @@ function MapLayers() {
     setPisteNote("loading");
     const frame = requestAnimationFrame(() => {
       if (cancelled || !mapHasSize(map)) return;
-      void fetch(`${site.basePath}/pistes/${resort.id}.geojson`)
+      void fetch(`${BASE_PATH}/pistes/${resort.id}.geojson`)
         .then((response) => (response.ok ? response.json() : null))
         .then((data: { features?: unknown[] } | null) => {
           if (cancelled || !mapHasSize(map)) return;
@@ -252,12 +248,6 @@ function MapLayers() {
     };
   }, [map, selectResort]);
 
-  function jump(target: L.LatLngExpression, zoom: number) {
-    if (!mapHasSize(map)) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    map.flyTo(target, zoom, { animate: !reduced, duration: reduced ? 0 : 0.7 });
-  }
-
   return (
     <>
       {share.showPistes ? (
@@ -281,12 +271,6 @@ function MapLayers() {
           <div id="map-layers" className="layers-panel">
             <button type="button" aria-pressed={share.showPistes} onClick={() => updateShare({ showPistes: !share.showPistes })}>
               {t("showAllPistes")}
-            </button>
-            <button type="button" onClick={() => jump(EAST, 8)}>
-              {t("jumpEast")}
-            </button>
-            <button type="button" onClick={() => jump(TIROL, 8)}>
-              {t("jumpTirol")}
             </button>
             <button
               type="button"

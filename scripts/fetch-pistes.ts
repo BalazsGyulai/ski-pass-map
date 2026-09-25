@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, unlink
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { distanceKm } from "../src/lib/distance";
+import { stripPortalUrls } from "../src/lib/portals";
 import { normalizeDifficulty, simplifyLine } from "../src/lib/pistes";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -49,10 +50,15 @@ const liftTypes = new Set([
   "yes",
 ]);
 
-const data = JSON.parse(readFileSync(join(root, "data", "resorts.json"), "utf8")) as {
-  resorts: ResortPoint[];
+const osm = JSON.parse(readFileSync(join(root, "data", "osm.json"), "utf8")) as {
+  resorts: Array<{ id: string; lat: number; lon: number; slopeKm: number | null }>;
 };
-const resorts = data.resorts;
+const resorts: ResortPoint[] = osm.resorts.map((resort) => ({
+  id: resort.id,
+  lat: resort.lat,
+  lon: resort.lon,
+  slope_km: resort.slopeKm,
+}));
 
 function radiusKm(resort: ResortPoint): number {
   const km = resort.slope_km;
@@ -327,13 +333,13 @@ async function main() {
       } else {
         console.log(`query ${index + 1}/${groups.length} ${group.map((resort) => resort.id).join(", ")} (replacing unusable cache)`);
         payload = await fetchGroup(group);
-        writeFileSync(cachePath, JSON.stringify(payload));
+        writeFileSync(cachePath, stripPortalUrls(JSON.stringify(payload)));
         console.log(`  stored ${payload.elements?.length ?? 0} elements`);
       }
     } else {
       console.log(`query ${index + 1}/${groups.length} ${group.map((resort) => resort.id).join(", ")}`);
       payload = await fetchGroup(group);
-      writeFileSync(cachePath, JSON.stringify(payload));
+      writeFileSync(cachePath, stripPortalUrls(JSON.stringify(payload)));
       console.log(`  stored ${payload.elements?.length ?? 0} elements`);
     }
     for (const element of payload.elements ?? []) {

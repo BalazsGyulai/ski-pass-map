@@ -96,7 +96,7 @@ describe("quotePlan", () => {
     dayTicketEstimate: dayTicketIsEstimate(resort.day_ticket_season, resort.day_ticket_eur),
   }));
 
-  it("prices Ostalpen plus Snow Card, and treats the Stubaier day ticket as an estimate", () => {
+  it("prices Ostalpen plus Snow Card and leaves the day-ticket total unknown without an official day ticket", () => {
     const quotes = quotePlan(passes, slim, 2003, "2026-10-01", [
       { id: "stuhleck", days: 4 },
       { id: "stubaier-gletscher", days: 7 },
@@ -108,15 +108,16 @@ describe("quotePlan", () => {
       uncoveredDays: 0,
       totalEur: 1667,
       usesEstimate: false,
-      breakEvenEstimate: true,
+      breakEvenEstimate: false,
+      breakEvenDays: null,
     });
     expect(quotes.find((quote) => quote.id === "pass:ostalpen")?.uncoveredDays).toBe(7);
     expect(quotes.find((quote) => quote.id === "pass:snowcardtirol")?.coveredDays).toBe(7);
     expect(quotes.find((quote) => quote.id === "pass:bergerlebnispass")?.priceReason).toBe("age-not-birth-year");
     const tickets = quotes.find((quote) => quote.id === "day-tickets");
-    expect(tickets?.totalEur).toBeCloseTo(4 * 64.5 + 7 * 72.5);
-    expect(tickets?.usesEstimate).toBe(true);
-    expect(cheapestFullCoverage(quotes)?.id).toBe("day-tickets");
+    expect(tickets?.totalEur).toBeNull();
+    expect(tickets?.usesEstimate).toBe(false);
+    expect(cheapestFullCoverage(quotes)?.id).toBe("combo:ostalpen+snowcardtirol");
   });
 
   it("prices day tickets and break-even when every used resort has a day-ticket price", () => {
@@ -126,7 +127,14 @@ describe("quotePlan", () => {
         id: "local",
         pricing: {
           brackets: [{ label: "Adult", birth_year_from: null, birth_year_to: null }],
-          periods: [{ bracket: "Adult", price_eur: 100, valid_until: null }],
+          periods: [
+            {
+              bracket: "Adult",
+              price_eur: 100,
+              valid_until: null,
+              source: { sourceUrl: "https://example.com/pass", checkedAt: "2026-09-25" },
+            },
+          ],
         },
       },
     ];

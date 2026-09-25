@@ -10,14 +10,14 @@ export interface ResortFilters {
   passMatch: "any" | "all";
   noPass: boolean;
   regions: string[];
-  klima: boolean;
+  transit: boolean;
   park: boolean;
   night: boolean;
   minElev: number | null;
   minSlope: number | null;
   maxKm: number | null;
   favouritesOnly: boolean;
-  showClosed: boolean;
+  showAbandoned: boolean;
 }
 
 export function countActiveFilters(filters: ResortFilters): number {
@@ -26,14 +26,14 @@ export function countActiveFilters(filters: ResortFilters): number {
   if (filters.passes.length > 0) count += 1;
   if (filters.noPass) count += 1;
   if (filters.regions.length > 0) count += 1;
-  if (filters.klima) count += 1;
+  if (filters.transit) count += 1;
   if (filters.park) count += 1;
   if (filters.night) count += 1;
   if (filters.minElev != null) count += 1;
   if (filters.minSlope != null) count += 1;
   if (filters.maxKm != null) count += 1;
   if (filters.favouritesOnly) count += 1;
-  if (filters.showClosed) count += 1;
+  if (filters.showAbandoned) count += 1;
   return count;
 }
 
@@ -44,7 +44,7 @@ export function filterResorts(
 ): Resort[] {
   const query = fold(filters.q.trim());
   return resorts.filter((resort) => {
-    if (resort.status === "closed?" && !filters.showClosed) {
+    if (resort.abandoned && !filters.showAbandoned) {
       const named = query.length > 0 && fold(resort.name).includes(query);
       if (!named) return false;
     }
@@ -64,7 +64,7 @@ export function filterResorts(
       if (!hit) return false;
     }
     if (filters.regions.length > 0 && !filters.regions.includes(resort.region)) return false;
-    if (filters.klima && !resort.klimaticket) return false;
+    if (filters.transit && !resort.public_transport) return false;
     if (filters.park && resort.snowpark !== true) return false;
     if (filters.night && resort.night_skiing !== true) return false;
     if (filters.minElev != null && (resort.top_elevation_m == null || resort.top_elevation_m < filters.minElev)) return false;

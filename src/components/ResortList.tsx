@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { passById, passes, resorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { filterResorts, sortResorts } from "@/lib/filter";
-import { formatEur, formatKm } from "@/lib/format";
+import { finiteOrBlank, formatEur, formatKm } from "@/lib/format";
 import { resolvePrice } from "@/lib/pricing";
 import { regionLabel } from "@/lib/i18n";
 import { useApp } from "./AppState";
@@ -54,8 +54,8 @@ export function ResortList() {
               id={`resort-${resort.id}`}
               className={
                 share.resort === resort.id
-                  ? `resort-row is-selected${resort.status === "closed?" ? " is-closed" : ""}`
-                  : `resort-row${resort.status === "closed?" ? " is-closed" : ""}`
+                  ? `resort-row is-selected${resort.abandoned ? " is-closed" : ""}`
+                  : `resort-row${resort.abandoned ? " is-closed" : ""}`
               }
             >
               <button
@@ -79,13 +79,13 @@ export function ResortList() {
               >
                 <span className="name-line">
                   <span className="resort-name">{resort.name}</span>
-                  {resort.status === "closed?" ? <span className="badge warn">{t("statusClosed")}</span> : null}
+                  {resort.abandoned ? <span className="badge warn">{t("statusClosed")}</span> : null}
                 </span>
                 <span className="card-stats">
-                  <span>{distance != null ? `${formatKm(distance)} ${t("km")}` : t("unknown")}</span>
-                  <span>{resort.top_elevation_m == null ? t("unknown") : `${resort.top_elevation_m} m`}</span>
-                  <span>{resort.slope_km == null ? t("unknown") : `${resort.slope_km} ${t("km")}`}</span>
-                  <span>{cardPrice(resort, birthYear, effectiveDate, lang, t)}</span>
+                  {distance != null && formatKm(distance) ? <span>{`${formatKm(distance)} ${t("km")}`}</span> : null}
+                  {finiteOrBlank(resort.top_elevation_m) != null ? <span>{`${resort.top_elevation_m} m`}</span> : null}
+                  {finiteOrBlank(resort.slope_km) != null ? <span>{`${resort.slope_km} ${t("km")}`}</span> : null}
+                  {cardPrice(resort, birthYear, effectiveDate, lang, t)}
                 </span>
                 <span className="card-foot">
                   <PassBadges ids={resort.passes} emptyLabel={t("noPass")} />
@@ -126,8 +126,8 @@ function cardPrice(
   birthYear: number | null,
   effectiveDate: string | null,
   lang: "en" | "hu",
-  t: (key: "dayTicket" | "unknown" | "estimate", vars?: Record<string, string | number>) => string,
-): string {
+  t: (key: "dayTicket" | "estimate", vars?: Record<string, string | number>) => string,
+): ReactNode {
   if (effectiveDate) {
     let best: number | null = null;
     for (const id of resort.passes) {
@@ -136,9 +136,11 @@ function cardPrice(
       const price = resolvePrice(pass, birthYear, effectiveDate);
       if (price.amountEur != null && (best == null || price.amountEur < best)) best = price.amountEur;
     }
-    if (best != null) return formatEur(lang, best);
+    const priced = finiteOrBlank(best);
+    if (priced != null) return <span>{formatEur(lang, priced)}</span>;
   }
-  if (resort.day_ticket_eur == null) return t("unknown");
+  const day = finiteOrBlank(resort.day_ticket_eur);
+  if (day == null) return null;
   const estimate = resort.day_ticket_season !== "2025/26" ? ` (${t("estimate")})` : "";
-  return `${t("dayTicket")} ${formatEur(lang, resort.day_ticket_eur)}${estimate}`;
+  return <span>{`${t("dayTicket")} ${formatEur(lang, day)}${estimate}`}</span>;
 }

@@ -1,12 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { passById, passes, resortById, resorts } from "@/lib/data";
-import { distanceKm } from "@/lib/distance";
-import { formatBreakEven, formatDate, formatEur } from "@/lib/format";
+import { finiteOrBlank, formatBreakEven, formatDate, formatEur } from "@/lib/format";
 import { priceReasonText } from "@/lib/i18n";
-import { cheapestFullCoverage, distributeDays, quotePlan, type PriceQuote } from "@/lib/pricing";
+import { cheapestFullCoverage, quotePlan, type PriceQuote } from "@/lib/pricing";
 import { useApp } from "./AppState";
 
 export function Planner() {
@@ -19,24 +18,9 @@ export function Planner() {
     effectiveDate,
     resortDays,
     setResortDaysCount,
-    replaceResortDays,
     clearResortDays,
-    home,
     ready,
   } = useApp();
-  const [eastDays, setEastDays] = useState(10);
-  const [tirolDays, setTirolDays] = useState(7);
-  const [tirolId, setTirolId] = useState("stubaier-gletscher");
-  const [picked, setPicked] = useState<string[] | null>(null);
-  const [fillError, setFillError] = useState(false);
-
-  const eastern = resorts.filter((resort) => resort.region !== "Tirol");
-  const tirol = resorts.filter((resort) => resort.region === "Tirol");
-  const nearbyIds = eastern
-    .filter((resort) => resort.passes.length > 0 && (home ? distanceKm(home, resort) <= 90 : false))
-    .sort((a, b) => (home ? distanceKm(home, a) - distanceKm(home, b) : 0))
-    .map((resort) => resort.id);
-  const selectedIds = picked ?? nearbyIds;
 
   const plan = Object.entries(resortDays).map(([id, days]) => ({ id, days }));
   const quotes = useMemo(() => {
@@ -59,32 +43,6 @@ export function Planner() {
 
   const recommended = cheapestFullCoverage(quotes);
   const totalPlanned = plan.reduce((sum, item) => sum + item.days, 0);
-
-  function applyFill(ids: string[], east: number, tirolResort: string, tirolCount: number) {
-    if (ids.length === 0) {
-      setFillError(true);
-      return;
-    }
-    setFillError(false);
-    const ordered = [...ids].sort((a, b) => {
-      const left = resortById.get(a);
-      const right = resortById.get(b);
-      if (!home || !left || !right) return 0;
-      return distanceKm(home, left) - distanceKm(home, right);
-    });
-    const days = distributeDays(ordered, east);
-    if (tirolResort && tirolCount > 0) days[tirolResort] = (days[tirolResort] ?? 0) + tirolCount;
-    replaceResortDays(days);
-  }
-
-  function loadExample() {
-    setPicked(nearbyIds);
-    setEastDays(10);
-    setTirolDays(7);
-    setTirolId("stubaier-gletscher");
-    if (birthYear == null) setBirthYear(2003);
-    applyFill(nearbyIds, 10, "stubaier-gletscher", 7);
-  }
 
   return (
     <div className="page page-narrow">
@@ -117,82 +75,6 @@ export function Planner() {
       </section>
 
       <section className="card-block">
-        <h2>{t("quickFill")}</h2>
-        <p className="hint">{t("distributeNote")}</p>
-        <div className="split">
-          <label className="field">
-            <span>{t("eastDays")}</span>
-            <input type="number" min={0} max={60} value={eastDays} onChange={(event) => setEastDays(Number(event.target.value))} />
-          </label>
-          <label className="field">
-            <span>{t("tirolDays")}</span>
-            <input type="number" min={0} max={30} value={tirolDays} onChange={(event) => setTirolDays(Number(event.target.value))} />
-          </label>
-          <label className="field">
-            <span>{t("tirolResort")}</span>
-            <select value={tirolId} onChange={(event) => setTirolId(event.target.value)}>
-              {tirol.map((resort) => (
-                <option key={resort.id} value={resort.id}>
-                  {resort.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div className="row-actions">
-          <button type="button" className="ghost" onClick={() => setPicked(nearbyIds)}>
-            {t("selectAllNearby")}
-          </button>
-          <button type="button" className="ghost" onClick={() => setPicked([])}>
-            {t("selectNone")}
-          </button>
-        </div>
-        <p className="hint">{t("nearbyHint")}</p>
-        <fieldset>
-          <legend>{t("easternResorts")}</legend>
-          <ul className="check-grid">
-            {eastern.map((resort) => {
-              const km = home ? distanceKm(home, resort) : null;
-              return (
-                <li key={resort.id}>
-                  <label className="check">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.includes(resort.id)}
-                      onChange={() => {
-                        setPicked(
-                          selectedIds.includes(resort.id)
-                            ? selectedIds.filter((id) => id !== resort.id)
-                            : [...selectedIds, resort.id],
-                        );
-                      }}
-                    />
-                    <span>
-                      {resort.name}
-                      {km != null ? ` · ${Math.round(km)} km` : ""}
-                    </span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
-        </fieldset>
-        {fillError ? <p className="hint warn">{t("noEasternSelected")}</p> : null}
-        <div className="row-actions">
-          <button type="button" className="primary" onClick={() => applyFill(selectedIds, eastDays, tirolId, tirolDays)}>
-            {t("applyQuickFill")}
-          </button>
-          <button type="button" className="ghost" onClick={loadExample}>
-            {t("loadExample")}
-          </button>
-          <button type="button" className="ghost" onClick={clearResortDays}>
-            {t("clearDays")}
-          </button>
-        </div>
-        <p className="hint">{t("exampleHint")}</p>
-      </section>
-
-      <section className="card-block">
         <h2>{t("plannedDays")}</h2>
         {totalPlanned === 0 ? <p>{t("nonePlanned")}</p> : null}
         <ul className="plan-list">
@@ -217,6 +99,13 @@ export function Planner() {
               );
             })}
         </ul>
+        {totalPlanned > 0 ? (
+          <div className="row-actions">
+            <button type="button" className="ghost" onClick={clearResortDays}>
+              {t("clearDays")}
+            </button>
+          </div>
+        ) : null}
       </section>
 
       <section className="card-block">
@@ -226,7 +115,7 @@ export function Planner() {
         {totalPlanned === 0 ? <p>{t("addDaysPrompt")}</p> : null}
         {recommended ? (
           <p className="banner">
-            {t("cheapest")}: {quoteTitle(recommended, t)} · {formatEur(lang, recommended.totalEur ?? 0)}
+            {t("cheapest")}: {quoteTitle(recommended, t)} · {finiteOrBlank(recommended.totalEur) != null ? formatEur(lang, recommended.totalEur ?? 0) : t("unknownTotal")}
             {recommended.usesEstimate ? ` · ${t("estimate")}` : ""}
           </p>
         ) : totalPlanned > 0 ? (
@@ -332,5 +221,6 @@ function quoteTitle(quote: PriceQuote, t: (key: "dayTicketsOnly" | "combo" | "pa
 }
 
 function money(lang: "en" | "hu", value: number | null, unknown: string): string {
-  return value == null ? unknown : formatEur(lang, value);
+  const amount = finiteOrBlank(value);
+  return amount == null ? unknown : formatEur(lang, amount);
 }

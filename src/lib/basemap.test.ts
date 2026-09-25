@@ -6,6 +6,7 @@ describe("basemap tiles", () => {
     expect(OSM_TILE_URL).toBe("https://tile.openstreetmap.org/{z}/{x}/{y}.png");
     expect(OSM_TILE_URL).not.toMatch(/carto|apikey|api_key/i);
     expect(OSM_TILE_ATTRIBUTION).toMatch(/openstreetmap\.org\/copyright/);
+    expect(OSM_TILE_ATTRIBUTION).toMatch(/openskimap\.org/);
     expect(OSM_TILE_ATTRIBUTION).not.toMatch(/carto/i);
   });
 });

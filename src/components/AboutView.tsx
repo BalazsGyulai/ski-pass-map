@@ -1,12 +1,13 @@
 "use client";
 
-import { dataset, passes, resorts } from "@/lib/data";
+import { generated, passes, resorts, unverifiedResortIds } from "@/lib/data";
+import { SITE_NAME } from "@/lib/site";
 import { formatDate } from "@/lib/format";
 import { useApp } from "./AppState";
 
 export function AboutView() {
   const { t, lang } = useApp();
-  const updated = dataset.generated;
+  const updated = generated;
 
   return (
     <div className="page page-narrow">
@@ -20,6 +21,7 @@ export function AboutView() {
         <h2>{t("seasonLabel", { season: "2026/27" })}</h2>
         <p>{updated ? t("lastUpdated", { date: formatDate(lang, updated) }) : t("updatedUnknown")}</p>
         <p>{t("resortsInData", { n: resorts.length })}</p>
+        {unverifiedResortIds.length > 0 ? <p>{t("unverifiedHeld", { n: unverifiedResortIds.length })}</p> : null}
         <p>{t("passesInData", { n: passes.length })}</p>
         <p>{t("seedBody")}</p>
         <p>{t("gapsBody")}</p>
@@ -50,6 +52,19 @@ export function AboutView() {
       <section className="card-block">
         <h2>{t("storageTitle")}</h2>
         <p>{t("storageBody")}</p>
+      </section>
+      <section className="card-block">
+        <h2>{t("creditsTitle")}</h2>
+        <p>{t("creditsOsm")}</p>
+        <p>{t("creditsOpenSkiMap")}</p>
+        <p>{t("creditsOpenSnowMap")}</p>
+        <p>{t("creditsPasses")}</p>
+        <p>
+          <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">
+            {t("reportMapIssue")}
+          </a>
+        </p>
+        <p>{t("creditsCode", { name: SITE_NAME })}</p>
       </section>
       <section className="card-block">
         <h2>{t("pwaTitle")}</h2>

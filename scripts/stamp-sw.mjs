@@ -23,5 +23,21 @@ if (!source.includes("__BUILD_ID__")) {
   process.exit(1);
 }
 
-writeFileSync(file, source.replaceAll("__BUILD_ID__", id));
-console.log(`service worker cache ski-pass-map-${id}`);
+const site = JSON.parse(readFileSync(new URL("../config/site.json", import.meta.url), "utf8"));
+const configured = process.env.NEXT_PUBLIC_BASE_PATH;
+const basePath = configured === undefined ? site.basePath : configured;
+const prefix = basePath === "" ? "" : basePath;
+const stamped = source.replaceAll("__BUILD_ID__", id).replaceAll("/ski-pass-map", prefix);
+const manifestFile = new URL("../out/manifest.webmanifest", import.meta.url);
+const manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
+const rewrite = (value) => (typeof value === "string" ? value.replaceAll("/ski-pass-map", prefix || "") : value);
+manifest.name = site.name;
+manifest.short_name = site.name;
+manifest.start_url = basePath === "" ? "/" : `${basePath}/`;
+manifest.scope = basePath === "" ? "/" : `${basePath}/`;
+if (Array.isArray(manifest.icons)) {
+  for (const icon of manifest.icons) icon.src = rewrite(icon.src);
+}
+writeFileSync(file, stamped);
+writeFileSync(manifestFile, `${JSON.stringify(manifest, null, 2)}\n`);
+console.log(`service worker cache ski-pass-map-${id} basePath=${basePath === "" ? "/" : basePath}`);

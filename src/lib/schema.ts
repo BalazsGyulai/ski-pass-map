@@ -7,6 +7,34 @@ const httpUrl = z
   .url()
   .refine((value) => value.startsWith("https://") || value.startsWith("http://"), "Only http(s) URLs");
 
+/**
+ * A factual value plus optional provenance.
+ * sourceUrl and checkedAt are set together. snippet is a short quote or paraphrase, not a copied page.
+ */
+export function sourced<T extends z.ZodTypeAny>(value: T) {
+  return z
+    .object({
+      value,
+      sourceUrl: httpUrl.optional(),
+      checkedAt: isoDate.optional(),
+      snippet: z.string().min(1).max(400).optional(),
+    })
+    .superRefine((fact, ctx) => {
+      if ((fact.sourceUrl == null) !== (fact.checkedAt == null)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "sourceUrl and checkedAt must both be set or both be omitted",
+        });
+      }
+    });
+}
+
+export const factSourceSchema = z.object({
+  sourceUrl: httpUrl,
+  checkedAt: isoDate,
+  snippet: z.string().min(1).max(400).optional(),
+});
+
 const bracketSchema = z
   .object({
     label: z.string().min(1),
@@ -32,6 +60,7 @@ const periodSchema = z.object({
   bracket: z.string().min(1),
   price_eur: z.number().nonnegative().nullable(),
   valid_until: isoDate.nullable(),
+  source: factSourceSchema,
 });
 
 export const passSchema = z.object({
@@ -40,99 +69,126 @@ export const passSchema = z.object({
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   price_note: z.string().min(1),
   url: httpUrl,
+  source: factSourceSchema,
   pricing: z.object({
     brackets: z.array(bracketSchema).min(1),
     periods: z.array(periodSchema).min(1),
   }),
 });
 
-const optionalUrl = httpUrl.nullable();
-const trueOrUnknown = z.union([z.literal(true), z.null()]);
+const coverageSchema = z.object({
+  id: z.string().min(1),
+  sourceUrl: httpUrl,
+  checkedAt: isoDate,
+});
 
-export const resortSchema = z
+/** Non-OSM resort facts. Coordinates and OSM statistics live in data/osm.json. */
+export const resortRecordSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  region: z.string().min(1),
+  country: z.string().regex(/^[A-Z]{2}$/),
+  verification: z.enum(["verified", "unverified"]),
+  passes: z.array(coverageSchema),
+  website: sourced(httpUrl).nullable(),
+  dayTicket: sourced(
+    z.object({
+      eur: z.number().nonnegative(),
+      season: z.string().min(1),
+    }),
+  ).nullable(),
+  seasonDates: sourced(z.string().min(1)).nullable(),
+  publicTransport: z.string().min(1).nullable(),
+  snowpark: sourced(z.literal(true)).nullable(),
+  nightSkiing: sourced(z.literal(true)).nullable(),
+  notes: z.string().min(1).nullable(),
+});
+
+export const resortsFileSchema = z.object({
+  generated: isoDate,
+  resorts: z.array(resortRecordSchema).min(1),
+});
+
+export const passesFileSchema = z.object({
+  generated: isoDate,
+  passes: z.array(passSchema).min(1),
+});
+
+const trueOrNull = z.union([z.literal(true), z.null()]);
+
+/** Europe bounds, wide enough for a later country without treating the file as worldwide. */
+const europeLat = z.number().gte(34).lte(72);
+const europeLon = z.number().gte(-25).lte(45);
+
+export const osmResortSchema = z
   .object({
     id: z.string().min(1),
-    name: z.string().min(1),
-    lat: z.number().gte(45.7).lte(49.1),
-    lon: z.number().gte(9.5).lte(22.9),
-    region: z.string().min(1),
-    passes: z.array(z.string().min(1)),
-    klimaticket: z.boolean(),
-    day_ticket_eur: z.number().nonnegative().nullable(),
-    day_ticket_season: z.string().min(1).nullable(),
-    website: optionalUrl,
-    status: z.enum(["open", "closed?"]),
-    coord_source: z.string().min(1),
-    top_elevation_m: z.number().nonnegative().nullable(),
-    base_elevation_m: z.number().nonnegative().nullable(),
-    slope_km: z.number().nonnegative().nullable(),
+    lat: europeLat,
+    lon: europeLon,
+    coordSource: z.string().min(1),
+    topElevationM: z.number().nonnegative().nullable(),
+    baseElevationM: z.number().nonnegative().nullable(),
+    slopeKm: z.number().nonnegative().nullable(),
     lifts: z.number().int().nonnegative().nullable(),
-    stats_source: z.string().min(1).nullable(),
-    snowpark: trueOrUnknown,
-    night_skiing: trueOrUnknown,
-    snow_report_url: optionalUrl,
-    webcam_url: optionalUrl,
-    public_transport_note: z.string().nullable(),
-    season_dates_2026_27: z.string().nullable(),
-    listed_on: z.array(z.string().min(1)),
-    skiresort_url: optionalUrl,
-    bergfex_url: optionalUrl,
-    piste_map_url: optionalUrl.optional(),
-    notes: z.string().nullable(),
-    feature_evidence: z.string().nullable(),
+    snowpark: trueOrNull,
+    nightSkiing: trueOrNull,
+    abandoned: z.boolean(),
   })
   .superRefine((resort, ctx) => {
     if (
-      resort.top_elevation_m != null &&
-      resort.base_elevation_m != null &&
-      resort.top_elevation_m < resort.base_elevation_m
+      resort.topElevationM != null &&
+      resort.baseElevationM != null &&
+      resort.topElevationM < resort.baseElevationM
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "top_elevation_m is lower than base_elevation_m",
-        path: ["top_elevation_m"],
-      });
-    }
-    if ((resort.day_ticket_eur == null) !== (resort.day_ticket_season == null)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "day_ticket_eur and day_ticket_season must both be set or both be null",
-        path: ["day_ticket_season"],
+        message: "topElevationM is lower than baseElevationM",
+        path: ["topElevationM"],
       });
     }
   });
 
-export const citySchema = z.object({
+export const placeSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  lat: z.number().gte(-90).lte(90),
-  lon: z.number().gte(-180).lte(180),
-  country: z.string().min(1),
+  lat: europeLat,
+  lon: europeLon,
+  country: z.string().regex(/^[A-Z]{2}$/),
+  coordSource: z.string().min(1),
 });
 
-export const datasetSchema = z
+export const osmFileSchema = z.object({
+  licence: z.literal("ODbL-1.0"),
+  attribution: z.string().min(1),
+  generated: isoDate,
+  places: z.array(placeSchema),
+  resorts: z.array(osmResortSchema).min(1),
+});
+
+export const catalogSchema = z
   .object({
-    generated: isoDate,
-    passes: z.array(passSchema).min(1),
-    cities: z.array(citySchema),
-    resorts: z.array(resortSchema).min(1),
+    passes: passesFileSchema,
+    resorts: resortsFileSchema,
+    osm: osmFileSchema,
   })
   .superRefine((data, ctx) => {
-    assertUnique(data.passes.map((pass) => pass.id), "passes", ctx);
-    assertUnique(data.resorts.map((resort) => resort.id), "resorts", ctx);
-    assertUnique(data.cities.map((city) => city.id), "cities", ctx);
+    assertUnique(data.passes.passes.map((pass) => pass.id), ["passes", "passes"], ctx);
+    assertUnique(data.resorts.resorts.map((resort) => resort.id), ["resorts", "resorts"], ctx);
+    assertUnique(data.osm.resorts.map((resort) => resort.id), ["osm", "resorts"], ctx);
+    assertUnique(data.osm.places.map((place) => place.id), ["osm", "places"], ctx);
 
-    const passIds = new Set(data.passes.map((pass) => pass.id));
-    data.passes.forEach((pass, passIndex) => {
+    const passIds = new Set(data.passes.passes.map((pass) => pass.id));
+    const osmIds = new Set(data.osm.resorts.map((resort) => resort.id));
+    data.passes.passes.forEach((pass, passIndex) => {
       const labels = pass.pricing.brackets.map((bracket) => bracket.label);
-      assertUnique(labels, `passes.${passIndex}.brackets`, ctx);
+      assertUnique(labels, ["passes", "passes", passIndex, "pricing", "brackets"], ctx);
       const labelSet = new Set(labels);
       pass.pricing.periods.forEach((period, periodIndex) => {
         if (!labelSet.has(period.bracket)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `Period refers to unknown bracket ${period.bracket}`,
-            path: ["passes", passIndex, "pricing", "periods", periodIndex, "bracket"],
+            path: ["passes", "passes", passIndex, "pricing", "periods", periodIndex, "bracket"],
           });
         }
       });
@@ -142,7 +198,7 @@ export const datasetSchema = z
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `Bracket ${bracket.label} has no price period`,
-            path: ["passes", passIndex, "pricing", "brackets", bracketIndex],
+            path: ["passes", "passes", passIndex, "pricing", "brackets", bracketIndex],
           });
         }
         const open = periods.filter((period) => period.valid_until == null);
@@ -150,7 +206,7 @@ export const datasetSchema = z
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `Bracket ${bracket.label} has more than one open-ended period`,
-            path: ["passes", passIndex, "pricing", "brackets", bracketIndex],
+            path: ["passes", "passes", passIndex, "pricing", "brackets", bracketIndex],
           });
         }
         const dates = periods.map((period) => period.valid_until).filter((date): date is string => Boolean(date));
@@ -158,7 +214,7 @@ export const datasetSchema = z
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `Bracket ${bracket.label} repeats a valid_until date`,
-            path: ["passes", passIndex, "pricing", "brackets", bracketIndex],
+            path: ["passes", "passes", passIndex, "pricing", "brackets", bracketIndex],
           });
         }
       });
@@ -170,23 +226,40 @@ export const datasetSchema = z
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `${pass.id} matches more than one birth-year bracket for ${year}`,
-            path: ["passes", passIndex, "pricing", "brackets"],
+            path: ["passes", "passes", passIndex, "pricing", "brackets"],
           });
           break;
         }
       }
     });
 
-    data.resorts.forEach((resort, resortIndex) => {
-      resort.passes.forEach((passId, passIndex) => {
-        if (!passIds.has(passId)) {
+    data.resorts.resorts.forEach((resort, resortIndex) => {
+      if (!osmIds.has(resort.id)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Resort ${resort.id} has no OpenStreetMap record`,
+          path: ["resorts", "resorts", resortIndex, "id"],
+        });
+      }
+      resort.passes.forEach((coverage, passIndex) => {
+        if (!passIds.has(coverage.id)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Unknown pass id ${passId}`,
-            path: ["resorts", resortIndex, "passes", passIndex],
+            message: `Unknown pass id ${coverage.id}`,
+            path: ["resorts", "resorts", resortIndex, "passes", passIndex, "id"],
           });
         }
       });
+    });
+
+    data.osm.resorts.forEach((resort, resortIndex) => {
+      if (!data.resorts.resorts.some((record) => record.id === resort.id)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `OpenStreetMap record ${resort.id} has no resort`,
+          path: ["osm", "resorts", resortIndex, "id"],
+        });
+      }
     });
   });
 
@@ -203,23 +276,55 @@ function yearInBracket(
   return true;
 }
 
-function assertUnique(ids: string[], label: string, ctx: z.RefinementCtx) {
+function assertUnique(ids: string[], path: (string | number)[], ctx: z.RefinementCtx) {
   const seen = new Set<string>();
   ids.forEach((id, index) => {
     if (seen.has(id)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: `Duplicate ${label} id ${id}`,
-        path: [label, index, "id"],
+        message: `Duplicate id ${id}`,
+        path: [...path, index, "id"],
       });
     }
     seen.add(id);
   });
 }
 
-export type Dataset = z.infer<typeof datasetSchema>;
-export type Pass = Dataset["passes"][number];
-export type Resort = Dataset["resorts"][number];
-export type City = Dataset["cities"][number];
+export type Pass = z.infer<typeof passSchema>;
+export type ResortRecord = z.infer<typeof resortRecordSchema>;
+export type OsmResort = z.infer<typeof osmResortSchema>;
+export type Place = z.infer<typeof placeSchema>;
 export type AgeBracket = Pass["pricing"]["brackets"][number];
 export type PricePeriod = Pass["pricing"]["periods"][number];
+
+/** Joined view used by the UI. Portal-only resorts are omitted by data.ts. */
+export interface Resort {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  region: string;
+  country: string;
+  passes: string[];
+  abandoned: boolean;
+  day_ticket_eur: number | null;
+  day_ticket_season: string | null;
+  website: string | null;
+  top_elevation_m: number | null;
+  base_elevation_m: number | null;
+  slope_km: number | null;
+  lifts: number | null;
+  snowpark: true | null;
+  night_skiing: true | null;
+  public_transport: string | null;
+  season_dates: string | null;
+  notes: string | null;
+}
+
+export interface City {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+}

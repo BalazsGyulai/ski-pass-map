@@ -2,7 +2,7 @@ function cssColor(value: string): string {
   return /^#[0-9a-fA-F]{3,8}$/.test(value) ? value : "#8b938e";
 }
 
-export function pieSvg(colors: string[], options: { selected: boolean; klima: boolean; closed: boolean }): string {
+export function pieSvg(colors: string[], options: { selected: boolean; closed: boolean }): string {
   const cx = 14;
   const cy = 14;
   const radius = 10;
@@ -28,6 +28,5 @@ export function pieSvg(colors: string[], options: { selected: boolean; klima: bo
       })
       .join("");
   }
-  const klima = options.klima ? `<path d="M14 26 l4 5 h-8 z" fill="#14211c" />` : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="32" viewBox="0 0 28 32" aria-hidden="true">${body}<circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="${ring}" stroke-width="${ringWidth}"${dash} />${klima}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="32" viewBox="0 0 28 32" aria-hidden="true">${body}<circle cx="${cx}" cy="${cy}" r="${radius}" fill="none" stroke="${ring}" stroke-width="${ringWidth}"${dash} /></svg>`;
 }

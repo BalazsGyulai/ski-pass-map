@@ -14,6 +14,7 @@ export function daysUntil(today: string, date: string): number {
 }
 
 export function formatEur(lang: Lang, value: number): string {
+  if (!Number.isFinite(value)) return "";
   const cents = Math.abs(value - Math.round(value)) > 0.001;
   return new Intl.NumberFormat(lang === "hu" ? "hu-HU" : "en-GB", {
     style: "currency",
@@ -34,10 +35,17 @@ export function formatDate(lang: Lang, iso: string): string {
 }
 
 export function formatKm(km: number): string {
+  if (!Number.isFinite(km)) return "";
   if (km < 10) return km.toFixed(1);
   return Math.round(km).toString();
 }
 
 export function formatBreakEven(days: number): string {
+  if (!Number.isFinite(days)) return "";
   return (Math.round(days * 10) / 10).toString();
+}
+
+export function finiteOrBlank(value: number | null | undefined): number | null {
+  if (value == null || !Number.isFinite(value)) return null;
+  return value;
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SITE_NAME } from "@/lib/site";
 import { useApp } from "./AppState";
 
 const links = [
@@ -28,7 +29,7 @@ export function Header() {
       </a>
       <div className="bar">
         <Link href="/" className="brand">
-          <span>{t("title")}</span>
+          <span>{SITE_NAME}</span>
           <small>{t("season")}</small>
         </Link>
         <button

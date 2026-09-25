@@ -6,9 +6,12 @@ import Link from "next/link";
 import { passById, resortById } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { filterResorts } from "@/lib/filter";
-import { formatBreakEven, formatDate, formatEur, formatKm } from "@/lib/format";
+import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm } from "@/lib/format";
 import { bracketLabel, priceReasonText, regionLabel } from "@/lib/i18n";
 import { passes, resorts } from "@/lib/data";
+import type { Resort } from "@/lib/schema";
+import type { MessageKey } from "@/lib/i18n";
+import type { Lang } from "@/lib/url-state";
 import { resolvePrice } from "@/lib/pricing";
 import { useApp } from "./AppState";
 
@@ -118,8 +121,8 @@ export function ResortDetail() {
         <p className="eyebrow">{regionLabel(lang, resort.region)}</p>
         <h2 id="resort-title">{resort.name}</h2>
         <p className="meta">
-          <span className={resort.status === "open" ? "badge" : "badge warn"}>{resort.status === "open" ? t("statusOpen") : t("statusClosed")}</span>
-          {resort.status === "closed?" ? <span className="hint warn">{t("closedWarning")}</span> : null}
+          {resort.abandoned ? <span className="badge warn">{t("statusClosed")}</span> : null}
+          {resort.abandoned ? <span className="hint warn">{t("closedWarning")}</span> : null}
           {distance != null ? <span>{t("distanceValue", { n: formatKm(distance) })}</span> : null}
         </p>
         <button ref={closeRef} type="button" className="icon-btn" onClick={() => selectResort(null)}>
@@ -136,10 +139,8 @@ export function ResortDetail() {
             if (!pass) return null;
             const price = effectiveDate ? resolvePrice(pass, birthYear, effectiveDate) : null;
             const amount = price?.amountEur ?? null;
-            const breakEven =
-              amount != null && resort.day_ticket_eur != null && resort.day_ticket_eur > 0
-                ? amount / resort.day_ticket_eur
-                : null;
+            const dayTicket = finiteOrBlank(resort.day_ticket_eur);
+            const breakEven = amount != null && dayTicket != null && dayTicket > 0 ? amount / dayTicket : null;
             return (
               <li key={id}>
                 <span className="swatch" style={{ background: pass.color }} />
@@ -163,66 +164,11 @@ export function ResortDetail() {
         </ul>
         {!birthYear ? <p className="hint">{t("setBirthYearHint")}</p> : null}
 
-        <h3>{t("stats")}</h3>
-        <dl className="stat-grid">
-          <div>
-            <dt>{t("dayTicket")}</dt>
-            <dd>
-              {resort.day_ticket_eur == null ? (
-                t("unknown")
-              ) : (
-                <>
-                  {formatEur(lang, resort.day_ticket_eur)}
-                  <span className="hint">
-                    {" "}
-                    {resort.day_ticket_season ?? t("seasonUnknown")}
-                    {resort.day_ticket_season !== "2025/26" ? ` · ${t("estimate")}` : ""}
-                  </span>
-                </>
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt>{t("elevation")}</dt>
-            <dd>{resort.top_elevation_m == null ? t("unknown") : `${resort.top_elevation_m} m`}</dd>
-          </div>
-          <div>
-            <dt>{t("baseElevation")}</dt>
-            <dd>{resort.base_elevation_m == null ? t("unknown") : `${resort.base_elevation_m} m`}</dd>
-          </div>
-          <div>
-            <dt>{t("slopeKm")}</dt>
-            <dd>{resort.slope_km == null ? t("unknown") : `${resort.slope_km} km`}</dd>
-          </div>
-          <div>
-            <dt>{t("lifts")}</dt>
-            <dd>{resort.lifts == null ? t("unknown") : resort.lifts}</dd>
-          </div>
-          <div>
-            <dt>{t("snowpark")}</dt>
-            <dd>{resort.snowpark === true ? t("yes") : t("unknown")}</dd>
-          </div>
-          <div>
-            <dt>{t("nightSkiing")}</dt>
-            <dd>{resort.night_skiing === true ? t("yes") : t("unknown")}</dd>
-          </div>
-        </dl>
-        {resort.stats_source ? (
-          <p className="hint">
-            <strong>{t("statsSource")}: </strong>
-            {resort.stats_source}
-          </p>
-        ) : null}
-        {resort.season_dates_2026_27 ? (
+        <ResortFacts resort={resort} t={t} lang={lang} />
+        {resort.season_dates ? (
           <p>
             <strong>{t("seasonDates")}: </strong>
-            {resort.season_dates_2026_27}
-          </p>
-        ) : null}
-        {resort.feature_evidence ? (
-          <p>
-            <strong>{t("featureEvidence")}: </strong>
-            {resort.feature_evidence}
+            {resort.season_dates}
           </p>
         ) : null}
         {resort.notes ? (
@@ -232,25 +178,16 @@ export function ResortDetail() {
           </p>
         ) : null}
 
-        <h3>{t("klima")}</h3>
-        <p>{resort.klimaticket ? t("klimaYes") : t("klimaNo")}</p>
-        {resort.public_transport_note ? (
-          <p>
-            <strong>{t("transportNote")}: </strong>
-            {resort.public_transport_note}
-          </p>
+        {resort.public_transport ? (
+          <>
+            <h3>{t("klima")}</h3>
+            <p>{resort.public_transport}</p>
+          </>
         ) : null}
 
         <div className="link-buttons">
           <LinkButton href={resort.website} label={t("openWebsite")} />
-          <LinkButton href={resort.snow_report_url} label={t("snowReport")} />
-          <LinkButton href={resort.webcam_url} label={t("webcams")} />
-          <LinkButton href={resort.piste_map_url ?? null} label={t("pisteMapOfficial")} />
         </div>
-        <ul className="link-list">
-          <External href={resort.skiresort_url} label={t("skiresort")} unknown={t("unknown")} optional />
-          <External href={resort.bergfex_url} label={t("bergfex")} unknown={t("unknown")} optional />
-        </ul>
       </div>
       <footer className="sheet-actions">
         <button type="button" className={fav ? "primary" : "ghost"} aria-pressed={fav} onClick={() => toggleFavourite(resort.id)}>
@@ -273,28 +210,53 @@ export function ResortDetail() {
   );
 }
 
+function ResortFacts({
+  resort,
+  t,
+  lang,
+}: {
+  resort: Resort;
+  t: (key: MessageKey, vars?: Record<string, string | number>) => string;
+  lang: Lang;
+}) {
+  const rows: { label: string; value: string }[] = [];
+  const day = finiteOrBlank(resort.day_ticket_eur);
+  if (day != null) {
+    const season = resort.day_ticket_season ?? "";
+    const estimate = season && season !== "2025/26" ? ` · ${t("estimate")}` : "";
+    rows.push({ label: t("dayTicket"), value: `${formatEur(lang, day)}${season ? ` ${season}` : ""}${estimate}` });
+  }
+  const top = finiteOrBlank(resort.top_elevation_m);
+  if (top != null) rows.push({ label: t("elevation"), value: `${top} m` });
+  const base = finiteOrBlank(resort.base_elevation_m);
+  if (base != null) rows.push({ label: t("baseElevation"), value: `${base} m` });
+  const slope = finiteOrBlank(resort.slope_km);
+  if (slope != null) rows.push({ label: t("slopeKm"), value: `${slope} km` });
+  const lifts = finiteOrBlank(resort.lifts);
+  if (lifts != null) rows.push({ label: t("lifts"), value: String(lifts) });
+  if (resort.snowpark === true) rows.push({ label: t("snowpark"), value: t("yes") });
+  if (resort.night_skiing === true) rows.push({ label: t("nightSkiing"), value: t("yes") });
+  if (rows.length === 0) return null;
+  return (
+    <>
+      <h3>{t("stats")}</h3>
+      <dl className="stat-grid">
+        {rows.map((row) => (
+          <div key={row.label}>
+            <dt>{row.label}</dt>
+            <dd>{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </>
+  );
+}
+
 function LinkButton({ href, label }: { href: string | null; label: string }) {
   if (!href) return null;
   return (
     <a href={href} target="_blank" rel="noopener noreferrer">
       {label}
     </a>
-  );
-}
-
-function External({ href, label, unknown, optional }: { href: string | null; label: string; unknown: string; optional?: boolean }) {
-  if (!href && optional) return null;
-  return (
-    <li>
-      {href ? (
-        <a href={href} target="_blank" rel="noopener noreferrer">
-          {label}
-        </a>
-      ) : (
-        <span>
-          {label}: {unknown}
-        </span>
-      )}
-    </li>
   );
 }

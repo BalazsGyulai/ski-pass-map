@@ -8,7 +8,7 @@ import { translate, type MessageKey } from "@/lib/i18n";
 import { readStorage, writeStorage } from "@/lib/storage";
 import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
-import { bareResortUrl, defaultShareState, parseShareState, serializeShareState, type Lang, type ShareState } from "@/lib/url-state";
+import { bareResortUrl, defaultShareState, parseShareState, serializeShareState, shareableSearch, type Lang, type ShareState } from "@/lib/url-state";
 
 type ThemeChoice = "system" | "light" | "dark";
 
@@ -76,7 +76,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const stored = readStorage();
     if (stored) {
       if (!params.has("lang") && (stored.lang === "en" || stored.lang === "hu")) parsed.lang = stored.lang;
-      if (!params.has("home") && stored.home) {
+      if (!params.has("home") && stored.home && !removedHome(stored.home)) {
         parsed.home = stored.home;
         parsed.geoLat = stored.geoLat ?? null;
         parsed.geoLon = stored.geoLon ?? null;
@@ -167,20 +167,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const qs = serializeShareState(share);
       next = qs ? `${path}?${qs}` : path;
     } else {
-      const params = new URLSearchParams(window.location.search);
-      if (share.lang === "en") params.delete("lang");
-      else params.set("lang", share.lang);
-      params.delete("lat");
-      params.delete("lon");
-      if (share.home === "geo" && share.geoLat != null && share.geoLon != null) {
-        params.set("home", "geo");
-        params.set("lat", share.geoLat.toFixed(5));
-        params.set("lon", share.geoLon.toFixed(5));
-      } else if (share.home !== "sopron") {
-        params.set("home", share.home);
-      } else {
-        params.delete("home");
-      }
+      const params = shareableSearch(new URLSearchParams(window.location.search), share);
       const qs = params.toString();
       next = qs ? `${path}?${qs}` : path;
     }
@@ -255,14 +242,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       passMatch: "any",
       noPass: false,
       regions: [],
-      klima: false,
+      transit: false,
       park: false,
       night: false,
       minElev: null,
       minSlope: null,
       maxKm: null,
       favouritesOnly: false,
-      showClosed: false,
+      showAbandoned: false,
     });
   }
 
@@ -319,7 +306,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   function copyLink() {
-    const url = window.location.href;
+    const url = shareableHref(window.location.href);
     const done = (ok: boolean) => {
       setCopyMessage(translate(share.lang, ok ? "copied" : "copyFailed"));
       window.setTimeout(() => setCopyMessage(null), 2200);
@@ -379,7 +366,20 @@ function homePoint(share: ShareState): HomePoint | null {
     if (share.geoLat == null || share.geoLon == null) return null;
     return { lat: share.geoLat, lon: share.geoLon, label: "geo" };
   }
-  const city = cities.find((item) => item.id === share.home) ?? cities[0];
+  const city = cities.find((item) => item.id === share.home);
   if (!city) return null;
   return { lat: city.lat, lon: city.lon, label: city.name };
+}
+
+const retiredHomes = new Set(["sopron", "graz", "wiener-neustadt"]);
+
+function removedHome(id: string): boolean {
+  return retiredHomes.has(id);
+}
+
+function shareableHref(href: string): string {
+  const url = new URL(href);
+  const params = shareableSearch(url.searchParams);
+  const qs = params.toString();
+  return `${url.origin}${url.pathname}${qs ? `?${qs}` : ""}${url.hash}`;
 }
