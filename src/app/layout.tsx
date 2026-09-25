@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { AppProvider } from "@/components/AppState";
 import { Header } from "@/components/Header";
 import { ServiceWorker } from "@/components/ServiceWorker";
+import { CONTENT_SECURITY_POLICY, REFERRER_POLICY } from "@/lib/security";
 import site from "../../config/site.json";
 import "./globals.css";
 
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
   },
   description: "Season passes for ski resorts in eastern Austria, 2026/27. Compare coverage, prices, and straight-line distance from home.",
   manifest: `${site.basePath}/manifest.webmanifest`,
+  referrer: REFERRER_POLICY,
   appleWebApp: { capable: true, title: "Ski passes" },
   icons: {
     icon: `${site.basePath}/icon-192.png`,
@@ -31,6 +33,9 @@ const themeScript = `try{var t=localStorage.getItem("ski-pass-map-v1");if(t){var
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta httpEquiv="Content-Security-Policy" content={CONTENT_SECURITY_POLICY} />
+      </head>
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <Suspense fallback={<div className="boot">Loading…</div>}>

@@ -49,7 +49,7 @@ export function CompareView() {
                       <span className="swatch" style={{ background: pass.color }} />
                       <strong>{pass.name}</strong>
                     </span>
-                    <a href={pass.url} target="_blank" rel="noreferrer">
+                    <a href={pass.url} target="_blank" rel="noopener noreferrer">
                       {t("officialSite")}
                     </a>
                   </td>
