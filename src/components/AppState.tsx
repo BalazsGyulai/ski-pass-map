@@ -165,7 +165,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     prevResort.current = onMap ? share.resort : previous;
 
     if (onMap && previous === undefined && share.resort && !(window.history.state as { skiResort?: boolean } | null)?.skiResort) {
-      const params = new URLSearchParams(serializeShareState(share));
+      const params = new URLSearchParams(serializeShareState({ ...share, view: "map" }));
       params.delete("resort");
       const bareQs = params.toString();
       const bare = bareQs ? `${path}?${bareQs}` : path;
@@ -177,6 +177,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (next === current) return;
     if (onMap && share.resort && !pushedResort.current) {
+      const bareParams = new URLSearchParams(serializeShareState({ ...share, resort: null, view: "map" }));
+      const bareQs = bareParams.toString();
+      const bare = bareQs ? `${path}?${bareQs}` : path;
+      if (bare !== current) window.history.replaceState(null, "", bare);
       window.history.pushState({ skiResort: true }, "", next);
       pushedResort.current = true;
       return;
