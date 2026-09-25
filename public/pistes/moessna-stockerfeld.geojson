@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Stockerfeld Lift","aerialway":"drag_lift","osm":"way/478289855"},"geometry":{"type":"LineString","coordinates":[[14.02409,47.34853],[14.01787,47.34887]]}}]}

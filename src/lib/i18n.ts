@@ -253,6 +253,21 @@ const en = {
   regionVienna: "Vienna",
   regionBurgenland: "Burgenland",
   cityNoteTirol: "Tirol week",
+  showAllPistes: "Show all pistes",
+  pisteLegend: "Piste colours",
+  pisteNovice: "Novice",
+  pisteEasy: "Easy",
+  pisteIntermediate: "Intermediate",
+  pisteAdvanced: "Advanced / expert",
+  pisteFreeride: "Freeride",
+  pisteOther: "Difficulty unknown",
+  pisteLift: "Lift",
+  pisteEmpty: "No OpenStreetMap pistes in range of this resort.",
+  pisteLoading: "Loading pistes…",
+  openWebsite: "Open website",
+  pisteMapOfficial: "Piste map (official)",
+  osmLicence: "Map data and piste lines © OpenStreetMap contributors, ODbL. https://www.openstreetmap.org/copyright",
+  opensnowmapLicence: "The optional “Show all pistes” layer uses OpenSnowMap pistes-only tiles (CC BY-SA). Tiles load only for the area on screen. https://www.opensnowmap.org/",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -508,6 +523,21 @@ const hu: Record<MessageKey, string> = {
   regionVienna: "Bécs",
   regionBurgenland: "Burgenland",
   cityNoteTirol: "Tiroli hét",
+  showAllPistes: "Minden pálya",
+  pisteLegend: "Pályaszínek",
+  pisteNovice: "Kezdő",
+  pisteEasy: "Könnyű",
+  pisteIntermediate: "Középhaladó",
+  pisteAdvanced: "Haladó / expert",
+  pisteFreeride: "Freeride",
+  pisteOther: "Nehézség ismeretlen",
+  pisteLift: "Felvonó",
+  pisteEmpty: "Ennek a síterepnek a közelében nincs OpenStreetMap-pálya.",
+  pisteLoading: "Pályák betöltése…",
+  openWebsite: "Weboldal megnyitása",
+  pisteMapOfficial: "Pályatérkép (hivatalos)",
+  osmLicence: "Térképadat és pályavonalak © OpenStreetMap közreműködők, ODbL. https://www.openstreetmap.org/copyright",
+  opensnowmapLicence: "A „Minden pálya” réteg az OpenSnowMap csak-pálya csempéit használja (CC BY-SA). Csak a látható terület töltődik be. https://www.opensnowmap.org/",
 };
 
 const messages: Record<Lang, Record<MessageKey, string>> = { en, hu };

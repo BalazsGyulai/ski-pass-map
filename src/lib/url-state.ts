@@ -12,6 +12,7 @@ export interface ShareState extends ResortFilters {
   lang: Lang;
   sort: SortKey;
   dir: SortDir;
+  showPistes: boolean;
 }
 
 export function defaultShareState(): ShareState {
@@ -37,6 +38,7 @@ export function defaultShareState(): ShareState {
     lang: "en",
     sort: "distance",
     dir: "asc",
+    showPistes: false,
   };
 }
 
@@ -68,6 +70,7 @@ export function parseShareState(params: URLSearchParams): ShareState {
   const sort = params.get("sort");
   state.sort = sort === "day" || sort === "elevation" || sort === "slope" || sort === "name" ? sort : "distance";
   state.dir = params.get("dir") === "desc" ? "desc" : "asc";
+  state.showPistes = params.get("pistes") === "1";
   return state;
 }
 
@@ -97,6 +100,7 @@ export function serializeShareState(state: ShareState): string {
   if (state.lang !== "en") params.set("lang", state.lang);
   if (state.sort !== "distance") params.set("sort", state.sort);
   if (state.dir !== "asc") params.set("dir", state.dir);
+  if (state.showPistes) params.set("pistes", "1");
   return params.toString();
 }
 

@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import site from "../../config/site.json";
 import { cities, passes, resorts } from "@/lib/data";
 import { clusterPoints } from "@/lib/cluster";
 import { filterResorts } from "@/lib/filter";
 import { cityNoteLabel } from "@/lib/i18n";
 import { pieSvg } from "@/lib/marker";
+import { pisteStyle, type PisteProperties } from "@/lib/pistes";
 import { useApp } from "./AppState";
 
 const EAST: L.LatLngExpression = [47.55, 15.55];
@@ -18,7 +20,7 @@ export default function MapView() {
   return (
     <MapContainer center={EAST} zoom={8} minZoom={6} maxZoom={16} className="map-canvas" scrollWheelZoom>
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <MapLayers />
@@ -33,7 +35,8 @@ function mapHasSize(map: L.Map): boolean {
 
 function MapLayers() {
   const map = useMap();
-  const { share, home, favourites, highlightId, selectResort, t, lang } = useApp();
+  const { share, updateShare, home, favourites, highlightId, selectResort, t, lang } = useApp();
+  const [pisteNote, setPisteNote] = useState<"idle" | "loading" | "empty" | "ready">("idle");
   const passNames = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.name])), []);
   const colors = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.color])), []);
 
@@ -132,26 +135,75 @@ function MapLayers() {
   }, [map, lang, share.home]);
 
   useEffect(() => {
-    if (!share.resort) return;
+    if (!share.resort) {
+      setPisteNote("idle");
+      return;
+    }
     const resort = resorts.find((item) => item.id === share.resort);
     if (!resort) return;
-    let done = false;
-    const go = () => {
-      if (done || !mapHasSize(map)) return;
-      done = true;
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const zoom = map.getZoom();
-      if (!Number.isFinite(zoom)) return;
-      map.flyTo([resort.lat, resort.lon], Math.max(zoom, 12), { animate: !reduced, duration: reduced ? 0 : 0.6 });
-    };
-    const frame = requestAnimationFrame(go);
-    map.on("resize", go);
+    let cancelled = false;
+    const layer = L.geoJSON(undefined, {
+      style: (feature) => {
+        const props = feature?.properties as PisteProperties | undefined;
+        const style = pisteStyle(props?.difficulty ?? null, props?.kind === "lift" ? "lift" : "piste");
+        return { color: style.color, weight: style.weight, dashArray: style.dashArray, opacity: 0.95, lineCap: "round", lineJoin: "round" };
+      },
+      onEachFeature: (feature, marker) => {
+        const props = feature.properties as PisteProperties | null;
+        if (!props) return;
+        const difficulty =
+          props.kind === "lift"
+            ? t("pisteLift")
+            : props.difficulty === "novice"
+              ? t("pisteNovice")
+              : props.difficulty === "easy"
+                ? t("pisteEasy")
+                : props.difficulty === "intermediate"
+                  ? t("pisteIntermediate")
+                  : props.difficulty === "advanced" || props.difficulty === "expert"
+                    ? t("pisteAdvanced")
+                    : props.difficulty === "freeride"
+                      ? t("pisteFreeride")
+                      : t("pisteOther");
+        const lift = props.aerialway?.replaceAll("_", " ");
+        const text = [props.name, props.kind === "lift" ? lift ?? difficulty : difficulty].filter(Boolean).join(" · ");
+        marker.bindTooltip(text, { sticky: true, opacity: 1 });
+      },
+    }).addTo(map);
+    setPisteNote("loading");
+    const frame = requestAnimationFrame(() => {
+      if (cancelled || !mapHasSize(map)) return;
+      void fetch(`${site.basePath}/pistes/${resort.id}.geojson`)
+        .then((response) => (response.ok ? response.json() : null))
+        .then((data: { features?: unknown[] } | null) => {
+          if (cancelled || !mapHasSize(map)) return;
+          const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          const count = data?.features?.length ?? 0;
+          if (data && count > 0) {
+            layer.addData(data as GeoJSON.GeoJSON);
+            const bounds = layer.getBounds();
+            if (bounds.isValid()) {
+              map.fitBounds(bounds.pad(0.2), { padding: [36, 36], maxZoom: 14, animate: !reduced });
+            }
+            setPisteNote("ready");
+            return;
+          }
+          const zoom = map.getZoom();
+          if (Number.isFinite(zoom)) {
+            map.flyTo([resort.lat, resort.lon], Math.max(zoom, 12), { animate: !reduced, duration: reduced ? 0 : 0.6 });
+          }
+          setPisteNote("empty");
+        })
+        .catch(() => {
+          if (!cancelled) setPisteNote("empty");
+        });
+    });
     return () => {
-      done = true;
+      cancelled = true;
       cancelAnimationFrame(frame);
-      map.off("resize", go);
+      map.removeLayer(layer);
     };
-  }, [map, share.resort]);
+  }, [map, share.resort, t]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => map.invalidateSize());
@@ -165,7 +217,33 @@ function MapLayers() {
   }
 
   return (
+    <>
+      {share.showPistes ? (
+        <TileLayer
+          url="https://tiles.opensnowmap.org/pistes/{z}/{x}/{y}.png"
+          attribution='© <a href="https://www.opensnowmap.org/">OpenSnowMap.org</a> (CC BY-SA)'
+          opacity={0.9}
+        />
+      ) : null}
+      {share.resort || share.showPistes ? (
+        <div className="piste-legend" aria-label={t("pisteLegend")}>
+          <p>{t("pisteLegend")}</p>
+          <ul>
+            <li><span className="piste-swatch" style={{ background: "#1f9d55" }} />{t("pisteNovice")}</li>
+            <li><span className="piste-swatch" style={{ background: "#1d6fd8" }} />{t("pisteEasy")}</li>
+            <li><span className="piste-swatch" style={{ background: "#d62728" }} />{t("pisteIntermediate")}</li>
+            <li><span className="piste-swatch" style={{ background: "#161616" }} />{t("pisteAdvanced")}</li>
+            <li><span className="piste-swatch dashed" />{t("pisteFreeride")}</li>
+            <li><span className="piste-swatch" style={{ background: "#1c2430" }} />{t("pisteLift")}</li>
+          </ul>
+          {pisteNote === "loading" ? <p className="piste-note">{t("pisteLoading")}</p> : null}
+          {pisteNote === "empty" ? <p className="piste-note">{t("pisteEmpty")}</p> : null}
+        </div>
+      ) : null}
     <div className="map-actions">
+      <button type="button" aria-pressed={share.showPistes} onClick={() => updateShare({ showPistes: !share.showPistes })}>
+        {t("showAllPistes")}
+      </button>
       <button type="button" onClick={() => jump(EAST, 8)}>
         {t("jumpEast")}
       </button>
@@ -183,5 +261,6 @@ function MapLayers() {
         {t("fitResorts")}
       </button>
     </div>
+    </>
   );
 }

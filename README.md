@@ -30,6 +30,8 @@ Closed or uncertain resorts (`status: "closed?"`) stay off the map until “Show
 
 `config/site.json` holds `basePath` (`/ski-pass-map`). The same path is in `public/sw.js` and `public/manifest.webmanifest`. `npm run validate` checks that they still match.
 
+Piste lines are OpenStreetMap ways, fetched once with `npm run fetch-pistes` (Overpass at `lz4.overpass-api.de`, with a delay between requests, raw responses cached in `data/pistes/raw/`). That script is not part of `npm run build` or CI. It writes `public/pistes/<resort-id>.geojson`, which the map loads when a resort is opened. An optional overlay uses the OpenSnowMap pistes-only tiles (`https://tiles.opensnowmap.org/pistes/{z}/{x}/{y}.png`). Their terms allow that layer on a website if the browser sends a referer, the app does not bulk-download tiles, and the map credits OpenStreetMap (ODbL) and OpenSnowMap (CC BY-SA). Official piste-map images are not copied; `piste_map_url` is only a link, shown when the data has one.
+
 ## What the pages do
 
 - **Map / list:** clustered markers, pass-coloured pie markers, grey if no pass covers the resort, dashed if closed, filters, search, straight-line distance from Sopron, Wiener Neustadt, Graz, Vienna, Innsbruck, or your location.

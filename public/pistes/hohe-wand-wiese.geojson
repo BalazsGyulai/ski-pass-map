@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Hohe Wand Wiese","aerialway":"drag_lift","osm":"way/12814864"},"geometry":{"type":"LineString","coordinates":[[16.2027,48.22952],[16.20581,48.23191]]}}]}

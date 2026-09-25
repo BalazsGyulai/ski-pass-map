@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Skilift Breitenfurt","aerialway":"t-bar","osm":"way/88999253"},"geometry":{"type":"LineString","coordinates":[[16.1447,48.13009],[16.13955,48.1283]]}}]}

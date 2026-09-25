@@ -8,7 +8,8 @@
     "validate": "tsx scripts/validate-data.ts",
     "build": "npm run validate && next build",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "fetch-pistes": "tsx scripts/fetch-pistes.ts"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

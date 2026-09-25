@@ -172,11 +172,13 @@ export function ResortDetail() {
           </p>
         ) : null}
 
-        <h3>{t("links")}</h3>
+        <div className="link-buttons">
+          <LinkButton href={resort.website} label={t("openWebsite")} />
+          <LinkButton href={resort.snow_report_url} label={t("snowReport")} />
+          <LinkButton href={resort.webcam_url} label={t("webcams")} />
+          <LinkButton href={resort.piste_map_url ?? null} label={t("pisteMapOfficial")} />
+        </div>
         <ul className="link-list">
-          <External href={resort.website} label={t("website")} unknown={t("unknown")} />
-          <External href={resort.snow_report_url} label={t("snowReport")} unknown={t("unknown")} />
-          <External href={resort.webcam_url} label={t("webcams")} unknown={t("unknown")} />
           <External href={resort.skiresort_url} label={t("skiresort")} unknown={t("unknown")} optional />
           <External href={resort.bergfex_url} label={t("bergfex")} unknown={t("unknown")} optional />
         </ul>
@@ -202,12 +204,21 @@ export function ResortDetail() {
   );
 }
 
+function LinkButton({ href, label }: { href: string | null; label: string }) {
+  if (!href) return null;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {label}
+    </a>
+  );
+}
+
 function External({ href, label, unknown, optional }: { href: string | null; label: string; unknown: string; optional?: boolean }) {
   if (!href && optional) return null;
   return (
     <li>
       {href ? (
-        <a href={href} target="_blank" rel="noreferrer">
+        <a href={href} target="_blank" rel="noopener noreferrer">
           {label}
         </a>
       ) : (

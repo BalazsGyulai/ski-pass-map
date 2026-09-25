@@ -77,6 +77,7 @@ export const resortSchema = z
     listed_on: z.array(z.string().min(1)),
     skiresort_url: optionalUrl,
     bergfex_url: optionalUrl,
+    piste_map_url: optionalUrl.optional(),
     notes: z.string().nullable(),
     feature_evidence: z.string().nullable(),
   })

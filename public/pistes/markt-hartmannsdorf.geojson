@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Grossecklift","aerialway":"drag_lift","osm":"way/503157011"},"geometry":{"type":"LineString","coordinates":[[15.83342,47.04615],[15.83077,47.04733]]}}]}

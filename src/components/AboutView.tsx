@@ -55,6 +55,8 @@ export function AboutView() {
         <h2>{t("pwaTitle")}</h2>
         <p>{t("pwaBody")}</p>
         <p>{t("osm")}</p>
+        <p>{t("osmLicence")}</p>
+        <p>{t("opensnowmapLicence")}</p>
       </section>
       <section className="card-block">
         <h2>data/resorts.json</h2>
