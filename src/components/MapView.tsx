@@ -26,6 +26,11 @@ export default function MapView() {
   );
 }
 
+function mapHasSize(map: L.Map): boolean {
+  const size = map.getSize();
+  return size.x >= 1 && size.y >= 1;
+}
+
 function MapLayers() {
   const map = useMap();
   const { share, home, favourites, highlightId, selectResort, t, lang } = useApp();
@@ -45,6 +50,7 @@ function MapLayers() {
   useEffect(() => {
     const resortsLayer = L.layerGroup().addTo(map);
     const draw = () => {
+      if (!mapHasSize(map)) return;
       resortsLayer.clearLayers();
       const zoom = map.getZoom();
       const clusters = clusterPoints(filtered, zoom);
@@ -86,6 +92,7 @@ function MapLayers() {
             title: t("clusterLabel", { n: cluster.items.length }),
           });
           marker.on("click", () => {
+            if (!mapHasSize(map)) return;
             const bounds = L.latLngBounds(cluster.items.map((item) => [item.lat, item.lon] as [number, number]));
             map.fitBounds(bounds.pad(0.2), { padding: [32, 32], maxZoom: 12 });
           });
@@ -95,8 +102,10 @@ function MapLayers() {
     };
     draw();
     map.on("zoomend", draw);
+    map.on("resize", draw);
     return () => {
       map.off("zoomend", draw);
+      map.off("resize", draw);
       map.removeLayer(resortsLayer);
     };
   }, [map, filtered, share.resort, highlightId, colors, selectResort, t]);
@@ -126,8 +135,22 @@ function MapLayers() {
     if (!share.resort) return;
     const resort = resorts.find((item) => item.id === share.resort);
     if (!resort) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    map.flyTo([resort.lat, resort.lon], Math.max(map.getZoom(), 12), { animate: !reduced, duration: reduced ? 0 : 0.6 });
+    let done = false;
+    const go = () => {
+      if (done || !mapHasSize(map)) return;
+      done = true;
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const zoom = map.getZoom();
+      if (!Number.isFinite(zoom)) return;
+      map.flyTo([resort.lat, resort.lon], Math.max(zoom, 12), { animate: !reduced, duration: reduced ? 0 : 0.6 });
+    };
+    const frame = requestAnimationFrame(go);
+    map.on("resize", go);
+    return () => {
+      done = true;
+      cancelAnimationFrame(frame);
+      map.off("resize", go);
+    };
   }, [map, share.resort]);
 
   useEffect(() => {
@@ -136,6 +159,7 @@ function MapLayers() {
   }, [map, share.view]);
 
   function jump(target: L.LatLngExpression, zoom: number) {
+    if (!mapHasSize(map)) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     map.flyTo(target, zoom, { animate: !reduced, duration: reduced ? 0 : 0.7 });
   }
@@ -151,7 +175,7 @@ function MapLayers() {
       <button
         type="button"
         onClick={() => {
-          if (filtered.length === 0) return;
+          if (filtered.length === 0 || !mapHasSize(map)) return;
           const bounds = L.latLngBounds(filtered.map((resort) => [resort.lat, resort.lon] as [number, number]));
           map.fitBounds(bounds.pad(0.15), { padding: [28, 28], maxZoom: 11 });
         }}

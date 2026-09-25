@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { AppProvider } from "@/components/AppState";
 import { Header } from "@/components/Header";
 import { ServiceWorker } from "@/components/ServiceWorker";
+import site from "../../config/site.json";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,11 +12,11 @@ export const metadata: Metadata = {
     template: "%s · Ski pass map",
   },
   description: "Season passes for ski resorts in eastern Austria, 2026/27. Compare coverage, prices, and straight-line distance from home.",
-  manifest: "/manifest.webmanifest",
+  manifest: `${site.basePath}/manifest.webmanifest`,
   appleWebApp: { capable: true, title: "Ski passes" },
   icons: {
-    icon: "/icon-192.png",
-    apple: "/apple-touch-icon.png",
+    icon: `${site.basePath}/icon-192.png`,
+    apple: `${site.basePath}/apple-touch-icon.png`,
   },
 };
 
