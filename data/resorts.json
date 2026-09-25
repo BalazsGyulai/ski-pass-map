@@ -1,0 +1,1283 @@
+{
+  "meta": {
+    "season": "2026/27",
+    "updated": "2026-09-25",
+    "age_assumptions": "Age cutoffs for 2026/27 are assumptions: U25 is birth year 2002–2010, U28 is birth year 1999–2010, adult is older than that youth bracket, and birth year 2011 or later is a child tariff. Confirm the Jahrgang on the official site.",
+    "coordinate_note": "Seed coordinates come from the earlier static map (Nominatim / OpenStreetMap). Unterberg is approximate.",
+    "price_disclaimer": "Prices are the 2026/27 figures supplied for this project. They are not a live feed. Check the official pass website before buying."
+  },
+  "passes": [
+    {
+      "id": "bep",
+      "name": "NÖ Bergerlebnispass",
+      "color": "#1f5fd1",
+      "price_note": "€429 until 31 Oct 2026, €500 in November, €555 from 1 Dec 2026. One tariff for youth and adult. Child price not in this dataset.",
+      "url": "https://www.bergerlebnispass.at/",
+      "pricing": {
+        "assumptions": "Age cutoffs for 2026/27 are assumptions: U25 is birth year 2002–2010, U28 is birth year 1999–2010, adult is older than that youth bracket, and birth year 2011 or later is a child tariff. Confirm the Jahrgang on the official site. Only one tariff was provided, so it is used for youth and adult. Nothing is priced before 1 Sep 2026.",
+        "brackets": [
+          {
+            "id": "standard",
+            "label": "Youth and adult",
+            "min_birth_year": null,
+            "max_birth_year": 2010,
+            "periods": [
+              {
+                "id": "early",
+                "label": "Until 31 Oct 2026",
+                "start": "2026-09-01",
+                "end": "2026-10-31",
+                "price_eur": 429
+              },
+              {
+                "id": "november",
+                "label": "November 2026",
+                "start": "2026-11-01",
+                "end": "2026-11-30",
+                "price_eur": 500
+              },
+              {
+                "id": "regular",
+                "label": "From 1 Dec 2026",
+                "start": "2026-12-01",
+                "end": null,
+                "price_eur": 555
+              }
+            ]
+          },
+          {
+            "id": "child",
+            "label": "Child",
+            "min_birth_year": 2011,
+            "max_birth_year": null,
+            "periods": [
+              {
+                "id": "unknown",
+                "label": "Not in dataset",
+                "start": null,
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          }
+        ]
+      },
+      "deadlines": [
+        {
+          "id": "bep-early",
+          "date": "2026-10-31",
+          "kind": "ends",
+          "label": "Early price ends (€429, then €500)"
+        },
+        {
+          "id": "bep-november",
+          "date": "2026-11-30",
+          "kind": "ends",
+          "label": "November price ends (€500, then €555)"
+        }
+      ]
+    },
+    {
+      "id": "oac",
+      "name": "Ostalpen-Card",
+      "color": "#1a9a3a",
+      "price_note": "U25 €587, adult €773. No early-bird date was provided.",
+      "url": "https://www.skiregion-ostalpen.at/bestellung",
+      "pricing": {
+        "assumptions": "Age cutoffs for 2026/27 are assumptions: U25 is birth year 2002–2010, U28 is birth year 1999–2010, adult is older than that youth bracket, and birth year 2011 or later is a child tariff. Confirm the Jahrgang on the official site. No purchase-date split was provided.",
+        "brackets": [
+          {
+            "id": "adult",
+            "label": "Adult",
+            "min_birth_year": null,
+            "max_birth_year": 2001,
+            "periods": [
+              {
+                "id": "standard",
+                "label": "Season price",
+                "start": null,
+                "end": null,
+                "price_eur": 773
+              }
+            ]
+          },
+          {
+            "id": "u25",
+            "label": "U25",
+            "min_birth_year": 2002,
+            "max_birth_year": 2010,
+            "periods": [
+              {
+                "id": "standard",
+                "label": "Season price",
+                "start": null,
+                "end": null,
+                "price_eur": 587
+              }
+            ]
+          },
+          {
+            "id": "child",
+            "label": "Child",
+            "min_birth_year": 2011,
+            "max_birth_year": null,
+            "periods": [
+              {
+                "id": "unknown",
+                "label": "Not in dataset",
+                "start": null,
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          }
+        ]
+      },
+      "deadlines": []
+    },
+    {
+      "id": "sj",
+      "name": "Steiermark Joker",
+      "color": "#d62728",
+      "price_note": "U28 €837 and adult €1,148 until 3 Dec 2026. Prices after that date were not provided.",
+      "url": "https://www.steiermarkjoker.at/",
+      "pricing": {
+        "assumptions": "Age cutoffs for 2026/27 are assumptions: U25 is birth year 2002–2010, U28 is birth year 1999–2010, adult is older than that youth bracket, and birth year 2011 or later is a child tariff. Confirm the Jahrgang on the official site. Both figures are the pre-3 Dec 2026 prices. Later prices were not provided.",
+        "brackets": [
+          {
+            "id": "adult",
+            "label": "Adult",
+            "min_birth_year": null,
+            "max_birth_year": 1998,
+            "periods": [
+              {
+                "id": "early",
+                "label": "Until 3 Dec 2026",
+                "start": null,
+                "end": "2026-12-03",
+                "price_eur": 1148
+              },
+              {
+                "id": "later",
+                "label": "After 3 Dec 2026",
+                "start": "2026-12-04",
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          },
+          {
+            "id": "u28",
+            "label": "U28",
+            "min_birth_year": 1999,
+            "max_birth_year": 2010,
+            "periods": [
+              {
+                "id": "early",
+                "label": "Until 3 Dec 2026",
+                "start": null,
+                "end": "2026-12-03",
+                "price_eur": 837
+              },
+              {
+                "id": "later",
+                "label": "After 3 Dec 2026",
+                "start": "2026-12-04",
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          },
+          {
+            "id": "child",
+            "label": "Child",
+            "min_birth_year": 2011,
+            "max_birth_year": null,
+            "periods": [
+              {
+                "id": "unknown",
+                "label": "Not in dataset",
+                "start": null,
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          }
+        ]
+      },
+      "deadlines": [
+        {
+          "id": "sj-early",
+          "date": "2026-12-03",
+          "kind": "ends",
+          "label": "Early-bird ends (later price not in the data)"
+        }
+      ]
+    },
+    {
+      "id": "mmt",
+      "name": "Mur-Mürz Top Skipass",
+      "color": "#ff8c00",
+      "price_note": "U28 €610 until 15 Dec 2026, then €671. Adult €835 as a single figure, not split by date.",
+      "url": "https://www.skiberge.at/",
+      "pricing": {
+        "assumptions": "Age cutoffs for 2026/27 are assumptions: U25 is birth year 2002–2010, U28 is birth year 1999–2010, adult is older than that youth bracket, and birth year 2011 or later is a child tariff. Confirm the Jahrgang on the official site. The adult price was given as one number and is not split on 15 Dec.",
+        "brackets": [
+          {
+            "id": "adult",
+            "label": "Adult",
+            "min_birth_year": null,
+            "max_birth_year": 1998,
+            "periods": [
+              {
+                "id": "standard",
+                "label": "Season price",
+                "start": null,
+                "end": null,
+                "price_eur": 835
+              }
+            ]
+          },
+          {
+            "id": "u28",
+            "label": "U28",
+            "min_birth_year": 1999,
+            "max_birth_year": 2010,
+            "periods": [
+              {
+                "id": "early",
+                "label": "Until 15 Dec 2026",
+                "start": null,
+                "end": "2026-12-15",
+                "price_eur": 610
+              },
+              {
+                "id": "later",
+                "label": "From 16 Dec 2026",
+                "start": "2026-12-16",
+                "end": null,
+                "price_eur": 671
+              }
+            ]
+          },
+          {
+            "id": "child",
+            "label": "Child",
+            "min_birth_year": 2011,
+            "max_birth_year": null,
+            "periods": [
+              {
+                "id": "unknown",
+                "label": "Not in dataset",
+                "start": null,
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          }
+        ]
+      },
+      "deadlines": [
+        {
+          "id": "mmt-u28",
+          "date": "2026-12-15",
+          "kind": "ends",
+          "label": "U28 early price ends (€610, then €671)"
+        }
+      ]
+    },
+    {
+      "id": "ssc",
+      "name": "SuperSkiCard",
+      "color": "#8e44ad",
+      "price_note": "U25 €890 and adult €1,049 until 3 Dec 2026. Prices after that date were not provided.",
+      "url": "https://www.superskicard.com/de/superskicard.html",
+      "pricing": {
+        "assumptions": "Age cutoffs for 2026/27 are assumptions: U25 is birth year 2002–2010, U28 is birth year 1999–2010, adult is older than that youth bracket, and birth year 2011 or later is a child tariff. Confirm the Jahrgang on the official site. Both figures are the pre-3 Dec 2026 prices. Later prices were not provided.",
+        "brackets": [
+          {
+            "id": "adult",
+            "label": "Adult",
+            "min_birth_year": null,
+            "max_birth_year": 2001,
+            "periods": [
+              {
+                "id": "early",
+                "label": "Until 3 Dec 2026",
+                "start": null,
+                "end": "2026-12-03",
+                "price_eur": 1049
+              },
+              {
+                "id": "later",
+                "label": "After 3 Dec 2026",
+                "start": "2026-12-04",
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          },
+          {
+            "id": "u25",
+            "label": "U25",
+            "min_birth_year": 2002,
+            "max_birth_year": 2010,
+            "periods": [
+              {
+                "id": "early",
+                "label": "Until 3 Dec 2026",
+                "start": null,
+                "end": "2026-12-03",
+                "price_eur": 890
+              },
+              {
+                "id": "later",
+                "label": "After 3 Dec 2026",
+                "start": "2026-12-04",
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          },
+          {
+            "id": "child",
+            "label": "Child",
+            "min_birth_year": 2011,
+            "max_birth_year": null,
+            "periods": [
+              {
+                "id": "unknown",
+                "label": "Not in dataset",
+                "start": null,
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          }
+        ]
+      },
+      "deadlines": [
+        {
+          "id": "ssc-early",
+          "date": "2026-12-03",
+          "kind": "ends",
+          "label": "Early-bird ends (later price not in the data)"
+        }
+      ]
+    },
+    {
+      "id": "tsc",
+      "name": "Snow Card Tirol",
+      "color": "#00a3a3",
+      "price_note": "€1,080 presale 26 Sep–31 Oct 2026, then €1,227. Same tariff for youth and adult. No price before 26 Sep 2026.",
+      "url": "https://www.skiwelt.at/en/snow-card-tirol.html",
+      "pricing": {
+        "assumptions": "Age cutoffs for 2026/27 are assumptions: U25 is birth year 2002–2010, U28 is birth year 1999–2010, adult is older than that youth bracket, and birth year 2011 or later is a child tariff. Confirm the Jahrgang on the official site. No separate youth price was provided. The presale window is 26 Sep–31 Oct 2026.",
+        "brackets": [
+          {
+            "id": "standard",
+            "label": "Youth and adult",
+            "min_birth_year": null,
+            "max_birth_year": 2010,
+            "periods": [
+              {
+                "id": "presale",
+                "label": "Presale 26 Sep–31 Oct 2026",
+                "start": "2026-09-26",
+                "end": "2026-10-31",
+                "price_eur": 1080
+              },
+              {
+                "id": "regular",
+                "label": "From 1 Nov 2026",
+                "start": "2026-11-01",
+                "end": null,
+                "price_eur": 1227
+              }
+            ]
+          },
+          {
+            "id": "child",
+            "label": "Child",
+            "min_birth_year": 2011,
+            "max_birth_year": null,
+            "periods": [
+              {
+                "id": "unknown",
+                "label": "Not in dataset",
+                "start": null,
+                "end": null,
+                "price_eur": null
+              }
+            ]
+          }
+        ]
+      },
+      "deadlines": [
+        {
+          "id": "tsc-start",
+          "date": "2026-09-26",
+          "kind": "starts",
+          "label": "Presale starts (€1,080)"
+        },
+        {
+          "id": "tsc-end",
+          "date": "2026-10-31",
+          "kind": "ends",
+          "label": "Presale ends (€1,080, then €1,227)"
+        }
+      ]
+    }
+  ],
+  "cities": [
+    {
+      "id": "sopron",
+      "name": "Sopron",
+      "lat": 47.6803063,
+      "lon": 16.5983457,
+      "note": "home"
+    },
+    {
+      "id": "wiener-neustadt",
+      "name": "Wiener Neustadt",
+      "lat": 47.8131847,
+      "lon": 16.2441166,
+      "note": "study"
+    },
+    {
+      "id": "graz",
+      "name": "Graz",
+      "lat": 47.0708678,
+      "lon": 15.4382786,
+      "note": null
+    },
+    {
+      "id": "vienna",
+      "name": "Vienna",
+      "lat": 48.2083537,
+      "lon": 16.3725042,
+      "note": null
+    }
+  ],
+  "resorts": [
+    {
+      "id": "semmering-hirschenkogel",
+      "name": "Semmering Hirschenkogel",
+      "lat": 47.622151,
+      "lon": 15.8337663,
+      "region": "Lower Austria",
+      "passes": [
+        "bep",
+        "oac"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "stuhleck",
+      "name": "Stuhleck",
+      "lat": 47.5741948,
+      "lon": 15.7899645,
+      "region": "Styria",
+      "passes": [
+        "oac",
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "moenichkirchen-mariensee",
+      "name": "Mönichkirchen-Mariensee",
+      "lat": 47.5120788,
+      "lon": 16.0361905,
+      "region": "Lower Austria",
+      "passes": [
+        "bep",
+        "oac"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "st-corona-am-wechsel",
+      "name": "St. Corona am Wechsel",
+      "lat": 47.5870539,
+      "lon": 16.008036,
+      "region": "Lower Austria",
+      "passes": [
+        "bep",
+        "oac"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "puchberg-am-schneeberg",
+      "name": "Puchberg am Schneeberg",
+      "lat": 47.789513,
+      "lon": 15.9125301,
+      "region": "Lower Austria",
+      "passes": [
+        "oac"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "hochkar",
+      "name": "Hochkar",
+      "lat": 47.7108251,
+      "lon": 14.9012107,
+      "region": "Lower Austria",
+      "passes": [
+        "bep",
+        "oac"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "oetscher-lackenhof",
+      "name": "Ötscher / Lackenhof",
+      "lat": 47.8697008,
+      "lon": 15.1515861,
+      "region": "Lower Austria",
+      "passes": [
+        "bep",
+        "oac"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "annaberg",
+      "name": "Annaberg",
+      "lat": 47.8717371,
+      "lon": 15.3756128,
+      "region": "Lower Austria",
+      "passes": [
+        "bep",
+        "oac"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "gemeindealpe-mitterbach",
+      "name": "Gemeindealpe Mitterbach",
+      "lat": 47.8130278,
+      "lon": 15.2496988,
+      "region": "Lower Austria",
+      "passes": [
+        "bep",
+        "oac"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "mariazeller-buergeralpe",
+      "name": "Mariazeller Bürgeralpe",
+      "lat": 47.7877151,
+      "lon": 15.3289564,
+      "region": "Styria",
+      "passes": [
+        "bep",
+        "oac",
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "lunz-maiszinken",
+      "name": "Lunz / Maiszinken",
+      "lat": 47.8606764,
+      "lon": 15.0270919,
+      "region": "Lower Austria",
+      "passes": [
+        "bep",
+        "oac"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "koenigsberg-hollenstein",
+      "name": "Königsberg (Hollenstein)",
+      "lat": 47.7891605,
+      "lon": 14.8395412,
+      "region": "Lower Austria",
+      "passes": [
+        "bep"
+      ],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "unterberg",
+      "name": "Unterberg",
+      "lat": 47.932,
+      "lon": 15.81,
+      "region": "Lower Austria",
+      "passes": [],
+      "klimaticket": true,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "praebichl",
+      "name": "Präbichl",
+      "lat": 47.5242441,
+      "lon": 14.9472379,
+      "region": "Styria",
+      "passes": [
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "hohe-veitsch-brunnalm",
+      "name": "Hohe Veitsch / Brunnalm",
+      "lat": 47.5956484,
+      "lon": 15.4664419,
+      "region": "Styria",
+      "passes": [
+        "oac",
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "niederalpl",
+      "name": "Niederalpl",
+      "lat": 47.6809519,
+      "lon": 15.3777692,
+      "region": "Styria",
+      "passes": [
+        "oac",
+        "sj"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "turnau-schwabenberg",
+      "name": "Turnau (Schwabenberg)",
+      "lat": 47.5585706,
+      "lon": 15.3376224,
+      "region": "Styria",
+      "passes": [
+        "oac",
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "steirischer-seeberg",
+      "name": "Steirischer Seeberg",
+      "lat": 47.6255276,
+      "lon": 15.2885908,
+      "region": "Styria",
+      "passes": [
+        "oac"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "st-jakob-im-walde",
+      "name": "St. Jakob im Walde",
+      "lat": 47.4660432,
+      "lon": 15.786947,
+      "region": "Styria",
+      "passes": [
+        "oac",
+        "sj"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "st-kathrein-hauenstein",
+      "name": "St. Kathrein/Hauenstein",
+      "lat": 47.4900211,
+      "lon": 15.67713,
+      "region": "Styria",
+      "passes": [
+        "oac"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "wenigzell",
+      "name": "Wenigzell",
+      "lat": 47.4257927,
+      "lon": 15.7864361,
+      "region": "Styria",
+      "passes": [
+        "oac"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "salzstiegl",
+      "name": "Salzstiegl",
+      "lat": 47.0685443,
+      "lon": 14.8718288,
+      "region": "Styria",
+      "passes": [
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "gaal",
+      "name": "Gaal",
+      "lat": 47.2731973,
+      "lon": 14.6694941,
+      "region": "Styria",
+      "passes": [
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "kleinlobming",
+      "name": "Kleinlobming",
+      "lat": 47.1510438,
+      "lon": 14.8472093,
+      "region": "Styria",
+      "passes": [
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "lachtal",
+      "name": "Lachtal",
+      "lat": 47.2524874,
+      "lon": 14.3682392,
+      "region": "Styria",
+      "passes": [
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "kreischberg",
+      "name": "Kreischberg",
+      "lat": 47.0773706,
+      "lon": 14.0571311,
+      "region": "Styria",
+      "passes": [
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "schladming-planai",
+      "name": "Schladming / Planai",
+      "lat": 47.3940415,
+      "lon": 13.6867878,
+      "region": "Styria",
+      "passes": [
+        "sj",
+        "ssc"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "tauplitz",
+      "name": "Tauplitz",
+      "lat": 47.5959219,
+      "lon": 14.00663,
+      "region": "Styria",
+      "passes": [
+        "sj",
+        "ssc"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "turracher-hoehe",
+      "name": "Turracher Höhe",
+      "lat": 46.9131659,
+      "lon": 13.8764531,
+      "region": "Styria / Carinthia",
+      "passes": [
+        "sj",
+        "mmt"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "innsbruck",
+      "name": "Innsbruck",
+      "lat": 47.2654296,
+      "lon": 11.3927685,
+      "region": "Tirol",
+      "passes": [
+        "tsc"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "mayrhofen",
+      "name": "Mayrhofen",
+      "lat": 47.1672188,
+      "lon": 11.8638664,
+      "region": "Tirol",
+      "passes": [
+        "tsc"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "kitzbuehel",
+      "name": "Kitzbühel",
+      "lat": 47.4463585,
+      "lon": 12.3911473,
+      "region": "Tirol",
+      "passes": [
+        "tsc",
+        "ssc"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    },
+    {
+      "id": "stubaier-gletscher",
+      "name": "Stubaier Gletscher",
+      "lat": 46.9918843,
+      "lon": 11.1172229,
+      "region": "Tirol",
+      "passes": [
+        "tsc"
+      ],
+      "klimaticket": false,
+      "day_ticket_eur": null,
+      "day_ticket_season": null,
+      "website": null,
+      "status": "open",
+      "top_elevation_m": null,
+      "base_elevation_m": null,
+      "slope_km": null,
+      "lifts": null,
+      "snowpark": null,
+      "night_skiing": null,
+      "snow_report_url": null,
+      "webcam_url": null,
+      "public_transport_note": null
+    }
+  ]
+}
