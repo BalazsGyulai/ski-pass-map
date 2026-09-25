@@ -266,8 +266,13 @@ const en = {
   pisteLoading: "Loading pistes…",
   openWebsite: "Open website",
   pisteMapOfficial: "Piste map (official)",
-  osmLicence: "Map data and piste lines © OpenStreetMap contributors, ODbL. https://www.openstreetmap.org/copyright",
+  osmLicence: "Base map © OpenStreetMap contributors (ODbL), standard tiles from tile.openstreetmap.org. Dark mode recolours those same tiles. Piste lines © OpenStreetMap contributors. https://www.openstreetmap.org/copyright",
   opensnowmapLicence: "The optional “Show all pistes” layer uses OpenSnowMap pistes-only tiles (CC BY-SA). Tiles load only for the area on screen. https://www.opensnowmap.org/",
+  allFilters: "All filters",
+  hideFilters: "Hide filters",
+  sheetHandle: "Drag up or down to resize. Drag down from the short sheet to close.",
+  menu: "Menu",
+  layers: "Layers",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -536,8 +541,13 @@ const hu: Record<MessageKey, string> = {
   pisteLoading: "Pályák betöltése…",
   openWebsite: "Weboldal megnyitása",
   pisteMapOfficial: "Pályatérkép (hivatalos)",
-  osmLicence: "Térképadat és pályavonalak © OpenStreetMap közreműködők, ODbL. https://www.openstreetmap.org/copyright",
+  osmLicence: "Alaptérkép © OpenStreetMap közreműködők (ODbL), a tile.openstreetmap.org szabványos csempéi. A sötét mód ugyanazokat a csempéket színezi át. Pályavonalak © OpenStreetMap közreműködők. https://www.openstreetmap.org/copyright",
   opensnowmapLicence: "A „Minden pálya” réteg az OpenSnowMap csak-pálya csempéit használja (CC BY-SA). Csak a látható terület töltődik be. https://www.opensnowmap.org/",
+  allFilters: "Minden szűrő",
+  hideFilters: "Szűrők elrejtése",
+  sheetHandle: "Húzd fel vagy le a méretezéshez. A rövid lapról lefelé húzva bezárul.",
+  menu: "Menü",
+  layers: "Rétegek",
 };
 
 const messages: Record<Lang, Record<MessageKey, string>> = { en, hu };

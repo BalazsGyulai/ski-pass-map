@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { nextSheetSnap, type SheetSnap } from "@/lib/sheet";
 import Link from "next/link";
 import { passById, resortById } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
@@ -27,10 +28,56 @@ export function ResortDetail() {
   } = useApp();
   const resort = share.resort ? resortById.get(share.resort) : undefined;
   const closeRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
+  const [snap, setSnap] = useState<SheetSnap>("half");
 
   useEffect(() => {
     closeRef.current?.focus();
+    setSnap("half");
   }, [resort?.id]);
+
+  useEffect(() => {
+    if (!resort) return;
+    document.documentElement.dataset.sheet = snap;
+    return () => {
+      delete document.documentElement.dataset.sheet;
+    };
+  }, [resort, snap]);
+
+  function onGrabPointerDown(event: React.PointerEvent<HTMLElement>) {
+    if (!window.matchMedia("(max-width: 899px)").matches) return;
+    if ((event.target as HTMLElement).closest("button, a, input")) return;
+    const origin = snap;
+    const startY = event.clientY;
+    let lastY = startY;
+    const handle = event.currentTarget;
+    handle.setPointerCapture(event.pointerId);
+    const move = (ev: PointerEvent) => {
+      lastY = ev.clientY;
+      const dy = Math.max(-80, lastY - startY);
+      sheetRef.current?.style.setProperty("transform", `translateY(${dy}px)`);
+      sheetRef.current?.style.setProperty("transition", "none");
+    };
+    const end = () => {
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", end);
+      handle.removeEventListener("pointercancel", end);
+      sheetRef.current?.style.removeProperty("transform");
+      sheetRef.current?.style.removeProperty("transition");
+      const dy = lastY - startY;
+      if (dy > 56) {
+        const next = nextSheetSnap(origin, "down");
+        if (next === "close") selectResort(null);
+        else setSnap(next);
+      } else if (dy < -56) {
+        const next = nextSheetSnap(origin, "up");
+        if (next !== "close") setSnap(next);
+      }
+    };
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
+  }
 
   if (!resort) return null;
 
@@ -44,8 +91,21 @@ export function ResortDetail() {
   const days = resortDays[resort.id] ?? 0;
 
   return (
-    <article className="detail-sheet" aria-labelledby="resort-title">
-      <header className="detail-head">
+    <article ref={sheetRef} className={`detail-sheet snap-${snap}`} aria-labelledby="resort-title">
+      <div
+        className="sheet-grab"
+        onPointerDown={onGrabPointerDown}
+        role="separator"
+        aria-orientation="horizontal"
+        aria-label={t("sheetHandle")}
+        aria-valuemin={0}
+        aria-valuemax={2}
+        aria-valuenow={snap === "peek" ? 0 : snap === "half" ? 1 : 2}
+        aria-valuetext={snap}
+      >
+        <span className="grab-bar" />
+      </div>
+      <header className="detail-head" onPointerDown={onGrabPointerDown}>
         <p className="eyebrow">{regionLabel(lang, resort.region)}</p>
         <h2 id="resort-title">{resort.name}</h2>
         <p className="meta">
@@ -53,8 +113,8 @@ export function ResortDetail() {
           {resort.status === "closed?" ? <span className="hint warn">{t("closedWarning")}</span> : null}
           {distance != null ? <span>{t("distanceValue", { n: formatKm(distance) })}</span> : null}
         </p>
-        <button ref={closeRef} type="button" className="icon-btn" onClick={() => selectResort(null)} aria-label={t("close")}>
-          ×
+        <button ref={closeRef} type="button" className="icon-btn" onClick={() => selectResort(null)}>
+          {t("close")}
         </button>
       </header>
       <div className="detail-body">

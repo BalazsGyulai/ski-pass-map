@@ -10,6 +10,7 @@ import { clusterPoints } from "@/lib/cluster";
 import { filterResorts } from "@/lib/filter";
 import { cityNoteLabel } from "@/lib/i18n";
 import { pieSvg } from "@/lib/marker";
+import { OSM_TILE_ATTRIBUTION, OSM_TILE_URL } from "@/lib/basemap";
 import { pisteStyle, type PisteProperties } from "@/lib/pistes";
 import { useApp } from "./AppState";
 
@@ -18,14 +19,32 @@ const TIROL: L.LatLngExpression = [47.2, 11.65];
 
 export default function MapView() {
   return (
-    <MapContainer center={EAST} zoom={8} minZoom={6} maxZoom={16} className="map-canvas" scrollWheelZoom>
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <MapContainer center={EAST} zoom={8} minZoom={6} maxZoom={16} className="map-canvas" scrollWheelZoom zoomControl={false}>
+      <BaseTiles />
       <MapLayers />
     </MapContainer>
   );
+}
+
+function BaseTiles() {
+  return <TileLayer url={OSM_TILE_URL} attribution={OSM_TILE_ATTRIBUTION} maxZoom={19} />;
+}
+
+function mapPadding(map: L.Map): { paddingTopLeft: [number, number]; paddingBottomRight: [number, number] } {
+  const narrow = window.matchMedia("(max-width: 899px)").matches;
+  const snap = document.documentElement.dataset.sheet;
+  const height = map.getSize().y;
+  const bottom = !narrow || !snap ? 28 : snap === "peek" ? 160 : snap === "full" ? Math.max(80, height - 96) : Math.round(height * 0.5);
+  const left = narrow ? 28 : 420;
+  const right = !narrow && document.querySelector(".detail-sheet") ? 420 : 28;
+  return { paddingTopLeft: [left, 72], paddingBottomRight: [right, bottom] };
+}
+
+function darkPisteColor(color: string, difficulty: string | null, theme: "system" | "light" | "dark"): string {
+  if (difficulty !== "advanced" && difficulty !== "expert") return color;
+  const mediaDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const dark = theme === "dark" || (theme !== "light" && mediaDark);
+  return dark ? "#f4f4f5" : color;
 }
 
 function mapHasSize(map: L.Map): boolean {
@@ -35,8 +54,9 @@ function mapHasSize(map: L.Map): boolean {
 
 function MapLayers() {
   const map = useMap();
-  const { share, updateShare, home, favourites, highlightId, selectResort, t, lang } = useApp();
+  const { share, updateShare, home, favourites, highlightId, selectResort, t, lang, theme } = useApp();
   const [pisteNote, setPisteNote] = useState<"idle" | "loading" | "empty" | "ready">("idle");
+  const [layersOpen, setLayersOpen] = useState(false);
   const passNames = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.name])), []);
   const colors = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.color])), []);
 
@@ -146,7 +166,8 @@ function MapLayers() {
       style: (feature) => {
         const props = feature?.properties as PisteProperties | undefined;
         const style = pisteStyle(props?.difficulty ?? null, props?.kind === "lift" ? "lift" : "piste");
-        return { color: style.color, weight: style.weight, dashArray: style.dashArray, opacity: 0.95, lineCap: "round", lineJoin: "round" };
+        const color = darkPisteColor(style.color, props?.difficulty ?? null, theme);
+        return { color, weight: style.weight, dashArray: style.dashArray, opacity: 0.95, lineCap: "round", lineJoin: "round" };
       },
       onEachFeature: (feature, marker) => {
         const props = feature.properties as PisteProperties | null;
@@ -183,7 +204,7 @@ function MapLayers() {
             layer.addData(data as GeoJSON.GeoJSON);
             const bounds = layer.getBounds();
             if (bounds.isValid()) {
-              map.fitBounds(bounds.pad(0.2), { padding: [36, 36], maxZoom: 14, animate: !reduced });
+              map.fitBounds(bounds.pad(0.2), { ...mapPadding(map), maxZoom: 14, animate: !reduced });
             }
             setPisteNote("ready");
             return;
@@ -203,12 +224,33 @@ function MapLayers() {
       cancelAnimationFrame(frame);
       map.removeLayer(layer);
     };
-  }, [map, share.resort, t]);
+  }, [map, share.resort, t, theme]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => map.invalidateSize());
     return () => cancelAnimationFrame(frame);
   }, [map, share.view]);
+
+  useEffect(() => {
+    if (!mapHasSize(map)) return;
+    const zoom = L.control.zoom({ position: "bottomright" });
+    zoom.addTo(map);
+    return () => {
+      zoom.remove();
+    };
+  }, [map]);
+
+  useEffect(() => {
+    function onClick(event: L.LeafletMouseEvent) {
+      const target = event.originalEvent?.target;
+      if (target instanceof Element && target.closest(".leaflet-control, .leaflet-marker-icon, .leaflet-tooltip, .leaflet-overlay-pane, .layers")) return;
+      selectResort(null);
+    }
+    map.on("click", onClick);
+    return () => {
+      map.off("click", onClick);
+    };
+  }, [map, selectResort]);
 
   function jump(target: L.LatLngExpression, zoom: number) {
     if (!mapHasSize(map)) return;
@@ -225,42 +267,55 @@ function MapLayers() {
           opacity={0.9}
         />
       ) : null}
-      {share.resort || share.showPistes ? (
-        <div className="piste-legend" aria-label={t("pisteLegend")}>
-          <p>{t("pisteLegend")}</p>
-          <ul>
-            <li><span className="piste-swatch" style={{ background: "#1f9d55" }} />{t("pisteNovice")}</li>
-            <li><span className="piste-swatch" style={{ background: "#1d6fd8" }} />{t("pisteEasy")}</li>
-            <li><span className="piste-swatch" style={{ background: "#d62728" }} />{t("pisteIntermediate")}</li>
-            <li><span className="piste-swatch" style={{ background: "#161616" }} />{t("pisteAdvanced")}</li>
-            <li><span className="piste-swatch dashed" />{t("pisteFreeride")}</li>
-            <li><span className="piste-swatch" style={{ background: "#1c2430" }} />{t("pisteLift")}</li>
-          </ul>
-          {pisteNote === "loading" ? <p className="piste-note">{t("pisteLoading")}</p> : null}
-          {pisteNote === "empty" ? <p className="piste-note">{t("pisteEmpty")}</p> : null}
-        </div>
-      ) : null}
-    <div className="map-actions">
-      <button type="button" aria-pressed={share.showPistes} onClick={() => updateShare({ showPistes: !share.showPistes })}>
-        {t("showAllPistes")}
-      </button>
-      <button type="button" onClick={() => jump(EAST, 8)}>
-        {t("jumpEast")}
-      </button>
-      <button type="button" onClick={() => jump(TIROL, 8)}>
-        {t("jumpTirol")}
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          if (filtered.length === 0 || !mapHasSize(map)) return;
-          const bounds = L.latLngBounds(filtered.map((resort) => [resort.lat, resort.lon] as [number, number]));
-          map.fitBounds(bounds.pad(0.15), { padding: [28, 28], maxZoom: 11 });
-        }}
-      >
-        {t("fitResorts")}
-      </button>
-    </div>
+      <div className="layers">
+        <button
+          type="button"
+          className="layers-btn"
+          aria-expanded={layersOpen}
+          aria-controls="map-layers"
+          onClick={() => setLayersOpen((open) => !open)}
+        >
+          {t("layers")}
+        </button>
+        {layersOpen ? (
+          <div id="map-layers" className="layers-panel">
+            <button type="button" aria-pressed={share.showPistes} onClick={() => updateShare({ showPistes: !share.showPistes })}>
+              {t("showAllPistes")}
+            </button>
+            <button type="button" onClick={() => jump(EAST, 8)}>
+              {t("jumpEast")}
+            </button>
+            <button type="button" onClick={() => jump(TIROL, 8)}>
+              {t("jumpTirol")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (filtered.length === 0 || !mapHasSize(map)) return;
+                const bounds = L.latLngBounds(filtered.map((resort) => [resort.lat, resort.lon] as [number, number]));
+                map.fitBounds(bounds.pad(0.15), { ...mapPadding(map), maxZoom: 11 });
+              }}
+            >
+              {t("fitResorts")}
+            </button>
+            {share.resort || share.showPistes ? (
+              <div className="piste-legend">
+                <p>{t("pisteLegend")}</p>
+                <ul>
+                  <li><span className="piste-swatch" style={{ background: "#1f9d55" }} />{t("pisteNovice")}</li>
+                  <li><span className="piste-swatch" style={{ background: "#1d6fd8" }} />{t("pisteEasy")}</li>
+                  <li><span className="piste-swatch" style={{ background: "#d62728" }} />{t("pisteIntermediate")}</li>
+                  <li><span className="piste-swatch" style={{ background: "#161616" }} />{t("pisteAdvanced")}</li>
+                  <li><span className="piste-swatch dashed" />{t("pisteFreeride")}</li>
+                  <li><span className="piste-swatch" style={{ background: "#1c2430" }} />{t("pisteLift")}</li>
+                </ul>
+                {pisteNote === "loading" ? <p className="piste-note">{t("pisteLoading")}</p> : null}
+                {pisteNote === "empty" ? <p className="piste-note">{t("pisteEmpty")}</p> : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
     </>
   );
 }
