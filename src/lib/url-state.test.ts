@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bareResortUrl, defaultShareState, parseShareState } from "./url-state";
+import { bareResortUrl, defaultShareState, parseShareState, serializeShareState } from "./url-state";
 
 describe("parseShareState", () => {
   it("drops markup and unknown tokens from the query", () => {
@@ -12,10 +12,11 @@ describe("parseShareState", () => {
     expect(state.q).not.toMatch(/[\u0000-\u001F]/);
     expect(state.passes).toEqual(["ok"]);
     expect(state.regions).toEqual(["Lower Austria"]);
-    expect(state.home).toBe("sopron");
+    expect(state.home).toBe("");
     expect(state.resort).toBeNull();
     expect(state.view).toBe("filters");
     expect(state.geoLat).toBeNull();
+    expect(state.geoLon).toBeNull();
     expect(state.minElev).toBeNull();
   });
 
@@ -31,6 +32,23 @@ describe("parseShareState", () => {
     expect(state.regions).toEqual(["Lower Austria", "Styria"]);
     expect(state.home).toBe("vienna");
     expect(state.resort).toBe("stuhleck");
+  });
+});
+
+describe("serializeShareState", () => {
+  it("never writes device coordinates into a shareable query", () => {
+    const state = {
+      ...defaultShareState(),
+      home: "geo",
+      geoLat: 47.12345,
+      geoLon: 16.54321,
+      resort: "stuhleck",
+    };
+    const query = serializeShareState(state);
+    expect(query).not.toMatch(/lat|lon|geo|47\.|16\./);
+    expect(parseShareState(new URLSearchParams("home=geo&lat=47.12345&lon=16.54321")).geoLat).toBeNull();
+    expect(parseShareState(new URLSearchParams("home=geo&lat=47.12345&lon=16.54321")).home).toBe("");
+    expect(parseShareState(new URLSearchParams("klima=1&closed=1"))).toMatchObject({ transit: true, showAbandoned: true });
   });
 });
 

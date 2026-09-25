@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import site from "../../config/site.json";
+import { BASE_PATH } from "@/lib/site";
 
 export function ServiceWorker() {
   useEffect(() => {
@@ -15,7 +15,7 @@ export function ServiceWorker() {
       window.location.reload();
     });
     navigator.serviceWorker
-      .register(`${site.basePath}/sw.js`, { scope: `${site.basePath}/`, updateViaCache: "none" })
+      .register(`${BASE_PATH}/sw.js`, { scope: BASE_PATH ? `${BASE_PATH}/` : "/", updateViaCache: "none" })
       .then((registration) => registration.update())
       .catch(() => {
         // The site still works online if the worker cannot be installed.

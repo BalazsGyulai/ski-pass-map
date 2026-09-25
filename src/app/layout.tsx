@@ -4,21 +4,21 @@ import { AppProvider } from "@/components/AppState";
 import { Header } from "@/components/Header";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import { CONTENT_SECURITY_POLICY, REFERRER_POLICY } from "@/lib/security";
-import site from "../../config/site.json";
+import { BASE_PATH, SITE_NAME } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Ski pass map 2026/27",
-    template: "%s · Ski pass map",
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
   },
-  description: "Season passes for ski resorts in eastern Austria, 2026/27. Compare coverage, prices, and straight-line distance from home.",
-  manifest: `${site.basePath}/manifest.webmanifest`,
+  description: `${SITE_NAME} compares season passes for ski areas, starting with Austria for 2026/27.`,
+  manifest: `${BASE_PATH}/manifest.webmanifest`,
   referrer: REFERRER_POLICY,
-  appleWebApp: { capable: true, title: "Ski passes" },
+  appleWebApp: { capable: true, title: SITE_NAME },
   icons: {
-    icon: `${site.basePath}/icon-192.png`,
-    apple: `${site.basePath}/apple-touch-icon.png`,
+    icon: `${BASE_PATH}/icon-192.png`,
+    apple: `${BASE_PATH}/apple-touch-icon.png`,
   },
 };
 

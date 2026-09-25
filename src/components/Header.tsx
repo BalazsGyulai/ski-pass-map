@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SITE_NAME } from "@/lib/site";
 import { useApp } from "./AppState";
 
 const links = [
@@ -28,7 +29,7 @@ export function Header() {
       </a>
       <div className="bar">
         <Link href="/" className="brand">
-          <span>{t("title")}</span>
+          <span>{SITE_NAME}</span>
           <small>{t("season")}</small>
         </Link>
         <button
@@ -45,7 +46,12 @@ export function Header() {
             {links.map((link) => {
               const current = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
               return (
-                <Link key={link.href} href={link.href} aria-current={current ? "page" : undefined}>
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={current ? "page" : undefined}
+                  onClick={link.href === "/" ? () => updateShare({ view: "map" }) : undefined}
+                >
                   {t(link.key)}
                 </Link>
               );

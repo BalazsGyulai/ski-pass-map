@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
-import site from "./config/site.json";
+import { BASE_PATH } from "./src/lib/site";
 
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: site.basePath,
-  assetPrefix: site.basePath,
+  ...(BASE_PATH ? { basePath: BASE_PATH, assetPrefix: BASE_PATH } : {}),
   images: { unoptimized: true },
   trailingSlash: true,
   reactStrictMode: true,

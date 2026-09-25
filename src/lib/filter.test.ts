@@ -7,53 +7,54 @@ import { pieSvg } from "./marker";
 import { parseShareState, serializeShareState } from "./url-state";
 
 const names = new Map(passes.map((pass) => [pass.id, pass.name]));
-const sopron = cities.find((city) => city.id === "sopron");
-if (!sopron) throw new Error("missing sopron");
+const vienna = cities.find((city) => city.id === "vienna");
+if (!vienna) throw new Error("missing vienna");
 
 describe("filterResorts", () => {
-  it("filters by pass any/all, uncovered resorts, and KlimaTicket", () => {
-    const base = { home: sopron, favourites: new Set<string>(), passNames: names };
+  it("filters by pass any/all, uncovered resorts, and public-transport notes", () => {
+    const base = { home: vienna, favourites: new Set<string>(), passNames: names };
     const empty = {
       q: "",
       passes: [] as string[],
       passMatch: "any" as const,
       noPass: false,
       regions: [] as string[],
-      klima: false,
+      transit: false,
       park: false,
       night: false,
       minElev: null,
       minSlope: null,
       maxKm: null,
       favouritesOnly: false,
-      showClosed: false,
+      showAbandoned: false,
     };
     const uncovered = filterResorts(resorts, { ...empty, noPass: true }, base);
-    expect(uncovered.some((resort) => resort.id === "unterberg")).toBe(false);
-    expect(uncovered.every((resort) => resort.passes.length === 0 && resort.status === "open")).toBe(true);
-    expect(filterResorts(resorts, { ...empty, noPass: true, showClosed: true }, base).some((resort) => resort.id === "unterberg")).toBe(
-      true,
-    );
-    expect(filterResorts(resorts, { ...empty, q: "Unterberg" }, base).some((resort) => resort.id === "unterberg")).toBe(true);
+    expect(uncovered.some((resort) => resort.id === "unterberg")).toBe(true);
+    expect(uncovered.every((resort) => resort.passes.length === 0)).toBe(true);
+    expect(filterResorts(resorts, { ...empty, showAbandoned: true }, base).some((resort) => resort.id === "defunct-alpl")).toBe(true);
+    expect(filterResorts(resorts, empty, base).some((resort) => resort.id === "defunct-alpl")).toBe(false);
+    expect(filterResorts(resorts, { ...empty, q: "Alpl" }, base).some((resort) => resort.id === "defunct-alpl")).toBe(true);
     const bep = filterResorts(resorts, { ...empty, passes: ["bergerlebnispass"] }, base);
     expect(bep.some((resort) => resort.id === "semmering-hirschenkogel")).toBe(true);
     expect(bep.some((resort) => resort.id === "stuhleck")).toBe(false);
     const both = filterResorts(resorts, { ...empty, passes: ["bergerlebnispass", "ostalpen"], passMatch: "all" }, base);
     expect(both.some((resort) => resort.id === "semmering-hirschenkogel")).toBe(true);
     expect(both.every((resort) => resort.passes.includes("bergerlebnispass") && resort.passes.includes("ostalpen"))).toBe(true);
-    const klima = filterResorts(resorts, { ...empty, klima: true }, base);
-    expect(klima.every((resort) => resort.klimaticket)).toBe(true);
-    expect(klima.some((resort) => resort.id === "stuhleck")).toBe(false);
+    const transit = filterResorts(resorts, { ...empty, transit: true }, base);
+    expect(transit.every((resort) => Boolean(resort.public_transport))).toBe(true);
+    expect(transit.some((resort) => resort.id === "semmering-hirschenkogel")).toBe(true);
+    expect(transit.some((resort) => resort.id === "stubaier-gletscher")).toBe(false);
     expect(filterResorts(resorts, { ...empty, q: "Otscher" }, base).map((resort) => resort.id)).toEqual(["oetscher-lackenhof"]);
     const parks = filterResorts(resorts, { ...empty, park: true }, base);
     expect(parks.length).toBeGreaterThan(0);
     expect(parks.every((resort) => resort.snowpark === true)).toBe(true);
     const high = filterResorts(resorts, { ...empty, minElev: 2000 }, base);
+    expect(high.length).toBeGreaterThan(0);
     expect(high.every((resort) => (resort.top_elevation_m ?? 0) >= 2000)).toBe(true);
-    expect(filterResorts(resorts, empty, base).every((resort) => resort.status === "open")).toBe(true);
+    expect(resorts.some((resort) => resort.id === "riedbach-neustadtl")).toBe(false);
   });
 
-  it("limits distance from Sopron and sorts unknown values last", () => {
+  it("limits distance from Vienna and sorts unknown values last", () => {
     const near = filterResorts(
       resorts,
       {
@@ -62,19 +63,19 @@ describe("filterResorts", () => {
         passMatch: "any",
         noPass: false,
         regions: [],
-        klima: false,
+        transit: false,
         park: false,
         night: false,
         minElev: null,
         minSlope: null,
         maxKm: 30,
         favouritesOnly: false,
-        showClosed: false,
+        showAbandoned: false,
       },
-      { home: sopron, favourites: new Set(), passNames: names },
+      { home: vienna, favourites: new Set(), passNames: names },
     );
-    expect(near.some((resort) => resort.id === "innsbruck")).toBe(false);
-    expect(near.every((resort) => distanceKm(sopron, resort) <= 30)).toBe(true);
+    expect(near.some((resort) => resort.id === "stubaier-gletscher")).toBe(false);
+    expect(near.every((resort) => distanceKm(vienna, resort) <= 30)).toBe(true);
     const sorted = sortResorts(resorts, "elevation", "desc", () => null);
     expect(sorted[0].top_elevation_m).not.toBeNull();
     expect((sorted[0].top_elevation_m ?? 0) >= (sorted[1].top_elevation_m ?? 0)).toBe(true);
@@ -99,19 +100,21 @@ describe("clusterPoints", () => {
 
 describe("share url", () => {
   it("round-trips the fields that should be shareable", () => {
-    const state = parseShareState(new URLSearchParams("passes=bergerlebnispass,ostalpen&match=all&klima=1&home=graz&resort=stuhleck&view=list&lang=hu&sort=name&maxKm=80&regions=Styria|Tirol&closed=1"));
+    const state = parseShareState(new URLSearchParams("passes=bergerlebnispass,ostalpen&match=all&transit=1&home=vienna&resort=stuhleck&view=list&lang=hu&sort=name&maxKm=80&regions=Styria|Tirol&abandoned=1"));
     expect(state).toMatchObject({
       passes: ["bergerlebnispass", "ostalpen"],
-      showClosed: true,
+      showAbandoned: true,
       passMatch: "all",
-      klima: true,
-      home: "graz",
+      transit: true,
+      home: "vienna",
       resort: "stuhleck",
       view: "list",
       lang: "hu",
       sort: "name",
       maxKm: 80,
       regions: ["Styria", "Tirol"],
+      geoLat: null,
+      geoLon: null,
     });
     const again = parseShareState(new URLSearchParams(serializeShareState(state)));
     expect(again).toEqual(state);
@@ -120,9 +123,9 @@ describe("share url", () => {
 
 describe("pieSvg", () => {
   it("draws one wedge per pass and a grey dot when nothing covers the resort", () => {
-    expect(pieSvg([], { selected: false, klima: false, closed: false })).toContain('fill="#8b938e"');
-    const pie = pieSvg(["#1f5fd1", "#1a9a3a"], { selected: true, klima: true, closed: false });
-    expect(pie.match(/<path /g)).toHaveLength(3);
+    expect(pieSvg([], { selected: false, closed: false })).toContain('fill="#8b938e"');
+    const pie = pieSvg(["#1f5fd1", "#1a9a3a"], { selected: true, closed: false });
+    expect(pie.match(/<path /g)).toHaveLength(2);
     expect(pie).toContain("#ffbf47");
   });
 });

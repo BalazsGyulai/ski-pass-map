@@ -1,7 +1,7 @@
 {
-  "name": "Ski pass map 2026/27",
-  "short_name": "Ski passes",
-  "description": "Season passes for ski resorts in eastern Austria, 2026/27.",
+  "name": "Skimap.eu",
+  "short_name": "Skimap.eu",
+  "description": "Season passes for ski areas, starting with Austria for 2026/27.",
   "start_url": "/ski-pass-map/",
   "scope": "/ski-pass-map/",
   "display": "standalone",
