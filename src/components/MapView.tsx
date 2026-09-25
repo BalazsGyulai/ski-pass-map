@@ -113,7 +113,7 @@ function MapLayers() {
   useEffect(() => {
     const layer = L.layerGroup().addTo(map);
     cities.forEach((city) => {
-      const note = cityNoteLabel(lang, city.note);
+      const note = cityNoteLabel(lang, city.id);
       const label = note ? `${city.name} (${note})` : city.name;
       const homeCity = share.home === city.id;
       const icon = L.divIcon({

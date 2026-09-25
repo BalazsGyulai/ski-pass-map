@@ -17,6 +17,7 @@ export interface ResortFilters {
   minSlope: number | null;
   maxKm: number | null;
   favouritesOnly: boolean;
+  showClosed: boolean;
 }
 
 export function countActiveFilters(filters: ResortFilters): number {
@@ -32,6 +33,7 @@ export function countActiveFilters(filters: ResortFilters): number {
   if (filters.minSlope != null) count += 1;
   if (filters.maxKm != null) count += 1;
   if (filters.favouritesOnly) count += 1;
+  if (filters.showClosed) count += 1;
   return count;
 }
 
@@ -42,6 +44,10 @@ export function filterResorts(
 ): Resort[] {
   const query = fold(filters.q.trim());
   return resorts.filter((resort) => {
+    if (resort.status === "closed?" && !filters.showClosed) {
+      const named = query.length > 0 && fold(resort.name).includes(query);
+      if (!named) return false;
+    }
     if (query) {
       const passText = resort.passes.map((id) => context.passNames.get(id) ?? id).join(" ");
       const haystack = fold(`${resort.name} ${resort.region} ${passText}`);

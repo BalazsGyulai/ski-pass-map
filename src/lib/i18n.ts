@@ -42,7 +42,9 @@ const en = {
   minSlope: "Minimum slope length (km)",
   maxDistance: "Maximum distance (km)",
   maxDistanceHelp: "Straight-line from the home base, not drive time.",
-  unknownHidden: "Resorts with an unknown value are hidden while this filter is on. The seed data leaves many of these fields empty.",
+  unknownHidden: "A missing snow park or night-skiing flag is unknown, not a no. Those resorts stay hidden while this filter is on.",
+  showClosed: "Show closed or uncertain",
+  showClosedHint: "Hidden by default, including historic lifts marked abandoned. A name search still finds them.",
   favouritesOnly: "Favourites only",
   noFavourites: "No favourites yet. The star saves them on this device.",
   homeBase: "Home base",
@@ -68,6 +70,7 @@ const en = {
   legendGrey: "Grey dot: no pass in this dataset covers it.",
   legendKlima: "Small triangle: KlimaTicket / VOR.",
   legendCluster: "A numbered bubble groups nearby resorts. Zoom in for names.",
+  legendClosed: "Dashed ring: closed or uncertain. Hidden until you show them.",
   showMap: "Map",
   showList: "List",
   showFilters: "Filters",
@@ -198,8 +201,8 @@ const en = {
   updatedUnknown: "No update date in the data file.",
   howToUpdate: "Edit data/resorts.json, then run npm run validate and npm run build. The build stops if the file does not match the schema.",
   pagesSetting: "One-time GitHub setting: Settings → Pages → Build and deployment → Source: GitHub Actions. The workflow cannot switch that on for you.",
-  seedBody: "The seed list is the earlier map: resorts around Lower Austria, Styria, and a few in Tirol, with the passes that covered them. Coordinates are from Nominatim / OpenStreetMap. Unterberg is approximate.",
-  gapsBody: "Top elevation, base elevation, slope length, lifts, snow park, night skiing, day ticket, website, snow report, and webcam are null in the seed. The app shows them as unknown and does not invent a number.",
+  seedBody: "140 resorts in Styria, Lower Austria, Tirol, Hungary, Burgenland, and Vienna. Coordinates and stats come from OpenSkiMap, skiresort.info, official pass partner lists, and Nominatim. Sources and caveats are in the data notes.",
+  gapsBody: "Snow park and night skiing are true only with a source, otherwise unknown. Semmering, Stuhleck, and Präbichl day tickets are the checked 2025/26 prices. Every other day ticket is the latest skiresort.info figure and is an estimate. Hungarian day tickets are forints in the notes, not euros.",
   ageTitle: "Age rules",
   storageTitle: "What is saved",
   storageBody: "Stars, birth year, purchase date, and planned days are in localStorage on this device. Filters, the selected resort, and the map or list view are in the link.",
@@ -236,6 +239,20 @@ const en = {
   showOnMap: "Show on map",
   filterCountShort: "Filters ({n})",
   straightLineShort: "straight-line",
+  seasonUnknown: "season unknown",
+  estimate: "estimate",
+  estimateNote: "Includes a day ticket whose season was not stated. Only Semmering, Stuhleck, and Präbichl are checked 2025/26 prices.",
+  ageNotBirthYear: "This pass is priced by age at purchase, not birth year. The adult and child prices are listed separately.",
+  notes: "Notes",
+  featureEvidence: "Park and night-skiing evidence",
+  seasonDates: "Season dates 2026/27",
+  statsSource: "Stats source",
+  skiresort: "Skiresort.info",
+  bergfex: "bergfex",
+  regionHungary: "Hungary",
+  regionVienna: "Vienna",
+  regionBurgenland: "Burgenland",
+  cityNoteTirol: "Tirol week",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -280,7 +297,9 @@ const hu: Record<MessageKey, string> = {
   minSlope: "Legalább ennyi pálya (km)",
   maxDistance: "Legfeljebb ekkora távolság (km)",
   maxDistanceHelp: "Légvonal a kiindulóponttól, nem menetidő.",
-  unknownHidden: "Az ismeretlen értékű síterepek ezzel a szűrővel rejtve maradnak. A kezdő adatban sok mező üres.",
+  unknownHidden: "A hiányzó snowpark vagy éjszakai síelés ismeretlen, nem nem. Ezek a síterepek a szűrővel rejtve maradnak.",
+  showClosed: "Zárt vagy bizonytalan mutatása",
+  showClosedHint: "Alapból rejtve, a felhagyott történelmi felvonókkal együtt. Névre keresve így is előjönnek.",
   favouritesOnly: "Csak kedvencek",
   noFavourites: "Még nincs kedvenc. A csillag ezen az eszközön menti őket.",
   homeBase: "Kiindulópont",
@@ -306,6 +325,7 @@ const hu: Record<MessageKey, string> = {
   legendGrey: "Szürke pont: a listában egyik bérlet sem fedi.",
   legendKlima: "Kis háromszög: KlimaTicket / VOR.",
   legendCluster: "A számozott buborék közeli síterepeket fog össze. A nevek nagyításkor jönnek elő.",
+  legendClosed: "Szaggatott karika: zárt vagy bizonytalan. Addig rejtve, amíg be nem kapcsolod.",
   showMap: "Térkép",
   showList: "Lista",
   showFilters: "Szűrők",
@@ -436,8 +456,8 @@ const hu: Record<MessageKey, string> = {
   updatedUnknown: "Nincs frissítési dátum az adatfájlban.",
   howToUpdate: "Szerkeszd a data/resorts.json fájlt, majd futtasd: npm run validate és npm run build. A build megáll, ha a fájl nem illik a sémára.",
   pagesSetting: "Egyszeri GitHub-beállítás: Settings → Pages → Build and deployment → Source: GitHub Actions. A workflow ezt nem tudja bekapcsolni.",
-  seedBody: "A kezdő lista a korábbi térkép: alsó-ausztriai, stájer és néhány tiroli síterep, a fedő bérletekkel. A koordináták Nominatim / OpenStreetMap adatok. Unterberg közelítő.",
-  gapsBody: "A csúcs, a völgyállomás, a pályahossz, a felvonók, a snowpark, az éjszakai síelés, a napijegy, a weboldal, a hójelentés és a webkamera a kezdő adatban null. Az app ismeretlenként írja ki, és nem talál ki számot.",
+  seedBody: "140 síterep Stájerországban, Alsó-Ausztriában, Tirolban, Magyarországon, Burgenlandban és Bécsben. A koordináták és a számok az OpenSkiMap, a skiresort.info, a hivatalos partnerlisták és a Nominatim adatai. A források és a fenntartások a megjegyzésekben vannak.",
+  gapsBody: "A snowpark és az éjszakai síelés csak forrással igaz, különben ismeretlen. A Semmering, a Stuhleck és a Präbichl napijegye ellenőrzött 2025/26-os ár. A többi a legutóbbi skiresort.info ár, becslés. A magyar napijegy forintban, a megjegyzésben van.",
   ageTitle: "Életkorszabály",
   storageTitle: "Mi mentődik",
   storageBody: "A csillagok, a születési év, a vásárlás napja és a tervezett napok ennek az eszköznek a localStorage-ában vannak. A szűrők, a kiválasztott síterep és a térkép vagy lista nézet a linkben van.",
@@ -474,6 +494,20 @@ const hu: Record<MessageKey, string> = {
   showOnMap: "Mutasd a térképen",
   filterCountShort: "Szűrők ({n})",
   straightLineShort: "légvonal",
+  seasonUnknown: "szezon ismeretlen",
+  estimate: "becslés",
+  estimateNote: "Van benne napijegy, amelynek a szezonja nincs megadva. Csak a Semmering, a Stuhleck és a Präbichl ellenőrzött 2025/26-os ár.",
+  ageNotBirthYear: "Ezt a bérletet a vásárláskori életkor árazza, nem a születési év. A felnőtt és a gyerekár külön látszik.",
+  notes: "Megjegyzés",
+  featureEvidence: "Park és éjszakai síelés forrása",
+  seasonDates: "Szezon 2026/27",
+  statsSource: "Statisztika forrása",
+  skiresort: "Skiresort.info",
+  bergfex: "bergfex",
+  regionHungary: "Magyarország",
+  regionVienna: "Bécs",
+  regionBurgenland: "Burgenland",
+  cityNoteTirol: "Tiroli hét",
 };
 
 const messages: Record<Lang, Record<MessageKey, string>> = { en, hu };
@@ -483,6 +517,9 @@ const regionKeys: Record<string, MessageKey> = {
   Styria: "regionStyria",
   "Styria / Carinthia": "regionStyriaCarinthia",
   Tirol: "regionTirol",
+  Hungary: "regionHungary",
+  Vienna: "regionVienna",
+  Burgenland: "regionBurgenland",
 };
 
 const bracketKeys: Record<string, MessageKey> = {
@@ -519,7 +556,7 @@ export function regionLabel(lang: Lang, region: string): string {
 }
 
 export function bracketLabel(lang: Lang, id: string, fallback: string): string {
-  const key = bracketKeys[id];
+  const key = bracketKeys[id] ?? bracketKeys[id.toLowerCase()];
   return key ? translate(lang, key) : fallback;
 }
 
@@ -528,10 +565,11 @@ export function deadlineLabel(lang: Lang, id: string, fallback: string): string 
   return key ? translate(lang, key) : fallback;
 }
 
-export function cityNoteLabel(lang: Lang, note: string | null): string | null {
-  if (note === "home") return translate(lang, "cityNoteHome");
-  if (note === "study") return translate(lang, "cityNoteStudy");
-  return note;
+export function cityNoteLabel(lang: Lang, cityId: string): string | null {
+  if (cityId === "sopron") return translate(lang, "cityNoteHome");
+  if (cityId === "wiener-neustadt") return translate(lang, "cityNoteStudy");
+  if (cityId === "innsbruck") return translate(lang, "cityNoteTirol");
+  return null;
 }
 
 export function priceReasonText(
@@ -542,6 +580,7 @@ export function priceReasonText(
 ): string {
   if (bracketId === "child") return translate(lang, "childUnknown");
   if (reason === "no-birth-year") return translate(lang, "noBirthYear");
+  if (reason === "age-not-birth-year") return translate(lang, "ageNotBirthYear");
   if (reason === "no-bracket") return translate(lang, "noBracket");
   if (reason === "no-period") {
     return nextStart ? translate(lang, "presaleNotStarted", { date: formatDate(lang, nextStart) }) : translate(lang, "priceUnknown");

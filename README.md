@@ -24,15 +24,15 @@ npm run dev        # http://localhost:3000/ski-pass-map
 npm run build      # static site in out/
 ```
 
-Missing numbers must be `null`. The UI shows those as unknown and does not invent a price, elevation, or day ticket. Pass coverage is a list of pass ids. Age brackets and price periods live on each pass under `pricing`, so a later season is a data edit, not a code change.
+Missing numbers must be `null`. The UI shows those as unknown and does not invent a price, elevation, or day ticket. `snowpark` and `night_skiing` are `true` or `null`, never `false`. Pass coverage is a list of pass ids. Each pass has `pricing.brackets` (birth-year bounds, both null when the pass uses age at purchase or publishes no Jahrgang) and `pricing.periods` (`price_eur` valid through `valid_until`). A later season is a data edit, not a code change.
 
-Age cutoffs in the seed file are assumptions for 2026/27 (U25 = birth years 2002–2010, U28 = 1999–2010, child = 2011 or later). Change `min_birth_year` / `max_birth_year` if a pass uses a different Jahrgang. Prices that were not in the source notes are `null`.
+Closed or uncertain resorts (`status: "closed?"`) stay off the map until “Show closed or uncertain” is on. Day tickets other than the checked 2025/26 prices for Semmering, Stuhleck, and Präbichl are estimates.
 
 `config/site.json` holds `basePath` (`/ski-pass-map`). The same path is in `public/sw.js` and `public/manifest.webmanifest`. `npm run validate` checks that they still match.
 
 ## What the pages do
 
-- **Map / list:** clustered markers, pass-coloured pie markers, grey if no pass covers the resort, filters, search, straight-line distance from Sopron, Wiener Neustadt, Graz, Vienna, or your location.
+- **Map / list:** clustered markers, pass-coloured pie markers, grey if no pass covers the resort, dashed if closed, filters, search, straight-line distance from Sopron, Wiener Neustadt, Graz, Vienna, Innsbruck, or your location.
 - **Planner:** birth year, purchase date, days per resort, two-pass combinations, day-ticket comparison, and break-even where a day-ticket price exists.
 - **Compare:** tariffs for the saved birth year and date, plus a deadline countdown.
 - **About:** sources, the disclaimer, and how this file is updated.

@@ -42,7 +42,7 @@ export function Filters() {
           onChange={(event) => updateShare({ home: event.target.value })}
         >
           {cities.map((city) => {
-            const note = cityNoteLabel(lang, city.note);
+            const note = cityNoteLabel(lang, city.id);
             return (
               <option key={city.id} value={city.id}>
                 {city.name}
@@ -131,6 +131,11 @@ export function Filters() {
       </fieldset>
 
       <label className="check">
+        <input type="checkbox" checked={share.showClosed} onChange={(event) => updateShare({ showClosed: event.target.checked })} />
+        <span>{t("showClosed")}</span>
+      </label>
+      <p className="hint">{t("showClosedHint")}</p>
+      <label className="check">
         <input type="checkbox" checked={share.klima} onChange={(event) => updateShare({ klima: event.target.checked })} />
         <span>{t("klima")}</span>
       </label>
@@ -213,6 +218,7 @@ export function Filters() {
         <p>{t("legendGrey")}</p>
         <p>{t("legendKlima")}</p>
         <p>{t("legendCluster")}</p>
+        <p>{t("legendClosed")}</p>
       </div>
 
       <div className="filter-footer">

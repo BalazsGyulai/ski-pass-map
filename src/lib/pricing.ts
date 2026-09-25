@@ -1,6 +1,6 @@
-import type { Pass, PricePeriod } from "./schema";
+import type { AgeBracket, Pass, PricePeriod } from "./schema";
 
-export type PriceReason = "ok" | "no-birth-year" | "no-bracket" | "no-period" | "price-unknown";
+export type PriceReason = "ok" | "no-birth-year" | "no-bracket" | "no-period" | "price-unknown" | "age-not-birth-year";
 
 export interface ResolvedPrice {
   amountEur: number | null;
@@ -20,6 +20,7 @@ export interface PricedResort {
   region: string;
   passes: string[];
   dayTicketEur: number | null;
+  dayTicketEstimate: boolean;
 }
 
 export interface PlanDays {
@@ -42,6 +43,15 @@ export interface PriceQuote {
   nextPeriodStart: string | null;
   coveredResortIds: string[];
   uncoveredResortIds: string[];
+  usesEstimate: boolean;
+  breakEvenEstimate: boolean;
+}
+
+export interface Deadline {
+  id: string;
+  date: string;
+  kind: "starts" | "ends";
+  label: string;
 }
 
 const EMPTY_PRICE: ResolvedPrice = {
@@ -56,50 +66,66 @@ const EMPTY_PRICE: ResolvedPrice = {
   nextPeriodStart: null,
 };
 
-export function yearInBracket(
-  year: number,
-  bracket: { min_birth_year: number | null; max_birth_year: number | null },
-): boolean {
-  if (bracket.min_birth_year != null && year < bracket.min_birth_year) return false;
-  if (bracket.max_birth_year != null && year > bracket.max_birth_year) return false;
+export function yearInBracket(year: number, bracket: Pick<AgeBracket, "birth_year_from" | "birth_year_to">): boolean {
+  if (bracket.birth_year_from != null && year < bracket.birth_year_from) return false;
+  if (bracket.birth_year_to != null && year > bracket.birth_year_to) return false;
   return true;
 }
 
-export function periodCovers(period: Pick<PricePeriod, "start" | "end">, date: string): boolean {
-  if (period.start && date < period.start) return false;
-  if (period.end && date > period.end) return false;
-  return true;
+export function isOpenBracket(bracket: Pick<AgeBracket, "birth_year_from" | "birth_year_to">): boolean {
+  return bracket.birth_year_from == null && bracket.birth_year_to == null;
+}
+
+/** The note is the only place Snow Card records that the presale has not started yet. */
+export function presaleStart(pass: Pass): string | null {
+  const match = pass.price_note.match(/[Pp]resale from (\d{4}-\d{2}-\d{2})/);
+  return match?.[1] ?? null;
 }
 
 export function resolvePrice(pass: Pass, birthYear: number | null, purchaseDate: string): ResolvedPrice {
   if (birthYear == null || !Number.isInteger(birthYear)) {
     return { ...EMPTY_PRICE, reason: "no-birth-year" };
   }
-  const bracket = pass.pricing.brackets.find((item) => yearInBracket(birthYear, item));
-  if (!bracket) return { ...EMPTY_PRICE, reason: "no-bracket" };
+  const open = pass.pricing.brackets.filter((bracket) => isOpenBracket(bracket));
+  const bounded = pass.pricing.brackets.filter((bracket) => !isOpenBracket(bracket));
+  const matched = bounded.filter((bracket) => yearInBracket(birthYear, bracket));
+  if (matched.length > 1) return { ...EMPTY_PRICE, reason: "no-bracket" };
 
-  const period = bracket.periods.find((item) => periodCovers(item, purchaseDate));
-  const nextPeriodStart = earliestStartAfter(bracket.periods, purchaseDate);
-  if (!period) {
+  const specific = matched[0];
+  if (specific) {
+    const period = periodOnDate(pass, specific, purchaseDate);
+    if (period) return priceFrom(specific, period);
+    const fallback = open
+      .map((bracket) => ({ bracket, period: periodOnDate(pass, bracket, purchaseDate) }))
+      .find((item) => item.period);
+    if (fallback?.period) return priceFrom(fallback.bracket, fallback.period);
     return {
       ...EMPTY_PRICE,
-      bracketId: bracket.id,
-      bracketLabel: bracket.label,
+      bracketId: specific.label,
+      bracketLabel: specific.label,
       reason: "no-period",
-      nextPeriodStart,
+      nextPeriodStart: nextStart(pass, specific, purchaseDate),
     };
   }
-  return {
-    amountEur: period.price_eur,
-    bracketId: bracket.id,
-    bracketLabel: bracket.label,
-    periodId: period.id,
-    periodLabel: period.label,
-    periodStart: period.start,
-    periodEnd: period.end,
-    reason: period.price_eur == null ? "price-unknown" : "ok",
-    nextPeriodStart: null,
-  };
+
+  if (bounded.length === 0 && open.length === 1) {
+    const bracket = open[0];
+    const period = periodOnDate(pass, bracket, purchaseDate);
+    if (!period) {
+      return {
+        ...EMPTY_PRICE,
+        bracketId: bracket.label,
+        bracketLabel: bracket.label,
+        reason: "no-period",
+        nextPeriodStart: nextStart(pass, bracket, purchaseDate),
+      };
+    }
+    return priceFrom(bracket, period);
+  }
+  if (bounded.length === 0 && open.length > 1) {
+    return { ...EMPTY_PRICE, reason: "age-not-birth-year" };
+  }
+  return { ...EMPTY_PRICE, reason: "no-bracket" };
 }
 
 export interface BracketPrice {
@@ -116,35 +142,81 @@ export interface BracketPrice {
 
 export function pricesOnDate(pass: Pass, purchaseDate: string): BracketPrice[] {
   return pass.pricing.brackets.map((bracket) => {
-    const period = bracket.periods.find((item) => periodCovers(item, purchaseDate));
+    const period = periodOnDate(pass, bracket, purchaseDate);
     if (!period) {
       return {
-        bracketId: bracket.id,
+        bracketId: bracket.label,
         bracketLabel: bracket.label,
         amountEur: null,
         periodId: null,
         periodLabel: null,
         periodStart: null,
         periodEnd: null,
-        reason: "no-period",
-        nextPeriodStart: earliestStartAfter(bracket.periods, purchaseDate),
+        reason: "no-period" as const,
+        nextPeriodStart: nextStart(pass, bracket, purchaseDate),
       };
     }
+    const resolved = priceFrom(bracket, period);
     return {
-      bracketId: bracket.id,
+      bracketId: bracket.label,
       bracketLabel: bracket.label,
-      amountEur: period.price_eur,
-      periodId: period.id,
-      periodLabel: period.label,
-      periodStart: period.start,
-      periodEnd: period.end,
-      reason: period.price_eur == null ? "price-unknown" : "ok",
+      amountEur: resolved.amountEur,
+      periodId: resolved.periodId,
+      periodLabel: resolved.periodLabel,
+      periodStart: resolved.periodStart,
+      periodEnd: resolved.periodEnd,
+      reason: resolved.reason,
       nextPeriodStart: null,
     };
   });
 }
 
-export function quotePlan(passes: Pass[], resorts: PricedResort[], birthYear: number | null, purchaseDate: string, plan: PlanDays[]): PriceQuote[] {
+export function deadlinesFor(pass: Pass): Deadline[] {
+  const events: Deadline[] = [];
+  const start = presaleStart(pass);
+  if (start) {
+    events.push({ id: `${pass.id}-presale`, date: start, kind: "starts", label: "Presale starts" });
+  }
+  const byDate = new Map<string, string[]>();
+  for (const bracket of pass.pricing.brackets) {
+    const periods = periodsFor(pass, bracket.label);
+    for (let index = 0; index < periods.length; index++) {
+      const period = periods[index];
+      if (!period.valid_until || period.price_eur == null) continue;
+      const next = periods[index + 1];
+      const change =
+        next && next.price_eur != null
+          ? `${bracket.label} €${period.price_eur} → €${next.price_eur}`
+          : `${bracket.label} €${period.price_eur} ends`;
+      const list = byDate.get(period.valid_until) ?? [];
+      list.push(change);
+      byDate.set(period.valid_until, list);
+    }
+    const opens = openBracketStart(pass, bracket);
+    if (opens) {
+      const price = periods[0]?.price_eur;
+      events.push({
+        id: `${pass.id}-open-${opens}`,
+        date: opens,
+        kind: "starts",
+        label: price == null ? bracket.label : `${bracket.label} €${price}`,
+      });
+    }
+  }
+  for (const [date, changes] of byDate) {
+    events.push({ id: `${pass.id}-${date}`, date, kind: "ends", label: changes.join("; ") });
+  }
+  events.sort((a, b) => a.date.localeCompare(b.date) || a.kind.localeCompare(b.kind));
+  return events;
+}
+
+export function quotePlan(
+  passes: Pass[],
+  resorts: PricedResort[],
+  birthYear: number | null,
+  purchaseDate: string,
+  plan: PlanDays[],
+): PriceQuote[] {
   const daysById = new Map<string, number>();
   for (const item of plan) {
     if (item.days > 0) daysById.set(item.id, (daysById.get(item.id) ?? 0) + item.days);
@@ -157,7 +229,7 @@ export function quotePlan(passes: Pass[], resorts: PricedResort[], birthYear: nu
     for (let j = i + 1; j < passes.length; j++) {
       const a = passes[i].id;
       const b = passes[j].id;
-      if (isUsefulCombo(a, b, resorts, active)) {
+      if (isUsefulCombo(a, b, active)) {
         combos.push(quoteFor(passes, [a, b], active, daysById, birthYear, purchaseDate));
       }
     }
@@ -193,6 +265,10 @@ export function distributeDays(idsInPriorityOrder: string[], days: number): Reco
   return result;
 }
 
+export function dayTicketIsEstimate(season: string | null, amount: number | null): boolean {
+  return amount != null && season !== "2025/26";
+}
+
 function quoteFor(
   passes: Pass[],
   passIds: string[],
@@ -220,6 +296,8 @@ function quoteFor(
   if (passPriceEur != null && coveredDayTicketEur != null && coveredDays > 0 && coveredDayTicketEur > 0) {
     breakEvenDays = passPriceEur / (coveredDayTicketEur / coveredDays);
   }
+  const usesEstimate = uncoveredDayTicketEur != null && uncoveredDayTicketEur > 0 && anyEstimate(uncovered, daysById);
+  const breakEvenEstimate = breakEvenDays != null && anyEstimate(covered, daysById);
 
   return {
     id: passIds.length > 1 ? `combo:${passIds.join("+")}` : `pass:${passIds[0]}`,
@@ -236,6 +314,8 @@ function quoteFor(
     nextPeriodStart: failed?.nextPeriodStart ?? null,
     coveredResortIds: covered.map((resort) => resort.id),
     uncoveredResortIds: uncovered.map((resort) => resort.id),
+    usesEstimate,
+    breakEvenEstimate,
   };
 }
 
@@ -257,21 +337,15 @@ function dayTicketQuote(active: PricedResort[], daysById: Map<string, number>): 
     nextPeriodStart: null,
     coveredResortIds: active.map((resort) => resort.id),
     uncoveredResortIds: [],
+    usesEstimate: anyEstimate(active, daysById),
+    breakEvenEstimate: false,
   };
 }
 
-function isUsefulCombo(a: string, b: string, resorts: PricedResort[], active: PricedResort[]): boolean {
-  if (active.length === 0) return false;
+function isUsefulCombo(a: string, b: string, active: PricedResort[]): boolean {
   const onlyA = active.some((resort) => resort.passes.includes(a) && !resort.passes.includes(b));
   const onlyB = active.some((resort) => resort.passes.includes(b) && !resort.passes.includes(a));
-  if (!onlyA || !onlyB) return false;
-  const setA = new Set(resorts.filter((resort) => resort.passes.includes(a)).map((resort) => resort.id));
-  const setB = new Set(resorts.filter((resort) => resort.passes.includes(b)).map((resort) => resort.id));
-  let addsA = false;
-  let addsB = false;
-  for (const id of setA) if (!setB.has(id)) addsA = true;
-  for (const id of setB) if (!setA.has(id)) addsB = true;
-  return addsA && addsB;
+  return onlyA && onlyB;
 }
 
 function sumDays(list: PricedResort[], daysById: Map<string, number>): number {
@@ -289,8 +363,72 @@ function ticketCost(list: PricedResort[], daysById: Map<string, number>): number
   return sum;
 }
 
-function earliestStartAfter(periods: PricePeriod[], date: string): string | null {
-  const starts = periods.map((period) => period.start).filter((start): start is string => Boolean(start && start > date));
-  starts.sort();
-  return starts[0] ?? null;
+function anyEstimate(list: PricedResort[], daysById: Map<string, number>): boolean {
+  return list.some((resort) => (daysById.get(resort.id) ?? 0) > 0 && resort.dayTicketEstimate);
+}
+
+function periodsFor(pass: Pass, label: string): PricePeriod[] {
+  return pass.pricing.periods
+    .filter((period) => period.bracket === label)
+    .sort((a, b) => {
+      if (a.valid_until == null) return 1;
+      if (b.valid_until == null) return -1;
+      return a.valid_until.localeCompare(b.valid_until);
+    });
+}
+
+function periodOnDate(pass: Pass, bracket: AgeBracket, date: string): PricePeriod | null {
+  const presale = presaleStart(pass);
+  if (presale && date < presale) return null;
+  const opens = openBracketStart(pass, bracket);
+  if (opens && date < opens) return null;
+  for (const period of periodsFor(pass, bracket.label)) {
+    if (period.valid_until == null || date <= period.valid_until) return period;
+  }
+  return null;
+}
+
+function openBracketStart(pass: Pass, bracket: AgeBracket): string | null {
+  if (!isOpenBracket(bracket)) return null;
+  const ownDated = periodsFor(pass, bracket.label).some((period) => period.valid_until != null);
+  if (ownDated) return null;
+  const latest = pass.pricing.periods
+    .map((period) => period.valid_until)
+    .filter((date): date is string => Boolean(date))
+    .sort()
+    .at(-1);
+  return latest ? addDays(latest, 1) : null;
+}
+
+function nextStart(pass: Pass, bracket: AgeBracket, date: string): string | null {
+  const presale = presaleStart(pass);
+  if (presale && date < presale) return presale;
+  const opens = openBracketStart(pass, bracket);
+  if (opens && date < opens) return opens;
+  const next = periodsFor(pass, bracket.label)
+    .map((period) => period.valid_until)
+    .filter((end): end is string => Boolean(end && end >= date))
+    .sort()[0];
+  return next ? addDays(next, 1) : null;
+}
+
+function priceFrom(bracket: AgeBracket, period: PricePeriod): ResolvedPrice {
+  return {
+    amountEur: period.price_eur,
+    bracketId: bracket.label,
+    bracketLabel: bracket.label,
+    periodId: `${bracket.label}:${period.valid_until ?? "open"}`,
+    periodLabel: period.valid_until ? `until ${period.valid_until}` : "after the last cut-off",
+    periodStart: null,
+    periodEnd: period.valid_until,
+    reason: period.price_eur == null ? "price-unknown" : "ok",
+    nextPeriodStart: null,
+  };
+}
+
+function addDays(iso: string, days: number): string {
+  const [year, month, day] = iso.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
 }

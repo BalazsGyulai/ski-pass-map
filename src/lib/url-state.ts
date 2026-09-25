@@ -28,6 +28,7 @@ export function defaultShareState(): ShareState {
     minSlope: null,
     maxKm: null,
     favouritesOnly: false,
+    showClosed: false,
     home: "sopron",
     geoLat: null,
     geoLon: null,
@@ -54,6 +55,7 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.minSlope = positiveOrNull(params.get("minSlope"));
   state.maxKm = positiveOrNull(params.get("maxKm"));
   state.favouritesOnly = params.get("fav") === "1";
+  state.showClosed = params.get("closed") === "1";
   state.home = params.get("home") || "sopron";
   const lat = finiteOrNull(params.get("lat"));
   const lon = finiteOrNull(params.get("lon"));
@@ -84,6 +86,7 @@ export function serializeShareState(state: ShareState): string {
   if (state.minSlope != null) params.set("minSlope", String(state.minSlope));
   if (state.maxKm != null) params.set("maxKm", String(state.maxKm));
   if (state.favouritesOnly) params.set("fav", "1");
+  if (state.showClosed) params.set("closed", "1");
   if (state.home !== defaults.home) params.set("home", state.home);
   if (state.home === "geo" && state.geoLat != null && state.geoLon != null) {
     params.set("lat", state.geoLat.toFixed(5));

@@ -46,7 +46,15 @@ export function ResortList() {
           const fav = favourites.includes(resort.id);
           const days = resortDays[resort.id] ?? 0;
           return (
-            <li key={resort.id} id={`resort-${resort.id}`} className={share.resort === resort.id ? "resort-row is-selected" : "resort-row"}>
+            <li
+              key={resort.id}
+              id={`resort-${resort.id}`}
+              className={
+                share.resort === resort.id
+                  ? `resort-row is-selected${resort.status === "closed?" ? " is-closed" : ""}`
+                  : `resort-row${resort.status === "closed?" ? " is-closed" : ""}`
+              }
+            >
               <button
                 type="button"
                 className={fav ? "star is-on" : "star"}
@@ -73,7 +81,12 @@ export function ResortList() {
                 <span className="meta">
                   {regionLabel(lang, resort.region)}
                   {distance != null ? ` · ${formatKm(distance)} ${t("km")} ${t("straightLineShort")}` : ""}
-                  {` · ${t("dayTicket")}: ${resort.day_ticket_eur == null ? t("unknown") : `€${resort.day_ticket_eur}`}`}
+                  {` · ${t("dayTicket")}: ${
+                    resort.day_ticket_eur == null
+                      ? t("unknown")
+                      : `€${resort.day_ticket_eur}${resort.day_ticket_season === "2025/26" ? "" : ` (${t("estimate")})`}`
+                  }`}
+                  {resort.status === "closed?" ? ` · ${t("statusClosed")}` : ""}
                   {` · ${t("elevation")}: ${resort.top_elevation_m == null ? t("unknown") : `${resort.top_elevation_m} m`}`}
                   {days > 0 ? ` · ${t("plannedBadge", { n: days })}` : ""}
                 </span>

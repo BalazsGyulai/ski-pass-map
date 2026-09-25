@@ -187,6 +187,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       minSlope: null,
       maxKm: null,
       favouritesOnly: false,
+      showClosed: false,
     });
   }
 

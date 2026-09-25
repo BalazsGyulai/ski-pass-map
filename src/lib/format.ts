@@ -14,10 +14,12 @@ export function daysUntil(today: string, date: string): number {
 }
 
 export function formatEur(lang: Lang, value: number): string {
+  const cents = Math.abs(value - Math.round(value)) > 0.001;
   return new Intl.NumberFormat(lang === "hu" ? "hu-HU" : "en-GB", {
     style: "currency",
     currency: "EUR",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: cents ? 2 : 0,
+    maximumFractionDigits: cents ? 2 : 0,
   }).format(value);
 }
 

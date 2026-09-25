@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { dataset, passById, passes, resortById, resorts } from "@/lib/data";
+import { passById, passes, resortById, resorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { formatBreakEven, formatDate, formatEur } from "@/lib/format";
 import { priceReasonText } from "@/lib/i18n";
@@ -49,6 +49,7 @@ export function Planner() {
         region: resort.region,
         passes: resort.passes,
         dayTicketEur: resort.day_ticket_eur,
+        dayTicketEstimate: resort.day_ticket_eur != null && resort.day_ticket_season !== "2025/26",
       })),
       birthYear,
       effectiveDate,
@@ -226,6 +227,7 @@ export function Planner() {
         {recommended ? (
           <p className="banner">
             {t("cheapest")}: {quoteTitle(recommended, t)} · {formatEur(lang, recommended.totalEur ?? 0)}
+            {recommended.usesEstimate ? ` · ${t("estimate")}` : ""}
           </p>
         ) : totalPlanned > 0 ? (
           <p className="banner warn">{t("noFullCoverage")}</p>
@@ -239,11 +241,11 @@ export function Planner() {
 
       <section className="card-block">
         <h2>{t("assumptions")}</h2>
-        {dataset.meta?.age_assumptions ? <p>{dataset.meta.age_assumptions}</p> : null}
+        <p className="hint">{t("estimateNote")}</p>
         <ul className="source-list">
           {passes.map((pass) => (
             <li key={pass.id}>
-              <strong>{pass.name}.</strong> {pass.pricing.assumptions}
+              <strong>{pass.name}.</strong> {pass.price_note}
             </li>
           ))}
         </ul>
@@ -275,7 +277,10 @@ function QuoteCard({ quote, recommended, totalPlanned }: { quote: PriceQuote; re
         </div>
         <div>
           <dt>{t("total")}</dt>
-          <dd>{money(lang, quote.totalEur, t("unknownTotal"))}</dd>
+          <dd>
+            {money(lang, quote.totalEur, t("unknownTotal"))}
+            {quote.usesEstimate && quote.totalEur != null ? ` · ${t("estimate")}` : ""}
+          </dd>
         </div>
         <div>
           <dt>{t("costPerDay")}</dt>
@@ -285,7 +290,7 @@ function QuoteCard({ quote, recommended, totalPlanned }: { quote: PriceQuote; re
           <dt>{t("breakEven")}</dt>
           <dd>
             {quote.breakEvenDays != null
-              ? t("breakEvenMix", { n: formatBreakEven(quote.breakEvenDays) })
+              ? `${t("breakEvenMix", { n: formatBreakEven(quote.breakEvenDays) })}${quote.breakEvenEstimate ? ` · ${t("estimate")}` : ""}`
               : t("breakEvenMixUnknown")}
           </dd>
         </div>

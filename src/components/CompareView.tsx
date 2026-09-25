@@ -3,13 +3,13 @@
 import { passes, resorts } from "@/lib/data";
 import { daysUntil, formatDate, formatEur } from "@/lib/format";
 import { bracketLabel, deadlineLabel, priceReasonText } from "@/lib/i18n";
-import { pricesOnDate, resolvePrice } from "@/lib/pricing";
+import { deadlinesFor, pricesOnDate, resolvePrice } from "@/lib/pricing";
 import { useApp } from "./AppState";
 
 export function CompareView() {
   const { t, lang, birthYear, effectiveDate, today } = useApp();
   const events = passes
-    .flatMap((pass) => pass.deadlines.map((deadline) => ({ ...deadline, pass })))
+    .flatMap((pass) => deadlinesFor(pass).map((deadline) => ({ ...deadline, pass })))
     .sort((a, b) => a.date.localeCompare(b.date) || a.pass.name.localeCompare(b.pass.name));
 
   return (
@@ -37,7 +37,7 @@ export function CompareView() {
               const tariffs = effectiveDate ? pricesOnDate(pass, effectiveDate) : [];
               const covered = resorts.filter((resort) => resort.passes.includes(pass.id));
               const next = today
-                ? pass.deadlines
+                ? deadlinesFor(pass)
                     .map((deadline) => ({ ...deadline, days: daysUntil(today, deadline.date) }))
                     .filter((deadline) => deadline.days >= 0)
                     .sort((a, b) => a.days - b.days)[0]

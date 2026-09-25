@@ -6,7 +6,7 @@ import { useApp } from "./AppState";
 
 export function AboutView() {
   const { t, lang } = useApp();
-  const updated = dataset.meta?.updated;
+  const updated = dataset.generated;
 
   return (
     <div className="page page-narrow">
@@ -14,20 +14,19 @@ export function AboutView() {
       <section className="card-block">
         <h2>{t("disclaimerTitle")}</h2>
         <p>{t("disclaimer")}</p>
-        <p>{dataset.meta?.price_disclaimer}</p>
+        <p>{t("checkOfficial")}</p>
       </section>
       <section className="card-block">
-        <h2>{t("seasonLabel", { season: dataset.meta?.season ?? "2026/27" })}</h2>
+        <h2>{t("seasonLabel", { season: "2026/27" })}</h2>
         <p>{updated ? t("lastUpdated", { date: formatDate(lang, updated) }) : t("updatedUnknown")}</p>
         <p>{t("resortsInData", { n: resorts.length })}</p>
         <p>{t("passesInData", { n: passes.length })}</p>
         <p>{t("seedBody")}</p>
-        <p>{dataset.meta?.coordinate_note}</p>
         <p>{t("gapsBody")}</p>
       </section>
       <section className="card-block">
         <h2>{t("ageTitle")}</h2>
-        <p>{dataset.meta?.age_assumptions}</p>
+        <p>{t("ageNotBirthYear")}</p>
         <ul className="source-list">
           {passes.map((pass) => (
             <li key={pass.id}>
@@ -43,7 +42,6 @@ export function AboutView() {
                   <em>{t("sourceNote")}. </em>
                   {pass.price_note}
                 </p>
-                <p>{pass.pricing.assumptions}</p>
               </div>
             </li>
           ))}

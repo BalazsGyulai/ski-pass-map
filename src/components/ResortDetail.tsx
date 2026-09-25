@@ -98,7 +98,20 @@ export function ResortDetail() {
         <dl className="stat-grid">
           <div>
             <dt>{t("dayTicket")}</dt>
-            <dd>{resort.day_ticket_eur == null ? t("unknown") : formatEur(lang, resort.day_ticket_eur)}</dd>
+            <dd>
+              {resort.day_ticket_eur == null ? (
+                t("unknown")
+              ) : (
+                <>
+                  {formatEur(lang, resort.day_ticket_eur)}
+                  <span className="hint">
+                    {" "}
+                    {resort.day_ticket_season ?? t("seasonUnknown")}
+                    {resort.day_ticket_season !== "2025/26" ? ` · ${t("estimate")}` : ""}
+                  </span>
+                </>
+              )}
+            </dd>
           </div>
           <div>
             <dt>{t("elevation")}</dt>
@@ -118,14 +131,37 @@ export function ResortDetail() {
           </div>
           <div>
             <dt>{t("snowpark")}</dt>
-            <dd>{resort.snowpark == null ? t("unknown") : resort.snowpark ? t("yes") : t("no")}</dd>
+            <dd>{resort.snowpark === true ? t("yes") : t("unknown")}</dd>
           </div>
           <div>
             <dt>{t("nightSkiing")}</dt>
-            <dd>{resort.night_skiing == null ? t("unknown") : resort.night_skiing ? t("yes") : t("no")}</dd>
+            <dd>{resort.night_skiing === true ? t("yes") : t("unknown")}</dd>
           </div>
         </dl>
-        {resort.day_ticket_season ? <p className="hint">{resort.day_ticket_season}</p> : null}
+        {resort.stats_source ? (
+          <p className="hint">
+            <strong>{t("statsSource")}: </strong>
+            {resort.stats_source}
+          </p>
+        ) : null}
+        {resort.season_dates_2026_27 ? (
+          <p>
+            <strong>{t("seasonDates")}: </strong>
+            {resort.season_dates_2026_27}
+          </p>
+        ) : null}
+        {resort.feature_evidence ? (
+          <p>
+            <strong>{t("featureEvidence")}: </strong>
+            {resort.feature_evidence}
+          </p>
+        ) : null}
+        {resort.notes ? (
+          <p>
+            <strong>{t("notes")}: </strong>
+            {resort.notes}
+          </p>
+        ) : null}
 
         <h3>{t("klima")}</h3>
         <p>{resort.klimaticket ? t("klimaYes") : t("klimaNo")}</p>
@@ -141,6 +177,8 @@ export function ResortDetail() {
           <External href={resort.website} label={t("website")} unknown={t("unknown")} />
           <External href={resort.snow_report_url} label={t("snowReport")} unknown={t("unknown")} />
           <External href={resort.webcam_url} label={t("webcams")} unknown={t("unknown")} />
+          <External href={resort.skiresort_url} label={t("skiresort")} unknown={t("unknown")} optional />
+          <External href={resort.bergfex_url} label={t("bergfex")} unknown={t("unknown")} optional />
         </ul>
       </div>
       <footer className="sheet-actions">
@@ -164,7 +202,8 @@ export function ResortDetail() {
   );
 }
 
-function External({ href, label, unknown }: { href: string | null; label: string; unknown: string }) {
+function External({ href, label, unknown, optional }: { href: string | null; label: string; unknown: string; optional?: boolean }) {
+  if (!href && optional) return null;
   return (
     <li>
       {href ? (

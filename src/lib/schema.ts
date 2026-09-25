@@ -7,58 +7,31 @@ const httpUrl = z
   .url()
   .refine((value) => value.startsWith("https://") || value.startsWith("http://"), "Only http(s) URLs");
 
-const pricePeriodSchema = z
+const bracketSchema = z
   .object({
-    id: z.string().min(1),
     label: z.string().min(1),
-    start: isoDate.nullable(),
-    end: isoDate.nullable(),
-    price_eur: z.number().nonnegative().nullable(),
-  })
-  .superRefine((period, ctx) => {
-    if (period.start && period.end && period.start > period.end) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Period start is after end", path: ["start"] });
-    }
-  });
-
-const ageBracketSchema = z
-  .object({
-    id: z.string().min(1),
-    label: z.string().min(1),
-    min_birth_year: z.number().int().nullable(),
-    max_birth_year: z.number().int().nullable(),
-    periods: z.array(pricePeriodSchema).min(1),
+    birth_year_from: z.number().int().nullable(),
+    birth_year_to: z.number().int().nullable(),
+    note: z.string().min(1).optional(),
   })
   .superRefine((bracket, ctx) => {
     if (
-      bracket.min_birth_year != null &&
-      bracket.max_birth_year != null &&
-      bracket.min_birth_year > bracket.max_birth_year
+      bracket.birth_year_from != null &&
+      bracket.birth_year_to != null &&
+      bracket.birth_year_from > bracket.birth_year_to
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "min_birth_year is greater than max_birth_year",
-        path: ["min_birth_year"],
+        message: "birth_year_from is greater than birth_year_to",
+        path: ["birth_year_from"],
       });
-    }
-    for (let i = 0; i < bracket.periods.length; i++) {
-      for (let j = i + 1; j < bracket.periods.length; j++) {
-        if (periodsOverlap(bracket.periods[i], bracket.periods[j])) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: `Price periods overlap: ${bracket.periods[i].id} and ${bracket.periods[j].id}`,
-            path: ["periods"],
-          });
-        }
-      }
     }
   });
 
-const deadlineSchema = z.object({
-  id: z.string().min(1),
-  date: isoDate,
-  kind: z.enum(["starts", "ends"]),
-  label: z.string().min(1),
+const periodSchema = z.object({
+  bracket: z.string().min(1),
+  price_eur: z.number().nonnegative().nullable(),
+  valid_until: isoDate.nullable(),
 });
 
 export const passSchema = z.object({
@@ -68,62 +41,44 @@ export const passSchema = z.object({
   price_note: z.string().min(1),
   url: httpUrl,
   pricing: z.object({
-    assumptions: z.string().min(1),
-    brackets: z.array(ageBracketSchema).min(1),
+    brackets: z.array(bracketSchema).min(1),
+    periods: z.array(periodSchema).min(1),
   }),
-  deadlines: z.array(deadlineSchema).default([]),
 });
 
-const optionalNonNegative = z
-  .number()
-  .nonnegative()
-  .nullable()
-  .optional()
-  .transform((value) => value ?? null);
-const optionalInt = z
-  .number()
-  .int()
-  .nonnegative()
-  .nullable()
-  .optional()
-  .transform((value) => value ?? null);
-const optionalText = z
-  .string()
-  .nullable()
-  .optional()
-  .transform((value) => value ?? null);
-const optionalUrl = httpUrl
-  .nullable()
-  .optional()
-  .transform((value) => value ?? null);
-const optionalBool = z
-  .boolean()
-  .nullable()
-  .optional()
-  .transform((value) => value ?? null);
+const optionalUrl = httpUrl.nullable();
+const trueOrUnknown = z.union([z.literal(true), z.null()]);
 
 export const resortSchema = z
   .object({
     id: z.string().min(1),
     name: z.string().min(1),
-    lat: z.number().gte(-90).lte(90),
-    lon: z.number().gte(-180).lte(180),
+    lat: z.number().gte(45.7).lte(49.1),
+    lon: z.number().gte(9.5).lte(22.9),
     region: z.string().min(1),
     passes: z.array(z.string().min(1)),
     klimaticket: z.boolean(),
     day_ticket_eur: z.number().nonnegative().nullable(),
-    day_ticket_season: z.string().nullable(),
-    website: httpUrl.nullable(),
+    day_ticket_season: z.string().min(1).nullable(),
+    website: optionalUrl,
     status: z.enum(["open", "closed?"]),
-    top_elevation_m: optionalNonNegative,
-    base_elevation_m: optionalNonNegative,
-    slope_km: optionalNonNegative,
-    lifts: optionalInt,
-    snowpark: optionalBool,
-    night_skiing: optionalBool,
+    coord_source: z.string().min(1),
+    top_elevation_m: z.number().nonnegative().nullable(),
+    base_elevation_m: z.number().nonnegative().nullable(),
+    slope_km: z.number().nonnegative().nullable(),
+    lifts: z.number().int().nonnegative().nullable(),
+    stats_source: z.string().min(1).nullable(),
+    snowpark: trueOrUnknown,
+    night_skiing: trueOrUnknown,
     snow_report_url: optionalUrl,
     webcam_url: optionalUrl,
-    public_transport_note: optionalText,
+    public_transport_note: z.string().nullable(),
+    season_dates_2026_27: z.string().nullable(),
+    listed_on: z.array(z.string().min(1)),
+    skiresort_url: optionalUrl,
+    bergfex_url: optionalUrl,
+    notes: z.string().nullable(),
+    feature_evidence: z.string().nullable(),
   })
   .superRefine((resort, ctx) => {
     if (
@@ -137,6 +92,13 @@ export const resortSchema = z
         path: ["top_elevation_m"],
       });
     }
+    if ((resort.day_ticket_eur == null) !== (resort.day_ticket_season == null)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "day_ticket_eur and day_ticket_season must both be set or both be null",
+        path: ["day_ticket_season"],
+      });
+    }
   });
 
 export const citySchema = z.object({
@@ -144,20 +106,12 @@ export const citySchema = z.object({
   name: z.string().min(1),
   lat: z.number().gte(-90).lte(90),
   lon: z.number().gte(-180).lte(180),
-  note: optionalText,
+  country: z.string().min(1),
 });
 
 export const datasetSchema = z
   .object({
-    meta: z
-      .object({
-        season: z.string().optional(),
-        updated: isoDate.optional(),
-        age_assumptions: z.string().optional(),
-        coordinate_note: z.string().optional(),
-        price_disclaimer: z.string().optional(),
-      })
-      .optional(),
+    generated: isoDate,
     passes: z.array(passSchema).min(1),
     cities: z.array(citySchema),
     resorts: z.array(resortSchema).min(1),
@@ -168,36 +122,53 @@ export const datasetSchema = z
     assertUnique(data.cities.map((city) => city.id), "cities", ctx);
 
     const passIds = new Set(data.passes.map((pass) => pass.id));
-    const deadlineIds = new Set<string>();
-
     data.passes.forEach((pass, passIndex) => {
-      pass.deadlines.forEach((deadline, deadlineIndex) => {
-        if (deadlineIds.has(deadline.id)) {
+      const labels = pass.pricing.brackets.map((bracket) => bracket.label);
+      assertUnique(labels, `passes.${passIndex}.brackets`, ctx);
+      const labelSet = new Set(labels);
+      pass.pricing.periods.forEach((period, periodIndex) => {
+        if (!labelSet.has(period.bracket)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Duplicate deadline id ${deadline.id}`,
-            path: ["passes", passIndex, "deadlines", deadlineIndex, "id"],
+            message: `Period refers to unknown bracket ${period.bracket}`,
+            path: ["passes", passIndex, "pricing", "periods", periodIndex, "bracket"],
           });
         }
-        deadlineIds.add(deadline.id);
-        const bound = pass.pricing.brackets.some((bracket) =>
-          bracket.periods.some((period) => period.start === deadline.date || period.end === deadline.date),
-        );
-        if (!bound) {
+      });
+      pass.pricing.brackets.forEach((bracket, bracketIndex) => {
+        const periods = pass.pricing.periods.filter((period) => period.bracket === bracket.label);
+        if (periods.length === 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Deadline ${deadline.id} is not a price-period boundary`,
-            path: ["passes", passIndex, "deadlines", deadlineIndex, "date"],
+            message: `Bracket ${bracket.label} has no price period`,
+            path: ["passes", passIndex, "pricing", "brackets", bracketIndex],
+          });
+        }
+        const open = periods.filter((period) => period.valid_until == null);
+        if (open.length > 1) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Bracket ${bracket.label} has more than one open-ended period`,
+            path: ["passes", passIndex, "pricing", "brackets", bracketIndex],
+          });
+        }
+        const dates = periods.map((period) => period.valid_until).filter((date): date is string => Boolean(date));
+        if (new Set(dates).size !== dates.length) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Bracket ${bracket.label} repeats a valid_until date`,
+            path: ["passes", passIndex, "pricing", "brackets", bracketIndex],
           });
         }
       });
 
+      const bounded = pass.pricing.brackets.filter((bracket) => !isOpenBracket(bracket));
       for (let year = 1940; year <= 2030; year++) {
-        const matched = pass.pricing.brackets.filter((bracket) => yearInBracket(year, bracket));
+        const matched = bounded.filter((bracket) => yearInBracket(year, bracket));
         if (matched.length > 1) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `${pass.id} matches more than one age bracket for birth year ${year}`,
+            message: `${pass.id} matches more than one birth-year bracket for ${year}`,
             path: ["passes", passIndex, "pricing", "brackets"],
           });
           break;
@@ -218,23 +189,16 @@ export const datasetSchema = z
     });
   });
 
-function periodsOverlap(
-  a: { start: string | null; end: string | null },
-  b: { start: string | null; end: string | null },
-): boolean {
-  const aStart = a.start ?? "0000-01-01";
-  const aEnd = a.end ?? "9999-12-31";
-  const bStart = b.start ?? "0000-01-01";
-  const bEnd = b.end ?? "9999-12-31";
-  return aStart <= bEnd && bStart <= aEnd;
+function isOpenBracket(bracket: { birth_year_from: number | null; birth_year_to: number | null }): boolean {
+  return bracket.birth_year_from == null && bracket.birth_year_to == null;
 }
 
 function yearInBracket(
   year: number,
-  bracket: { min_birth_year: number | null; max_birth_year: number | null },
+  bracket: { birth_year_from: number | null; birth_year_to: number | null },
 ): boolean {
-  if (bracket.min_birth_year != null && year < bracket.min_birth_year) return false;
-  if (bracket.max_birth_year != null && year > bracket.max_birth_year) return false;
+  if (bracket.birth_year_from != null && year < bracket.birth_year_from) return false;
+  if (bracket.birth_year_to != null && year > bracket.birth_year_to) return false;
   return true;
 }
 
@@ -257,5 +221,4 @@ export type Pass = Dataset["passes"][number];
 export type Resort = Dataset["resorts"][number];
 export type City = Dataset["cities"][number];
 export type AgeBracket = Pass["pricing"]["brackets"][number];
-export type PricePeriod = AgeBracket["periods"][number];
-export type Deadline = Pass["deadlines"][number];
+export type PricePeriod = Pass["pricing"]["periods"][number];
