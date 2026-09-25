@@ -44,12 +44,12 @@ export function defaultShareState(): ShareState {
 
 export function parseShareState(params: URLSearchParams): ShareState {
   const state = defaultShareState();
-  state.q = params.get("q") ?? "";
-  state.passes = splitList(params.get("passes"), ",");
+  state.q = cleanText(params.get("q") ?? "", 200);
+  state.passes = idList(params.get("passes"), ",", 24);
   const match = params.get("match");
   state.passMatch = match === "all" ? "all" : "any";
   state.noPass = params.get("nopass") === "1";
-  state.regions = splitList(params.get("regions"), "|");
+  state.regions = labelList(params.get("regions"), "|", 24);
   state.klima = params.get("klima") === "1";
   state.park = params.get("park") === "1";
   state.night = params.get("night") === "1";
@@ -58,12 +58,13 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.maxKm = positiveOrNull(params.get("maxKm"));
   state.favouritesOnly = params.get("fav") === "1";
   state.showClosed = params.get("closed") === "1";
-  state.home = params.get("home") || "sopron";
+  const home = params.get("home") || "sopron";
+  state.home = safeId(home, 64) ?? "sopron";
   const lat = finiteOrNull(params.get("lat"));
   const lon = finiteOrNull(params.get("lon"));
   state.geoLat = lat != null && lat >= -90 && lat <= 90 ? lat : null;
   state.geoLon = lon != null && lon >= -180 && lon <= 180 ? lon : null;
-  state.resort = params.get("resort") || null;
+  state.resort = safeId(params.get("resort"), 80);
   const view = params.get("view");
   state.view = view === "list" || view === "filters" ? view : "map";
   state.lang = params.get("lang") === "hu" ? "hu" : "en";
@@ -104,9 +105,44 @@ export function serializeShareState(state: ShareState): string {
   return params.toString();
 }
 
-function splitList(value: string | null, separator: string): string[] {
+function labelList(value: string | null, separator: string, maxItems: number): string[] {
   if (!value) return [];
-  return value.split(separator).map((part) => part.trim()).filter(Boolean);
+  const labels: string[] = [];
+  for (const part of value.split(separator)) {
+    const label = part.replace(/[\u0000-\u001F\u007F]/g, "").trim().slice(0, 80);
+    if (!label || !/^[A-Za-z][A-Za-z -]*$/.test(label) || labels.includes(label)) continue;
+    labels.push(label);
+    if (labels.length >= maxItems) break;
+  }
+  return labels;
+}
+
+function idList(value: string | null, separator: string, maxItems: number): string[] {
+  if (!value) return [];
+  const ids: string[] = [];
+  for (const part of value.split(separator)) {
+    const id = safeId(part.trim(), 64);
+    if (!id || ids.includes(id)) continue;
+    ids.push(id);
+    if (ids.length >= maxItems) break;
+  }
+  return ids;
+}
+
+function safeId(value: string | null, max: number): string | null {
+  if (!value) return null;
+  const id = value.trim();
+  if (id.length < 1 || id.length > max) return null;
+  return /^[a-z0-9-]+$/i.test(id) ? id : null;
+}
+
+function cleanText(value: string, max: number): string {
+  return value.replace(/[\u0000-\u001F\u007F]/g, "").slice(0, max);
+}
+
+export function bareResortUrl(path: string, state: ShareState): string {
+  const qs = serializeShareState({ ...state, resort: null, view: "map" });
+  return qs ? `${path}?${qs}` : path;
 }
 
 function finiteOrNull(value: string | null): number | null {

@@ -1,3 +1,7 @@
+function cssColor(value: string): string {
+  return /^#[0-9a-fA-F]{3,8}$/.test(value) ? value : "#8b938e";
+}
+
 export function pieSvg(colors: string[], options: { selected: boolean; klima: boolean; closed: boolean }): string {
   const cx = 14;
   const cy = 14;
@@ -9,7 +13,7 @@ export function pieSvg(colors: string[], options: { selected: boolean; klima: bo
   if (colors.length === 0) {
     body = `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="#8b938e" />`;
   } else if (colors.length === 1) {
-    body = `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${colors[0]}" />`;
+    body = `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${cssColor(colors[0])}" />`;
   } else {
     body = colors
       .map((color, index) => {
@@ -20,7 +24,7 @@ export function pieSvg(colors: string[], options: { selected: boolean; klima: bo
         const x1 = cx + radius * Math.cos(end);
         const y1 = cy + radius * Math.sin(end);
         const large = end - start > Math.PI ? 1 : 0;
-        return `<path d="M ${cx} ${cy} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${radius} ${radius} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z" fill="${color}" />`;
+        return `<path d="M ${cx} ${cy} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${radius} ${radius} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z" fill="${cssColor(color)}" />`;
       })
       .join("");
   }

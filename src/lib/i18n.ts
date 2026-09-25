@@ -270,7 +270,7 @@ const en = {
   opensnowmapLicence: "The optional “Show all pistes” layer uses OpenSnowMap pistes-only tiles (CC BY-SA). Tiles load only for the area on screen. https://www.opensnowmap.org/",
   allFilters: "All filters",
   hideFilters: "Hide filters",
-  sheetHandle: "Drag up or down to resize. Drag down from the short sheet to close.",
+  sheetHandle: "Resize the sheet. Arrow up expands, arrow down collapses, and arrow down from the short sheet closes.",
   menu: "Menu",
   layers: "Layers",
 } as const;
@@ -545,7 +545,7 @@ const hu: Record<MessageKey, string> = {
   opensnowmapLicence: "A „Minden pálya” réteg az OpenSnowMap csak-pálya csempéit használja (CC BY-SA). Csak a látható terület töltődik be. https://www.opensnowmap.org/",
   allFilters: "Minden szűrő",
   hideFilters: "Szűrők elrejtése",
-  sheetHandle: "Húzd fel vagy le a méretezéshez. A rövid lapról lefelé húzva bezárul.",
+  sheetHandle: "Méret nyílbillentyűvel: fel nagyobb, le kisebb. A rövid lapról a lefelé nyíl bezárja.",
   menu: "Menü",
   layers: "Rétegek",
 };

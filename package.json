@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "validate": "tsx scripts/validate-data.ts",
-    "build": "npm run validate && next build",
+    "build": "npm run validate && next build && node scripts/stamp-sw.mjs",
     "lint": "eslint .",
     "test": "vitest run",
     "fetch-pistes": "tsx scripts/fetch-pistes.ts"
@@ -27,11 +27,15 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.26",
+    "playwright-core": "^1.63.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^5.0.1"
   },
   "engines": {
     "node": ">=22"
+  },
+  "overrides": {
+    "postcss": "8.5.28"
   }
 }

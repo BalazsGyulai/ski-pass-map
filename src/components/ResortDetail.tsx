@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { nextSheetSnap, type SheetSnap } from "@/lib/sheet";
+import { nextSheetSnap, snapFromKey, type SheetSnap } from "@/lib/sheet";
 import Link from "next/link";
 import { passById, resortById } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
@@ -95,6 +95,15 @@ export function ResortDetail() {
       <div
         className="sheet-grab"
         onPointerDown={onGrabPointerDown}
+        onKeyDown={(event) => {
+          if (!window.matchMedia("(max-width: 899px)").matches) return;
+          const next = snapFromKey(snap, event.key);
+          if (next == null || next === snap) return;
+          event.preventDefault();
+          if (next === "close") selectResort(null);
+          else setSnap(next);
+        }}
+        tabIndex={0}
         role="separator"
         aria-orientation="horizontal"
         aria-label={t("sheetHandle")}
@@ -144,7 +153,7 @@ export function ResortDetail() {
                   <p className="hint">
                     {t("breakEvenHere")}: {breakEven != null ? t("breakEvenDays", { n: formatBreakEven(breakEven) }) : t("breakEvenUnknown")}
                   </p>
-                  <a href={pass.url} target="_blank" rel="noreferrer">
+                  <a href={pass.url} target="_blank" rel="noopener noreferrer">
                     {t("officialSite")}
                   </a>
                 </div>

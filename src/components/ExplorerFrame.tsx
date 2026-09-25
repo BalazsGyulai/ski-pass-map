@@ -18,6 +18,7 @@ export function ExplorerFrame() {
       const typing = Boolean(target?.closest("input, textarea, select"));
       if (event.key === "Escape") {
         if (filtersOpen) setFiltersOpen(false);
+        else if (share.view === "filters") updateShare({ view: "map" });
         else selectResort(null);
       }
       if (event.key === "/" && !typing) {
@@ -31,7 +32,7 @@ export function ExplorerFrame() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selectResort, updateShare, filtersOpen]);
+  }, [selectResort, updateShare, filtersOpen, share.view]);
 
   function openFilters() {
     if (window.matchMedia("(max-width: 899px)").matches) updateShare({ view: "filters" });

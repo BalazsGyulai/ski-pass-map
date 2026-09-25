@@ -11,6 +11,8 @@ import { filterResorts } from "@/lib/filter";
 import { cityNoteLabel } from "@/lib/i18n";
 import { pieSvg } from "@/lib/marker";
 import { OSM_TILE_ATTRIBUTION, OSM_TILE_URL } from "@/lib/basemap";
+import { escapeHtml } from "@/lib/html";
+import { mapFitPadding } from "@/lib/map-padding";
 import { pisteStyle, type PisteProperties } from "@/lib/pistes";
 import { useApp } from "./AppState";
 
@@ -31,13 +33,11 @@ function BaseTiles() {
 }
 
 function mapPadding(map: L.Map): { paddingTopLeft: [number, number]; paddingBottomRight: [number, number] } {
-  const narrow = window.matchMedia("(max-width: 899px)").matches;
-  const snap = document.documentElement.dataset.sheet;
-  const height = map.getSize().y;
-  const bottom = !narrow || !snap ? 28 : snap === "peek" ? 160 : snap === "full" ? Math.max(80, height - 96) : Math.round(height * 0.5);
-  const left = narrow ? 28 : 420;
-  const right = !narrow && document.querySelector(".detail-sheet") ? 420 : 28;
-  return { paddingTopLeft: [left, 72], paddingBottomRight: [right, bottom] };
+  return mapFitPadding({
+    narrow: window.matchMedia("(max-width: 899px)").matches,
+    sheet: document.documentElement.dataset.sheet ?? null,
+    height: map.getSize().y,
+  });
 }
 
 function darkPisteColor(color: string, difficulty: string | null, theme: "system" | "light" | "dark"): string {
@@ -92,7 +92,7 @@ function MapLayers() {
           });
           const marker = L.marker([resort.lat, resort.lon], { icon, keyboard: true, title: resort.name });
           if (zoom >= 11) {
-            marker.bindTooltip(resort.name, {
+            marker.bindTooltip(escapeHtml(resort.name), {
               permanent: true,
               direction: "right",
               offset: [12, 0],
@@ -146,7 +146,7 @@ function MapLayers() {
         iconAnchor: [11, 11],
       });
       const marker = L.marker([city.lat, city.lon], { icon, keyboard: true, title: label, zIndexOffset: 400 });
-      marker.bindTooltip(label, { permanent: true, direction: "right", offset: [10, 0], className: "city-label", opacity: 1 });
+      marker.bindTooltip(escapeHtml(label), { permanent: true, direction: "right", offset: [10, 0], className: "city-label", opacity: 1 });
       layer.addLayer(marker);
     });
     return () => {
@@ -188,7 +188,7 @@ function MapLayers() {
                       : t("pisteOther");
         const lift = props.aerialway?.replaceAll("_", " ");
         const text = [props.name, props.kind === "lift" ? lift ?? difficulty : difficulty].filter(Boolean).join(" · ");
-        marker.bindTooltip(text, { sticky: true, opacity: 1 });
+        marker.bindTooltip(escapeHtml(text), { sticky: true, opacity: 1 });
       },
     }).addTo(map);
     setPisteNote("loading");
@@ -263,7 +263,7 @@ function MapLayers() {
       {share.showPistes ? (
         <TileLayer
           url="https://tiles.opensnowmap.org/pistes/{z}/{x}/{y}.png"
-          attribution='© <a href="https://www.opensnowmap.org/">OpenSnowMap.org</a> (CC BY-SA)'
+          attribution='© <a href="https://www.opensnowmap.org/" rel="noopener noreferrer">OpenSnowMap.org</a> (CC BY-SA)'
           opacity={0.9}
         />
       ) : null}

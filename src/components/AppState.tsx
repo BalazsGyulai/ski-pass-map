@@ -7,7 +7,8 @@ import { countActiveFilters } from "@/lib/filter";
 import { translate, type MessageKey } from "@/lib/i18n";
 import { readStorage, writeStorage } from "@/lib/storage";
 import { todayISO } from "@/lib/format";
-import { defaultShareState, parseShareState, serializeShareState, type Lang, type ShareState } from "@/lib/url-state";
+import { shareHistoryStep } from "@/lib/history-step";
+import { bareResortUrl, defaultShareState, parseShareState, serializeShareState, type Lang, type ShareState } from "@/lib/url-state";
 
 type ThemeChoice = "system" | "light" | "dark";
 
@@ -122,13 +123,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const onMap = pathname === "/";
   const pushedResort = useRef(false);
   const prevResort = useRef<string | null | undefined>(undefined);
+  const rememberedBare = useRef<string | null>(null);
+  const rewinding = useRef(false);
+  const pendingBare = useRef<string | null>(null);
+  const pendingResortUrl = useRef<string | null>(null);
 
   useEffect(() => {
     function onPop() {
       if (!onMap) return;
+      if (rewinding.current) {
+        rewinding.current = false;
+        const bare = pendingBare.current ?? `${window.location.pathname}${window.location.search}`;
+        const resortUrl = pendingResortUrl.current;
+        pendingBare.current = null;
+        pendingResortUrl.current = null;
+        window.history.replaceState(null, "", bare);
+        rememberedBare.current = bare;
+        if (resortUrl) {
+          window.history.pushState({ skiResort: true }, "", resortUrl);
+          pushedResort.current = true;
+          return;
+        }
+        pushedResort.current = false;
+        prevResort.current = null;
+        setShare((current) => ({ ...current, resort: null }));
+        return;
+      }
       const parsed = parseShareState(new URLSearchParams(window.location.search));
       prevResort.current = parsed.resort;
       pushedResort.current = Boolean(window.history.state && (window.history.state as { skiResort?: boolean }).skiResort);
+      if (!parsed.resort) rememberedBare.current = `${window.location.pathname}${window.location.search}`;
       setShare(parsed);
     }
     window.addEventListener("popstate", onPop);
@@ -163,29 +187,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const current = `${path}${window.location.search}`;
     const previous = prevResort.current;
     prevResort.current = onMap ? share.resort : previous;
+    const bare = bareResortUrl(path, share);
+    const step = shareHistoryStep({
+      onMap,
+      next,
+      current,
+      previousResort: previous,
+      resort: share.resort,
+      pushed: pushedResort.current,
+      historyFlag: Boolean((window.history.state as { skiResort?: boolean } | null)?.skiResort),
+      bare,
+      rememberedBare: rememberedBare.current,
+    });
 
-    if (onMap && previous === undefined && share.resort && !(window.history.state as { skiResort?: boolean } | null)?.skiResort) {
-      const params = new URLSearchParams(serializeShareState({ ...share, view: "map" }));
-      params.delete("resort");
-      const bareQs = params.toString();
-      const bare = bareQs ? `${path}?${bareQs}` : path;
-      window.history.replaceState(null, "", bare);
-      window.history.pushState({ skiResort: true }, "", next);
+    if (step.type === "noop") {
+      if (!share.resort) rememberedBare.current = next;
+      return;
+    }
+    if (step.type === "seed" || step.type === "push") {
+      rememberedBare.current = step.bare;
+      if (step.bare !== current) window.history.replaceState(null, "", step.bare);
+      window.history.pushState({ skiResort: true }, "", step.resortUrl);
       pushedResort.current = true;
       return;
     }
-
-    if (next === current) return;
-    if (onMap && share.resort && !pushedResort.current) {
-      const bareParams = new URLSearchParams(serializeShareState({ ...share, resort: null, view: "map" }));
-      const bareQs = bareParams.toString();
-      const bare = bareQs ? `${path}?${bareQs}` : path;
-      if (bare !== current) window.history.replaceState(null, "", bare);
-      window.history.pushState({ skiResort: true }, "", next);
-      pushedResort.current = true;
+    if (step.type === "sync-under") {
+      rememberedBare.current = step.bare;
+      pendingBare.current = step.bare;
+      pendingResortUrl.current = step.resortUrl;
+      if (!rewinding.current) {
+        rewinding.current = true;
+        window.history.back();
+      }
       return;
     }
-    window.history.replaceState(null, "", next);
+    window.history.replaceState(null, "", step.url);
+    if (!share.resort) rememberedBare.current = step.url;
   }, [ready, onMap, share]);
 
   useEffect(() => {
@@ -232,6 +269,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const selectResort = useCallback((id: string | null) => {
     if (id == null && pushedResort.current) {
       pushedResort.current = false;
+      if (rewinding.current) {
+        pendingResortUrl.current = null;
+        return;
+      }
       window.history.back();
       return;
     }

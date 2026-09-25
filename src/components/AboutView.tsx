@@ -34,7 +34,7 @@ export function AboutView() {
               <div>
                 <strong>{pass.name}</strong>
                 <p>
-                  <a href={pass.url} target="_blank" rel="noreferrer">
+                  <a href={pass.url} target="_blank" rel="noopener noreferrer">
                     {t("officialSite")}
                   </a>
                 </p>
