@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Schilift Zlaim","aerialway":"t-bar","osm":"way/199305924"},"geometry":{"type":"LineString","coordinates":[[13.83578,47.61749],[13.84013,47.61467]]}}]}

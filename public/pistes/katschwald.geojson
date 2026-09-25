@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Kirchenlift","aerialway":"t-bar","osm":"way/793474137"},"geometry":{"type":"LineString","coordinates":[[14.63919,47.09981],[14.63467,47.09742]]}}]}
