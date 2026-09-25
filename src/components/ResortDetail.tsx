@@ -152,7 +152,12 @@ export function ResortDetail() {
                     {price?.periodEnd ? ` · ${t("periodUntil", { date: formatDate(lang, price.periodEnd) })}` : ""}
                   </p>
                   <p className="hint">
-                    {t("breakEvenHere")}: {breakEven != null ? t("breakEvenDays", { n: formatBreakEven(breakEven) }) : t("breakEvenUnknown")}
+                    {t("breakEvenHere")}:{" "}
+                    {breakEven != null
+                      ? t("breakEvenDays", { n: formatBreakEven(breakEven) })
+                      : dayTicket == null
+                        ? t("breakEvenUnknown")
+                        : t("unknown")}
                   </p>
                   <a href={pass.url} target="_blank" rel="noopener noreferrer">
                     {t("officialSite")}
