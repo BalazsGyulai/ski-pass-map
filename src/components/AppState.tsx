@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { cities } from "@/lib/data";
 import { countActiveFilters } from "@/lib/filter";
 import { translate, type MessageKey } from "@/lib/i18n";
@@ -120,6 +120,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, share.home, share.geoLat, share.geoLon, share.lang]);
 
   const onMap = pathname === "/";
+  const pushedResort = useRef(false);
+  const prevResort = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    function onPop() {
+      if (!onMap) return;
+      const parsed = parseShareState(new URLSearchParams(window.location.search));
+      prevResort.current = parsed.resort;
+      pushedResort.current = Boolean(window.history.state && (window.history.state as { skiResort?: boolean }).skiResort);
+      setShare(parsed);
+    }
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [onMap]);
 
   useEffect(() => {
     if (!ready) return;
@@ -147,7 +161,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       next = qs ? `${path}?${qs}` : path;
     }
     const current = `${path}${window.location.search}`;
-    if (next !== current) window.history.replaceState(null, "", next);
+    const previous = prevResort.current;
+    prevResort.current = onMap ? share.resort : previous;
+
+    if (onMap && previous === undefined && share.resort && !(window.history.state as { skiResort?: boolean } | null)?.skiResort) {
+      const params = new URLSearchParams(serializeShareState(share));
+      params.delete("resort");
+      const bareQs = params.toString();
+      const bare = bareQs ? `${path}?${bareQs}` : path;
+      window.history.replaceState(null, "", bare);
+      window.history.pushState({ skiResort: true }, "", next);
+      pushedResort.current = true;
+      return;
+    }
+
+    if (next === current) return;
+    if (onMap && share.resort && !pushedResort.current) {
+      window.history.pushState({ skiResort: true }, "", next);
+      pushedResort.current = true;
+      return;
+    }
+    window.history.replaceState(null, "", next);
   }, [ready, onMap, share]);
 
   useEffect(() => {
@@ -192,6 +226,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   const selectResort = useCallback((id: string | null) => {
+    if (id == null && pushedResort.current) {
+      pushedResort.current = false;
+      window.history.back();
+      return;
+    }
     const narrow = window.matchMedia("(max-width: 899px)").matches;
     setShare((current) => ({ ...current, resort: id, ...(id && narrow ? { view: "map" as const } : {}) }));
   }, []);

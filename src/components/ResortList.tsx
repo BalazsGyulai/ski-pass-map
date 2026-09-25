@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import { passById, passes, resorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { filterResorts, sortResorts } from "@/lib/filter";
-import { formatKm } from "@/lib/format";
+import { formatEur, formatKm } from "@/lib/format";
+import { resolvePrice } from "@/lib/pricing";
 import { regionLabel } from "@/lib/i18n";
 import { useApp } from "./AppState";
 
@@ -19,6 +20,8 @@ export function ResortList() {
     t,
     lang,
     resortDays,
+    birthYear,
+    effectiveDate,
   } = useApp();
   const passNames = new Map(passes.map((pass) => [pass.id, pass.name]));
   const filtered = filterResorts(resorts, share, {
@@ -75,21 +78,24 @@ export function ResortList() {
                 onBlur={() => setHighlightId(null)}
               >
                 <span className="name-line">
-                  <PassDots ids={resort.passes} />
-                  <span>{resort.name}</span>
+                  <span className="resort-name">{resort.name}</span>
+                  {resort.status === "closed?" ? <span className="badge warn">{t("statusClosed")}</span> : null}
                 </span>
-                <span className="meta">
-                  {regionLabel(lang, resort.region)}
-                  {distance != null ? ` · ${formatKm(distance)} ${t("km")} ${t("straightLineShort")}` : ""}
-                  {` · ${t("dayTicket")}: ${
-                    resort.day_ticket_eur == null
-                      ? t("unknown")
-                      : `€${resort.day_ticket_eur}${resort.day_ticket_season === "2025/26" ? "" : ` (${t("estimate")})`}`
-                  }`}
-                  {resort.status === "closed?" ? ` · ${t("statusClosed")}` : ""}
-                  {` · ${t("elevation")}: ${resort.top_elevation_m == null ? t("unknown") : `${resort.top_elevation_m} m`}`}
-                  {days > 0 ? ` · ${t("plannedBadge", { n: days })}` : ""}
+                <span className="card-stats">
+                  <span>{distance != null ? `${formatKm(distance)} ${t("km")}` : t("unknown")}</span>
+                  <span>{resort.top_elevation_m == null ? t("unknown") : `${resort.top_elevation_m} m`}</span>
+                  <span>{resort.slope_km == null ? t("unknown") : `${resort.slope_km} ${t("km")}`}</span>
+                  <span>{cardPrice(resort, birthYear, effectiveDate, lang, t)}</span>
                 </span>
+                <span className="card-foot">
+                  <PassBadges ids={resort.passes} emptyLabel={t("noPass")} />
+                  <span className="amenity-row">
+                    {resort.snowpark ? <span className="amenity" title={t("snowpark")}>{t("snowpark")}</span> : null}
+                    {resort.night_skiing ? <span className="amenity" title={t("nightSkiing")}>{t("nightSkiing")}</span> : null}
+                    {days > 0 ? <span className="amenity">{t("plannedBadge", { n: days })}</span> : null}
+                  </span>
+                </span>
+                <span className="sr-only">{regionLabel(lang, resort.region)}</span>
               </button>
             </li>
           );
@@ -99,13 +105,40 @@ export function ResortList() {
   );
 }
 
-function PassDots({ ids }: { ids: string[] }) {
-  if (ids.length === 0) return <span className="dot dot-grey" aria-hidden="true" />;
+function PassBadges({ ids, emptyLabel }: { ids: string[]; emptyLabel: string }) {
+  if (ids.length === 0) return <span className="pass-pill is-empty">{emptyLabel}</span>;
   return (
-    <span className="dots" aria-hidden="true">
-      {ids.map((id) => (
-        <span key={id} className="dot" style={{ background: passById.get(id)?.color ?? "#8b938e" }} />
-      ))}
+    <span className="pass-pills">
+      {ids.map((id) => {
+        const pass = passById.get(id);
+        return (
+          <span key={id} className="pass-pill" style={{ background: pass?.color ?? "#8b938e" }}>
+            {pass?.name ?? id}
+          </span>
+        );
+      })}
     </span>
   );
+}
+
+function cardPrice(
+  resort: { passes: string[]; day_ticket_eur: number | null; day_ticket_season: string | null },
+  birthYear: number | null,
+  effectiveDate: string | null,
+  lang: "en" | "hu",
+  t: (key: "dayTicket" | "unknown" | "estimate", vars?: Record<string, string | number>) => string,
+): string {
+  if (effectiveDate) {
+    let best: number | null = null;
+    for (const id of resort.passes) {
+      const pass = passById.get(id);
+      if (!pass) continue;
+      const price = resolvePrice(pass, birthYear, effectiveDate);
+      if (price.amountEur != null && (best == null || price.amountEur < best)) best = price.amountEur;
+    }
+    if (best != null) return formatEur(lang, best);
+  }
+  if (resort.day_ticket_eur == null) return t("unknown");
+  const estimate = resort.day_ticket_season !== "2025/26" ? ` (${t("estimate")})` : "";
+  return `${t("dayTicket")} ${formatEur(lang, resort.day_ticket_eur)}${estimate}`;
 }

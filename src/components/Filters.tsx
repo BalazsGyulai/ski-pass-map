@@ -5,7 +5,7 @@ import { cityNoteLabel, regionLabel } from "@/lib/i18n";
 import { useApp } from "./AppState";
 import type { SortKey } from "@/lib/filter";
 
-export function Filters() {
+export function Filters({ onClose }: { onClose?: () => void }) {
   const { share, updateShare, resetFilters, activeFilterCount, t, lang, home, locate, locating, geoError } = useApp();
   const regions = [...new Set(resorts.map((resort) => resort.region))];
   const strictFilter = share.park || share.night || share.minElev != null || share.minSlope != null;
@@ -27,7 +27,7 @@ export function Filters() {
       <label className="field">
         <span>{t("searchLabel")}</span>
         <input
-          id="resort-search"
+          id="resort-search-filters"
           type="search"
           value={share.q}
           placeholder={t("searchPlaceholder")}
@@ -222,9 +222,14 @@ export function Filters() {
       </div>
 
       <div className="filter-footer">
-        <button type="button" className="primary wide" onClick={resetFilters}>
+        <button type="button" className="ghost" onClick={resetFilters}>
           {t("reset")}
         </button>
+        {onClose ? (
+          <button type="button" className="primary" onClick={onClose}>
+            {t("hideFilters")}
+          </button>
+        ) : null}
       </div>
     </form>
   );

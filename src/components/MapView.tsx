@@ -18,14 +18,50 @@ const TIROL: L.LatLngExpression = [47.2, 11.65];
 
 export default function MapView() {
   return (
-    <MapContainer center={EAST} zoom={8} minZoom={6} maxZoom={16} className="map-canvas" scrollWheelZoom>
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <MapContainer center={EAST} zoom={8} minZoom={6} maxZoom={16} className="map-canvas" scrollWheelZoom zoomControl={false}>
+      <BaseTiles />
       <MapLayers />
     </MapContainer>
   );
+}
+
+function BaseTiles() {
+  const { theme } = useApp();
+  const [dark, setDark] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => setDark(theme === "dark" || (theme !== "light" && media.matches));
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, [theme]);
+  const url = dark
+    ? "https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+  return (
+    <TileLayer
+      key={url}
+      url={url}
+      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    />
+  );
+}
+
+function mapPadding(map: L.Map): { paddingTopLeft: [number, number]; paddingBottomRight: [number, number] } {
+  const narrow = window.matchMedia("(max-width: 899px)").matches;
+  const snap = document.documentElement.dataset.sheet;
+  const height = map.getSize().y;
+  const bottom = !narrow || !snap ? 28 : snap === "peek" ? 160 : snap === "full" ? Math.max(80, height - 96) : Math.round(height * 0.5);
+  const left = narrow ? 28 : 420;
+  const right = !narrow && document.querySelector(".detail-sheet") ? 420 : 28;
+  return { paddingTopLeft: [left, 72], paddingBottomRight: [right, bottom] };
+}
+
+function darkPisteColor(color: string, difficulty: string | null, theme: "system" | "light" | "dark"): string {
+  if (difficulty !== "advanced" && difficulty !== "expert") return color;
+  const mediaDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const dark = theme === "dark" || (theme !== "light" && mediaDark);
+  return dark ? "#f4f4f5" : color;
 }
 
 function mapHasSize(map: L.Map): boolean {
@@ -35,7 +71,7 @@ function mapHasSize(map: L.Map): boolean {
 
 function MapLayers() {
   const map = useMap();
-  const { share, updateShare, home, favourites, highlightId, selectResort, t, lang } = useApp();
+  const { share, updateShare, home, favourites, highlightId, selectResort, t, lang, theme } = useApp();
   const [pisteNote, setPisteNote] = useState<"idle" | "loading" | "empty" | "ready">("idle");
   const passNames = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.name])), []);
   const colors = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.color])), []);
@@ -146,7 +182,8 @@ function MapLayers() {
       style: (feature) => {
         const props = feature?.properties as PisteProperties | undefined;
         const style = pisteStyle(props?.difficulty ?? null, props?.kind === "lift" ? "lift" : "piste");
-        return { color: style.color, weight: style.weight, dashArray: style.dashArray, opacity: 0.95, lineCap: "round", lineJoin: "round" };
+        const color = darkPisteColor(style.color, props?.difficulty ?? null, theme);
+        return { color, weight: style.weight, dashArray: style.dashArray, opacity: 0.95, lineCap: "round", lineJoin: "round" };
       },
       onEachFeature: (feature, marker) => {
         const props = feature.properties as PisteProperties | null;
@@ -183,7 +220,7 @@ function MapLayers() {
             layer.addData(data as GeoJSON.GeoJSON);
             const bounds = layer.getBounds();
             if (bounds.isValid()) {
-              map.fitBounds(bounds.pad(0.2), { padding: [36, 36], maxZoom: 14, animate: !reduced });
+              map.fitBounds(bounds.pad(0.2), { ...mapPadding(map), maxZoom: 14, animate: !reduced });
             }
             setPisteNote("ready");
             return;
@@ -203,12 +240,33 @@ function MapLayers() {
       cancelAnimationFrame(frame);
       map.removeLayer(layer);
     };
-  }, [map, share.resort, t]);
+  }, [map, share.resort, t, theme]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => map.invalidateSize());
     return () => cancelAnimationFrame(frame);
   }, [map, share.view]);
+
+  useEffect(() => {
+    if (!mapHasSize(map)) return;
+    const zoom = L.control.zoom({ position: "bottomright" });
+    zoom.addTo(map);
+    return () => {
+      zoom.remove();
+    };
+  }, [map]);
+
+  useEffect(() => {
+    function onClick(event: L.LeafletMouseEvent) {
+      const target = event.originalEvent?.target;
+      if (target instanceof Element && target.closest(".leaflet-control, .leaflet-marker-icon, .leaflet-tooltip, .leaflet-overlay-pane")) return;
+      selectResort(null);
+    }
+    map.on("click", onClick);
+    return () => {
+      map.off("click", onClick);
+    };
+  }, [map, selectResort]);
 
   function jump(target: L.LatLngExpression, zoom: number) {
     if (!mapHasSize(map)) return;
@@ -226,8 +284,8 @@ function MapLayers() {
         />
       ) : null}
       {share.resort || share.showPistes ? (
-        <div className="piste-legend" aria-label={t("pisteLegend")}>
-          <p>{t("pisteLegend")}</p>
+        <details className="piste-legend">
+          <summary>{t("pisteLegend")}</summary>
           <ul>
             <li><span className="piste-swatch" style={{ background: "#1f9d55" }} />{t("pisteNovice")}</li>
             <li><span className="piste-swatch" style={{ background: "#1d6fd8" }} />{t("pisteEasy")}</li>
@@ -238,7 +296,7 @@ function MapLayers() {
           </ul>
           {pisteNote === "loading" ? <p className="piste-note">{t("pisteLoading")}</p> : null}
           {pisteNote === "empty" ? <p className="piste-note">{t("pisteEmpty")}</p> : null}
-        </div>
+        </details>
       ) : null}
     <div className="map-actions">
       <button type="button" aria-pressed={share.showPistes} onClick={() => updateShare({ showPistes: !share.showPistes })}>
@@ -255,7 +313,7 @@ function MapLayers() {
         onClick={() => {
           if (filtered.length === 0 || !mapHasSize(map)) return;
           const bounds = L.latLngBounds(filtered.map((resort) => [resort.lat, resort.lon] as [number, number]));
-          map.fitBounds(bounds.pad(0.15), { padding: [28, 28], maxZoom: 11 });
+          map.fitBounds(bounds.pad(0.15), { ...mapPadding(map), maxZoom: 11 });
         }}
       >
         {t("fitResorts")}
