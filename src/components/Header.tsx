@@ -46,7 +46,12 @@ export function Header() {
             {links.map((link) => {
               const current = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
               return (
-                <Link key={link.href} href={link.href} aria-current={current ? "page" : undefined}>
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={current ? "page" : undefined}
+                  onClick={link.href === "/" ? () => updateShare({ view: "map" }) : undefined}
+                >
                   {t(link.key)}
                 </Link>
               );
