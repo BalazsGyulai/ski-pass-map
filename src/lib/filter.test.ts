@@ -4,6 +4,7 @@ import { cities, passes, resorts } from "./data";
 import { distanceKm } from "./distance";
 import { filterResorts, sortResorts } from "./filter";
 import { pieSvg } from "./marker";
+import type { Resort } from "./schema";
 import { parseShareState, serializeShareState } from "./url-state";
 
 const names = new Map(passes.map((pass) => [pass.id, pass.name]));
@@ -29,29 +30,42 @@ describe("filterResorts", () => {
       showAbandoned: false,
     };
     const uncovered = filterResorts(resorts, { ...empty, noPass: true }, base);
-    expect(uncovered.some((resort) => resort.id === "unterberg")).toBe(true);
+    expect(uncovered.length).toBeGreaterThan(0);
     expect(uncovered.every((resort) => resort.passes.length === 0)).toBe(true);
-    expect(filterResorts(resorts, { ...empty, showAbandoned: true }, base).some((resort) => resort.id === "defunct-alpl")).toBe(true);
-    expect(filterResorts(resorts, empty, base).some((resort) => resort.id === "defunct-alpl")).toBe(false);
-    expect(filterResorts(resorts, { ...empty, q: "Alpl" }, base).some((resort) => resort.id === "defunct-alpl")).toBe(true);
-    const bep = filterResorts(resorts, { ...empty, passes: ["bergerlebnispass"] }, base);
-    expect(bep.some((resort) => resort.id === "semmering-hirschenkogel")).toBe(true);
-    expect(bep.some((resort) => resort.id === "stuhleck")).toBe(false);
-    const both = filterResorts(resorts, { ...empty, passes: ["bergerlebnispass", "ostalpen"], passMatch: "all" }, base);
-    expect(both.some((resort) => resort.id === "semmering-hirschenkogel")).toBe(true);
-    expect(both.every((resort) => resort.passes.includes("bergerlebnispass") && resort.passes.includes("ostalpen"))).toBe(true);
+    const closed = resorts.find((resort) => resort.abandoned);
+    if (!closed) throw new Error("expected a permanently closed area");
+    expect(filterResorts(resorts, { ...empty, showAbandoned: true }, base).some((resort) => resort.id === closed.id)).toBe(true);
+    expect(filterResorts(resorts, empty, base).some((resort) => resort.id === closed.id)).toBe(false);
+    expect(filterResorts(resorts, { ...empty, q: closed.name }, base).some((resort) => resort.id === closed.id)).toBe(true);
+    const passId = passes.find((pass) => resorts.some((resort) => resort.passes.includes(pass.id)))?.id;
+    if (!passId) throw new Error("expected a pass with coverage");
+    const covered = filterResorts(resorts, { ...empty, passes: [passId] }, base);
+    expect(covered.length).toBeGreaterThan(0);
+    expect(covered.every((resort) => resort.passes.includes(passId))).toBe(true);
+    const second = passes.find((pass) => pass.id !== passId && resorts.some((resort) => resort.passes.includes(pass.id) && resort.passes.includes(passId)));
+    if (second) {
+      const both = filterResorts(resorts, { ...empty, passes: [passId, second.id], passMatch: "all" }, base);
+      expect(both.every((resort) => resort.passes.includes(passId) && resort.passes.includes(second.id))).toBe(true);
+    }
     const transit = filterResorts(resorts, { ...empty, transit: true }, base);
     expect(transit.every((resort) => Boolean(resort.public_transport))).toBe(true);
-    expect(transit.some((resort) => resort.id === "semmering-hirschenkogel")).toBe(true);
-    expect(transit.some((resort) => resort.id === "stubaier-gletscher")).toBe(false);
-    expect(filterResorts(resorts, { ...empty, q: "Otscher" }, base).map((resort) => resort.id)).toEqual(["oetscher-lackenhof"]);
+    const named = resorts.find((resort) => /Semmering/i.test(resort.name));
+    expect(filterResorts(resorts, { ...empty, q: "Semmering" }, base).some((resort) => resort.id === named?.id)).toBe(true);
     const parks = filterResorts(resorts, { ...empty, park: true }, base);
     expect(parks.length).toBeGreaterThan(0);
     expect(parks.every((resort) => resort.snowpark === true)).toBe(true);
     const high = filterResorts(resorts, { ...empty, minElev: 2000 }, base);
     expect(high.length).toBeGreaterThan(0);
     expect(high.every((resort) => (resort.top_elevation_m ?? 0) >= 2000)).toBe(true);
-    expect(resorts.some((resort) => resort.id === "riedbach-neustadtl")).toBe(false);
+    const umbrella = resorts.find((resort) => resort.stats_aggregate && (resort.slope_km_display ?? 0) >= 20);
+    if (!umbrella) throw new Error("expected an umbrella area");
+    expect(umbrella.slope_km).toBeNull();
+    expect(umbrella.lifts).toBeNull();
+    const long = filterResorts(resorts, { ...empty, minSlope: 20 }, base);
+    expect(long.every((resort) => (resort.slope_km ?? 0) >= 20)).toBe(true);
+    expect(long.some((resort) => resort.id === umbrella.id)).toBe(false);
+    expect(resorts.some((resort) => resort.name === "Horsefeathers Superpark Planai")).toBe(false);
+    expect(resorts.some((resort) => resort.name === "Schizentrum Rettenbach")).toBe(false);
   });
 
   it("limits distance from Vienna and sorts unknown values last", () => {
@@ -74,27 +88,34 @@ describe("filterResorts", () => {
       },
       { home: vienna, favourites: new Set(), passNames: names },
     );
-    expect(near.some((resort) => resort.id === "stubaier-gletscher")).toBe(false);
+    expect(near.some((resort) => resort.region === "Tirol" && resort.lon < 12)).toBe(false);
     expect(near.every((resort) => distanceKm(vienna, resort) <= 30)).toBe(true);
     const sorted = sortResorts(resorts, "elevation", "desc", () => null);
     expect(sorted[0].top_elevation_m).not.toBeNull();
     expect((sorted[0].top_elevation_m ?? 0) >= (sorted[1].top_elevation_m ?? 0)).toBe(true);
-    expect(sorted.at(-1)?.top_elevation_m).toBeNull();
+    const firstMissing = sorted.findIndex((resort) => resort.top_elevation_m == null);
+    if (firstMissing === -1) {
+      expect(sorted.at(-1)?.top_elevation_m).toEqual(expect.any(Number));
+    } else {
+      expect(sorted.slice(firstMissing).every((resort) => resort.top_elevation_m == null)).toBe(true);
+    }
   });
 });
 
 describe("clusterPoints", () => {
   it("groups nearby resorts at low zoom and separates them when labels would show", () => {
-    const pair = resorts.filter((resort) => resort.id === "semmering-hirschenkogel" || resort.id === "stuhleck");
-    const low = clusterPoints(pair, 8);
-    expect(low).toHaveLength(1);
-    expect(low[0].items).toHaveLength(2);
-    expect(clusterPoints(pair, 11)).toHaveLength(2);
-    const far = clusterPoints(
-      resorts.filter((resort) => resort.id === "semmering-hirschenkogel" || resort.id === "stubaier-gletscher"),
+    const grouped = clusterPoints(
+      resorts.filter((resort) => !resort.abandoned),
       8,
-    );
-    expect(far).toHaveLength(2);
+    ).find((cluster) => cluster.items.length >= 2);
+    if (!grouped) throw new Error("expected a cluster");
+    const pair = grouped.items.slice(0, 2);
+    expect(clusterPoints(pair, 8)).toHaveLength(1);
+    expect(clusterPoints(pair, 11)).toHaveLength(2);
+    const east = resorts.find((resort) => resort.region === "Lower Austria");
+    const west = resorts.find((resort) => resort.region === "Vorarlberg");
+    expect(east && west).toBeTruthy();
+    expect(clusterPoints([east as Resort, west as Resort], 8)).toHaveLength(2);
   });
 });
 

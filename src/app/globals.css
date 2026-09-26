@@ -140,6 +140,21 @@ img { max-width: 100%; }
 }
 .brand span { font-weight: 750; letter-spacing: -0.03em; white-space: nowrap; }
 .brand small { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
+.disclaimer-bar {
+  margin: 0;
+  padding: 0 0.75rem 0.4rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+.fact-source {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 450;
+  line-height: 1.35;
+}
 .menu-btn { display: none; }
 .header-menu { display: contents; }
 .primary-nav, .tools, .lang-toggle { display: flex; gap: 0.2rem; align-items: center; }
@@ -406,6 +421,7 @@ legend { padding: 0 0.3rem; font-weight: 700; }
   font-weight: 700;
 }
 .badge.warn { background: var(--warn-bg); color: var(--warn); }
+strong .badge, .name-line .badge { margin-left: 0.35rem; }
 .sheet-actions {
   display: flex;
   flex-wrap: wrap;

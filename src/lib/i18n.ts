@@ -97,7 +97,7 @@ const en = {
   close: "Close",
   resorts: "Resorts",
   priceForYou: "Your price",
-  setBirthYearHint: "Set a birth year in the planner to pick U25, U28, or adult.",
+  setBirthYearHint: "Set a birth year in the planner. Each pass uses its own brackets.",
   km: "km",
   distanceValue: "{n} km straight-line",
   hiddenByFilters: "Current filters hide this resort on the map.",
@@ -155,9 +155,9 @@ const en = {
   startsToday: "starts today",
   started: "started",
   planTitle: "Season pass planner",
-  planIntro: "Birth year picks U25, U28, or adult. Purchase date picks the early-bird price. Planned days are priced only at the resorts you name.",
+  planIntro: "Birth year and purchase date pick the price. Brackets differ by pass, so the same year can be adult on one pass and youth on another. Planned days are priced only at the resorts you name.",
   birthYear: "Birth year",
-  birthYearHelp: "Assumption for 2026/27: U25 is 2002–2010, U28 is 1999–2010. 2011 or later is a child tariff, which is not in the data.",
+  birthYearHelp: "Each pass uses its own birth-year brackets. If that pass has no bracket for the year, the price stays unavailable. Nothing is guessed from the bracket name.",
   purchaseDate: "Purchase date",
   purchaseHelp: "Leave it and the planner uses today. That is what selects the early-bird window.",
   quickFill: "Quick fill",
@@ -195,6 +195,16 @@ const en = {
   coverageNote: "A day counts as covered only when that resort is on the pass. Two-pass combinations appear when each pass covers a planned day the other does not.",
   savedLocally: "Favourites, birth year, and planned days stay in this browser only.",
   checkOfficial: "Check the official site before you pay. These prices can go stale.",
+  globalDisclaimer: "Information may be incomplete, outdated or wrong. Always check the official website before buying.",
+  dynamicPricing: "dynamic pricing, see official site",
+  provisional: "provisional",
+  networkPrice: "Network price",
+  needsRecheck: "Needs recheck",
+  viaTourismSite: "Via a tourism site",
+  sourceChecked: "Source · checked on {date}",
+  osmSource: "OpenStreetMap · ODbL",
+  statsAggregate: "Includes sub-areas, so this figure is left out of filters and totals.",
+  pisteTotal: "{km} km of piste on the map. Areas that contain other areas are not added again.",
   aboutTitle: "About, sources, and updates",
   disclaimerTitle: "Check the official price",
   disclaimer: "Prices in this app are a copy of notes for 2026/27, not a live feed. Buy only after checking the pass website. Straight-line distance is not a drive time or a train connection.",
@@ -203,7 +213,7 @@ const en = {
   howToUpdate: "Resort facts are in data/resorts.json, pass prices in data/passes.json, and OpenStreetMap coordinates in data/osm.json. npm run validate checks the schema and rejects portal URLs.",
   pagesSetting: "One-time GitHub setting: Settings → Pages → Build and deployment → Source: GitHub Actions. The workflow cannot switch that on for you.",
   seedBody: "The first launch is Austria, with a few neighbouring areas already in the file. Coordinates come from OpenStreetMap and OpenSkiMap. Pass coverage and prices come from the operators' own pages. Resort rows that were only listed on commercial portals stay in the data file and off the map until they are checked.",
-  gapsBody: "Missing elevations, piste lengths, lift counts, and day-ticket prices are left blank. Snow park and night skiing are shown only when an official page or OpenStreetMap says so. Semmering, Stuhleck, and Präbichl are the only day tickets kept, from each resort's own site for 2025/26.",
+  gapsBody: "Missing values stay blank. Snow park and night skiing are shown only when an official page says so. Piste kilometres and lift counts come from OpenStreetMap. Areas that contain other areas are left out of those totals and out of the length and lift filters. A day ticket from a season other than 2026/27 is marked as an estimate.",
   ageTitle: "Age rules",
   storageTitle: "What is saved",
   storageBody: "Stars, birth year, purchase date, planned days, and your location stay in localStorage on this device. Shared links contain filters and the open resort. They never contain your coordinates.",
@@ -261,6 +271,11 @@ const en = {
   regionHungary: "Hungary",
   regionVienna: "Vienna",
   regionBurgenland: "Burgenland",
+  regionCarinthia: "Carinthia",
+  regionSalzburg: "Salzburg",
+  regionUpperAustria: "Upper Austria",
+  regionVorarlberg: "Vorarlberg",
+  regionBavaria: "Bavaria",
   cityNoteTirol: "Tirol week",
   showAllPistes: "Show all pistes",
   pisteLegend: "Piste colours",
@@ -381,7 +396,7 @@ const hu: Record<MessageKey, string> = {
   close: "Bezárás",
   resorts: "Síterepek",
   priceForYou: "A te árad",
-  setBirthYearHint: "A tervezőben add meg a születési éved az U25, U28 vagy felnőtt árhoz.",
+  setBirthYearHint: "Add meg a születési éved a tervezőben. Minden bérletnek saját sávjai vannak.",
   km: "km",
   distanceValue: "{n} km légvonal",
   hiddenByFilters: "A jelenlegi szűrők elrejtik ezt a síterepet a térképen.",
@@ -439,9 +454,9 @@ const hu: Record<MessageKey, string> = {
   startsToday: "ma indul",
   started: "elindult",
   planTitle: "Szezonbérlet-tervező",
-  planIntro: "A születési év választja az U25, U28 vagy felnőtt árat. A vásárlás napja az elővételt. A napokat csak a megnevezett síterepeken számoljuk.",
+  planIntro: "A születési év és a vásárlás napja választja az árat. A sávok bérletenként eltérnek, ezért ugyanaz az év az egyiken felnőtt, a másikon ifjúsági lehet. A napokat csak a megnevezett síterepeken számoljuk.",
   birthYear: "Születési év",
-  birthYearHelp: "2026/27-es feltételezés: U25 = 2002–2010, U28 = 1999–2010. A 2011 vagy későbbi születés gyerekár, ez nincs az adatban.",
+  birthYearHelp: "Minden bérletnek saját születésiév-sávjai vannak. Ha arra az évre nincs sáv, az ár nem elérhető. A sáv nevéből nem találgatunk.",
   purchaseDate: "Vásárlás napja",
   purchaseHelp: "Ha nem írod át, a tervező a mai napot használja. Ez dönti el az elővételt.",
   quickFill: "Gyors kitöltés",
@@ -479,6 +494,16 @@ const hu: Record<MessageKey, string> = {
   coverageNote: "Egy nap akkor lefedett, ha az a síterep rajta van a bérleten. Két bérlet akkor jelenik meg, ha mindkettő olyan napot fed, amit a másik nem.",
   savedLocally: "A kedvencek, a születési év és a tervezett napok csak ebben a böngészőben maradnak.",
   checkOfficial: "Fizetés előtt nézd meg a hivatalos oldalt. Ezek az árak elavulhatnak.",
+  globalDisclaimer: "Az adatok hiányosak, elavultak vagy tévesek lehetnek. Vásárlás előtt mindig nézd meg a hivatalos weboldalt.",
+  dynamicPricing: "dinamikus ár, lásd a hivatalos oldalt",
+  provisional: "előzetes",
+  networkPrice: "Hálózati ár",
+  needsRecheck: "Újraellenőrizendő",
+  viaTourismSite: "Turisztikai oldalról",
+  sourceChecked: "Forrás · ellenőrizve: {date}",
+  osmSource: "OpenStreetMap · ODbL",
+  statsAggregate: "Részterületeket is tartalmaz, ezért a szűrők és az összesítések kihagyják.",
+  pisteTotal: "{km} km pálya a térképen. A más területeket tartalmazó síterepek nincsenek újra hozzáadva.",
   aboutTitle: "Névjegy, források, frissítés",
   disclaimerTitle: "Ellenőrizd a hivatalos árat",
   disclaimer: "Az itteni árak a 2026/27-es jegyzet másolatai, nem élő adatok. Csak a bérlet hivatalos oldala után vegyél. A légvonal nem menetidő és nem vonatcsatlakozás.",
@@ -487,7 +512,7 @@ const hu: Record<MessageKey, string> = {
   howToUpdate: "A síterepadatok a data/resorts.json fájlban, a bérletárak a data/passes.json fájlban, az OpenStreetMap koordináták a data/osm.json fájlban vannak. Az npm run validate ellenőrzi a sémát, és elutasítja a portálos URL-eket.",
   pagesSetting: "Egyszeri GitHub-beállítás: Settings → Pages → Build and deployment → Source: GitHub Actions. A workflow ezt nem tudja bekapcsolni.",
   seedBody: "Az első indulás Ausztria, néhány szomszédos területtel a fájlban. A koordináták az OpenStreetMap és az OpenSkiMap adatai. A bérletlefedettség és az árak az üzemeltetők saját oldalairól származnak. A csak kereskedelmi portálokon szereplő síterepek a fájlban maradnak, de a térképen rejtve, amíg nincsenek ellenőrizve.",
-  gapsBody: "A hiányzó magasság, pályahossz, liftszám és napijegy üresen marad. A snowpark és az éjszakai síelés csak akkor látszik, ha a hivatalos oldal vagy az OpenStreetMap írja. Csak a Semmering, a Stuhleck és a Präbichl napijegye maradt meg, a saját oldaluk 2025/26-os árából.",
+  gapsBody: "A hiányzó érték üresen marad. A snowpark és az éjszakai síelés csak akkor látszik, ha a hivatalos oldal írja. A pályakilométer és a felvonószám az OpenStreetMapről jön. A más területeket tartalmazó síterepek kimaradnak az összesítésből és a pálya- meg felvonószűrőből. A 2026/27-től eltérő szezon napijegye becslésként jelenik meg.",
   ageTitle: "Életkorszabály",
   storageTitle: "Mi mentődik",
   storageBody: "A csillagok, a születési év, a vásárlás napja, a tervezett napok és a helyzeted ezen az eszközön, a localStorage-ban maradnak. A megosztott link a szűrőket és a nyitott síterepet tartalmazza. A koordinátáidat soha.",
@@ -545,6 +570,11 @@ const hu: Record<MessageKey, string> = {
   regionHungary: "Magyarország",
   regionVienna: "Bécs",
   regionBurgenland: "Burgenland",
+  regionCarinthia: "Karintia",
+  regionSalzburg: "Salzburg",
+  regionUpperAustria: "Felső-Ausztria",
+  regionVorarlberg: "Vorarlberg",
+  regionBavaria: "Bajorország",
   cityNoteTirol: "Tiroli hét",
   showAllPistes: "Minden pálya",
   pisteLegend: "Pályaszínek",
@@ -578,6 +608,11 @@ const regionKeys: Record<string, MessageKey> = {
   Hungary: "regionHungary",
   Vienna: "regionVienna",
   Burgenland: "regionBurgenland",
+  Carinthia: "regionCarinthia",
+  Salzburg: "regionSalzburg",
+  "Upper Austria": "regionUpperAustria",
+  Vorarlberg: "regionVorarlberg",
+  Bavaria: "regionBavaria",
 };
 
 const bracketKeys: Record<string, MessageKey> = {
@@ -609,8 +644,13 @@ export function translate(lang: Lang, key: MessageKey, vars?: Record<string, str
 }
 
 export function regionLabel(lang: Lang, region: string): string {
-  const key = regionKeys[region];
-  return key ? translate(lang, key) : region;
+  return region
+    .split(" / ")
+    .map((part) => {
+      const key = regionKeys[part];
+      return key ? translate(lang, key) : part;
+    })
+    .join(" / ");
 }
 
 export function bracketLabel(lang: Lang, id: string, fallback: string): string {

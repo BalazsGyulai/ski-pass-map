@@ -13,6 +13,9 @@ export const FORBIDDEN_PORTAL_MARKERS = [
   "onthesnow.com",
   "skiinfo.",
   "snow-online.com",
+  "snow-forecast.com",
+  "snow-forecast.co.uk",
+  "snow-forecast",
 ] as const;
 
 const portalUrl =

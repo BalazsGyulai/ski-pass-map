@@ -5,7 +5,7 @@ import Link from "next/link";
 import { passById, passes, resortById, resorts } from "@/lib/data";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur } from "@/lib/format";
 import { priceReasonText } from "@/lib/i18n";
-import { cheapestFullCoverage, quotePlan, type PriceQuote } from "@/lib/pricing";
+import { cheapestFullCoverage, dayTicketIsEstimate, quotePlan, type PriceQuote } from "@/lib/pricing";
 import { useApp } from "./AppState";
 
 export function Planner() {
@@ -33,7 +33,7 @@ export function Planner() {
         region: resort.region,
         passes: resort.passes,
         dayTicketEur: resort.day_ticket_eur,
-        dayTicketEstimate: resort.day_ticket_eur != null && resort.day_ticket_season !== "2025/26",
+        dayTicketEstimate: dayTicketIsEstimate(resort.day_ticket_season, resort.day_ticket_eur),
       })),
       birthYear,
       effectiveDate,
@@ -59,7 +59,7 @@ export function Planner() {
               type="number"
               inputMode="numeric"
               min={1940}
-              max={2020}
+              max={2026}
               value={birthYear ?? ""}
               onChange={(event) => setBirthYear(event.target.value === "" ? null : Number(event.target.value))}
             />
@@ -134,7 +134,7 @@ export function Planner() {
         <ul className="source-list">
           {passes.map((pass) => (
             <li key={pass.id}>
-              <strong>{pass.name}.</strong> {pass.price_note}
+              <strong>{pass.name}.</strong> {pass.provisional ? <span className="badge">{t("provisional")}</span> : null} {pass.price_note}
             </li>
           ))}
         </ul>

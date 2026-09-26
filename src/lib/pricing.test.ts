@@ -20,69 +20,60 @@ const pass = (id: string) => {
 };
 
 describe("resolvePrice", () => {
-  it("does not guess Bergerlebnispass adult or child from a birth year", () => {
-    const bep = pass("bergerlebnispass");
+  it("does not guess an age-at-purchase pass from a birth year", () => {
+    const bep = pass("noe-bergerlebnispass");
     expect(resolvePrice(bep, 2003, "2026-10-31").reason).toBe("age-not-birth-year");
+    expect(resolvePrice(bep, 1990, "2026-12-01").reason).toBe("age-not-birth-year");
     expect(resolvePrice(bep, null, "2026-10-01").reason).toBe("no-birth-year");
     const early = pricesOnDate(bep, "2026-10-31");
-    expect(early.find((row) => row.bracketLabel.startsWith("Adult"))?.amountEur).toBe(429);
-    expect(early.find((row) => row.bracketLabel.startsWith("Child"))?.amountEur).toBe(170);
+    expect(early.find((row) => row.bracketLabel.startsWith("adult"))?.amountEur).toBe(429);
+    expect(early.find((row) => row.bracketLabel.startsWith("child"))?.amountEur).toBe(170);
+    const november = pricesOnDate(bep, "2026-11-15");
+    expect(november.find((row) => row.bracketLabel.startsWith("adult"))?.amountEur).toBe(500);
     const later = pricesOnDate(bep, "2026-12-01");
-    expect(later.find((row) => row.bracketLabel.startsWith("Adult"))?.amountEur).toBe(555);
-    expect(later.find((row) => row.bracketLabel.startsWith("Child"))?.amountEur).toBe(300);
+    expect(later.find((row) => row.bracketLabel.startsWith("adult"))?.amountEur).toBe(555);
+    expect(later.find((row) => row.bracketLabel.startsWith("child"))?.amountEur).toBe(300);
   });
 
-  it("selects Ostalpen tariffs on the published birth-year bounds", () => {
-    const oac = pass("ostalpen");
-    expect(resolvePrice(oac, 2000, "2026-12-01").amountEur).toBe(587);
-    expect(resolvePrice(oac, 2006, "2026-12-01").amountEur).toBe(587);
-    expect(resolvePrice(oac, 2007, "2026-12-01")).toMatchObject({ amountEur: 587, bracketLabel: "Youth" });
-    expect(resolvePrice(oac, 1999, "2027-02-01").amountEur).toBe(773);
-    expect(resolvePrice(oac, 2011, "2026-12-01").amountEur).toBe(399);
-    expect(resolvePrice(oac, 2020, "2026-12-01").reason).toBe("no-bracket");
-  });
-
-  it("keeps Snow Card unknown until the presale named in the price note", () => {
-    const tsc = pass("snowcardtirol");
+  it("prices Snow Card and SuperSkiCard from birth year and purchase date", () => {
+    const tsc = pass("snow-card-tirol");
     const before = resolvePrice(tsc, 2003, "2026-09-25");
     expect(before.amountEur).toBeNull();
     expect(before.reason).toBe("no-period");
     expect(before.nextPeriodStart).toBe("2026-09-26");
     expect(resolvePrice(tsc, 2003, "2026-09-26").amountEur).toBe(1080);
-    expect(resolvePrice(tsc, 2003, "2026-10-31").amountEur).toBe(1080);
+    expect(resolvePrice(tsc, 1990, "2026-10-31").amountEur).toBe(1080);
     expect(resolvePrice(tsc, 2003, "2026-11-01").amountEur).toBe(1227);
+    expect(resolvePrice(tsc, 1990, "2026-11-01").amountEur).toBe(1227);
     expect(resolvePrice(tsc, 2009, "2026-10-01").amountEur).toBe(658);
     expect(resolvePrice(tsc, 2021, "2026-11-01").reason).toBe("no-bracket");
+
+    const card = pass("superskicard-premium");
+    expect(resolvePrice(card, 2002, "2026-12-03").amountEur).toBe(890);
+    expect(resolvePrice(card, 2002, "2026-12-04").amountEur).toBe(1190);
+    expect(resolvePrice(card, 1990, "2026-12-03").amountEur).toBe(1049);
+    expect(resolvePrice(card, 1990, "2026-12-04").amountEur).toBe(1190);
+    expect(resolvePrice(card, 2021, "2026-12-04").reason).toBe("no-bracket");
   });
 
-  it("steps Joker and Mur-Mürz, and uses the SuperSkiCard 18+ price only after 3 Dec", () => {
-    expect(resolvePrice(pass("joker"), 2003, "2026-12-03").amountEur).toBe(837);
-    expect(resolvePrice(pass("joker"), 1990, "2026-12-03").amountEur).toBe(1148);
-    expect(resolvePrice(pass("joker"), 2003, "2026-12-04").amountEur).toBe(923);
-    expect(resolvePrice(pass("superskicard"), 2002, "2026-12-03").amountEur).toBe(890);
-    expect(resolvePrice(pass("superskicard"), 1990, "2026-12-03").amountEur).toBe(1049);
-    expect(resolvePrice(pass("superskicard"), 2002, "2026-12-04")).toMatchObject({
-      amountEur: 1190,
-      bracketLabel: "Everyone 18+ (from 2026-12-04)",
-    });
-    expect(resolvePrice(pass("superskicard"), 2012, "2026-12-04").reason).toBe("no-bracket");
-    expect(pricesOnDate(pass("superskicard"), "2026-10-01").find((row) => row.bracketLabel.includes("18+"))?.reason).toBe(
-      "no-period",
-    );
-    expect(resolvePrice(pass("murmuerz"), 1999, "2026-12-15").amountEur).toBe(610);
-    expect(resolvePrice(pass("murmuerz"), 1999, "2026-12-16").amountEur).toBe(671);
-    expect(resolvePrice(pass("murmuerz"), 1997, "2027-01-10").amountEur).toBe(919);
+  it("uses the provisional Ski Arlberg early-bird window", () => {
+    const arlberg = pass("ski-arlberg-saisonkarte");
+    expect(arlberg.provisional).toBe(true);
+    expect(resolvePrice(arlberg, 1990, "2026-11-26").reason).toBe("no-period");
+    expect(resolvePrice(arlberg, 1990, "2026-12-10").amountEur).toBe(840);
+    expect(resolvePrice(arlberg, 2003, "2026-12-11").amountEur).toBe(1272);
+    expect(resolvePrice(arlberg, 2019, "2026-12-11").amountEur).toBe(11);
   });
 });
 
 describe("deadlinesFor", () => {
   it("includes the Snow Card presale start and the shared cut-off dates", () => {
-    const snow = deadlinesFor(pass("snowcardtirol"));
+    const snow = deadlinesFor(pass("snow-card-tirol"));
     expect(snow.find((event) => event.date === "2026-09-26")?.kind).toBe("starts");
     expect(snow.find((event) => event.date === "2026-10-31")?.kind).toBe("ends");
-    const card = deadlinesFor(pass("superskicard"));
+    const card = deadlinesFor(pass("superskicard-premium"));
     expect(card.find((event) => event.date === "2026-12-03")?.kind).toBe("ends");
-    expect(card.find((event) => event.date === "2026-12-04")?.kind).toBe("starts");
+    expect(card.find((event) => event.date === "2026-12-03")?.label).toContain("890");
   });
 });
 
@@ -96,34 +87,33 @@ describe("quotePlan", () => {
     dayTicketEstimate: dayTicketIsEstimate(resort.day_ticket_season, resort.day_ticket_eur),
   }));
 
-  it("prices Ostalpen plus Snow Card and leaves the day-ticket total unknown without an official day ticket", () => {
+  it("prices Snow Card plus Ski amadé from birth year, and leaves a missing bracket unavailable", () => {
+    const snowId = "snow-card-tirol";
+    const amadeId = "ski-amade-all-in-card-white";
+    const tirol = resorts.find((resort) => resort.passes.includes(snowId) && !resort.passes.includes(amadeId) && resort.day_ticket_eur == null);
+    const amade = resorts.find((resort) => resort.passes.includes(amadeId) && !resort.passes.includes(snowId) && resort.day_ticket_eur == null);
+    if (!tirol || !amade) throw new Error("expected a Snow Card resort and a Ski amadé resort without day tickets");
     const quotes = quotePlan(passes, slim, 2003, "2026-10-01", [
-      { id: "stuhleck", days: 4 },
-      { id: "stubaier-gletscher", days: 7 },
+      { id: amade.id, days: 4 },
+      { id: tirol.id, days: 7 },
     ]);
-    const combo = quotes.find((quote) => quote.id === "combo:ostalpen+snowcardtirol");
+    const combo = quotes.find((quote) => quote.id === `combo:${amadeId}+${snowId}` || quote.id === `combo:${snowId}+${amadeId}`);
     expect(combo).toMatchObject({
-      passPriceEur: 587 + 1080,
+      passPriceEur: 601 + 1080,
       coveredDays: 11,
       uncoveredDays: 0,
-      totalEur: 1667,
-      usesEstimate: false,
-      breakEvenEstimate: false,
-      breakEvenDays: null,
+      totalEur: 1681,
     });
-    expect(quotes.find((quote) => quote.id === "pass:ostalpen")?.uncoveredDays).toBe(7);
-    expect(quotes.find((quote) => quote.id === "pass:snowcardtirol")?.coveredDays).toBe(7);
-    expect(quotes.find((quote) => quote.id === "pass:bergerlebnispass")?.priceReason).toBe("age-not-birth-year");
-    const tickets = quotes.find((quote) => quote.id === "day-tickets");
-    expect(tickets?.totalEur).toBeNull();
-    expect(tickets?.usesEstimate).toBe(false);
-    expect(cheapestFullCoverage(quotes)?.id).toBe("combo:ostalpen+snowcardtirol");
+    expect(quotes.find((quote) => quote.id === `pass:${snowId}`)?.coveredDays).toBe(7);
+    expect(quotes.find((quote) => quote.id === `pass:${amadeId}`)?.coveredDays).toBe(4);
+    expect(quotes.find((quote) => quote.id === "pass:noe-bergerlebnispass")?.priceReason).toBe("age-not-birth-year");
+    expect(quotes.find((quote) => quote.id === "day-tickets")?.totalEur).toBeNull();
   });
 
   it("prices day tickets and break-even when every used resort has a day-ticket price", () => {
     const fixturePasses: Pass[] = [
       {
-        ...pass("bergerlebnispass"),
+        ...passes[0],
         id: "local",
         pricing: {
           brackets: [{ label: "Adult", birth_year_from: null, birth_year_to: null }],

@@ -34,6 +34,43 @@ No API keys or secrets are required. The map uses keyless OpenStreetMap tiles. M
 
 `npm run build` validates the data, runs `next build`, then stamps `out/sw.js` and `out/manifest.webmanifest` with the resolved base path and the site name. `public/sw.js` keeps the GitHub Pages prefix so local `next dev` matches that deployment.
 
+## Import Austria
+
+`npm run import:austria` reads the research drop and writes `data/passes.json`, `data/resorts.json`, and `data/osm.json`. Run it again when a newer drop arrives in the same shape.
+
+| Input | Role |
+| --- | --- |
+| `imports/austria/passes.json` | Multi-resort season passes, with provenance on every non-OSM value |
+| `imports/austria/resorts.json` | OpenSkiData areas for Austria, plus official-site facts where researched |
+| `imports/austria/legacy-resorts.json` | Part 1 resort file. Official values are copied only when the new drop has no value and the old one has `sourceUrl` and `checkedAt` |
+| `config/publish.json` | `includeRestrictedPasses` defaults to `false` |
+
+The script validates the result with the catalog schema and exits if a value is missing its source, a price is not a number, birth-year brackets overlap in a way that would require a guess, or any URL contains an aggregator domain (skiresort.info, bergfex, snow-forecast, skiinfo, OnTheSnow, Snow-Online).
+
+Visibility rules, applied in this order:
+
+- **Unnamed** areas stay in the file and off the map.
+- **Horsefeathers Superpark Planai** is a park inside Planai, not its own resort. The Planai sheet says so.
+- **Schizentrum Rettenbach** is a grass-ski centre and stays off the winter map.
+- **Lift-less duplicates** (a second OpenSkiData row with the same name and no lifts, including Skimap.org-only copies) are hidden. Pass coverage is moved onto the row that has lifts.
+- **Mostly outside Austria:** a cross-border area with no `.at` or `.tirol` website is hidden when OpenSkiData flags it as having no Austrian locality, or when it has no Austrian locality at all. Balderschwang and Fellhorn/Kanzelwand are hidden as well: the README for the drop lists them as mainly in Germany, and the locality counts do not catch them. Areas with an Austrian site stay, including Ischgl, Nassfeld, Kaunertal, and Tannheim.
+- **Permanently closed** Unterberg (official notice) stays searchable and is hidden like an abandoned area until “Show areas marked abandoned in OpenStreetMap” is on.
+- **Empty shells** with no lifts and no downhill piste, and that do not contain sub-areas, stay off the map.
+- **Tiny point-only** areas (one lift or none, under 1 km, no pass, no official site) stay off the map. Named point areas with a pass, a site, or more skiing stay on it.
+
+Umbrella areas that contain sub-areas stay on the map. Their piste kilometres and lift counts are kept for the sheet and marked as including sub-areas. Filters and the about-page total use only the nested areas, so the same lifts are not counted twice.
+
+Other published flags:
+
+- **networkPrice** — a day ticket whose note describes a joint or network ticket. The sheet shows the price and the note.
+- **needsRecheck** — a preliminary, ambiguous, or unlabelled season. The sheet shows a badge.
+- **viaTourismSite** — the source note mentions a tourism site.
+- **restricted** — Steiermark Joker and WildPass, whose imprints restrict storing the content. They are left out of `data/passes.json` while `includeRestrictedPasses` is false. Set it to true and run the import again to publish them.
+- **provisional** — Ski Arlberg, whose operator marks the tariff as provisional. The compare view, planner, and resort sheet show a badge.
+- **dynamic pricing** — no fixed adult day price, and the official page says the price is dynamic. The sheet and list say “dynamic pricing, see official site” instead of leaving the row blank. A published cash price is still shown when the page also mentions a dynamic online price.
+
+Age brackets are matched on birth year and purchase date. A proof-only tariff (student card, disability card, family package, AHA-Card) is not applied just because the year falls inside it. A year with no published bracket stays unavailable.
+
 ## Update the data
 
 Resort facts, pass prices, and OpenStreetMap geometry are separate files:
@@ -57,7 +94,7 @@ Missing numbers are `null`. The UI omits them. It does not invent a price, eleva
 
 Areas OpenStreetMap marks as abandoned stay off the map until “Show areas marked abandoned in OpenStreetMap” is on. A name search still finds them.
 
-`npm run validate` also checks that `public/sw.js` and `public/manifest.webmanifest` still contain `config/site.json`'s `basePath`, and that the manifest contains the site name. It fails if any JSON or GeoJSON file under `data/` or `public/` contains a skiresort.info, bergfex, OnTheSnow, Skiinfo, or Snow-Online URL.
+`npm run validate` also checks that `public/sw.js` and `public/manifest.webmanifest` still contain `config/site.json`'s `basePath`, and that the manifest contains the site name. It fails if any JSON or GeoJSON file under `data/` or `public/` contains a skiresort.info, bergfex, snow-forecast, OnTheSnow, Skiinfo, or Snow-Online URL.
 
 Piste lines are OpenStreetMap ways, fetched once with `npm run fetch-pistes` (Overpass at `lz4.overpass-api.de`, with a delay between requests, raw responses cached in `data/pistes/raw/`). That script is not part of `npm run build` or CI. It writes `public/pistes/<resort-id>.geojson`, which the map loads when a resort is opened. An optional overlay uses the OpenSnowMap pistes-only tiles (`https://tiles.opensnowmap.org/pistes/{z}/{x}/{y}.png`). Their terms allow that layer on a website if the browser sends a referer, the app does not bulk-download tiles, and the map credits OpenStreetMap (ODbL) and OpenSnowMap (CC BY-SA).
 

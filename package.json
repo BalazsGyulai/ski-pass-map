@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "import:austria": "tsx scripts/import-austria.ts",
     "validate": "tsx scripts/validate-data.ts",
     "build": "npm run validate && next build && node scripts/stamp-sw.mjs",
     "lint": "eslint .",

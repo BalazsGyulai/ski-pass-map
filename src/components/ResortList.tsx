@@ -5,7 +5,7 @@ import { passById, passes, resorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { filterResorts, sortResorts } from "@/lib/filter";
 import { finiteOrBlank, formatEur, formatKm } from "@/lib/format";
-import { resolvePrice } from "@/lib/pricing";
+import { dayTicketIsEstimate, resolvePrice } from "@/lib/pricing";
 import { regionLabel } from "@/lib/i18n";
 import { useApp } from "./AppState";
 
@@ -122,11 +122,16 @@ function PassBadges({ ids, emptyLabel }: { ids: string[]; emptyLabel: string }) 
 }
 
 function cardPrice(
-  resort: { passes: string[]; day_ticket_eur: number | null; day_ticket_season: string | null },
+  resort: {
+    passes: string[];
+    day_ticket_eur: number | null;
+    day_ticket_season: string | null;
+    day_ticket_dynamic: boolean;
+  },
   birthYear: number | null,
   effectiveDate: string | null,
   lang: "en" | "hu",
-  t: (key: "dayTicket" | "estimate", vars?: Record<string, string | number>) => string,
+  t: (key: "dayTicket" | "estimate" | "dynamicPricing", vars?: Record<string, string | number>) => string,
 ): ReactNode {
   if (effectiveDate) {
     let best: number | null = null;
@@ -140,7 +145,7 @@ function cardPrice(
     if (priced != null) return <span>{formatEur(lang, priced)}</span>;
   }
   const day = finiteOrBlank(resort.day_ticket_eur);
-  if (day == null) return null;
-  const estimate = resort.day_ticket_season !== "2025/26" ? ` (${t("estimate")})` : "";
+  if (day == null) return resort.day_ticket_dynamic ? <span>{t("dynamicPricing")}</span> : null;
+  const estimate = dayTicketIsEstimate(resort.day_ticket_season, day) ? ` (${t("estimate")})` : "";
   return <span>{`${t("dayTicket")} ${formatEur(lang, day)}${estimate}`}</span>;
 }
