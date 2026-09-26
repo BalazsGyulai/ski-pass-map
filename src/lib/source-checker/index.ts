@@ -1,6 +1,6 @@
 import type { FieldChange } from "@/lib/admin/edits";
 import { classifyTier } from "@/lib/admin/edits";
-import { safeFetchText, setSourceCheckerDevHosts } from "@/lib/ssrf";
+import { applySourceCheckerDevEnv, safeFetchText, type SourceTextFetcher } from "@/lib/ssrf";
 import type { AiBinding } from "./ai";
 import { runAiChecks } from "./ai";
 import { runDeterministicChecks } from "./deterministic";
@@ -8,7 +8,12 @@ import { mergeCheckerResults, type CheckerSummary } from "./tier";
 
 export interface SourceCheckerEnv {
   SOURCE_CHECKER_DEV_HOSTS?: string;
+  SOURCE_CHECKER_DEV_FIXTURE?: string;
   NODE_ENV?: string;
+}
+
+export interface SourceCheckerDeps {
+  fetchText?: SourceTextFetcher;
 }
 
 export async function checkSourceForEdit(
@@ -16,11 +21,11 @@ export async function checkSourceForEdit(
   changes: FieldChange[],
   ai?: AiBinding,
   env?: SourceCheckerEnv,
+  deps?: SourceCheckerDeps,
 ): Promise<CheckerSummary & { sourceUrl: string; fetchedChars: number }> {
-  if (env?.NODE_ENV !== "production" && env?.SOURCE_CHECKER_DEV_HOSTS) {
-    setSourceCheckerDevHosts(env.SOURCE_CHECKER_DEV_HOSTS.split(","));
-  }
-  const { text, finalUrl } = await safeFetchText(sourceUrl, { maxBytes: 2_000_000, timeoutMs: 10_000, maxRedirects: 3 });
+  applySourceCheckerDevEnv(env);
+  const fetchText = deps?.fetchText ?? safeFetchText;
+  const { text, finalUrl } = await fetchText(sourceUrl, { maxBytes: 2_000_000, timeoutMs: 10_000, maxRedirects: 3 });
   const deterministic = runDeterministicChecks(changes, text);
   const aiResults = await runAiChecks(ai, changes, text);
   const tier = classifyTier(changes);

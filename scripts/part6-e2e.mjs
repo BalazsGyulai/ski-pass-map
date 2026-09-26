@@ -45,6 +45,7 @@ async function main() {
       "ADMIN_DEV_BYPASS=1",
       "ADMIN_EMAILS=dev@skimap.test",
       "MAP_LOAD_HASH_SALT=e2e-salt-1234567890",
+      "SOURCE_CHECKER_DEV_FIXTURE=1",
       "SOURCE_CHECKER_DEV_HOSTS=127.0.0.1,localhost",
       "TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA",
     ].join("\n"),

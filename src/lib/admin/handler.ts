@@ -13,6 +13,8 @@ export interface AdminEnv extends AdminAuthEnv {
   MAP_LOAD_ALLOWED_ORIGINS?: string;
   AI?: { run(model: string, input: { prompt: string }): Promise<unknown> };
   SOURCE_CHECKER_DEV_HOSTS?: string;
+  SOURCE_CHECKER_DEV_FIXTURE?: string;
+  NODE_ENV?: string;
 }
 
 export function createAdminStore(db: D1Like): AppStore {

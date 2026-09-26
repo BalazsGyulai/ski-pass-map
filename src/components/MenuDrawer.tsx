@@ -15,12 +15,12 @@ export const mainLinks = [
 ];
 
 export const legalLinks = [
-  { rest: "/imprint", key: "imprint" as const },
-  { rest: "/privacy", key: "privacy" as const },
-  { rest: "/terms", key: "terms" as const },
-  { rest: "/credits", key: "creditsTitle" as const },
-  { rest: "/contact", key: "contact" as const },
-  { rest: "/support", key: "supportSkimap" as const },
+  { rest: "/imprint", key: "imprint" as const, todo: true },
+  { rest: "/privacy", key: "privacy" as const, todo: true },
+  { rest: "/terms", key: "terms" as const, todo: true },
+  { rest: "/credits", key: "creditsTitle" as const, todo: true },
+  { rest: "/contact", key: "contact" as const, todo: false },
+  { rest: "/support", key: "supportSkimap" as const, todo: true },
 ];
 
 export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -67,7 +67,8 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         <nav className="drawer-legal" aria-label={t("siteFooter")}>
           {legalLinks.map((link) => (
             <Link key={link.rest} href={href(link.rest)} onClick={onClose}>
-              {t(link.key)} <span className="todo-tag">{t("todoMark")}</span>
+              {t(link.key)}
+              {link.todo ? <span className="todo-tag">{t("todoMark")}</span> : null}
             </Link>
           ))}
         </nav>

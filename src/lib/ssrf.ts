@@ -34,6 +34,12 @@ export function isBlockedHost(hostname: string): boolean {
 }
 
 const devHosts = new Set<string>();
+let devFixturePorts = false;
+
+export function resetSourceCheckerDev() {
+  devHosts.clear();
+  devFixturePorts = false;
+}
 
 export function setSourceCheckerDevHosts(hosts: string[] | undefined) {
   devHosts.clear();
@@ -41,6 +47,29 @@ export function setSourceCheckerDevHosts(hosts: string[] | undefined) {
     const trimmed = host.trim().toLowerCase();
     if (trimmed) devHosts.add(trimmed);
   }
+}
+
+export function setSourceCheckerDevFixturePorts(enabled: boolean) {
+  devFixturePorts = enabled;
+}
+
+export interface SourceCheckerDevEnv {
+  NODE_ENV?: string;
+  SOURCE_CHECKER_DEV_FIXTURE?: string;
+  SOURCE_CHECKER_DEV_HOSTS?: string;
+}
+
+/** Dev/e2e only: relax host/port rules for local fixtures. Never active in production. */
+export function applySourceCheckerDevEnv(env: SourceCheckerDevEnv | undefined): void {
+  resetSourceCheckerDev();
+  if (!env || env.NODE_ENV === "production" || env.SOURCE_CHECKER_DEV_FIXTURE !== "1") return;
+  const hosts = env.SOURCE_CHECKER_DEV_HOSTS?.split(",").map((h) => h.trim()).filter(Boolean);
+  setSourceCheckerDevHosts(hosts?.length ? hosts : ["127.0.0.1", "localhost"]);
+  setSourceCheckerDevFixturePorts(true);
+}
+
+function devHostAllowed(hostname: string): boolean {
+  return devHosts.has(hostname.toLowerCase());
 }
 
 export function assertSafeHttpUrl(raw: string): URL {
@@ -52,8 +81,9 @@ export function assertSafeHttpUrl(raw: string): URL {
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") throw new Error("invalid_protocol");
   const port = url.port ? Number(url.port) : url.protocol === "https:" ? 443 : 80;
-  if (port !== 80 && port !== 443) throw new Error("invalid_port");
-  if (isBlockedHost(url.hostname) && !devHosts.has(url.hostname.toLowerCase())) throw new Error("blocked_host");
+  const hostAllowed = devHostAllowed(url.hostname);
+  if (port !== 80 && port !== 443 && !(devFixturePorts && hostAllowed)) throw new Error("invalid_port");
+  if (isBlockedHost(url.hostname) && !hostAllowed) throw new Error("blocked_host");
   return url;
 }
 
@@ -62,6 +92,8 @@ export interface SafeFetchOptions {
   timeoutMs: number;
   maxRedirects: number;
 }
+
+export type SourceTextFetcher = (url: string, options: SafeFetchOptions) => Promise<{ finalUrl: string; text: string }>;
 
 export async function safeFetchText(url: string, options: SafeFetchOptions): Promise<{ finalUrl: string; text: string }> {
   let current = assertSafeHttpUrl(url);
