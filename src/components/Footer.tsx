@@ -13,7 +13,8 @@ export function Footer() {
       <nav aria-label={t("siteFooter")}>
         {legalLinks.map((link) => (
           <Link key={link.rest} href={href(link.rest)}>
-            {t(link.key)} <span className="todo-tag">{t("todoMark")}</span>
+            {t(link.key)}
+            {link.todo ? <span className="todo-tag">{t("todoMark")}</span> : null}
           </Link>
         ))}
       </nav>

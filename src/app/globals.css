@@ -914,6 +914,27 @@ legend { padding: 0 4px; font-weight: 650; }
 .topbar-links .lang-switch { flex-shrink: 1; min-width: 0; }
 .drawer-tools .lang-switch { width: 100%; max-width: none; }
 
+.contact-form {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1rem 0;
+}
+.contact-form label { display: grid; gap: 0.35rem; }
+.contact-form textarea { min-height: 8rem; resize: vertical; }
+.contact-checkbox { grid-template-columns: auto 1fr; align-items: start; gap: 0.5rem; }
+.field-hint { font-size: 0.85rem; color: var(--ink-3); }
+.contact-banner { padding: 0.65rem 0.85rem; border-radius: 10px; }
+.contact-banner--ok { background: var(--open-bg); color: var(--open-ink); }
+.contact-banner--err { background: #fee2e2; color: #991b1b; }
+.admin-shell { min-height: 100dvh; background: var(--bg); color: var(--ink); }
+.admin-page { max-width: 1100px; margin: 0 auto; padding: 1.25rem; }
+.admin-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.75rem 0; }
+.admin-tabs button.active { font-weight: 700; text-decoration: underline; }
+.admin-inbox table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.admin-inbox th, .admin-inbox td { border: 1px solid var(--line); padding: 0.4rem; vertical-align: top; }
+.admin-inbox tr.flagged { background: color-mix(in srgb, var(--amber) 18%, transparent); }
+.checker-result { max-height: 320px; overflow: auto; background: var(--surface); padding: 0.75rem; border-radius: 8px; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
