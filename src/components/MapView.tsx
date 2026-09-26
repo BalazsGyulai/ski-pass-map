@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { passById, passes, resorts } from "@/lib/data";
 import { passShortName } from "@/lib/pass-label";
 import { clusterPoints } from "@/lib/cluster";
@@ -11,133 +8,201 @@ import { filterResorts } from "@/lib/filter";
 import { formatEur } from "@/lib/format";
 import { clusterRingHtml, passShares, pricePillHtml } from "@/lib/marker";
 import { BASE_PATH } from "@/lib/site";
-import { OSM_TILE_ATTRIBUTION, OSM_TILE_URL } from "@/lib/basemap";
-import { escapeHtml } from "@/lib/html";
-import { mapFitPadding } from "@/lib/map-padding";
-import { pisteStyle, type PisteProperties } from "@/lib/pistes";
+import { OPENSNOWMAP_ATTRIBUTION, OPENSNOWMAP_TILES, mapAppearance, styleFor } from "@/lib/map-styles";
+import { providerAfterFailure, resolveMapProvider } from "@/lib/map-provider";
+import type { MapProviderId } from "@/lib/map-styles";
+import {
+  PISTE_SOURCE_ID,
+  boundsOfGeoJson,
+  createVectorMap,
+  firstLabelLayer,
+  glFitPadding,
+  hasMapSize,
+  loadMapLibrary,
+  motionDuration,
+  padLngLatBounds,
+  pisteLayerIds,
+  pisteLayerSpecs,
+  pisteTip,
+  type MapLib,
+  type VectorMap,
+  type VectorMarker,
+} from "@/lib/vector-map";
 import { useApp } from "./AppState";
 
-const AUSTRIA: L.LatLngExpression = [47.5, 13.35];
+const SNOW_SOURCE = "opensnow-pistes";
+const SNOW_LAYER = "opensnow-pistes";
 
 export default function MapView() {
-  return (
-    <MapContainer center={AUSTRIA} zoom={7} minZoom={4} maxZoom={16} className="map-canvas" scrollWheelZoom zoomControl={false}>
-      <BaseTiles />
-      <MapLayers />
-    </MapContainer>
-  );
-}
-
-function BaseTiles() {
-  return <TileLayer url={OSM_TILE_URL} attribution={OSM_TILE_ATTRIBUTION} maxZoom={19} />;
-}
-
-function mapPadding(map: L.Map): { paddingTopLeft: [number, number]; paddingBottomRight: [number, number] } {
-  return mapFitPadding({
-    narrow: window.matchMedia("(max-width: 899px)").matches,
-    sheet: document.documentElement.dataset.sheet ?? null,
-    height: map.getSize().y,
-  });
-}
-
-function darkPisteColor(color: string, difficulty: string | null, theme: "system" | "light" | "dark"): string {
-  if (difficulty !== "advanced" && difficulty !== "expert") return color;
-  const mediaDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const dark = theme === "dark" || (theme !== "light" && mediaDark);
-  return dark ? "#f4f4f5" : color;
-}
-
-function mapHasSize(map: L.Map): boolean {
-  const size = map.getSize();
-  return size.x >= 1 && size.y >= 1;
-}
-
-function MapLayers() {
-  const map = useMap();
-  const { share, home, favourites, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, lang } = useApp();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<VectorMap | null>(null);
+  const libRef = useRef<MapLib | null>(null);
+  const appliedStyle = useRef<string | null>(null);
+  const pisteData = useRef<unknown>(null);
+  const { share, home, favourites, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, lang, offline } = useApp();
+  const [choice, setChoice] = useState<MapProviderId | null>(null);
+  const [override, setOverride] = useState<MapProviderId | null>(null);
+  const [ready, setReady] = useState(false);
+  const [bootError, setBootError] = useState(false);
   const [pisteNote, setPisteNote] = useState<"idle" | "loading" | "empty" | "ready">("idle");
+  const [systemDark, setSystemDark] = useState(false);
+  const provider = override ?? choice;
+  const appearance = mapAppearance(theme, systemDark);
+  const appearanceRef = useRef(appearance);
+  appearanceRef.current = appearance;
+  const darkRef = useRef(appearance === "dark");
+  darkRef.current = appearance === "dark";
+
   const passNames = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.name])), []);
   const colors = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.color])), []);
-
   const filtered = useMemo(
-    () =>
-      filterResorts(resorts, share, {
-        home,
-        favourites: new Set(favourites),
-        passNames,
-      }),
+    () => filterResorts(resorts, share, { home, favourites: new Set(favourites), passNames }),
     [share, home, favourites, passNames],
   );
 
   useEffect(() => {
-    const resortsLayer = L.layerGroup().addTo(map);
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const sync = () => setSystemDark(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (choice || offline) return;
+    let cancelled = false;
+    void resolveMapProvider().then((next) => {
+      if (!cancelled) setChoice(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [choice, offline]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!provider || !container) return;
+    let cancelled = false;
+    let map: VectorMap | null = null;
+    const fail = () => {
+      if (cancelled) return;
+      const next = providerAfterFailure(provider);
+      if (next === "openfreemap") setOverride("openfreemap");
+      else setBootError(true);
+    };
+    void (async () => {
+      try {
+        const loaded = await loadMapLibrary(provider);
+        if (cancelled) return;
+        const themeNow = appearanceRef.current;
+        map = createVectorMap(loaded.lib, {
+          container,
+          provider,
+          token: loaded.token,
+          theme: themeNow,
+          reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+          onFatal: fail,
+        });
+        libRef.current = loaded.lib;
+        mapRef.current = map;
+        appliedStyle.current = styleFor(provider, themeNow);
+        map.on("load", () => {
+          if (!cancelled) setReady(true);
+        });
+      } catch (error) {
+        console.error("Map failed to start", error);
+        fail();
+      }
+    })();
+    return () => {
+      cancelled = true;
+      setReady(false);
+      map?.remove();
+      if (mapRef.current === map) mapRef.current = null;
+      libRef.current = null;
+      appliedStyle.current = null;
+    };
+  }, [provider]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !provider || !ready) return;
+    const next = styleFor(provider, appearance);
+    if (appliedStyle.current === next) return;
+    appliedStyle.current = next;
+    map.setStyle(next);
+  }, [appearance, provider, ready]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const lib = libRef.current;
+    if (!map || !lib || !ready) return;
+    let markers: VectorMarker[] = [];
     const draw = () => {
-      if (!mapHasSize(map)) return;
-      resortsLayer.clearLayers();
+      for (const marker of markers) marker.remove();
+      markers = [];
+      if (!hasMapSize(map)) return;
       const zoom = map.getZoom();
       const pool = filtered.filter((resort) => resort.id !== share.resort);
       const clusters = clusterPoints(pool, zoom, { unclusterZoom: 9 });
-      const resortMarker = (resort: (typeof filtered)[number], selected: boolean) => {
+      const addResort = (resort: (typeof filtered)[number], selected: boolean) => {
         const price = resort.day_ticket_eur != null ? formatEur(lang, resort.day_ticket_eur) : t("dash");
         const covered = resort.passes.map((id) => passById.get(id)).filter((pass) => pass != null);
         const shorts = covered.map((pass) => passShortName(pass));
         const fullNames = covered.map((pass) => pass.name);
         const label = shorts.length === 0 ? t("dash") : shorts.length === 1 ? shorts[0] : `${shorts[0]} +${shorts.length - 1}`;
         const accessible = [resort.name, fullNames.length > 0 ? fullNames.join(", ") : t("noPass"), price].join(", ");
-        const width = selected
-          ? Math.min(240, 96 + resort.name.length * 7)
-          : Math.min(180, 36 + label.length * 8 + Math.min(3, resort.passes.length) * 10);
-        const height = selected ? 46 : 30;
-        const icon = L.divIcon({
-          className: `resort-marker${highlightId === resort.id && !selected ? " is-hot" : ""}`,
-          html: pricePillHtml({
-            label,
-            accessibleName: accessible,
-            colors: resort.passes.map((id) => colors.get(id) ?? "#94A3B8"),
-            selected,
-            name: resort.name,
-            plannedDays: resortDays[resort.id] ?? 0,
-            closed: resort.abandoned,
-            noPass: resort.passes.length === 0,
-          }),
-          iconSize: [width, height],
-          iconAnchor: [width / 2, selected ? height : height / 2],
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `resort-marker${highlightId === resort.id && !selected ? " is-hot" : ""}${selected ? " is-selected" : ""}`;
+        button.innerHTML = pricePillHtml({
+          label,
+          accessibleName: accessible,
+          colors: resort.passes.map((id) => colors.get(id) ?? "#94A3B8"),
+          selected,
+          name: resort.name,
+          plannedDays: resortDays[resort.id] ?? 0,
+          closed: resort.abandoned,
+          noPass: resort.passes.length === 0,
         });
-        const marker = L.marker([resort.lat, resort.lon], {
-          icon,
-          keyboard: true,
-          title: accessible,
-          zIndexOffset: selected ? 1200 : highlightId === resort.id ? 800 : 0,
+        button.setAttribute("aria-label", accessible);
+        button.title = accessible;
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          selectResort(resort.id);
         });
-        marker.on("click", () => selectResort(resort.id));
-        return marker;
+        const marker = new lib.Marker({ element: button, anchor: selected ? "bottom" : "center" }).setLngLat([resort.lon, resort.lat]).addTo(map);
+        marker.getElement().style.zIndex = selected ? "4" : highlightId === resort.id ? "3" : "1";
+        markers.push(marker);
       };
       clusters.forEach((cluster) => {
         if (cluster.items.length === 1) {
-          resortsLayer.addLayer(resortMarker(cluster.items[0], false));
-        } else {
-          const shares = passShares(cluster.items, (id) => colors.get(id) ?? "#94A3B8");
-          const icon = L.divIcon({
-            className: "resort-marker",
-            html: clusterRingHtml(cluster.items.length, shares),
-            iconSize: [40, 40],
-            iconAnchor: [20, 20],
-          });
-          const marker = L.marker([cluster.lat, cluster.lon], {
-            icon,
-            keyboard: true,
-            title: t("clusterLabel", { n: cluster.items.length }),
-          });
-          marker.on("click", () => {
-            if (!mapHasSize(map)) return;
-            const bounds = L.latLngBounds(cluster.items.map((item) => [item.lat, item.lon] as [number, number]));
-            map.fitBounds(bounds.pad(0.2), { padding: [32, 32], maxZoom: 12 });
-          });
-          resortsLayer.addLayer(marker);
+          addResort(cluster.items[0], false);
+          return;
         }
+        const shares = passShares(cluster.items, (id) => colors.get(id) ?? "#94A3B8");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "resort-marker";
+        button.innerHTML = clusterRingHtml(cluster.items.length, shares);
+        const accessible = t("clusterLabel", { n: cluster.items.length });
+        button.setAttribute("aria-label", accessible);
+        button.title = accessible;
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (!hasMapSize(map)) return;
+          const bounds = padLngLatBounds(
+            cluster.items.map((item) => [item.lon, item.lat]),
+            0.2,
+          );
+          if (!bounds) return;
+          map.fitBounds(bounds, { padding: 32, maxZoom: 12, duration: motionDuration(500) });
+        });
+        const marker = new lib.Marker({ element: button, anchor: "center" }).setLngLat([cluster.lon, cluster.lat]).addTo(map);
+        markers.push(marker);
       });
       const selected = filtered.find((resort) => resort.id === share.resort);
-      if (selected) resortsLayer.addLayer(resortMarker(selected, true));
+      if (selected) addResort(selected, true);
     };
     draw();
     map.on("zoomend", draw);
@@ -145,113 +210,153 @@ function MapLayers() {
     return () => {
       map.off("zoomend", draw);
       map.off("resize", draw);
-      map.removeLayer(resortsLayer);
+      for (const marker of markers) marker.remove();
     };
-  }, [map, filtered, share.resort, highlightId, colors, selectResort, t, lang, resortDays]);
+  }, [ready, filtered, share.resort, highlightId, colors, selectResort, t, lang, resortDays]);
 
   useEffect(() => {
-    if (!share.resort || share.hideRuns) {
-      setPisteNote("idle");
-      return;
-    }
-    const resort = resorts.find((item) => item.id === share.resort);
-    if (!resort) return;
+    const map = mapRef.current;
+    if (!map || !ready) return;
     let cancelled = false;
-    const layer = L.geoJSON(undefined, {
-      style: (feature) => {
-        const props = feature?.properties as PisteProperties | undefined;
-        const style = pisteStyle(props?.difficulty ?? null, props?.kind === "lift" ? "lift" : "piste");
-        const color = darkPisteColor(style.color, props?.difficulty ?? null, theme);
-        return { color, weight: style.weight, dashArray: style.dashArray, opacity: 0.95, lineCap: "round", lineJoin: "round" };
-      },
-      onEachFeature: (feature, marker) => {
-        const props = feature.properties as PisteProperties | null;
-        if (!props) return;
-        const difficulty =
-          props.kind === "lift"
-            ? t("pisteLift")
-            : props.difficulty === "novice"
-              ? t("pisteNovice")
-              : props.difficulty === "easy"
-                ? t("pisteEasy")
-                : props.difficulty === "intermediate"
-                  ? t("pisteIntermediate")
-                  : props.difficulty === "advanced" || props.difficulty === "expert"
-                    ? t("pisteAdvanced")
-                    : props.difficulty === "freeride"
-                      ? t("pisteFreeride")
-                      : t("pisteOther");
-        const lift = props.aerialway?.replaceAll("_", " ");
-        const text = [props.name, props.kind === "lift" ? lift ?? difficulty : difficulty].filter(Boolean).join(" · ");
-        marker.bindTooltip(escapeHtml(text), { sticky: true, opacity: 1 });
-      },
-    }).addTo(map);
-    setPisteNote("loading");
-    const frame = requestAnimationFrame(() => {
-      if (cancelled || !mapHasSize(map)) return;
+    const apply = (data: unknown) => {
+      if (!map.isStyleLoaded()) return;
+      clearPistes(map);
+      if (!data) return;
+      map.addSource(PISTE_SOURCE_ID, { type: "geojson", data });
+      const before = firstLabelLayer(map);
+      for (const spec of pisteLayerSpecs(darkRef.current)) {
+        const layer = {
+          id: spec.id,
+          type: "line",
+          source: PISTE_SOURCE_ID,
+          filter: spec.filter,
+          layout: { "line-cap": "round", "line-join": "round" },
+          paint: {
+            "line-color": spec.color,
+            "line-width": spec.width,
+            "line-opacity": 0.95,
+            ...(spec.dash ? { "line-dasharray": spec.dash } : {}),
+          },
+        };
+        if (before) map.addLayer(layer, before);
+        else map.addLayer(layer);
+      }
+    };
+    pisteData.current = null;
+    if (map.isStyleLoaded()) clearPistes(map);
+    const load = () => {
+      if (!share.resort || share.hideRuns) {
+        setPisteNote("idle");
+        return;
+      }
+      const resort = resorts.find((item) => item.id === share.resort);
+      if (!resort) return;
+      setPisteNote("loading");
       void fetch(`${BASE_PATH}/pistes/${resort.id}.geojson`)
         .then((response) => (response.ok ? response.json() : null))
         .then((data: { features?: unknown[] } | null) => {
-          if (cancelled || !mapHasSize(map)) return;
-          const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (cancelled) return;
           const count = data?.features?.length ?? 0;
           if (data && count > 0) {
-            layer.addData(data as GeoJSON.GeoJSON);
-            const bounds = layer.getBounds();
-            if (bounds.isValid()) {
-              map.fitBounds(bounds.pad(0.2), { ...mapPadding(map), maxZoom: 14, animate: !reduced });
+            pisteData.current = data;
+            apply(data);
+            const bounds = boundsOfGeoJson(data);
+            if (bounds && hasMapSize(map)) {
+              map.fitBounds(bounds, {
+                padding: glFitPadding(map.getContainer().clientHeight),
+                maxZoom: 14,
+                duration: motionDuration(600),
+              });
             }
             setPisteNote("ready");
             return;
           }
-          const zoom = map.getZoom();
-          if (Number.isFinite(zoom)) {
-            map.flyTo([resort.lat, resort.lon], Math.max(zoom, 12), { animate: !reduced, duration: reduced ? 0 : 0.6 });
+          pisteData.current = null;
+          if (hasMapSize(map)) {
+            map.flyTo({
+              center: [resort.lon, resort.lat],
+              zoom: Math.max(map.getZoom(), 12),
+              duration: motionDuration(600),
+              padding: glFitPadding(map.getContainer().clientHeight),
+            });
           }
           setPisteNote("empty");
         })
         .catch(() => {
           if (!cancelled) setPisteNote("empty");
         });
-    });
+    };
+    const onStyle = () => {
+      if (pisteData.current) apply(pisteData.current);
+    };
+    load();
+    map.on("style.load", onStyle);
     return () => {
       cancelled = true;
-      cancelAnimationFrame(frame);
-      map.removeLayer(layer);
+      map.off("style.load", onStyle);
     };
-  }, [map, share.resort, share.hideRuns, t, theme]);
+  }, [ready, share.resort, share.hideRuns]);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => map.invalidateSize());
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    const apply = () => {
+      if (!map.isStyleLoaded()) return;
+      syncSnow(map, share.showPistes);
+    };
+    apply();
+    map.on("style.load", apply);
+    return () => {
+      map.off("style.load", apply);
+    };
+  }, [ready, share.showPistes]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    const frame = requestAnimationFrame(() => map.resize());
     return () => cancelAnimationFrame(frame);
-  }, [map, share.view]);
+  }, [ready, share.view]);
 
   useEffect(() => {
-    let zoom: L.Control.Zoom | null = null;
+    const map = mapRef.current;
+    const lib = libRef.current;
+    if (!map || !lib || !ready) return;
+    let control: unknown = null;
     const sync = () => {
       const coarse = window.matchMedia("(pointer: coarse)").matches;
       const narrow = window.matchMedia("(max-width: 899px)").matches;
-      const show = !coarse && !narrow && mapHasSize(map);
+      const show = !coarse && !narrow && hasMapSize(map);
       if (!show) {
-        zoom?.remove();
-        zoom = null;
+        if (control) {
+          map.removeControl(control);
+          control = null;
+        }
         return;
       }
-      if (zoom) return;
-      zoom = L.control.zoom({ position: "topright" });
-      zoom.addTo(map);
+      if (control) return;
+      control = new lib.NavigationControl({ showCompass: false, showZoom: true, visualizePitch: false });
+      map.addControl(control, "top-right");
     };
     sync();
     map.on("resize", sync);
+    const coarseMedia = window.matchMedia("(pointer: coarse)");
+    const narrowMedia = window.matchMedia("(max-width: 899px)");
+    coarseMedia.addEventListener("change", sync);
+    narrowMedia.addEventListener("change", sync);
     return () => {
       map.off("resize", sync);
-      zoom?.remove();
+      coarseMedia.removeEventListener("change", sync);
+      narrowMedia.removeEventListener("change", sync);
+      if (control) map.removeControl(control);
     };
-  }, [map]);
+  }, [ready, provider]);
 
   useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
     const report = () => {
-      if (!mapHasSize(map)) return;
+      if (!hasMapSize(map) || !map.isStyleLoaded()) return;
       const bounds = map.getBounds();
       reportMapBounds({ south: bounds.getSouth(), west: bounds.getWest(), north: bounds.getNorth(), east: bounds.getEast() });
     };
@@ -263,50 +368,159 @@ function MapLayers() {
       map.off("moveend", report);
       map.off("resize", report);
     };
-  }, [map, reportMapBounds]);
+  }, [ready, reportMapBounds]);
 
   useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
     mapApi.current = {
       zoomOut() {
-        if (mapHasSize(map)) map.zoomOut();
+        if (hasMapSize(map)) map.zoomOut({ duration: motionDuration(300) });
       },
       fitAll() {
-        if (!mapHasSize(map) || filtered.length === 0) {
-          if (mapHasSize(map)) map.zoomOut();
+        if (!hasMapSize(map) || filtered.length === 0) {
+          if (hasMapSize(map)) map.zoomOut({ duration: motionDuration(300) });
           return;
         }
-        const bounds = L.latLngBounds(filtered.map((resort) => [resort.lat, resort.lon] as [number, number]));
-        map.fitBounds(bounds.pad(0.2), { ...mapPadding(map), maxZoom: 8 });
+        const bounds = padLngLatBounds(
+          filtered.map((resort) => [resort.lon, resort.lat]),
+          0.2,
+        );
+        if (!bounds) return;
+        map.fitBounds(bounds, {
+          padding: glFitPadding(map.getContainer().clientHeight),
+          maxZoom: 8,
+          duration: motionDuration(600),
+        });
       },
     };
-  }, [map, mapApi, filtered]);
+  }, [ready, mapApi, filtered]);
 
   useEffect(() => {
-    function onClick(event: L.LeafletMouseEvent) {
+    const map = mapRef.current;
+    const lib = libRef.current;
+    if (!map || !lib || !ready) return;
+    const popup = new lib.Popup({ closeButton: false, closeOnClick: false, offset: 12, className: "piste-tip" });
+    const labels = {
+      lift: t("pisteLift"),
+      novice: t("pisteNovice"),
+      easy: t("pisteEasy"),
+      intermediate: t("pisteIntermediate"),
+      advanced: t("pisteAdvanced"),
+      freeride: t("pisteFreeride"),
+      other: t("pisteOther"),
+    };
+    const showTip = (properties: Record<string, unknown> | null | undefined, lngLat: { lng: number; lat: number }) => {
+      const text = pisteTip(properties, labels);
+      if (!text) {
+        popup.remove();
+        return;
+      }
+      popup.setLngLat(lngLat).setText(text).addTo(map);
+    };
+    const onMove = (event: { point?: { x: number; y: number }; lngLat?: { lng: number; lat: number } }) => {
+      if (!event.point || !event.lngLat || !map.isStyleLoaded()) return;
+      const layers = pisteLayerIds().filter((id) => map.getLayer(id));
+      if (layers.length === 0) {
+        popup.remove();
+        map.getCanvas().style.cursor = "";
+        return;
+      }
+      let features: Array<{ properties?: Record<string, unknown> | null }> = [];
+      try {
+        features = map.queryRenderedFeatures([event.point.x, event.point.y], { layers });
+      } catch {
+        features = [];
+      }
+      if (features.length === 0) {
+        popup.remove();
+        map.getCanvas().style.cursor = "";
+        return;
+      }
+      map.getCanvas().style.cursor = "pointer";
+      showTip(features[0].properties ?? null, event.lngLat);
+    };
+    const onClick = (event: { point?: { x: number; y: number }; lngLat?: { lng: number; lat: number }; originalEvent?: Event }) => {
       const target = event.originalEvent?.target;
-      if (target instanceof Element && target.closest(".leaflet-control, .leaflet-marker-icon, .leaflet-tooltip, .leaflet-overlay-pane, .layers")) return;
+      if (target instanceof Element && target.closest(".resort-marker, .maplibregl-ctrl, .mapboxgl-ctrl, .maplibregl-popup, .mapboxgl-popup, .layers")) return;
+      if (event.point && map.isStyleLoaded()) {
+        const layers = pisteLayerIds().filter((id) => map.getLayer(id));
+        if (layers.length > 0 && event.lngLat) {
+          try {
+            const features = map.queryRenderedFeatures([event.point.x, event.point.y], { layers });
+            if (features.length > 0) {
+              showTip(features[0].properties ?? null, event.lngLat);
+              return;
+            }
+          } catch {
+            // A missing layer should not close the resort card.
+          }
+        }
+      }
+      popup.remove();
       selectResort(null);
-    }
+    };
+    map.on("mousemove", onMove);
     map.on("click", onClick);
     return () => {
+      map.off("mousemove", onMove);
       map.off("click", onClick);
+      popup.remove();
     };
-  }, [map, selectResort]);
+  }, [ready, selectResort, t]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const el = containerRef.current;
+    if (!map || !el || !ready) return;
+    const observer = new ResizeObserver(() => map.resize());
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [ready]);
 
   return (
-    <>
-      {share.showPistes ? (
-        <TileLayer
-          url="https://tiles.opensnowmap.org/pistes/{z}/{x}/{y}.png"
-          attribution='© <a href="https://www.opensnowmap.org/" rel="noopener noreferrer">OpenSnowMap.org</a> (CC BY-SA)'
-          opacity={0.9}
-        />
+    <div className="map-root" data-map-provider={provider ?? "pending"}>
+      <div ref={containerRef} className="map-canvas" />
+      {!ready && !bootError ? <div className="map-skeleton" role="status" aria-label={t("loadingMap")} /> : null}
+      {bootError ? (
+        <div className="map-skeleton" role="alert">
+          {t("mapError")}
+        </div>
       ) : null}
       {share.resort && !share.hideRuns && pisteNote !== "idle" && pisteNote !== "ready" ? (
         <p className="piste-float" role="status">
           {pisteNote === "loading" ? t("pisteLoading") : t("pisteEmpty")}
         </p>
       ) : null}
-    </>
+    </div>
   );
+}
+
+function clearPistes(map: VectorMap) {
+  if (!map.isStyleLoaded()) return;
+  for (const id of pisteLayerIds()) {
+    if (map.getLayer(id)) map.removeLayer(id);
+  }
+  if (map.getSource(PISTE_SOURCE_ID)) map.removeSource(PISTE_SOURCE_ID);
+}
+
+function syncSnow(map: VectorMap, show: boolean) {
+  if (!map.isStyleLoaded()) return;
+  const exists = Boolean(map.getLayer(SNOW_LAYER));
+  if (!show) {
+    if (exists) map.removeLayer(SNOW_LAYER);
+    if (map.getSource(SNOW_SOURCE)) map.removeSource(SNOW_SOURCE);
+    return;
+  }
+  if (exists) return;
+  map.addSource(SNOW_SOURCE, {
+    type: "raster",
+    tiles: [OPENSNOWMAP_TILES],
+    tileSize: 256,
+    attribution: OPENSNOWMAP_ATTRIBUTION,
+  });
+  const layer = { id: SNOW_LAYER, type: "raster", source: SNOW_SOURCE, paint: { "raster-opacity": 0.9 } };
+  const before = firstLabelLayer(map);
+  if (before) map.addLayer(layer, before);
+  else map.addLayer(layer);
 }

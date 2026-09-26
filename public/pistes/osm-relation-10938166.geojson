@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Haidenhof","aerialway":"platter","osm":"way/253059115"},"geometry":{"type":"LineString","coordinates":[[12.77188,46.83945],[12.77243,46.84136]]}}]}

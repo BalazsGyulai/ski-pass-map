@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Pfänderbahn","aerialway":"cable_car","osm":"way/24501225"},"geometry":{"type":"LineString","coordinates":[[9.75306,47.50494],[9.77914,47.50596]]}}]}

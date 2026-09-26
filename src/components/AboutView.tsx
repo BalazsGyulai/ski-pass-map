@@ -59,6 +59,8 @@ export function AboutView() {
         <h2>{t("creditsTitle")}</h2>
         <p>{t("creditsOsm")}</p>
         <p>{t("creditsOpenSkiMap")}</p>
+        <p>{t("creditsOpenFreeMap")}</p>
+        <p>{t("creditsMapbox")}</p>
         <p>{t("creditsOpenSnowMap")}</p>
         <p>{t("creditsPasses")}</p>
         <p>

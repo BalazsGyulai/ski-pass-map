@@ -16,6 +16,7 @@ https://opendatacommons.org/licenses/odbl/1-0/.
   flags that came from OpenStreetMap or OpenSkiMap. The file itself is marked
   `"licence": "ODbL-1.0"`.
 - `public/pistes/*.geojson` — piste and lift lines served with the map.
+- `public/pistes/none.json` — resort ids that have no piste or lift line inside their search radius.
 - `data/pistes/raw/*.json` — cached Overpass responses. Geometry is unchanged
   from OpenStreetMap. A few `website` tags that pointed at commercial ski
   portals were blanked so those URLs are not stored here.
@@ -28,6 +29,12 @@ now name OpenSkiMap, and this file does not store a Skimap.org URL.
 
 The optional piste overlay uses tiles from www.opensnowmap.org (CC BY-SA).
 Those tiles are not copied into this repository.
+
+The on-screen base map is not stored here. It is requested live from
+OpenFreeMap (OpenMapTiles schema, © OpenMapTiles, data © OpenStreetMap
+contributors) or, when a token, storage consent, and the monthly load budget
+allow it, from Mapbox. Positron, the OpenFreeMap style used here, includes
+Natural Earth shaded relief at low zoom.
 
 ## Files this licence does not cover
 
