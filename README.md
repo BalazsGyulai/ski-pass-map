@@ -130,6 +130,19 @@ Piste lines are OpenStreetMap ways, fetched once with `npm run fetch-pistes` (Ov
 
 Favourites and the trip plan stay in `localStorage` on the device. Filters and the open resort are in the URL. English and Hungarian UI; resort names stay German. Light and dark follow the system until you change Appearance.
 
+## Cloudflare setup for part 6
+
+Backend features use Pages Functions in [`functions/`](functions/), a second D1 database, Turnstile, Cloudflare Access, and Workers AI. The static export in `out/` does not read D1 at runtime yet.
+
+1. **D1 `skimap-app` (Western Europe):** In the dashboard, create D1 database `skimap-app` in Western Europe. Copy its id into [`wrangler.toml`](wrangler.toml) for the `DB` binding (replace the `REPLACE_ME` placeholder). Run `npx wrangler d1 migrations apply skimap-app --remote` for production, or `npm run db:migrate:local` before `wrangler pages dev`.
+2. **Pages bindings:** On project `skimap`, bind `DB` → `skimap-app`, keep existing `MAP_LOADS`, and add Workers AI binding `AI` (free tier).
+3. **Secrets / vars:** Set `MAP_LOAD_HASH_SALT` (reused for contact IP hashing), `TURNSTILE_SECRET_KEY`, `ACCESS_AUD`, `ACCESS_TEAM_DOMAIN`, and comma-separated `ADMIN_EMAILS`. Optional: `CONTACT_HOURLY_MAX`, `CONTACT_GLOBAL_DAILY_MAX`. See [`.env.example`](.env.example) and [`.dev.vars.example`](.dev.vars.example). Set build var `NEXT_PUBLIC_TURNSTILE_SITE_KEY` for the contact widget.
+4. **Turnstile:** Create a widget for the production site domain. Use the site key in the build; store the secret in Pages (not git).
+5. **Cloudflare Access:** Protect `/admin*` and `/api/admin/*` with a self-hosted Access application (free plan). Use the application audience tag as `ACCESS_AUD` and your team domain as `ACCESS_TEAM_DOMAIN`.
+6. **Local admin:** Only for development: `ADMIN_DEV_BYPASS=1` with `NODE_ENV` not `production`, plus `ADMIN_EMAILS`. Never enable bypass in production.
+
+Contact form: `POST /api/contact`. Admin UI: static [`/admin/`](src/app/admin/page.tsx) (English, `noindex`). Approved edits export as JSON patches; apply with `npm run apply:edits <patch.json>` (re-runs `npm run validate`).
+
 ## Licences
 
 Application code is “all rights reserved” until the owner chooses a licence. See [`LICENSE`](LICENSE). OpenStreetMap-derived files are ODbL 1.0. See [`DATA_LICENSE.md`](DATA_LICENSE.md).

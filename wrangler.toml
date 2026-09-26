@@ -7,3 +7,14 @@ pages_build_output_dir = "out"
 binding = "MAP_LOADS"
 database_name = "skimap-map-loads"
 database_id = "b5642fda-4805-44a4-afad-947a837a1a0f"
+
+# REPLACE_ME: create D1 database `skimap-app` in Western Europe, paste its id below, then run migrations.
+[[d1_databases]]
+binding = "DB"
+database_name = "skimap-app"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# Enable on the Pages project dashboard (Workers AI, free tier). Local `wrangler pages dev` needs a CF API token when this binding is active.
+[ai]
+binding = "AI"

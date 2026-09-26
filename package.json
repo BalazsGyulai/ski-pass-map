@@ -12,9 +12,14 @@
     "build": "npm run validate && next build && node scripts/check-static-html-lang.mjs && node scripts/stamp-sw.mjs",
     "lint": "eslint .",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "db:migrate:local": "node scripts/db-migrate-local.mjs",
+    "apply:edits": "tsx scripts/apply-edits.ts",
+    "test:part6-e2e": "node scripts/part6-e2e.mjs",
     "fetch-pistes": "tsx scripts/fetch-pistes.ts"
   },
   "dependencies": {
+    "jose": "^5.10.0",
     "mapbox-gl": "^3.31.0",
     "maplibre-gl": "^6.11.2",
     "next": "^15.5.26",
@@ -24,15 +29,18 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^22.20.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "better-sqlite3": "^11.10.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.26",
     "playwright-core": "^1.63.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.1",
+    "wrangler": "^4.141.0"
   },
   "engines": {
     "node": ">=22"
