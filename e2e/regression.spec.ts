@@ -237,6 +237,8 @@ test("part10 UI screenshots", async ({ page, baseURL }) => {
   await page.setViewportSize({ width: 820, height: 1180 });
   await page.goto(`/en/?resort=${RESORT_ID}`);
   await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await page.waitForSelector(".maplibregl-canvas", { timeout: 30_000 });
+  await page.waitForTimeout(800);
   await shotPart10(page, "resort-tablet");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`/en/?resort=${RESORT_ID}`);
