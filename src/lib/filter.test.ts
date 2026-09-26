@@ -127,7 +127,7 @@ describe("share url", () => {
       showAbandoned: true,
       passMatch: "all",
       transit: true,
-      home: "vienna",
+      home: "",
       resort: "stuhleck",
       view: "list",
       lang: "hu",

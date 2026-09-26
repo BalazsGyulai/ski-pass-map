@@ -2,23 +2,25 @@
 
 import { passes, resorts } from "@/lib/data";
 import { daysUntil, formatDate, formatEur } from "@/lib/format";
-import { bracketLabel, deadlineLabel, priceReasonText } from "@/lib/i18n";
-import { deadlinesFor, pricesOnDate, resolvePrice } from "@/lib/pricing";
+import { deadlineLabel, priceReasonText } from "@/lib/i18n";
+import { passHasShortName, passShortName } from "@/lib/pass-label";
+import { deadlinesFor, pricesOnDate, resolveForViewer } from "@/lib/pricing";
 import { useApp } from "./AppState";
 
-export function CompareView() {
+export function CompareView({ embedded = false }: { embedded?: boolean }) {
   const { t, lang, birthYear, effectiveDate, today } = useApp();
   const events = passes
     .flatMap((pass) => deadlinesFor(pass).map((deadline) => ({ ...deadline, pass })))
     .sort((a, b) => a.date.localeCompare(b.date) || a.pass.name.localeCompare(b.pass.name));
 
   return (
-    <div className="page">
-      <h1>{t("compareTitle")}</h1>
+    <div className={embedded ? "compare-embedded" : "page"}>
+      {embedded ? null : <h1>{t("compareTitle")}</h1>}
       <p>{t("compareIntro")}</p>
+      <p className="disclaimer">{t("globalDisclaimer")}</p>
       <p className="hint">{t("checkOfficial")}</p>
       {effectiveDate ? <p className="hint">{t("onDate", { date: formatDate(lang, effectiveDate) })}</p> : null}
-      {!birthYear ? <p className="hint">{t("setBirthYearHint")}</p> : null}
+      <p className="hint">{t("birthYearExact")}</p>
 
       <div className="table-wrap">
         <table className="compare-table">
@@ -33,7 +35,7 @@ export function CompareView() {
           </thead>
           <tbody>
             {passes.map((pass) => {
-              const yours = effectiveDate ? resolvePrice(pass, birthYear, effectiveDate) : null;
+              const yours = effectiveDate ? resolveForViewer(pass, birthYear, effectiveDate) : null;
               const tariffs = effectiveDate ? pricesOnDate(pass, effectiveDate) : [];
               const covered = resorts.filter((resort) => resort.passes.includes(pass.id));
               const next = today
@@ -47,11 +49,12 @@ export function CompareView() {
                   <td data-label={t("passes")}>
                     <span className="name-line">
                       <span className="swatch" style={{ background: pass.color }} />
-                      <strong>
-                        {pass.name}
+                      <strong className="pass-short">
+                        {passShortName(pass)}
                         {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
                       </strong>
                     </span>
+                    {passHasShortName(pass) ? <p className="pass-official">{pass.name}</p> : null}
                     <a href={pass.url} target="_blank" rel="noopener noreferrer">
                       {t("officialSite")}
                     </a>
@@ -60,7 +63,7 @@ export function CompareView() {
                     {yours?.amountEur != null ? (
                       <>
                         {formatEur(lang, yours.amountEur)}
-                        {yours.bracketId ? ` · ${bracketLabel(lang, yours.bracketId, yours.bracketLabel ?? "")}` : ""}
+                        {yours.bracketLabel ? ` · ${yours.bracketLabel}` : ""}
                       </>
                     ) : yours ? (
                       priceReasonText(lang, yours.reason, yours.bracketId, yours.nextPeriodStart)
@@ -69,15 +72,18 @@ export function CompareView() {
                     )}
                   </td>
                   <td data-label={t("tariffsColumn")}>
-                    <ul className="mini-passes">
-                      {tariffs.map((tariff) => (
-                        <li key={tariff.bracketId}>
-                          {bracketLabel(lang, tariff.bracketId, tariff.bracketLabel)}:{" "}
-                          {tariff.amountEur != null
-                            ? formatEur(lang, tariff.amountEur)
-                            : priceReasonText(lang, tariff.reason, tariff.bracketId, tariff.nextPeriodStart)}
-                        </li>
-                      ))}
+                    <ul className="mini-passes bracket-list">
+                      {tariffs.map((tariff) => {
+                        const matched = birthYear != null && yours?.reason === "ok" && tariff.bracketId === yours.bracketId;
+                        return (
+                          <li key={tariff.bracketId} className={matched ? "is-match" : undefined}>
+                            {tariff.bracketLabel}:{" "}
+                            {tariff.amountEur != null
+                              ? formatEur(lang, tariff.amountEur)
+                              : priceReasonText(lang, tariff.reason, tariff.bracketId, tariff.nextPeriodStart)}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </td>
                   <td data-label={t("resorts")}>

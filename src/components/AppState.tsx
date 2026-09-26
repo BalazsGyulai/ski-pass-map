@@ -2,13 +2,14 @@
 
 import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { cities } from "@/lib/data";
+import { boundsMoved, type MapBounds } from "@/lib/bounds";
 import { countActiveFilters } from "@/lib/filter";
 import { translate, type MessageKey } from "@/lib/i18n";
+import { cityPlaceId, sanitizeActivePlaceId, sanitizePlaces, type ReferenceCity, type SavedPlace } from "@/lib/places";
 import { readStorage, writeStorage } from "@/lib/storage";
 import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
-import { bareResortUrl, defaultShareState, parseShareState, serializeShareState, shareableSearch, type Lang, type ShareState } from "@/lib/url-state";
+import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type Lang, type ShareState } from "@/lib/url-state";
 
 type ThemeChoice = "system" | "light" | "dark";
 
@@ -30,6 +31,11 @@ interface AppContextValue {
   toggleFavourite: (id: string) => void;
   birthYear: number | null;
   setBirthYear: (year: number | null) => void;
+  places: SavedPlace[];
+  activePlaceId: string | null;
+  saveCity: (city: ReferenceCity) => void;
+  activatePlace: (id: string) => void;
+  removePlace: (id: string) => void;
   purchaseDate: string | null;
   setPurchaseDate: (date: string | null) => void;
   today: string | null;
@@ -50,6 +56,18 @@ interface AppContextValue {
   offline: boolean;
   copyMessage: string | null;
   copyLink: () => void;
+  areaBounds: MapBounds | null;
+  areaStale: boolean;
+  reportMapBounds: (bounds: MapBounds) => void;
+  searchThisArea: () => void;
+  searchAsMove: boolean;
+  setSearchAsMove: (on: boolean) => void;
+  mapApi: React.MutableRefObject<SkiMapApi>;
+}
+
+export interface SkiMapApi {
+  zoomOut: () => void;
+  fitAll: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -59,7 +77,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [share, setShare] = useState<ShareState>(defaultShareState);
   const [theme, setTheme] = useState<ThemeChoice>("system");
   const [favourites, setFavourites] = useState<string[]>([]);
-  const [birthYear, setBirthYear] = useState<number | null>(null);
+  const [birthYear, setBirthYearState] = useState<number | null>(null);
+  const [places, setPlaces] = useState<SavedPlace[]>([]);
+  const [activePlaceId, setActivePlaceId] = useState<string | null>(null);
   const [purchaseDate, setPurchaseDate] = useState<string | null>(null);
   const [resortDays, setResortDays] = useState<Record<string, number>>({});
   const [today, setToday] = useState<string | null>(null);
@@ -69,6 +89,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [locating, setLocating] = useState(false);
   const [offline, setOffline] = useState(false);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const [areaBounds, setAreaBounds] = useState<MapBounds | null>(null);
+  const [areaStale, setAreaStale] = useState(false);
+  const [searchAsMove, setSearchAsMoveState] = useState(false);
+  const areaRef = useRef<MapBounds | null>(null);
+  const liveRef = useRef<MapBounds | null>(null);
+  const moveRef = useRef(false);
+  const mapApi = useRef<SkiMapApi>({
+    zoomOut() {},
+    fitAll() {},
+  });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -76,14 +106,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const stored = readStorage();
     if (stored) {
       if (!params.has("lang") && (stored.lang === "en" || stored.lang === "hu")) parsed.lang = stored.lang;
-      if (!params.has("home") && stored.home && !removedHome(stored.home)) {
-        parsed.home = stored.home;
-        parsed.geoLat = stored.geoLat ?? null;
-        parsed.geoLon = stored.geoLon ?? null;
-      }
+      const savedPlaces = sanitizePlaces(stored.places);
+      setPlaces(savedPlaces);
+      setActivePlaceId(sanitizeActivePlaceId(stored.activePlaceId, savedPlaces));
       if (stored.theme === "light" || stored.theme === "dark" || stored.theme === "system") setTheme(stored.theme);
       if (Array.isArray(stored.favourites)) setFavourites(stored.favourites.filter((id) => typeof id === "string"));
-      if (typeof stored.birthYear === "number") setBirthYear(stored.birthYear);
+      if (typeof stored.birthYear === "number") setBirthYearState(stored.birthYear);
       if (typeof stored.purchaseDate === "string") setPurchaseDate(stored.purchaseDate);
       if (stored.resortDays && typeof stored.resortDays === "object") {
         const days: Record<string, number> = {};
@@ -93,6 +121,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setResortDays(days);
       }
     }
+    const fromUrl = parsePlan(params.get("plan"));
+    if (Object.keys(fromUrl).length > 0) setResortDays(fromUrl);
+    const bought = params.get("on");
+    if (bought && /^\d{4}-\d{2}-\d{2}$/.test(bought)) setPurchaseDate(bought);
     setToday(todayISO());
     setShare(parsed);
     setReady(true);
@@ -113,12 +145,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       birthYear,
       purchaseDate,
       resortDays,
-      home: share.home,
-      geoLat: share.geoLat,
-      geoLon: share.geoLon,
       lang: share.lang,
+      places,
+      activePlaceId,
+      version: 3,
     });
-  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, share.home, share.geoLat, share.geoLon, share.lang]);
+  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, share.lang, places, activePlaceId]);
 
   const onMap = pathname === "/";
   const pushedResort = useRef(false);
@@ -168,6 +200,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       next = qs ? `${path}?${qs}` : path;
     } else {
       const params = shareableSearch(new URLSearchParams(window.location.search), share);
+      const plan = serializePlan(resortDays);
+      if (plan) params.set("plan", plan);
+      else params.delete("plan");
+      if (purchaseDate) params.set("on", purchaseDate);
+      else params.delete("on");
       const qs = params.toString();
       next = qs ? `${path}?${qs}` : path;
     }
@@ -210,7 +247,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     window.history.replaceState(null, "", step.url);
     if (!share.resort) rememberedBare.current = step.url;
-  }, [ready, onMap, share]);
+  }, [ready, onMap, share, resortDays, purchaseDate]);
 
   useEffect(() => {
     const sync = () => setOffline(!navigator.onLine);
@@ -227,7 +264,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (key: MessageKey, vars?: Record<string, string | number>) => translate(share.lang, key, vars),
     [share.lang],
   );
-  const home = useMemo(() => homePoint(share), [share]);
+  const home = useMemo(() => homePoint(places, activePlaceId), [places, activePlaceId]);
   const effectiveDate = purchaseDate ?? today;
   const activeFilterCount = countActiveFilters(share);
 
@@ -281,6 +318,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
+  function setBirthYear(year: number | null) {
+    if (year == null || !Number.isInteger(year)) {
+      setBirthYearState(null);
+      return;
+    }
+    setBirthYearState(Math.min(2026, Math.max(1920, year)));
+  }
+
+  function saveCity(city: ReferenceCity) {
+    const id = cityPlaceId(city.id);
+    setPlaces((current) => {
+      const next = current.filter((place) => place.id !== id);
+      next.push({ id, label: city.name, lat: city.lat, lon: city.lon, kind: "city" });
+      return next.slice(-12);
+    });
+    setActivePlaceId(id);
+  }
+
+  function activatePlace(id: string) {
+    setActivePlaceId(id);
+  }
+
+  function removePlace(id: string) {
+    setPlaces((current) => current.filter((place) => place.id !== id));
+    setActivePlaceId((current) => (current === id ? null : current));
+  }
+
   function locate() {
     if (!navigator.geolocation) {
       setGeoError("unsupported");
@@ -291,11 +355,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       (position) => {
         setLocating(false);
         setGeoError(null);
-        updateShare({
-          home: "geo",
-          geoLat: position.coords.latitude,
-          geoLon: position.coords.longitude,
-        });
+        const id = `geo-${Date.now().toString(36)}`;
+        const place: SavedPlace = {
+          id,
+          label: translate(share.lang, "myLocation"),
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          kind: "geo",
+        };
+        setPlaces((current) => [...current, place].slice(-12));
+        setActivePlaceId(id);
       },
       () => {
         setLocating(false);
@@ -304,6 +373,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
     );
   }
+
+  const reportMapBounds = useCallback((bounds: MapBounds) => {
+    liveRef.current = bounds;
+    if (!areaRef.current || moveRef.current || !boundsMoved(areaRef.current, bounds)) {
+      if (!areaRef.current || moveRef.current) {
+        areaRef.current = bounds;
+        setAreaBounds(bounds);
+        setAreaStale(false);
+      }
+      return;
+    }
+    setAreaStale(true);
+  }, []);
+
+  const searchThisArea = useCallback(() => {
+    if (!liveRef.current) return;
+    areaRef.current = liveRef.current;
+    setAreaBounds(liveRef.current);
+    setAreaStale(false);
+  }, []);
+
+  const setSearchAsMove = useCallback((on: boolean) => {
+    moveRef.current = on;
+    setSearchAsMoveState(on);
+    if (on && liveRef.current) {
+      areaRef.current = liveRef.current;
+      setAreaBounds(liveRef.current);
+      setAreaStale(false);
+    }
+  }, []);
 
   function copyLink() {
     const url = shareableHref(window.location.href);
@@ -330,6 +429,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     toggleFavourite,
     birthYear,
     setBirthYear,
+    places,
+    activePlaceId,
+    saveCity,
+    activatePlace,
+    removePlace,
     purchaseDate,
     setPurchaseDate,
     today,
@@ -350,6 +454,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     offline,
     copyMessage,
     copyLink,
+    areaBounds,
+    areaStale,
+    reportMapBounds,
+    searchThisArea,
+    searchAsMove,
+    setSearchAsMove,
+    mapApi,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -361,20 +472,10 @@ export function useApp(): AppContextValue {
   return value;
 }
 
-function homePoint(share: ShareState): HomePoint | null {
-  if (share.home === "geo") {
-    if (share.geoLat == null || share.geoLon == null) return null;
-    return { lat: share.geoLat, lon: share.geoLon, label: "geo" };
-  }
-  const city = cities.find((item) => item.id === share.home);
-  if (!city) return null;
-  return { lat: city.lat, lon: city.lon, label: city.name };
-}
-
-const retiredHomes = new Set(["sopron", "graz", "wiener-neustadt"]);
-
-function removedHome(id: string): boolean {
-  return retiredHomes.has(id);
+function homePoint(places: SavedPlace[], activePlaceId: string | null): HomePoint | null {
+  const place = places.find((item) => item.id === activePlaceId);
+  if (!place) return null;
+  return { lat: place.lat, lon: place.lon, label: place.label };
 }
 
 function shareableHref(href: string): string {

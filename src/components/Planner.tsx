@@ -1,28 +1,27 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { passById, passes, resortById, resorts } from "@/lib/data";
+import { fold } from "@/lib/filter";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur } from "@/lib/format";
 import { priceReasonText } from "@/lib/i18n";
-import { cheapestFullCoverage, dayTicketIsEstimate, quotePlan, type PriceQuote } from "@/lib/pricing";
+import { cheapestFullCoverage, dayTicketIsEstimate, nextPriceChange, quotePlan, savingsVsDayTickets, type PriceQuote } from "@/lib/pricing";
+import { BASE_PATH } from "@/lib/site";
+import { serializePlan } from "@/lib/url-state";
+import { BirthYearField } from "./BirthYearField";
+import { CompareView } from "./CompareView";
+import { PlacePicker } from "./PlacePicker";
 import { useApp } from "./AppState";
 
 export function Planner() {
-  const {
-    t,
-    lang,
-    birthYear,
-    setBirthYear,
-    setPurchaseDate,
-    effectiveDate,
-    resortDays,
-    setResortDaysCount,
-    clearResortDays,
-    ready,
-  } = useApp();
+  const app = useApp();
+  const { t, lang, birthYear, setPurchaseDate, effectiveDate, resortDays, setResortDaysCount, clearResortDays, ready, share, copyMessage } = app;
+  const [tab, setTab] = useState<"plan" | "prices">("plan");
+  const [query, setQuery] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const plan = Object.entries(resortDays).map(([id, days]) => ({ id, days }));
   const quotes = useMemo(() => {
     if (!effectiveDate) return [];
     return quotePlan(
@@ -41,180 +40,222 @@ export function Planner() {
     );
   }, [effectiveDate, birthYear, resortDays]);
 
-  const recommended = cheapestFullCoverage(quotes);
-  const totalPlanned = plan.reduce((sum, item) => sum + item.days, 0);
+  const totalPlanned = Object.values(resortDays).reduce((sum, days) => sum + days, 0);
+  const priced = quotes.filter((quote) => quote.totalEur != null && totalPlanned > 0).sort((a, b) => (a.totalEur ?? 0) - (b.totalEur ?? 0));
+  const best = priced[0] ?? null;
+  const dayTickets = quotes.find((quote) => quote.kind === "day-tickets");
+  const savings = best && dayTickets ? savingsVsDayTickets(best, dayTickets) : null;
+  const others = priced.filter((quote) => quote.id !== best?.id);
+  const full = cheapestFullCoverage(quotes);
+  const hits = query.trim()
+    ? resorts.filter((resort) => fold(resort.name).includes(fold(query.trim())) && !(resortDays[resort.id] > 0)).slice(0, 6)
+    : [];
+
+  const alerts = useMemo(() => {
+    if (!effectiveDate) return [];
+    const used = new Set<string>();
+    for (const [id, days] of Object.entries(resortDays)) {
+      if (days <= 0) continue;
+      for (const passId of resortById.get(id)?.passes ?? []) used.add(passId);
+    }
+    return [...used]
+      .map((id) => {
+        const pass = passById.get(id);
+        if (!pass) return null;
+        const change = nextPriceChange(pass, birthYear, effectiveDate);
+        return change ? { ...change, name: pass.name } : null;
+      })
+      .filter((item): item is NonNullable<typeof item> => item != null)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, 3);
+  }, [effectiveDate, resortDays, birthYear]);
+
+  function sharePlan() {
+    const params = new URLSearchParams();
+    const plan = serializePlan(resortDays);
+    if (plan) params.set("plan", plan);
+    if (app.purchaseDate) params.set("on", app.purchaseDate);
+    if (share.lang !== "en") params.set("lang", share.lang);
+    const url = `${window.location.origin}${BASE_PATH}/plan/${params.toString() ? `?${params}` : ""}`;
+    if (navigator.clipboard?.writeText) {
+      void navigator.clipboard.writeText(url).then(() => {
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 2000);
+      });
+    }
+  }
+
+  const passBreak = quotes
+    .filter((quote) => quote.kind !== "day-tickets" && quote.breakEvenDays != null)
+    .sort((a, b) => (a.breakEvenDays ?? 0) - (b.breakEvenDays ?? 0))[0];
 
   return (
     <div className="page page-narrow">
       <h1>{t("planTitle")}</h1>
-      <p>{t("planIntro")}</p>
-      <p className="hint">{t("savedLocally")}</p>
-      <p className="hint">{t("checkOfficial")}</p>
+      <p className="disclaimer">{t("globalDisclaimer")}</p>
+      <div className="seg" role="tablist" aria-label={t("resultsTablist")}>
+        <button type="button" role="tab" aria-selected={tab === "plan"} onClick={() => setTab("plan")}>
+          {t("myPlanTab")}
+        </button>
+        <button type="button" role="tab" aria-selected={tab === "prices"} onClick={() => setTab("prices")}>
+          {t("passPricesTab")}
+        </button>
+      </div>
+      {tab === "prices" ? <CompareView embedded /> : null}
+      {tab === "plan" ? (
+        <div className="plan-layout">
+          <section className="card-block">
+            <div className="chip-row">
+              <label className="chip-field">
+                <span className="sr-only">{t("purchaseDate")}</span>
+                <input type="date" aria-label={t("purchaseDate")} value={effectiveDate ?? ""} onChange={(event) => setPurchaseDate(event.target.value || null)} />
+              </label>
+            </div>
+            {effectiveDate ? <p className="hint">{t("buyOn", { date: formatDate(lang, effectiveDate) })}</p> : null}
+            <BirthYearField />
+            <p className="hint">{t("purchaseHelp")}</p>
+            <PlacePicker />
 
-      <section className="card-block">
-        <div className="split">
-          <label className="field">
-            <span>{t("birthYear")}</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1940}
-              max={2026}
-              value={birthYear ?? ""}
-              onChange={(event) => setBirthYear(event.target.value === "" ? null : Number(event.target.value))}
-            />
-          </label>
-          <label className="field">
-            <span>{t("purchaseDate")}</span>
-            <input type="date" value={effectiveDate ?? ""} onChange={(event) => setPurchaseDate(event.target.value || null)} />
-          </label>
-        </div>
-        <p className="hint">{t("birthYearHelp")}</p>
-        <p className="hint">{t("purchaseHelp")}</p>
-        {effectiveDate ? <p className="hint">{t("onDate", { date: formatDate(lang, effectiveDate) })}</p> : null}
-      </section>
+            <label className="field">
+              <span>{t("planSearch")}</span>
+              <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("searchPlaceholder")} />
+            </label>
+            {hits.length > 0 ? (
+              <ul className="type-list">
+                {hits.map((resort) => (
+                  <li key={resort.id}>
+                    <button type="button" onClick={() => { setResortDaysCount(resort.id, 1); setQuery(""); }}>
+                      {resort.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
 
-      <section className="card-block">
-        <h2>{t("plannedDays")}</h2>
-        {totalPlanned === 0 ? <p>{t("nonePlanned")}</p> : null}
-        <ul className="plan-list">
-          {Object.entries(resortDays)
-            .sort((a, b) => b[1] - a[1])
-            .map(([id, days]) => {
-              const resort = resortById.get(id);
-              if (!resort) return null;
-              return (
-                <li key={id}>
-                  <Link href={`/?resort=${id}`}>{resort.name}</Link>
-                  <div className="stepper">
-                    <button type="button" aria-label={t("decreaseDays")} onClick={() => setResortDaysCount(id, days - 1)}>
-                      −
-                    </button>
-                    <span className="num">{days}</span>
-                    <button type="button" aria-label={t("increaseDays")} onClick={() => setResortDaysCount(id, days + 1)}>
-                      +
-                    </button>
-                  </div>
+            {totalPlanned === 0 ? <p>{t("planEmpty")}</p> : null}
+            <ul className="plan-list">
+              {Object.entries(resortDays)
+                .sort((a, b) => b[1] - a[1])
+                .map(([id, days]) => {
+                  const resort = resortById.get(id);
+                  if (!resort) return null;
+                  return (
+                    <li key={id}>
+                      <div>
+                        <Link href={`/?resort=${encodeURIComponent(id)}`}>{resort.name}</Link>
+                        <span className="pass-dots">
+                          {resort.passes.slice(0, 3).map((passId) => (
+                            <span key={passId} className="pass-dot" style={{ background: passById.get(passId)?.color ?? "#94A3B8" }} title={passById.get(passId)?.name ?? passId} />
+                          ))}
+                        </span>
+                      </div>
+                      <div className="stepper">
+                        <button type="button" aria-label={t("decreaseDays")} onClick={() => setResortDaysCount(id, days - 1)}>
+                          −
+                        </button>
+                        <span className="num">{days}</span>
+                        <button type="button" aria-label={t("increaseDays")} onClick={() => setResortDaysCount(id, days + 1)}>
+                          +
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+            </ul>
+            {totalPlanned > 0 ? (
+              <div className="row-actions">
+                <button type="button" className="ghost" onClick={clearResortDays}>
+                  {t("clearDays")}
+                </button>
+                <button type="button" className="ghost" onClick={sharePlan}>
+                  {copied ? t("copied") : copyMessage ?? t("sharePlan")}
+                </button>
+              </div>
+            ) : null}
+          </section>
+
+          <section className="card-block">
+            <h2>{t("results")}</h2>
+            {!ready || !effectiveDate ? <p>{t("loadingMap")}</p> : null}
+            {totalPlanned === 0 ? <p>{t("addDaysPrompt")}</p> : null}
+            {best ? (
+              <article className="best-card">
+                <p className="best-label">{t("bestValue")}</p>
+                <h3>{quoteTitle(best, t)}</h3>
+                <p className="price-display num">{best.totalEur != null ? formatEur(lang, best.totalEur) : t("unknownTotal")}</p>
+                {best.costPerDayEur != null ? <p className="hint">{t("perDay", { amount: formatEur(lang, best.costPerDayEur) })}</p> : null}
+                <p>{t("daysCoveredBar", { covered: best.coveredDays, total: totalPlanned })}</p>
+                <div className="coverage" aria-hidden="true">
+                  <span style={{ width: `${totalPlanned > 0 ? (best.coveredDays / totalPlanned) * 100 : 0}%` }} />
+                </div>
+                {savings != null && savings > 0 ? <p className="save">{t("youSave", { amount: formatEur(lang, savings) })}</p> : null}
+                {best.kind === "day-tickets" ? (
+                  <p>
+                    {t("dayTicketsWin")}
+                    {passBreak?.breakEvenDays != null ? ` ${t("passPaysOffFrom", { n: formatBreakEven(passBreak.breakEvenDays) })}` : ""}
+                  </p>
+                ) : null}
+                {best.usesEstimate ? <p className="hint">{t("estimate")}</p> : null}
+                {full && full.id !== best.id ? (
+                  <p className="hint">
+                    {t("fullCoverageLabel")}: {quoteTitle(full, t)} · {full.totalEur != null ? formatEur(lang, full.totalEur) : t("unknownTotal")}
+                  </p>
+                ) : null}
+              </article>
+            ) : null}
+            {alerts.map((alert) => (
+              <p key={`${alert.name}-${alert.date}`} className="deadline">
+                {t("deadlineRises", { name: alert.name, from: formatEur(lang, alert.fromEur), to: formatEur(lang, alert.toEur), date: formatDate(lang, alert.date) })}
+              </p>
+            ))}
+            {others.length > 0 ? <h3>{t("otherOptions")}</h3> : null}
+            <ul className="option-list">
+              {others.map((quote) => (
+                <li key={quote.id}>
+                  <button type="button" className="option-row" aria-expanded={openId === quote.id} onClick={() => setOpenId(openId === quote.id ? null : quote.id)}>
+                    <span>{quoteTitle(quote, t)}</span>
+                    <span className="num">{quote.totalEur != null ? formatEur(lang, quote.totalEur) : t("unknownTotal")}</span>
+                  </button>
+                  {openId === quote.id ? <Breakdown quote={quote} totalPlanned={totalPlanned} /> : null}
                 </li>
-              );
-            })}
-        </ul>
-        {totalPlanned > 0 ? (
-          <div className="row-actions">
-            <button type="button" className="ghost" onClick={clearResortDays}>
-              {t("clearDays")}
-            </button>
-          </div>
-        ) : null}
-      </section>
-
-      <section className="card-block">
-        <h2>{t("results")}</h2>
-        <p className="hint">{t("coverageNote")}</p>
-        {!ready || !effectiveDate ? <p>{t("loadingMap")}</p> : null}
-        {totalPlanned === 0 ? <p>{t("addDaysPrompt")}</p> : null}
-        {recommended ? (
-          <p className="banner">
-            {t("cheapest")}: {quoteTitle(recommended, t)} · {finiteOrBlank(recommended.totalEur) != null ? formatEur(lang, recommended.totalEur ?? 0) : t("unknownTotal")}
-            {recommended.usesEstimate ? ` · ${t("estimate")}` : ""}
-          </p>
-        ) : totalPlanned > 0 ? (
-          <p className="banner warn">{t("noFullCoverage")}</p>
-        ) : null}
-        <div className="quote-grid">
-          {quotes.map((quote) => (
-            <QuoteCard key={quote.id} quote={quote} recommended={recommended?.id === quote.id} totalPlanned={totalPlanned} />
-          ))}
+              ))}
+            </ul>
+            <p className="hint">{t("savedLocally")}</p>
+            <p className="hint">{t("checkOfficial")}</p>
+          </section>
         </div>
-      </section>
-
-      <section className="card-block">
-        <h2>{t("assumptions")}</h2>
-        <p className="hint">{t("estimateNote")}</p>
-        <ul className="source-list">
-          {passes.map((pass) => (
-            <li key={pass.id}>
-              <strong>{pass.name}.</strong> {pass.provisional ? <span className="badge">{t("provisional")}</span> : null} {pass.price_note}
-            </li>
-          ))}
-        </ul>
-      </section>
+      ) : null}
     </div>
   );
 }
 
-function QuoteCard({ quote, recommended, totalPlanned }: { quote: PriceQuote; recommended: boolean; totalPlanned: number }) {
+function Breakdown({ quote, totalPlanned }: { quote: PriceQuote; totalPlanned: number }) {
   const { t, lang, setPurchaseDate } = useApp();
-  const full = quote.uncoveredDays === 0 && totalPlanned > 0;
   return (
-    <article className={recommended ? "quote is-recommended" : "quote"}>
-      <h3>{quoteTitle(quote, t)}</h3>
-      {recommended ? <p className="badge">{t("cheapest")}</p> : null}
-      <p className="hint">{full ? t("fullCover") : totalPlanned > 0 ? t("partialCover") : t("stickerPrices")}</p>
-      <dl>
-        <div>
-          <dt>{t("passPrice")}</dt>
-          <dd>{quote.kind === "day-tickets" ? "—" : money(lang, quote.passPriceEur, t("unknown"))}</dd>
-        </div>
-        <div>
-          <dt>{t("coversDays", { covered: quote.coveredDays, total: Math.max(totalPlanned, quote.coveredDays) })}</dt>
-          <dd>{t("uncoveredDays", { n: quote.uncoveredDays })}</dd>
-        </div>
-        <div>
-          <dt>{t("uncoveredTicket")}</dt>
-          <dd>{quote.uncoveredDays === 0 ? "—" : money(lang, quote.uncoveredDayTicketEur, t("unknown"))}</dd>
-        </div>
-        <div>
-          <dt>{t("total")}</dt>
-          <dd>
-            {money(lang, quote.totalEur, t("unknownTotal"))}
-            {quote.usesEstimate && quote.totalEur != null ? ` · ${t("estimate")}` : ""}
-          </dd>
-        </div>
-        <div>
-          <dt>{t("costPerDay")}</dt>
-          <dd>{quote.costPerDayEur == null ? t("unknown") : formatEur(lang, quote.costPerDayEur)}</dd>
-        </div>
-        <div>
-          <dt>{t("breakEven")}</dt>
-          <dd>
-            {quote.breakEvenDays != null
-              ? `${t("breakEvenMix", { n: formatBreakEven(quote.breakEvenDays) })}${quote.breakEvenEstimate ? ` · ${t("estimate")}` : ""}`
-              : t("breakEvenMixUnknown")}
-          </dd>
-        </div>
-      </dl>
+    <div className="breakdown">
+      <p>{t("optionCovers", { covered: quote.coveredDays, total: totalPlanned })}</p>
+      <p>
+        {t("passPrice")}: {quote.kind === "day-tickets" ? t("dash") : money(lang, quote.passPriceEur, t("unknown"))}
+      </p>
+      <p>
+        {t("uncoveredTicket")}: {quote.uncoveredDays === 0 ? t("dash") : money(lang, quote.uncoveredDayTicketEur, t("unknown"))}
+      </p>
+      {quote.usesEstimate ? <p className="hint">{t("estimate")}</p> : null}
       {quote.priceReason && quote.passPriceEur == null ? (
         <p className="hint warn">
           {priceReasonText(lang, quote.priceReason, null, quote.nextPeriodStart)}
           {quote.nextPeriodStart ? (
-            <>
-              {" "}
-              <button type="button" className="ghost" onClick={() => setPurchaseDate(quote.nextPeriodStart)}>
-                {t("useThisDate", { date: formatDate(lang, quote.nextPeriodStart) })}
-              </button>
-            </>
+            <button type="button" className="ghost" onClick={() => setPurchaseDate(quote.nextPeriodStart)}>
+              {t("useThisDate", { date: formatDate(lang, quote.nextPeriodStart) })}
+            </button>
           ) : null}
         </p>
       ) : null}
-      {quote.passIds.length > 0 ? (
-        <ul className="mini-passes">
-          {quote.passIds.map((id) => {
-            const pass = passById.get(id);
-            if (!pass) return null;
-            return (
-              <li key={id}>
-                <span className="swatch" style={{ background: pass.color }} /> {pass.name}
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
-    </article>
+    </div>
   );
 }
 
-function quoteTitle(quote: PriceQuote, t: (key: "dayTicketsOnly" | "combo" | "passPrice", vars?: Record<string, string | number>) => string): string {
+function quoteTitle(quote: PriceQuote, t: (key: "dayTicketsOnly" | "combo", vars?: Record<string, string | number>) => string): string {
   if (quote.kind === "day-tickets") return t("dayTicketsOnly");
   const names = quote.passIds.map((id) => passById.get(id)?.name ?? id).join(" + ");
   return quote.kind === "combo" ? `${t("combo")}: ${names}` : names;

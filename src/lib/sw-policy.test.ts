@@ -5,7 +5,7 @@ const sw = readFileSync(new URL("../../public/sw.js", import.meta.url), "utf8");
 
 describe("service worker update policy", () => {
   it("versions the cache per build and drops the old fixed cache", () => {
-    expect(sw).toContain('const CACHE = "ski-pass-map-__BUILD_ID__"');
+    expect(sw).toContain('const CACHE = "ski-pass-map-v3-__BUILD_ID__"');
     expect(sw).not.toContain('const CACHE = "ski-pass-map-v1"');
     expect(sw).toContain("keys.filter((key) => key !== CACHE)");
   });

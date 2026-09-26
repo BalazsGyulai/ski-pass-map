@@ -1,3 +1,4 @@
+import { fold } from "./filter";
 import type { AgeBracket, Pass, PricePeriod } from "./schema";
 
 export type PriceReason = "ok" | "no-birth-year" | "no-bracket" | "no-period" | "price-unknown" | "age-not-birth-year";
@@ -74,6 +75,18 @@ export function yearInBracket(year: number, bracket: Pick<AgeBracket, "birth_yea
 
 export function isOpenBracket(bracket: Pick<AgeBracket, "birth_year_from" | "birth_year_to">): boolean {
   return bracket.birth_year_from == null && bracket.birth_year_to == null;
+}
+
+/** The one adult tariff, matched only by an adult/Erwachsene/Erw. label. Anything else is not guessed. */
+export function adultBracket(pass: Pass): AgeBracket | null {
+  const matches = pass.pricing.brackets.filter((bracket) => isAdultLabel(bracket.label));
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function isAdultLabel(label: string): boolean {
+  const text = fold(label).replaceAll("ß", "ss");
+  if (text.includes("senior")) return false;
+  return /^(?:erwachsen(?:e|en|er|es)?|adult|erw)\b/.test(text);
 }
 
 /** The note is the only place Snow Card records that the presale has not started yet. */
@@ -210,6 +223,56 @@ export function deadlinesFor(pass: Pass): Deadline[] {
   return events;
 }
 
+/**
+ * Adult price when no birth year is set. A birth year uses that pass's own bracket
+ * and does not fall back to another age group.
+ */
+export function resolveForViewer(pass: Pass, birthYear: number | null, purchaseDate: string): ResolvedPrice {
+  if (birthYear != null && Number.isInteger(birthYear)) return resolvePrice(pass, birthYear, purchaseDate);
+  const bracket = adultBracket(pass);
+  if (!bracket) return { ...EMPTY_PRICE, reason: "no-bracket" };
+  const period = periodOnDate(pass, bracket, purchaseDate);
+  if (!period) {
+    return {
+      ...EMPTY_PRICE,
+      bracketId: bracket.label,
+      bracketLabel: bracket.label,
+      reason: "no-period",
+      nextPeriodStart: nextStart(pass, bracket, purchaseDate),
+    };
+  }
+  return priceFrom(bracket, period);
+}
+
+export interface PriceChange {
+  date: string;
+  fromEur: number;
+  toEur: number;
+  bracketLabel: string;
+}
+
+/** The next published cut-off for the tariff the viewer is on, when the price actually changes. */
+export function nextPriceChange(pass: Pass, birthYear: number | null, purchaseDate: string): PriceChange | null {
+  const price = resolveForViewer(pass, birthYear, purchaseDate);
+  if (price.amountEur == null || !price.bracketLabel || !price.periodEnd) return null;
+  const periods = periodsFor(pass, price.bracketLabel);
+  const index = periods.findIndex((period) => period.valid_until === price.periodEnd);
+  const next = index >= 0 ? periods[index + 1] : undefined;
+  if (!next || next.price_eur == null || next.price_eur === price.amountEur) return null;
+  return {
+    date: price.periodEnd,
+    fromEur: price.amountEur,
+    toEur: next.price_eur,
+    bracketLabel: price.bracketLabel,
+  };
+}
+
+/** How much an option saves against paying day tickets for the same days. Negative when the option costs more. */
+export function savingsVsDayTickets(option: PriceQuote, dayTickets: PriceQuote): number | null {
+  if (option.totalEur == null || dayTickets.totalEur == null) return null;
+  return dayTickets.totalEur - option.totalEur;
+}
+
 export function quotePlan(
   passes: Pass[],
   resorts: PricedResort[],
@@ -279,7 +342,7 @@ function quoteFor(
   purchaseDate: string,
 ): PriceQuote {
   const selected = passIds.map((id) => passes.find((pass) => pass.id === id)).filter((pass): pass is Pass => Boolean(pass));
-  const resolved = selected.map((pass) => resolvePrice(pass, birthYear, purchaseDate));
+  const resolved = selected.map((pass) => resolveForViewer(pass, birthYear, purchaseDate));
   const passPriceKnown = resolved.every((price) => price.amountEur != null);
   const passPriceEur = passPriceKnown ? resolved.reduce((sum, price) => sum + (price.amountEur ?? 0), 0) : null;
   const failed = resolved.find((price) => price.amountEur == null);

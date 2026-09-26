@@ -13,6 +13,8 @@ export interface ShareState extends ResortFilters {
   sort: SortKey;
   dir: SortDir;
   showPistes: boolean;
+  /** Hide the selected resort's own piste lines. The OpenSnowMap overlay is showPistes. */
+  hideRuns: boolean;
 }
 
 export function defaultShareState(): ShareState {
@@ -39,6 +41,7 @@ export function defaultShareState(): ShareState {
     sort: "distance",
     dir: "asc",
     showPistes: false,
+    hideRuns: false,
   };
 }
 
@@ -58,9 +61,8 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.maxKm = positiveOrNull(params.get("maxKm"));
   state.favouritesOnly = params.get("fav") === "1";
   state.showAbandoned = params.get("abandoned") === "1" || params.get("closed") === "1";
-  const home = params.get("home");
-  // "geo" is a device location. It is never read from a shared URL.
-  state.home = home && home !== "geo" ? (safeId(home, 64) ?? "") : "";
+  // Reference places stay in localStorage. A shared link never sets a city or a device location.
+  state.home = "";
   state.geoLat = null;
   state.geoLon = null;
   state.resort = safeId(params.get("resort"), 80);
@@ -71,6 +73,7 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.sort = sort === "day" || sort === "elevation" || sort === "slope" || sort === "name" ? sort : "distance";
   state.dir = params.get("dir") === "desc" ? "desc" : "asc";
   state.showPistes = params.get("pistes") === "1";
+  state.hideRuns = params.get("runs") === "0";
   return state;
 }
 
@@ -90,13 +93,13 @@ export function serializeShareState(state: ShareState): string {
   if (state.maxKm != null) params.set("maxKm", String(state.maxKm));
   if (state.favouritesOnly) params.set("fav", "1");
   if (state.showAbandoned) params.set("abandoned", "1");
-  if (state.home && state.home !== "geo" && state.home !== defaults.home) params.set("home", state.home);
   if (state.resort) params.set("resort", state.resort);
   if (state.view !== "map") params.set("view", state.view);
   if (state.lang !== "en") params.set("lang", state.lang);
   if (state.sort !== "distance") params.set("sort", state.sort);
   if (state.dir !== "asc") params.set("dir", state.dir);
   if (state.showPistes) params.set("pistes", "1");
+  if (state.hideRuns) params.set("runs", "0");
   return params.toString();
 }
 
@@ -135,15 +138,35 @@ function cleanText(value: string, max: number): string {
   return value.replace(/[\u0000-\u001F\u007F]/g, "").slice(0, max);
 }
 
-/** Query string safe to put in the address bar or a copied link. Device coordinates are removed. */
-export function shareableSearch(params: URLSearchParams, share?: Pick<ShareState, "home" | "lang">): URLSearchParams {
+/** Plan rows encoded as id:days,id:days. Ids stay in the existing safe-id alphabet. */
+export function serializePlan(days: Record<string, number>): string {
+  return Object.entries(days)
+    .filter((entry): entry is [string, number] => entry[1] > 0 && /^[a-z0-9-]+$/i.test(entry[0]))
+    .map(([id, count]) => `${id}:${Math.min(80, Math.round(count))}`)
+    .join(",");
+}
+
+export function parsePlan(value: string | null): Record<string, number> {
+  const days: Record<string, number> = {};
+  if (!value) return days;
+  for (const part of value.split(",").slice(0, 40)) {
+    const [id, raw] = part.split(":");
+    if (!id || !/^[a-z0-9-]+$/i.test(id)) continue;
+    const count = Number(raw);
+    if (!Number.isInteger(count) || count <= 0 || count > 80) continue;
+    days[id] = count;
+  }
+  return days;
+}
+
+/** Query string safe to put in the address bar or a copied link. Places and birth year stay off the URL. */
+export function shareableSearch(params: URLSearchParams, share?: Pick<ShareState, "lang">): URLSearchParams {
   const next = new URLSearchParams(params);
   next.delete("lat");
   next.delete("lon");
-  if (next.get("home") === "geo") next.delete("home");
+  next.delete("home");
+  next.delete("age");
   if (share) {
-    if (share.home && share.home !== "geo") next.set("home", share.home);
-    else next.delete("home");
     if (share.lang === "en") next.delete("lang");
     else next.set("lang", share.lang);
   }

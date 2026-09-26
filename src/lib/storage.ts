@@ -1,17 +1,19 @@
+import type { SavedPlace } from "./places";
 import type { Lang } from "./url-state";
 
 const KEY = "ski-pass-map-v1";
 
 export interface StoredPrefs {
+  version?: number;
   theme?: "system" | "light" | "dark";
   favourites?: string[];
   birthYear?: number | null;
   purchaseDate?: string | null;
   resortDays?: Record<string, number>;
-  home?: string;
-  geoLat?: number | null;
-  geoLon?: number | null;
   lang?: Lang;
+  /** Reference places. Never copied into the URL. */
+  places?: SavedPlace[];
+  activePlaceId?: string | null;
 }
 
 export function readStorage(): StoredPrefs | null {

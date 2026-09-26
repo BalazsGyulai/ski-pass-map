@@ -6,10 +6,15 @@ import {
   dayTicketIsEstimate,
   deadlinesFor,
   distributeDays,
+  adultBracket,
+  nextPriceChange,
   pricesOnDate,
   quotePlan,
+  resolveForViewer,
   resolvePrice,
+  savingsVsDayTickets,
   type PricedResort,
+  type PriceQuote,
 } from "./pricing";
 import type { Pass } from "./schema";
 
@@ -63,6 +68,54 @@ describe("resolvePrice", () => {
     expect(resolvePrice(arlberg, 1990, "2026-12-10").amountEur).toBe(840);
     expect(resolvePrice(arlberg, 2003, "2026-12-11").amountEur).toBe(1272);
     expect(resolvePrice(arlberg, 2019, "2026-12-11").amountEur).toBe(11);
+  });
+});
+
+describe("resolveForViewer", () => {
+  it("prices the adult tariff without a birth year, and keeps a birth year exact", () => {
+    const bep = pass("noe-bergerlebnispass");
+    expect(resolveForViewer(bep, null, "2026-10-01").amountEur).toBe(429);
+    expect(resolveForViewer(bep, null, "2026-11-15").amountEur).toBe(500);
+    expect(resolveForViewer(bep, null, "2026-10-01").bracketLabel?.startsWith("adult")).toBe(true);
+    expect(pricesOnDate(bep, "2026-10-01").find((row) => row.bracketLabel.startsWith("child"))?.amountEur).toBe(170);
+    expect(resolveForViewer(bep, 2003, "2026-10-01").reason).toBe("age-not-birth-year");
+
+    const snow = pass("snow-card-tirol");
+    expect(resolveForViewer(snow, null, "2026-10-01").amountEur).toBe(1080);
+    expect(resolveForViewer(snow, 1990, "2026-10-01").amountEur).toBe(1080);
+    expect(resolveForViewer(snow, 2003, "2026-10-01").amountEur).toBe(1080);
+    expect(resolveForViewer(snow, 1990, "2026-11-15").amountEur).toBe(1227);
+    expect(resolveForViewer(snow, 2003, "2026-11-15").amountEur).toBe(1227);
+    const three = pass("3taelerpass-saisonkarte");
+    expect(resolveForViewer(three, null, "2026-12-11").bracketLabel?.startsWith("Erwachsene")).toBe(true);
+    expect(resolveForViewer(three, 2012, "2026-12-11").bracketLabel).toMatch(/Schüler I/);
+  });
+
+  it("uses one adult label and does not guess when that label is missing or repeated", () => {
+    for (const item of passes) {
+      expect(adultBracket(item), item.id).not.toBeNull();
+    }
+  });
+});
+
+describe("nextPriceChange", () => {
+  it("reads the next published cut-off for the adult tariff when no birth year is set", () => {
+    const bep = pass("noe-bergerlebnispass");
+    expect(nextPriceChange(bep, null, "2026-10-01")).toMatchObject({
+      date: "2026-10-31",
+      fromEur: 429,
+      toEur: 500,
+    });
+    expect(nextPriceChange(bep, 1990, "2026-10-01")).toBeNull();
+  });
+});
+
+describe("savingsVsDayTickets", () => {
+  it("subtracts the option total from day tickets", () => {
+    const day = { totalEur: 1171.5 } as PriceQuote;
+    const best = { totalEur: 987 } as PriceQuote;
+    expect(savingsVsDayTickets(best, day)).toBeCloseTo(184.5);
+    expect(savingsVsDayTickets({ totalEur: null } as PriceQuote, day)).toBeNull();
   });
 });
 
