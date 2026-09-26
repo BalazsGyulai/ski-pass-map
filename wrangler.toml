@@ -2,9 +2,8 @@ name = "skimap"
 compatibility_date = "2026-09-26"
 pages_build_output_dir = "out"
 
-# Placeholder binding. Create the D1 database in the Cloudflare dashboard and
-# replace database_id before you deploy. This file does not create anything.
+# Real free-tier D1 database in Western Europe (MAP_LOADS map-load counter).
 [[d1_databases]]
 binding = "MAP_LOADS"
 database_name = "skimap-map-loads"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "b5642fda-4805-44a4-afad-947a837a1a0f"
