@@ -45,7 +45,6 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   useEffect(() => {
     setPage(0);
     pagerRef.current?.scrollTo({ left: 0 });
-    titleRef.current?.focus();
   }, [resort?.id]);
 
   if (!resort) return null;
@@ -122,7 +121,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
           {regionLabel(messages, resort.region)} · {countryLabel(messages, resort.country)}
           {distance != null && formatKm(lang, distance) ? ` · ${t("kmAway", { n: formatKm(lang, distance) })}` : ""}
         </p>
-        <h2 id="resort-title" ref={titleRef} tabIndex={-1}>
+        <h2 id="resort-title" className="resort-title" ref={titleRef} tabIndex={-1}>
           {resort.name}
         </h2>
         <p className="meta">

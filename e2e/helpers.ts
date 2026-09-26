@@ -3,10 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 export const RESORT_ID = "skimap-12357";
-export const ARTIFACTS_DIR = "/opt/cursor/artifacts/screenshots/part9";
+export const ARTIFACTS_DIR = "/opt/cursor/artifacts/screenshots/part10";
 
 let shotsTaken = 0;
-const MAX_SHOTS = 10;
+const MAX_SHOTS = 14;
 
 export function originFromBase(baseURL: string | undefined): string {
   return (baseURL ?? "http://127.0.0.1:8835").replace(/\/$/, "");
@@ -39,7 +39,7 @@ export function attachOriginGuards(page: Page, origin: string): string[] {
   return problems;
 }
 
-export async function shotPart9(page: Page, name: string): Promise<void> {
+export async function shotPart10(page: Page, name: string): Promise<void> {
   if (shotsTaken >= MAX_SHOTS) return;
   fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
   const file = path.join(ARTIFACTS_DIR, `${name}.png`);

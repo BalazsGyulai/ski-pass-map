@@ -478,6 +478,24 @@ export default function MapView() {
     return () => observer.disconnect();
   }, [ready]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    const resize = () => {
+      requestAnimationFrame(() => {
+        map.resize();
+      });
+    };
+    resize();
+    const observer = new MutationObserver(resize);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-sheet", "data-panel"] });
+    window.addEventListener("resize", resize);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", resize);
+    };
+  }, [ready, share.resort]);
+
   return (
     <div className="map-root" data-map-provider={provider ?? "pending"}>
       <div ref={containerRef} className="map-canvas" />

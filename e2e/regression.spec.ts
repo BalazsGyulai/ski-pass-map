@@ -5,7 +5,7 @@ import {
   attachOriginGuards,
   dismissConsent,
   originFromBase,
-  shotPart9,
+  shotPart10,
   waitForMapMarkers,
 } from "./helpers";
 
@@ -35,13 +35,11 @@ test("map markers, search, filters, resort sheet tabs and pistes", async ({ page
   await page.waitForSelector(".list-sheet", { timeout: 30_000 });
   const markers = await waitForMapMarkers(page);
   expect(markers).toBeGreaterThan(0);
-  await shotPart9(page, "map-markers-tablet");
   await page.getByRole("button", { name: /filter|szűrő|open filters/i }).first().click();
   await page.locator(".filter-sheet input[type='search'], .filters-panel input[type='search']").first().fill("Planai");
   await page.waitForTimeout(400);
   await page.goto(`/en/?resort=${RESORT_ID}`);
   await page.waitForSelector("#resort-title", { timeout: 30_000 });
-  await shotPart9(page, "resort-sheet-tablet");
   for (const tab of ["#tab-prices", "#tab-pistes", "#tab-links"]) {
     await page.click(tab);
     await page.waitForTimeout(400);
@@ -80,7 +78,6 @@ test("consent banner and cookie settings", async ({ page, baseURL }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/hu/");
   await page.waitForSelector('[data-testid="consent-banner"]', { timeout: 20_000 });
-  await shotPart9(page, "consent-phone");
   await page.getByRole("button", { name: /reject|elutasít/i }).click();
   await expect.poll(() => page.evaluate(() => localStorage.getItem("skimap-cookie-banner"))).toBe("rejected");
   await page.evaluate(() => {
@@ -134,12 +131,10 @@ test("admin, portal, overrides, IDOR guard", async ({ page, baseURL, request }) 
   const problems = attachOriginGuards(page, origin);
   await page.goto("/admin/");
   await page.waitForSelector("button:has-text('Inbox')", { timeout: 15_000 });
-  await shotPart9(page, "admin-desktop");
   await fetch(`${origin}/api/portal/dev-login`, { method: "POST", headers: { "content-type": "application/json" } });
   await page.goto("/portal/login/");
   await page.getByRole("button", { name: /dev login/i }).click();
   await page.waitForURL("**/portal/**", { timeout: 20_000 });
-  await shotPart9(page, "portal-dashboard");
   const overrides = await request.get("/api/overrides");
   expect(overrides.ok()).toBeTruthy();
   const me = await request.get("/api/portal/me");
@@ -174,9 +169,8 @@ test("legal pages, sitemap, hreflang, 404, dark mode, service worker", async ({ 
   expect(hreflangs).toBeGreaterThan(2);
   const notFound = await page.goto("/en/this-page-does-not-exist/");
   expect(notFound?.status()).toBe(404);
-  await page.goto("/en/");
-  await page.getByRole("button", { name: /open menu|menü/i }).click();
-  await page.locator(".drawer-tools select").selectOption("dark");
+  await page.goto("/en/settings/");
+  await page.locator("#settings-appearance").locator("..").locator("select").selectOption("dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const sw = await page.request.get("/sw.js");
   expect(sw.ok()).toBeTruthy();
@@ -194,18 +188,84 @@ test("affiliate block hidden when config empty", async ({ page, baseURL }) => {
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
-test("map desktop and phone screenshots", async ({ page, baseURL }) => {
+test("layout: no horizontal overflow on key widths", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "accepted");
+  const cases: Array<[number, number, string]> = [
+    [320, 700, "/en/"],
+    [390, 844, "/en/"],
+    [820, 1180, `/en/?resort=${RESORT_ID}`],
+    [1440, 900, "/en/"],
+  ];
+  for (const [width, height, path] of cases) {
+    await page.setViewportSize({ width, height });
+    await page.goto(path);
+    if (path.includes("resort=")) await page.waitForSelector("#resort-title", { timeout: 30_000 });
+    else await page.waitForTimeout(500);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+    expect(overflow, `overflow ${width}px ${path}`).toBe(false);
+  }
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
+test("part10 UI screenshots", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);
   await dismissConsent(page, "accepted");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/en/");
   await waitForMapMarkers(page);
-  await shotPart9(page, "map-desktop");
+  await shotPart10(page, "map-desktop");
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.reload();
+  await page.goto("/en/");
   await waitForMapMarkers(page);
-  await shotPart9(page, "map-phone");
+  await shotPart10(page, "map-phone-light");
+  await page.goto("/en/settings/");
+  await page.locator("#settings-appearance").locator("..").locator("select").selectOption("dark");
+  await page.goto("/en/");
+  await waitForMapMarkers(page);
+  await shotPart10(page, "map-phone-dark");
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto("/en/");
+  await waitForMapMarkers(page);
+  await shotPart10(page, "map-320");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/en/?resort=${RESORT_ID}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await shotPart10(page, "resort-phone");
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await page.goto(`/en/?resort=${RESORT_ID}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await shotPart10(page, "resort-tablet");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/en/?resort=${RESORT_ID}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await shotPart10(page, "resort-desktop");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: /filter|open filters/i }).first().click();
+  await page.waitForSelector(".filter-sheet");
+  await shotPart10(page, "filter-phone");
+  await page.goto("/en/plan/");
+  await page.waitForSelector("h1");
+  await shotPart10(page, "plan-phone");
+  await page.goto("/en/saved/");
+  await page.waitForSelector("h1");
+  await shotPart10(page, "saved-phone");
+  await page.goto("/en/settings/");
+  await page.waitForSelector("h1");
+  await shotPart10(page, "settings-phone");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/en/settings/");
+  await shotPart10(page, "settings-desktop");
+  await page.addInitScript(() => {
+    localStorage.removeItem("skimap-cookie-banner");
+    localStorage.removeItem("skimap-map-consent");
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/en/");
+  await page.waitForSelector('[data-testid="consent-banner"]', { timeout: 20_000 });
+  await shotPart10(page, "consent-phone");
   expect(problems, problems.join("\n")).toEqual([]);
 });
 

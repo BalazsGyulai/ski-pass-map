@@ -10,8 +10,8 @@ import { useApp } from "./AppState";
 const links = [
   { rest: "/", key: "navMap" as const },
   { rest: "/plan", key: "navPlan" as const },
-  { rest: "/compare", key: "navCompare" as const },
-  { rest: "/about", key: "navAbout" as const },
+  { rest: "/saved", key: "navSaved" as const },
+  { rest: "/settings", key: "navSettings" as const },
 ];
 
 function navIsCurrent(rest: string, linkRest: string): boolean {
@@ -21,7 +21,7 @@ function navIsCurrent(rest: string, linkRest: string): boolean {
 
 export function Header() {
   const pathname = usePathname();
-  const { t, theme, setTheme } = useApp();
+  const { t } = useApp();
   const href = useLocalizedPath();
   const { rest } = parseLangPath(pathname);
   return (
@@ -42,14 +42,6 @@ export function Header() {
           ))}
         </nav>
         <LanguageSwitcher />
-        <label className="theme-label">
-          <span className="sr-only">{t("theme")}</span>
-          <select value={theme} onChange={(event) => setTheme(event.target.value as "system" | "light" | "dark")} aria-label={t("theme")}>
-            <option value="system">{t("themeSystem")}</option>
-            <option value="light">{t("themeLight")}</option>
-            <option value="dark">{t("themeDark")}</option>
-          </select>
-        </label>
       </div>
       <p className="disclaimer-bar">{t("globalDisclaimer")}</p>
     </header>

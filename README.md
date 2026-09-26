@@ -6,6 +6,10 @@ The first launch covers Austria for 2026/27, plus a few neighbouring areas alrea
 
 The site is a Next.js static export. It is currently published on GitHub Pages at [https://balazsgyulai.github.io/ski-pass-map](https://balazsgyulai.github.io/ski-pass-map). The same export can be served from the site root on Cloudflare Pages.
 
+## Design system
+
+Shared tokens live in [`src/app/globals.css`](src/app/globals.css). Spacing uses a 4–32px scale (`--space-1` … `--space-6`). Corners use `--radius-sm` (12px) through `--radius-lg` (20px) on cards and sheets. Elevation uses three shadow levels (`--shadow-1` … `--shadow-3`). Typography is [Inter](https://fonts.google.com/specimen/Inter) via `next/font` (self-hosted at build time). The UI palette stays neutral (`--surface`, `--ink`, `--line`); pass colours appear only as dots or stripes on pass rows. Light and dark themes set `data-theme` on `<html>`. Focus rings use `:focus-visible` with `--focus-ring`, not loud outlines on programmatic focus.
+
 ## One-time GitHub setting
 
 The workflow cannot turn Pages on by itself. In the repository:
