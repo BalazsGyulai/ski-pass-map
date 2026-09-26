@@ -221,13 +221,25 @@ function MapLayers() {
   }, [map, share.view]);
 
   useEffect(() => {
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
-    const narrow = window.matchMedia("(max-width: 899px)").matches;
-    if (coarse || narrow || !mapHasSize(map)) return;
-    const zoom = L.control.zoom({ position: "topright" });
-    zoom.addTo(map);
+    let zoom: L.Control.Zoom | null = null;
+    const sync = () => {
+      const coarse = window.matchMedia("(pointer: coarse)").matches;
+      const narrow = window.matchMedia("(max-width: 899px)").matches;
+      const show = !coarse && !narrow && mapHasSize(map);
+      if (!show) {
+        zoom?.remove();
+        zoom = null;
+        return;
+      }
+      if (zoom) return;
+      zoom = L.control.zoom({ position: "topright" });
+      zoom.addTo(map);
+    };
+    sync();
+    map.on("resize", sync);
     return () => {
-      zoom.remove();
+      map.off("resize", sync);
+      zoom?.remove();
     };
   }, [map]);
 

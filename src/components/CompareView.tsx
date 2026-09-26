@@ -19,7 +19,7 @@ export function CompareView({ embedded = false }: { embedded?: boolean }) {
       <p className="disclaimer">{t("globalDisclaimer")}</p>
       <p className="hint">{t("checkOfficial")}</p>
       {effectiveDate ? <p className="hint">{t("onDate", { date: formatDate(lang, effectiveDate) })}</p> : null}
-      <p className="hint">{birthYear ? t("birthYearExact") : t("birthYearExact")}</p>
+      <p className="hint">{t("birthYearExact")}</p>
 
       <div className="table-wrap">
         <table className="compare-table">
