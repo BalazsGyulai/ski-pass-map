@@ -8,7 +8,7 @@ export function mapFitPadding(options: {
     !options.narrow || !options.sheet
       ? 28
       : options.sheet === "peek"
-        ? 160
+        ? 212
         : options.sheet === "full"
           ? Math.max(80, options.height - 96)
           : Math.round(options.height * 0.5);

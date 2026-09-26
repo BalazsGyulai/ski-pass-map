@@ -1,8 +1,10 @@
+import type { AgeCategory } from "./age";
 import type { Lang } from "./url-state";
 
 const KEY = "ski-pass-map-v1";
 
 export interface StoredPrefs {
+  version?: number;
   theme?: "system" | "light" | "dark";
   favourites?: string[];
   birthYear?: number | null;
@@ -12,6 +14,7 @@ export interface StoredPrefs {
   geoLat?: number | null;
   geoLon?: number | null;
   lang?: Lang;
+  age?: AgeCategory;
 }
 
 export function readStorage(): StoredPrefs | null {

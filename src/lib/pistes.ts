@@ -16,11 +16,11 @@ export interface PisteStyle {
 
 const STYLES: Record<PisteDifficulty, PisteStyle> = {
   novice: { color: "#1f9d55", dashArray: undefined, weight: 3 },
-  easy: { color: "#1d6fd8", dashArray: undefined, weight: 3 },
-  intermediate: { color: "#d62728", dashArray: undefined, weight: 3 },
-  advanced: { color: "#161616", dashArray: undefined, weight: 3.5 },
-  expert: { color: "#161616", dashArray: undefined, weight: 3.5 },
-  freeride: { color: "#e67e22", dashArray: "8 6", weight: 3 },
+  easy: { color: "#2563EB", dashArray: undefined, weight: 3 },
+  intermediate: { color: "#DC2626", dashArray: undefined, weight: 3 },
+  advanced: { color: "#111827", dashArray: undefined, weight: 3.5 },
+  expert: { color: "#111827", dashArray: undefined, weight: 3.5 },
+  freeride: { color: "#EA7A1A", dashArray: "8 6", weight: 3 },
   unknown: { color: "#6b7280", dashArray: undefined, weight: 2.5 },
 };
 
@@ -33,7 +33,7 @@ export function normalizeDifficulty(value: string | null | undefined): PisteDiff
 }
 
 export function pisteStyle(difficulty: PisteDifficulty | null, kind: "piste" | "lift"): PisteStyle {
-  if (kind === "lift") return { color: "#1c2430", dashArray: undefined, weight: 2.5 };
+  if (kind === "lift") return { color: "#1F2937", dashArray: "1.5 3", weight: 1.5 };
   return STYLES[difficulty ?? "unknown"];
 }
 

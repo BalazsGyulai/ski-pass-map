@@ -1,5 +1,5 @@
 const BASE = "/ski-pass-map";
-const CACHE = "ski-pass-map-__BUILD_ID__";
+const CACHE = "ski-pass-map-v3-__BUILD_ID__";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());

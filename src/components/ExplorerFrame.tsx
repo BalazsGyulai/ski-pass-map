@@ -1,124 +1,140 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { passes } from "@/lib/data";
-import { Filters } from "./Filters";
-import { MapSlot } from "./MapSlot";
-import { ResortDetail } from "./ResortDetail";
-import { ResortList } from "./ResortList";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { resortById } from "@/lib/data";
+import { SITE_NAME } from "@/lib/site";
+import type { SheetSnap } from "@/lib/sheet";
+import { FilterSheet } from "./FilterSheet";
+import { LayersPanel, MapTools } from "./MapTools";
+import { ListSheet } from "./ListSheet";
+import { MenuDrawer } from "./MenuDrawer";
+import { PlanPill } from "./PlanPill";
+import { ResortCard } from "./ResortCard";
+import { SearchPill } from "./SearchPill";
+import { SkiMap } from "./map/SkiMap";
 import { useApp } from "./AppState";
+import { useNarrow } from "./useNarrow";
 
 export function ExplorerFrame() {
-  const { share, updateShare, selectResort, activeFilterCount, t, offline } = useApp();
+  const { share, selectResort, t, offline, searchAsMove, setSearchAsMove, areaStale, searchThisArea, resortDays, copyLink } = useApp();
+  const narrow = useNarrow();
+  const [menuOpen, setMenuOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [listSnap, setListSnap] = useState<SheetSnap>("peek");
+  const [cardSnap, setCardSnap] = useState<SheetSnap>("half");
+  const resort = share.resort ? resortById.get(share.resort) : undefined;
+  const snap = resort ? cardSnap : listSnap;
+  const days = Object.values(resortDays).reduce((sum, value) => sum + value, 0);
+  const previousResort = useRef<string | null>(null);
+
+  useEffect(() => {
+    setCardSnap("half");
+  }, [share.resort]);
+
+  useEffect(() => {
+    document.documentElement.dataset.sheet = snap;
+    return () => {
+      delete document.documentElement.dataset.sheet;
+    };
+  }, [snap]);
+
+  useEffect(() => {
+    const previous = previousResort.current;
+    if (previous && !share.resort) {
+      const row = document.getElementById(`resort-${previous}`)?.querySelector("button");
+      row?.focus();
+    }
+    previousResort.current = share.resort;
+  }, [share.resort]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
       const typing = Boolean(target?.closest("input, textarea, select"));
       if (event.key === "Escape") {
-        if (filtersOpen) setFiltersOpen(false);
-        else if (share.view === "filters") updateShare({ view: "map" });
-        else selectResort(null);
+        if (layersOpen) setLayersOpen(false);
+        else if (menuOpen) setMenuOpen(false);
+        else if (filtersOpen) setFiltersOpen(false);
+        else if (share.resort) selectResort(null);
+        else if (listSnap === "full") setListSnap("half");
+        else if (listSnap === "half") setListSnap("peek");
       }
       if (event.key === "/" && !typing) {
         event.preventDefault();
-        const search = document.getElementById("resort-search");
-        const panel = document.getElementById("resort-search-filters");
-        const visible = search && search.getClientRects().length > 0 ? search : panel;
-        visible?.focus();
-        if (window.matchMedia("(max-width: 899px)").matches && visible === panel) updateShare({ view: "filters" });
+        setFiltersOpen(true);
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selectResort, updateShare, filtersOpen, share.view]);
+  }, [filtersOpen, layersOpen, listSnap, menuOpen, selectResort, share.resort]);
 
-  function openFilters() {
-    if (window.matchMedia("(max-width: 899px)").matches) updateShare({ view: "filters" });
-    else setFiltersOpen(true);
-  }
-
-  function closeFilters() {
-    setFiltersOpen(false);
-    if (window.matchMedia("(max-width: 899px)").matches) updateShare({ view: "map" });
-  }
+  const compact = narrow && resort && cardSnap === "full" ? { name: resort.name, onBack: () => setCardSnap("half") } : null;
 
   return (
-    <div className={`explorer view-${share.view}${filtersOpen ? " filters-open" : ""}`}>
+    <div className="explorer" data-snap={snap} data-panel={resort ? "resort" : "list"}>
+      <a className="skip" href="#sheet-host">
+        {t("skip")}
+      </a>
       {offline ? <p className="offline-banner">{t("offline")}</p> : null}
-      <div className="map-col">
-        <MapSlot />
+      <header className="topbar">
+        <Link href="/" className="brand desk-brand">
+          <span>{SITE_NAME}</span>
+        </Link>
+        <SearchPill
+          onMenu={() => setMenuOpen(true)}
+          onOpen={() => setFiltersOpen(true)}
+          menuOpen={menuOpen}
+          compact={compact}
+          onShare={copyLink}
+        />
+        <nav className="topbar-links" aria-label={t("title")}>
+          <Link href="/plan">{days > 0 ? t("myPlanPillPlain", { days }) : t("myPlanLink")}</Link>
+          <Link href="/compare">{t("navCompare")}</Link>
+          <Link href="/about">{t("navAbout")}</Link>
+          <Link href="/support">
+            {t("supportSkimap")} <span className="todo-tag">{t("todoMark")}</span>
+          </Link>
+          <span className="lang-toggle" role="group" aria-label={t("langLabel")}>
+            <LangButtons />
+          </span>
+        </nav>
+      </header>
+      <div className="stage">
+        <SkiMap />
+        <MapTools layersOpen={layersOpen} onLayers={() => setLayersOpen((open) => !open)} />
+        <LayersPanel open={layersOpen} onClose={() => setLayersOpen(false)} />
+        {areaStale && !resort ? (
+          <button type="button" className="area-btn" onClick={searchThisArea}>
+            {t("searchThisArea")}
+          </button>
+        ) : null}
+        <label className="move-toggle">
+          <input type="checkbox" checked={searchAsMove} onChange={(event) => setSearchAsMove(event.target.checked)} />
+          <span>{t("searchAsMove")}</span>
+        </label>
+        <PlanPill />
       </div>
-      <aside className="dock">
-        <div className="float-bar">
-          <label className="search-field">
-            <span className="sr-only">{t("searchLabel")}</span>
-            <input
-              id="resort-search"
-              type="search"
-              value={share.q}
-              placeholder={t("searchPlaceholder")}
-              onChange={(event) => updateShare({ q: event.target.value })}
-            />
-          </label>
-          <div className="chips" role="toolbar" aria-label={t("filters")}>
-            {passes.map((pass) => {
-              const on = share.passes.includes(pass.id);
-              return (
-                <button
-                  key={pass.id}
-                  type="button"
-                  className={on ? "chip is-on" : "chip"}
-                  aria-pressed={on}
-                  onClick={() => {
-                    const next = on ? share.passes.filter((id) => id !== pass.id) : [...share.passes, pass.id];
-                    updateShare({ passes: next, noPass: false });
-                  }}
-                >
-                  <span className="swatch" style={{ background: pass.color }} />
-                  {pass.name}
-                </button>
-              );
-            })}
-            <button type="button" className={share.park ? "chip is-on" : "chip"} aria-pressed={share.park} onClick={() => updateShare({ park: !share.park })}>
-              {t("snowpark")}
-            </button>
-            <button type="button" className={share.night ? "chip is-on" : "chip"} aria-pressed={share.night} onClick={() => updateShare({ night: !share.night })}>
-              {t("nightSkiing")}
-            </button>
-            <button
-              type="button"
-              className={share.showAbandoned ? "chip is-on" : "chip"}
-              aria-pressed={share.showAbandoned}
-              onClick={() => updateShare({ showAbandoned: !share.showAbandoned })}
-            >
-              {t("showClosed")}
-            </button>
-            <button type="button" className="chip chip-more" aria-expanded={filtersOpen || share.view === "filters"} onClick={openFilters}>
-              {activeFilterCount > 0 ? t("filterCountShort", { n: activeFilterCount }) : t("allFilters")}
-            </button>
-          </div>
-        </div>
-        <div className="list-wrap">
-          <ResortList />
-        </div>
-        <div className="filters-pane">
-          <Filters onClose={closeFilters} />
-        </div>
-        {share.resort ? <ResortDetail /> : null}
-      </aside>
-      <nav className="bottom-nav" aria-label={t("viewLabel")}>
-        <button type="button" aria-pressed={share.view === "map"} onClick={() => updateShare({ view: "map" })}>
-          {t("showMap")}
-        </button>
-        <button type="button" aria-pressed={share.view === "list"} onClick={() => updateShare({ view: "list" })}>
-          {t("showList")}
-        </button>
-        <button type="button" aria-pressed={share.view === "filters"} onClick={() => updateShare({ view: "filters" })}>
-          {activeFilterCount > 0 ? t("filterCountShort", { n: activeFilterCount }) : t("showFilters")}
-        </button>
-      </nav>
+      <div className="sheet-host" id="sheet-host">
+        {resort ? <ResortCard snap={cardSnap} setSnap={setCardSnap} /> : <ListSheet snap={listSnap} setSnap={setListSnap} />}
+      </div>
+      <MenuDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <FilterSheet open={filtersOpen} onClose={() => setFiltersOpen(false)} />
     </div>
+  );
+}
+
+function LangButtons() {
+  const { t, share, updateShare } = useApp();
+  return (
+    <>
+      <button type="button" aria-pressed={share.lang === "en"} onClick={() => updateShare({ lang: "en" })}>
+        {t("langEn")}
+      </button>
+      <button type="button" aria-pressed={share.lang === "hu"} onClick={() => updateShare({ lang: "hu" })}>
+        {t("langHu")}
+      </button>
+    </>
   );
 }

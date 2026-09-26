@@ -4,10 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { cities, passes, resorts } from "@/lib/data";
+import { passes, resorts } from "@/lib/data";
 import { clusterPoints } from "@/lib/cluster";
 import { filterResorts } from "@/lib/filter";
-import { pieSvg } from "@/lib/marker";
+import { formatEur } from "@/lib/format";
+import { clusterRingHtml, passShares, pricePillHtml } from "@/lib/marker";
 import { BASE_PATH } from "@/lib/site";
 import { OSM_TILE_ATTRIBUTION, OSM_TILE_URL } from "@/lib/basemap";
 import { escapeHtml } from "@/lib/html";
@@ -52,9 +53,8 @@ function mapHasSize(map: L.Map): boolean {
 
 function MapLayers() {
   const map = useMap();
-  const { share, updateShare, home, favourites, highlightId, selectResort, t, theme } = useApp();
+  const { share, home, favourites, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, lang } = useApp();
   const [pisteNote, setPisteNote] = useState<"idle" | "loading" | "empty" | "ready">("idle");
-  const [layersOpen, setLayersOpen] = useState(false);
   const passNames = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.name])), []);
   const colors = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.color])), []);
 
@@ -74,36 +74,46 @@ function MapLayers() {
       if (!mapHasSize(map)) return;
       resortsLayer.clearLayers();
       const zoom = map.getZoom();
-      const clusters = clusterPoints(filtered, zoom);
+      const pool = filtered.filter((resort) => resort.id !== share.resort);
+      const clusters = clusterPoints(pool, zoom, { unclusterZoom: 9 });
+      const resortMarker = (resort: (typeof filtered)[number], selected: boolean) => {
+        const price = resort.day_ticket_eur != null ? formatEur(lang, resort.day_ticket_eur) : t("dash");
+        const names = resort.passes.map((id) => passNames.get(id) ?? id);
+        const width = selected
+          ? Math.min(240, 96 + resort.name.length * 7)
+          : Math.min(140, 44 + price.length * 8 + Math.min(3, resort.passes.length) * 10);
+        const height = selected ? 46 : 30;
+        const icon = L.divIcon({
+          className: `resort-marker${highlightId === resort.id && !selected ? " is-hot" : ""}`,
+          html: pricePillHtml({
+            price,
+            colors: resort.passes.map((id) => colors.get(id) ?? "#94A3B8"),
+            selected,
+            name: resort.name,
+            plannedDays: resortDays[resort.id] ?? 0,
+            closed: resort.abandoned,
+            noPass: resort.passes.length === 0,
+          }),
+          iconSize: [width, height],
+          iconAnchor: [width / 2, selected ? height : height / 2],
+        });
+        const marker = L.marker([resort.lat, resort.lon], {
+          icon,
+          keyboard: true,
+          title: [resort.name, price, names.length > 0 ? names.join(", ") : t("noPass")].join(", "),
+          zIndexOffset: selected ? 1200 : highlightId === resort.id ? 800 : 0,
+        });
+        marker.on("click", () => selectResort(resort.id));
+        return marker;
+      };
       clusters.forEach((cluster) => {
         if (cluster.items.length === 1) {
-          const resort = cluster.items[0];
-          const marked = share.resort === resort.id || highlightId === resort.id;
-          const icon = L.divIcon({
-            className: "resort-marker",
-            html: pieSvg(
-              resort.passes.map((id) => colors.get(id) ?? "#8b938e"),
-              { selected: marked, closed: resort.abandoned },
-            ),
-            iconSize: [28, 32],
-            iconAnchor: [14, 14],
-          });
-          const marker = L.marker([resort.lat, resort.lon], { icon, keyboard: true, title: resort.name });
-          if (zoom >= 11) {
-            marker.bindTooltip(escapeHtml(resort.name), {
-              permanent: true,
-              direction: "right",
-              offset: [12, 0],
-              className: "resort-label",
-              opacity: 1,
-            });
-          }
-          marker.on("click", () => selectResort(resort.id));
-          resortsLayer.addLayer(marker);
+          resortsLayer.addLayer(resortMarker(cluster.items[0], false));
         } else {
+          const shares = passShares(cluster.items, (id) => colors.get(id) ?? "#94A3B8");
           const icon = L.divIcon({
             className: "resort-marker",
-            html: `<span class="cluster-bubble">${cluster.items.length}</span>`,
+            html: clusterRingHtml(cluster.items.length, shares),
             iconSize: [40, 40],
             iconAnchor: [20, 20],
           });
@@ -120,6 +130,8 @@ function MapLayers() {
           resortsLayer.addLayer(marker);
         }
       });
+      const selected = filtered.find((resort) => resort.id === share.resort);
+      if (selected) resortsLayer.addLayer(resortMarker(selected, true));
     };
     draw();
     map.on("zoomend", draw);
@@ -129,29 +141,10 @@ function MapLayers() {
       map.off("resize", draw);
       map.removeLayer(resortsLayer);
     };
-  }, [map, filtered, share.resort, highlightId, colors, selectResort, t]);
+  }, [map, filtered, share.resort, highlightId, colors, selectResort, t, lang, passNames, resortDays]);
 
   useEffect(() => {
-    const layer = L.layerGroup().addTo(map);
-    cities.forEach((city) => {
-      const label = city.name;
-      const icon = L.divIcon({
-        className: "city-marker",
-        html: `<span class="city-star">★</span>`,
-        iconSize: [22, 22],
-        iconAnchor: [11, 11],
-      });
-      const marker = L.marker([city.lat, city.lon], { icon, keyboard: true, title: label, zIndexOffset: 400 });
-      marker.bindTooltip(escapeHtml(label), { permanent: true, direction: "right", offset: [10, 0], className: "city-label", opacity: 1 });
-      layer.addLayer(marker);
-    });
-    return () => {
-      map.removeLayer(layer);
-    };
-  }, [map]);
-
-  useEffect(() => {
-    if (!share.resort) {
+    if (!share.resort || share.hideRuns) {
       setPisteNote("idle");
       return;
     }
@@ -220,7 +213,7 @@ function MapLayers() {
       cancelAnimationFrame(frame);
       map.removeLayer(layer);
     };
-  }, [map, share.resort, t, theme]);
+  }, [map, share.resort, share.hideRuns, t, theme]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => map.invalidateSize());
@@ -228,13 +221,47 @@ function MapLayers() {
   }, [map, share.view]);
 
   useEffect(() => {
-    if (!mapHasSize(map)) return;
-    const zoom = L.control.zoom({ position: "bottomright" });
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const narrow = window.matchMedia("(max-width: 899px)").matches;
+    if (coarse || narrow || !mapHasSize(map)) return;
+    const zoom = L.control.zoom({ position: "topright" });
     zoom.addTo(map);
     return () => {
       zoom.remove();
     };
   }, [map]);
+
+  useEffect(() => {
+    const report = () => {
+      if (!mapHasSize(map)) return;
+      const bounds = map.getBounds();
+      reportMapBounds({ south: bounds.getSouth(), west: bounds.getWest(), north: bounds.getNorth(), east: bounds.getEast() });
+    };
+    const frame = requestAnimationFrame(report);
+    map.on("moveend", report);
+    map.on("resize", report);
+    return () => {
+      cancelAnimationFrame(frame);
+      map.off("moveend", report);
+      map.off("resize", report);
+    };
+  }, [map, reportMapBounds]);
+
+  useEffect(() => {
+    mapApi.current = {
+      zoomOut() {
+        if (mapHasSize(map)) map.zoomOut();
+      },
+      fitAll() {
+        if (!mapHasSize(map) || filtered.length === 0) {
+          if (mapHasSize(map)) map.zoomOut();
+          return;
+        }
+        const bounds = L.latLngBounds(filtered.map((resort) => [resort.lat, resort.lon] as [number, number]));
+        map.fitBounds(bounds.pad(0.2), { ...mapPadding(map), maxZoom: 8 });
+      },
+    };
+  }, [map, mapApi, filtered]);
 
   useEffect(() => {
     function onClick(event: L.LeafletMouseEvent) {
@@ -257,49 +284,11 @@ function MapLayers() {
           opacity={0.9}
         />
       ) : null}
-      <div className="layers">
-        <button
-          type="button"
-          className="layers-btn"
-          aria-expanded={layersOpen}
-          aria-controls="map-layers"
-          onClick={() => setLayersOpen((open) => !open)}
-        >
-          {t("layers")}
-        </button>
-        {layersOpen ? (
-          <div id="map-layers" className="layers-panel">
-            <button type="button" aria-pressed={share.showPistes} onClick={() => updateShare({ showPistes: !share.showPistes })}>
-              {t("showAllPistes")}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (filtered.length === 0 || !mapHasSize(map)) return;
-                const bounds = L.latLngBounds(filtered.map((resort) => [resort.lat, resort.lon] as [number, number]));
-                map.fitBounds(bounds.pad(0.15), { ...mapPadding(map), maxZoom: 11 });
-              }}
-            >
-              {t("fitResorts")}
-            </button>
-            {share.resort || share.showPistes ? (
-              <div className="piste-legend">
-                <p>{t("pisteLegend")}</p>
-                <ul>
-                  <li><span className="piste-swatch" style={{ background: "#1f9d55" }} />{t("pisteNovice")}</li>
-                  <li><span className="piste-swatch" style={{ background: "#1d6fd8" }} />{t("pisteEasy")}</li>
-                  <li><span className="piste-swatch" style={{ background: "#d62728" }} />{t("pisteIntermediate")}</li>
-                  <li><span className="piste-swatch" style={{ background: "#161616" }} />{t("pisteAdvanced")}</li>
-                  <li><span className="piste-swatch dashed" />{t("pisteFreeride")}</li>
-                  <li><span className="piste-swatch" style={{ background: "#1c2430" }} />{t("pisteLift")}</li>
-                </ul>
-                {pisteNote === "loading" ? <p className="piste-note">{t("pisteLoading")}</p> : null}
-                {pisteNote === "empty" ? <p className="piste-note">{t("pisteEmpty")}</p> : null}
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-      </div>
+      {share.resort && !share.hideRuns && pisteNote !== "idle" && pisteNote !== "ready" ? (
+        <p className="piste-float" role="status">
+          {pisteNote === "loading" ? t("pisteLoading") : t("pisteEmpty")}
+        </p>
+      ) : null}
     </>
   );
 }

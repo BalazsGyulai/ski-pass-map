@@ -1,3 +1,4 @@
+import { classifyBracket, pickCategoryBracket, type AgeCategory } from "./age";
 import type { AgeBracket, Pass, PricePeriod } from "./schema";
 
 export type PriceReason = "ok" | "no-birth-year" | "no-bracket" | "no-period" | "price-unknown" | "age-not-birth-year";
@@ -210,12 +211,70 @@ export function deadlinesFor(pass: Pass): Deadline[] {
   return events;
 }
 
+/** Category price when no birth year is set. A birth year uses the exact bracket instead. */
+export function resolveForViewer(pass: Pass, birthYear: number | null, purchaseDate: string, category: AgeCategory): ResolvedPrice {
+  if (birthYear != null && Number.isInteger(birthYear)) return resolvePrice(pass, birthYear, purchaseDate);
+  const bracket = pickCategoryBracket(pass, category);
+  if (!bracket) {
+    const matches = pass.pricing.brackets.filter((item) => classifyBracket(item.label) === category);
+    return { ...EMPTY_PRICE, reason: matches.length > 1 ? "age-not-birth-year" : "no-bracket" };
+  }
+  const period = periodOnDate(pass, bracket, purchaseDate);
+  if (!period) {
+    return {
+      ...EMPTY_PRICE,
+      bracketId: bracket.label,
+      bracketLabel: bracket.label,
+      reason: "no-period",
+      nextPeriodStart: nextStart(pass, bracket, purchaseDate),
+    };
+  }
+  return priceFrom(bracket, period);
+}
+
+export interface PriceChange {
+  date: string;
+  fromEur: number;
+  toEur: number;
+  bracketLabel: string;
+}
+
+/** The next published cut-off for the tariff the viewer is on, when the price actually changes. */
+export function nextPriceChange(
+  pass: Pass,
+  birthYear: number | null,
+  purchaseDate: string,
+  category?: AgeCategory,
+): PriceChange | null {
+  const price = category
+    ? resolveForViewer(pass, birthYear, purchaseDate, category)
+    : resolvePrice(pass, birthYear, purchaseDate);
+  if (price.amountEur == null || !price.bracketLabel || !price.periodEnd) return null;
+  const periods = periodsFor(pass, price.bracketLabel);
+  const index = periods.findIndex((period) => period.valid_until === price.periodEnd);
+  const next = index >= 0 ? periods[index + 1] : undefined;
+  if (!next || next.price_eur == null || next.price_eur === price.amountEur) return null;
+  return {
+    date: price.periodEnd,
+    fromEur: price.amountEur,
+    toEur: next.price_eur,
+    bracketLabel: price.bracketLabel,
+  };
+}
+
+/** How much an option saves against paying day tickets for the same days. Negative when the option costs more. */
+export function savingsVsDayTickets(option: PriceQuote, dayTickets: PriceQuote): number | null {
+  if (option.totalEur == null || dayTickets.totalEur == null) return null;
+  return dayTickets.totalEur - option.totalEur;
+}
+
 export function quotePlan(
   passes: Pass[],
   resorts: PricedResort[],
   birthYear: number | null,
   purchaseDate: string,
   plan: PlanDays[],
+  category?: AgeCategory,
 ): PriceQuote[] {
   const daysById = new Map<string, number>();
   for (const item of plan) {
@@ -223,14 +282,14 @@ export function quotePlan(
   }
   const active = resorts.filter((resort) => (daysById.get(resort.id) ?? 0) > 0);
 
-  const singles = passes.map((pass) => quoteFor(passes, [pass.id], active, daysById, birthYear, purchaseDate));
+  const singles = passes.map((pass) => quoteFor(passes, [pass.id], active, daysById, birthYear, purchaseDate, category));
   const combos: PriceQuote[] = [];
   for (let i = 0; i < passes.length; i++) {
     for (let j = i + 1; j < passes.length; j++) {
       const a = passes[i].id;
       const b = passes[j].id;
       if (isUsefulCombo(a, b, active)) {
-        combos.push(quoteFor(passes, [a, b], active, daysById, birthYear, purchaseDate));
+        combos.push(quoteFor(passes, [a, b], active, daysById, birthYear, purchaseDate, category));
       }
     }
   }
@@ -277,9 +336,12 @@ function quoteFor(
   daysById: Map<string, number>,
   birthYear: number | null,
   purchaseDate: string,
+  category?: AgeCategory,
 ): PriceQuote {
   const selected = passIds.map((id) => passes.find((pass) => pass.id === id)).filter((pass): pass is Pass => Boolean(pass));
-  const resolved = selected.map((pass) => resolvePrice(pass, birthYear, purchaseDate));
+  const resolved = selected.map((pass) =>
+    category ? resolveForViewer(pass, birthYear, purchaseDate, category) : resolvePrice(pass, birthYear, purchaseDate),
+  );
   const passPriceKnown = resolved.every((price) => price.amountEur != null);
   const passPriceEur = passPriceKnown ? resolved.reduce((sum, price) => sum + (price.amountEur ?? 0), 0) : null;
   const failed = resolved.find((price) => price.amountEur == null);

@@ -1,3 +1,4 @@
+import { isAgeCategory, type AgeCategory } from "./age";
 import type { ResortFilters, SortDir, SortKey } from "./filter";
 
 export type MobileView = "map" | "list" | "filters";
@@ -13,6 +14,9 @@ export interface ShareState extends ResortFilters {
   sort: SortKey;
   dir: SortDir;
   showPistes: boolean;
+  /** Hide the selected resort's own piste lines. The OpenSnowMap overlay is showPistes. */
+  hideRuns: boolean;
+  age: AgeCategory;
 }
 
 export function defaultShareState(): ShareState {
@@ -39,6 +43,8 @@ export function defaultShareState(): ShareState {
     sort: "distance",
     dir: "asc",
     showPistes: false,
+    hideRuns: false,
+    age: "adult",
   };
 }
 
@@ -71,6 +77,9 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.sort = sort === "day" || sort === "elevation" || sort === "slope" || sort === "name" ? sort : "distance";
   state.dir = params.get("dir") === "desc" ? "desc" : "asc";
   state.showPistes = params.get("pistes") === "1";
+  state.hideRuns = params.get("runs") === "0";
+  const age = params.get("age");
+  state.age = isAgeCategory(age) ? age : "adult";
   return state;
 }
 
@@ -97,6 +106,8 @@ export function serializeShareState(state: ShareState): string {
   if (state.sort !== "distance") params.set("sort", state.sort);
   if (state.dir !== "asc") params.set("dir", state.dir);
   if (state.showPistes) params.set("pistes", "1");
+  if (state.hideRuns) params.set("runs", "0");
+  if (state.age !== "adult") params.set("age", state.age);
   return params.toString();
 }
 
@@ -135,8 +146,29 @@ function cleanText(value: string, max: number): string {
   return value.replace(/[\u0000-\u001F\u007F]/g, "").slice(0, max);
 }
 
+/** Plan rows encoded as id:days,id:days. Ids stay in the existing safe-id alphabet. */
+export function serializePlan(days: Record<string, number>): string {
+  return Object.entries(days)
+    .filter((entry): entry is [string, number] => entry[1] > 0 && /^[a-z0-9-]+$/i.test(entry[0]))
+    .map(([id, count]) => `${id}:${Math.min(80, Math.round(count))}`)
+    .join(",");
+}
+
+export function parsePlan(value: string | null): Record<string, number> {
+  const days: Record<string, number> = {};
+  if (!value) return days;
+  for (const part of value.split(",").slice(0, 40)) {
+    const [id, raw] = part.split(":");
+    if (!id || !/^[a-z0-9-]+$/i.test(id)) continue;
+    const count = Number(raw);
+    if (!Number.isInteger(count) || count <= 0 || count > 80) continue;
+    days[id] = count;
+  }
+  return days;
+}
+
 /** Query string safe to put in the address bar or a copied link. Device coordinates are removed. */
-export function shareableSearch(params: URLSearchParams, share?: Pick<ShareState, "home" | "lang">): URLSearchParams {
+export function shareableSearch(params: URLSearchParams, share?: Pick<ShareState, "home" | "lang" | "age">): URLSearchParams {
   const next = new URLSearchParams(params);
   next.delete("lat");
   next.delete("lon");
@@ -146,6 +178,8 @@ export function shareableSearch(params: URLSearchParams, share?: Pick<ShareState
     else next.delete("home");
     if (share.lang === "en") next.delete("lang");
     else next.set("lang", share.lang);
+    if (share.age && share.age !== "adult") next.set("age", share.age);
+    else next.delete("age");
   }
   return next;
 }

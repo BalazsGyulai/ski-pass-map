@@ -3,22 +3,23 @@
 import { passes, resorts } from "@/lib/data";
 import { daysUntil, formatDate, formatEur } from "@/lib/format";
 import { bracketLabel, deadlineLabel, priceReasonText } from "@/lib/i18n";
-import { deadlinesFor, pricesOnDate, resolvePrice } from "@/lib/pricing";
+import { deadlinesFor, pricesOnDate, resolveForViewer } from "@/lib/pricing";
 import { useApp } from "./AppState";
 
-export function CompareView() {
-  const { t, lang, birthYear, effectiveDate, today } = useApp();
+export function CompareView({ embedded = false }: { embedded?: boolean }) {
+  const { t, lang, birthYear, effectiveDate, today, share } = useApp();
   const events = passes
     .flatMap((pass) => deadlinesFor(pass).map((deadline) => ({ ...deadline, pass })))
     .sort((a, b) => a.date.localeCompare(b.date) || a.pass.name.localeCompare(b.pass.name));
 
   return (
-    <div className="page">
-      <h1>{t("compareTitle")}</h1>
+    <div className={embedded ? "compare-embedded" : "page"}>
+      {embedded ? null : <h1>{t("compareTitle")}</h1>}
       <p>{t("compareIntro")}</p>
+      <p className="disclaimer">{t("globalDisclaimer")}</p>
       <p className="hint">{t("checkOfficial")}</p>
       {effectiveDate ? <p className="hint">{t("onDate", { date: formatDate(lang, effectiveDate) })}</p> : null}
-      {!birthYear ? <p className="hint">{t("setBirthYearHint")}</p> : null}
+      <p className="hint">{birthYear ? t("birthYearExact") : t("birthYearExact")}</p>
 
       <div className="table-wrap">
         <table className="compare-table">
@@ -33,7 +34,7 @@ export function CompareView() {
           </thead>
           <tbody>
             {passes.map((pass) => {
-              const yours = effectiveDate ? resolvePrice(pass, birthYear, effectiveDate) : null;
+              const yours = effectiveDate ? resolveForViewer(pass, birthYear, effectiveDate, share.age) : null;
               const tariffs = effectiveDate ? pricesOnDate(pass, effectiveDate) : [];
               const covered = resorts.filter((resort) => resort.passes.includes(pass.id));
               const next = today
