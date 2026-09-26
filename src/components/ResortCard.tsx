@@ -28,7 +28,7 @@ const pageKey: Record<(typeof pages)[number], MessageKey> = {
 
 export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: SheetSnap) => void }) {
   const app = useApp();
-  const { share, selectResort, t, lang, home, resortDays, setResortDaysCount } = app;
+  const { share, selectResort, t, lang, home, resortDays, setResortDaysCount, messages } = app;
   const resort = share.resort ? resortById.get(share.resort) : undefined;
   const { sortedAll, filtered } = useResortLists();
   const sheetRef = useRef<HTMLElement>(null);
@@ -113,8 +113,8 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         onPointerDown={(event) => startSheetDrag(event, { snap, apply: setSnap, close: () => selectResort(null), sheet: sheetRef.current, mode: "resort" })}
       >
         <p className="eyebrow">
-          {regionLabel(lang, resort.region)} · {countryLabel(lang, resort.country)}
-          {distance != null && formatKm(distance) ? ` · ${t("kmAway", { n: formatKm(distance) })}` : ""}
+          {regionLabel(messages, resort.region)} · {countryLabel(messages, resort.country)}
+          {distance != null && formatKm(lang, distance) ? ` · ${t("kmAway", { n: formatKm(lang, distance) })}` : ""}
         </p>
         <h2 id="resort-title" ref={titleRef} tabIndex={-1}>
           {resort.name}
@@ -239,7 +239,7 @@ function PricesPage({ resort }: { resort: Resort }) {
 }
 
 function PassPrice({ pass, day }: { pass: Pass; day: number | null }) {
-  const { t, lang, birthYear, effectiveDate } = useApp();
+  const { t, lang, birthYear, effectiveDate, messages } = useApp();
   if (!effectiveDate) return null;
   const price = resolveForViewer(pass, birthYear, effectiveDate);
   const change = nextPriceChange(pass, birthYear, effectiveDate);
@@ -258,7 +258,7 @@ function PassPrice({ pass, day }: { pass: Pass; day: number | null }) {
         </strong>
         {passHasShortName(pass) ? <p className="pass-official">{pass.name}</p> : null}
         <p className="price-lg num">
-          {price.amountEur != null ? formatEur(lang, price.amountEur) : priceReasonText(lang, price.reason, price.bracketId, price.nextPeriodStart)}
+          {price.amountEur != null ? formatEur(lang, price.amountEur) : priceReasonText(messages, lang, price.reason, price.bracketId, price.nextPeriodStart)}
         </p>
         {change ? (
           <p className="hint warn">{t("priceAfter", { price: formatEur(lang, change.toEur), date: formatDate(lang, change.date) })}</p>
@@ -271,7 +271,7 @@ function PassPrice({ pass, day }: { pass: Pass; day: number | null }) {
               {listed.map((row) => (
                 <li key={row.bracketId} className={matched && row.bracketId === matched ? "is-match" : undefined}>
                   {row.bracketLabel}{" "}
-                  {row.amountEur != null ? formatEur(lang, row.amountEur) : priceReasonText(lang, row.reason, row.bracketId, row.nextPeriodStart)}
+                  {row.amountEur != null ? formatEur(lang, row.amountEur) : priceReasonText(messages, lang, row.reason, row.bracketId, row.nextPeriodStart)}
                 </li>
               ))}
             </ul>
@@ -359,11 +359,11 @@ function SnowPage({ resort }: { resort: Resort }) {
 }
 
 function TravelPage({ resort }: { resort: Resort }) {
-  const { t, home } = useApp();
+  const { t, home, lang } = useApp();
   const distance = home ? distanceKm(home, resort) : null;
   const google = `https://www.google.com/maps/dir/?api=1&destination=${resort.lat},${resort.lon}`;
   const apple = `https://maps.apple.com/?daddr=${resort.lat},${resort.lon}`;
-  const km = distance != null ? formatKm(distance) : "";
+  const km = distance != null ? formatKm(lang, distance) : "";
   return (
     <div>
       <PlacePicker />

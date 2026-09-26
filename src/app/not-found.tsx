@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { defaultLangHome } from "@/i18n/routing";
 
 export default function NotFound() {
   return (
     <div className="page page-narrow">
-      <h1>That page is not on this map. / Ez az oldal nincs a térképen.</h1>
+      <h1>That page is not on this map.</h1>
       <p>
-        <Link href="/">Back to the map / Vissza a térképre</Link>
+        <Link href={defaultLangHome()}>Back to the map</Link>
       </p>
     </div>
   );

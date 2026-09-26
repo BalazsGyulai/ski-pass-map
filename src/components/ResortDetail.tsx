@@ -11,7 +11,8 @@ import { priceReasonText, regionLabel, type MessageKey } from "@/lib/i18n";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { adultBracket, dayTicketIsEstimate, pricesOnDate, resolveForViewer } from "@/lib/pricing";
 import type { FactRef, Resort } from "@/lib/schema";
-import type { Lang } from "@/lib/url-state";
+import type { Lang } from "@/i18n/languages";
+import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 
 export function ResortDetail() {
@@ -27,7 +28,9 @@ export function ResortDetail() {
     home,
     t,
     lang,
+    messages,
   } = useApp();
+  const href = useLocalizedPath();
   const resort = share.resort ? resortById.get(share.resort) : undefined;
   const closeRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
@@ -117,13 +120,13 @@ export function ResortDetail() {
         <span className="grab-bar" />
       </div>
       <header className="detail-head" onPointerDown={onGrabPointerDown}>
-        <p className="eyebrow">{regionLabel(lang, resort.region)}</p>
+        <p className="eyebrow">{regionLabel(messages, resort.region)}</p>
         <h2 id="resort-title">{resort.name}</h2>
         <p className="meta">
           {resort.abandoned ? <span className="badge warn">{t("statusClosed")}</span> : null}
           {resort.needs_recheck ? <span className="badge warn">{t("needsRecheck")}</span> : null}
           {resort.abandoned ? <span className="hint warn">{t("closedWarning")}</span> : null}
-          {distance != null ? <span>{t("distanceValue", { n: formatKm(distance) })}</span> : null}
+          {distance != null ? <span>{t("distanceValue", { n: formatKm(lang, distance) })}</span> : null}
         </p>
         <button ref={closeRef} type="button" className="icon-btn" onClick={() => selectResort(null)}>
           {t("close")}
@@ -155,7 +158,7 @@ export function ResortDetail() {
                   </strong>
                   {passHasShortName(pass) ? <p className="pass-official">{pass.name}</p> : null}
                   <p>
-                    {amount != null ? formatEur(lang, amount) : price ? priceReasonText(lang, price.reason, price.bracketId, price.nextPeriodStart) : t("unknown")}
+                    {amount != null ? formatEur(lang, amount) : price ? priceReasonText(messages, lang, price.reason, price.bracketId, price.nextPeriodStart) : t("unknown")}
                     {price?.periodEnd ? ` · ${t("periodUntil", { date: formatDate(lang, price.periodEnd) })}` : ""}
                   </p>
                   {listed.length > 0 ? (
@@ -163,7 +166,7 @@ export function ResortDetail() {
                       {listed.map((row) => (
                         <li key={row.bracketId} className={matched && row.bracketId === matched ? "is-match" : undefined}>
                           {row.bracketLabel}{" "}
-                          {row.amountEur != null ? formatEur(lang, row.amountEur) : priceReasonText(lang, row.reason, row.bracketId, row.nextPeriodStart)}
+                          {row.amountEur != null ? formatEur(lang, row.amountEur) : priceReasonText(messages, lang, row.reason, row.bracketId, row.nextPeriodStart)}
                         </li>
                       ))}
                     </ul>
@@ -228,7 +231,7 @@ export function ResortDetail() {
             +
           </button>
         </div>
-        <Link className="ghost linkish" href="/plan">
+        <Link className="ghost linkish" href={href("/plan")}>
           {t("navPlan")}
         </Link>
       </footer>

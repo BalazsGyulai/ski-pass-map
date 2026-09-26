@@ -19,7 +19,7 @@ export function SearchPill({
   compact?: { name: string; onBack: () => void } | null;
   onShare?: () => void;
 }) {
-  const { t, share, activeFilterCount, home, lang } = useApp();
+  const { t, share, activeFilterCount, home, messages } = useApp();
 
   if (compact) {
     return (
@@ -67,7 +67,7 @@ export function SearchPill({
     if (share.transit) parts.push(t("transportNote"));
     if (share.favouritesOnly) parts.push(t("favouritesOnly"));
     if (share.showAbandoned) parts.push(t("statusClosed"));
-    if (share.regions.length > 0) parts.push(share.regions.map((region) => regionLabel(lang, region)).join(", "));
+    if (share.regions.length > 0) parts.push(share.regions.map((region) => regionLabel(messages, region)).join(", "));
     if (home) parts.push(t("fromPlace", { place: home.label }));
     return parts.join(" · ");
   }

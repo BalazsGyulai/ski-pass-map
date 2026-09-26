@@ -10,7 +10,7 @@ import type { Resort } from "@/lib/schema";
 import { useApp } from "./AppState";
 
 export function ResortList({ items }: { items: Resort[] }) {
-  const { share, favourites, toggleFavourite, selectResort, setHighlightId, home, t, lang, resortDays } = useApp();
+  const { share, favourites, toggleFavourite, selectResort, setHighlightId, home, t, lang, resortDays, messages } = useApp();
 
   return (
     <ul className="resort-list">
@@ -42,8 +42,8 @@ export function ResortList({ items }: { items: Resort[] }) {
                 {resort.needs_recheck ? <span className="badge warn">{t("needsRecheck")}</span> : null}
               </span>
               <span className="meta">
-                {regionLabel(lang, resort.region)}
-                {distance != null && formatKm(distance) ? ` · ${formatKm(distance)} ${t("km")}` : ""}
+                {regionLabel(messages, resort.region)}
+                {distance != null && formatKm(lang, distance) ? ` · ${formatKm(lang, distance)} ${t("km")}` : ""}
               </span>
               {stats ? <span className="card-stats">{stats}</span> : null}
               <span className="card-foot">
