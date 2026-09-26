@@ -3,16 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { nextSheetSnap, snapFromKey, type SheetSnap } from "@/lib/sheet";
 import Link from "next/link";
-import { passById, resortById } from "@/lib/data";
+import { passById, passes, resortById, resorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { filterResorts } from "@/lib/filter";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm } from "@/lib/format";
-import { bracketLabel, priceReasonText, regionLabel } from "@/lib/i18n";
-import { passes, resorts } from "@/lib/data";
-import type { Resort } from "@/lib/schema";
-import type { MessageKey } from "@/lib/i18n";
+import { bracketLabel, priceReasonText, regionLabel, type MessageKey } from "@/lib/i18n";
+import { dayTicketIsEstimate, resolvePrice } from "@/lib/pricing";
+import type { FactRef, Resort } from "@/lib/schema";
 import type { Lang } from "@/lib/url-state";
-import { resolvePrice } from "@/lib/pricing";
 import { useApp } from "./AppState";
 
 export function ResortDetail() {
@@ -122,6 +120,7 @@ export function ResortDetail() {
         <h2 id="resort-title">{resort.name}</h2>
         <p className="meta">
           {resort.abandoned ? <span className="badge warn">{t("statusClosed")}</span> : null}
+          {resort.needs_recheck ? <span className="badge warn">{t("needsRecheck")}</span> : null}
           {resort.abandoned ? <span className="hint warn">{t("closedWarning")}</span> : null}
           {distance != null ? <span>{t("distanceValue", { n: formatKm(distance) })}</span> : null}
         </p>
@@ -145,7 +144,10 @@ export function ResortDetail() {
               <li key={id}>
                 <span className="swatch" style={{ background: pass.color }} />
                 <div>
-                  <strong>{pass.name}</strong>
+                  <strong>
+                    {pass.name}
+                    {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
+                  </strong>
                   <p>
                     {price?.bracketId ? `${bracketLabel(lang, price.bracketId, price.bracketLabel ?? "")}: ` : `${t("priceForYou")}: `}
                     {amount != null ? formatEur(lang, amount) : price ? priceReasonText(lang, price.reason, price.bracketId, price.nextPeriodStart) : t("unknown")}
@@ -192,7 +194,11 @@ export function ResortDetail() {
 
         <div className="link-buttons">
           <LinkButton href={resort.website} label={t("openWebsite")} />
+          <LinkButton href={resort.snow_report} label={t("snowReport")} />
+          <LinkButton href={resort.webcam} label={t("webcams")} />
         </div>
+        {resort.website ? <SourceLine source={resort.sources.website} t={t} lang={lang} tourism={resort.via_tourism_site} /> : null}
+        {resort.season_dates ? <SourceLine source={resort.sources.season} t={t} lang={lang} /> : null}
       </div>
       <footer className="sheet-actions">
         <button type="button" className={fav ? "primary" : "ghost"} aria-pressed={fav} onClick={() => toggleFavourite(resort.id)}>
@@ -224,36 +230,87 @@ function ResortFacts({
   t: (key: MessageKey, vars?: Record<string, string | number>) => string;
   lang: Lang;
 }) {
-  const rows: { label: string; value: string }[] = [];
+  const rows: { key: string; label: string; value: string; source?: FactRef; extra?: string }[] = [];
   const day = finiteOrBlank(resort.day_ticket_eur);
   if (day != null) {
     const season = resort.day_ticket_season ?? "";
-    const estimate = season && season !== "2025/26" ? ` · ${t("estimate")}` : "";
-    rows.push({ label: t("dayTicket"), value: `${formatEur(lang, day)}${season ? ` ${season}` : ""}${estimate}` });
+    const estimate = dayTicketIsEstimate(resort.day_ticket_season, day) ? ` · ${t("estimate")}` : "";
+    const network = resort.day_ticket_network_note ? ` · ${t("networkPrice")}` : "";
+    rows.push({
+      key: "day",
+      label: t("dayTicket"),
+      value: `${formatEur(lang, day)}${season ? ` ${season}` : ""}${estimate}${network}`,
+      source: resort.sources.dayTicket,
+      extra: resort.day_ticket_network_note ?? undefined,
+    });
+  } else if (resort.day_ticket_dynamic) {
+    rows.push({ key: "day", label: t("dayTicket"), value: t("dynamicPricing"), source: resort.sources.dynamic });
   }
   const top = finiteOrBlank(resort.top_elevation_m);
-  if (top != null) rows.push({ label: t("elevation"), value: `${top} m` });
+  if (top != null) rows.push({ key: "top", label: t("elevation"), value: `${top} m`, source: resort.sources.elevation });
   const base = finiteOrBlank(resort.base_elevation_m);
-  if (base != null) rows.push({ label: t("baseElevation"), value: `${base} m` });
-  const slope = finiteOrBlank(resort.slope_km);
-  if (slope != null) rows.push({ label: t("slopeKm"), value: `${slope} km` });
-  const lifts = finiteOrBlank(resort.lifts);
-  if (lifts != null) rows.push({ label: t("lifts"), value: String(lifts) });
-  if (resort.snowpark === true) rows.push({ label: t("snowpark"), value: t("yes") });
-  if (resort.night_skiing === true) rows.push({ label: t("nightSkiing"), value: t("yes") });
+  if (base != null) rows.push({ key: "base", label: t("baseElevation"), value: `${base} m`, source: resort.sources.elevation });
+  const slope = finiteOrBlank(resort.slope_km_display);
+  if (slope != null) {
+    rows.push({
+      key: "slope",
+      label: t("slopeKm"),
+      value: `${slope} km`,
+      source: resort.sources.slopes,
+      extra: resort.stats_aggregate ? t("statsAggregate") : undefined,
+    });
+  }
+  const lifts = finiteOrBlank(resort.lifts_display);
+  if (lifts != null) {
+    rows.push({
+      key: "lifts",
+      label: t("lifts"),
+      value: String(lifts),
+      source: resort.sources.lifts,
+      extra: resort.stats_aggregate ? t("statsAggregate") : undefined,
+    });
+  }
+  if (resort.snowpark === true) rows.push({ key: "park", label: t("snowpark"), value: t("yes"), source: resort.sources.snowpark });
+  if (resort.night_skiing === true) rows.push({ key: "night", label: t("nightSkiing"), value: t("yes"), source: resort.sources.nightSkiing });
   if (rows.length === 0) return null;
   return (
     <>
       <h3>{t("stats")}</h3>
       <dl className="stat-grid">
         {rows.map((row) => (
-          <div key={row.label}>
+          <div key={row.key}>
             <dt>{row.label}</dt>
-            <dd>{row.value}</dd>
+            <dd>
+              {row.value}
+              {row.extra ? <span className="fact-source">{row.extra}</span> : null}
+              <SourceLine source={row.source} t={t} lang={lang} tourism={row.key === "day" && resort.via_tourism_site} />
+            </dd>
           </div>
         ))}
       </dl>
     </>
+  );
+}
+
+function SourceLine({
+  source,
+  t,
+  lang,
+  tourism,
+}: {
+  source: FactRef | undefined;
+  t: (key: MessageKey, vars?: Record<string, string | number>) => string;
+  lang: Lang;
+  tourism?: boolean;
+}) {
+  if (!source) return null;
+  const tourismNote = tourism ? ` · ${t("viaTourismSite")}` : "";
+  if (!source.sourceUrl) return <span className="fact-source">{`${t("osmSource")}${tourismNote}`}</span>;
+  const text = source.checkedAt ? t("sourceChecked", { date: formatDate(lang, source.checkedAt) }) : t("sourceNote");
+  return (
+    <a className="fact-source" href={source.sourceUrl} target="_blank" rel="noopener noreferrer">
+      {`${text}${tourismNote}`}
+    </a>
   );
 }
 

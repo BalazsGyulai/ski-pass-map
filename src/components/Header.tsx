@@ -80,6 +80,7 @@ export function Header() {
           </div>
         </div>
       </div>
+      <p className="disclaimer-bar">{t("globalDisclaimer")}</p>
     </header>
   );
 }

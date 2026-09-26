@@ -265,8 +265,9 @@ export function distributeDays(idsInPriorityOrder: string[], days: number): Reco
   return result;
 }
 
+/** 2026/27 is the launch season. Any other labelled season is an estimate for that winter. */
 export function dayTicketIsEstimate(season: string | null, amount: number | null): boolean {
-  return amount != null && season !== "2025/26";
+  return amount != null && season !== "2026/27";
 }
 
 function quoteFor(

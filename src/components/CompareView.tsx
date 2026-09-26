@@ -47,7 +47,10 @@ export function CompareView() {
                   <td data-label={t("passes")}>
                     <span className="name-line">
                       <span className="swatch" style={{ background: pass.color }} />
-                      <strong>{pass.name}</strong>
+                      <strong>
+                        {pass.name}
+                        {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
+                      </strong>
                     </span>
                     <a href={pass.url} target="_blank" rel="noopener noreferrer">
                       {t("officialSite")}

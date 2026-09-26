@@ -69,6 +69,8 @@ export const passSchema = z.object({
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   price_note: z.string().min(1),
   url: httpUrl,
+  provisional: z.boolean(),
+  restricted: z.boolean(),
   source: factSourceSchema,
   pricing: z.object({
     brackets: z.array(bracketSchema).min(1),
@@ -90,6 +92,7 @@ export const resortRecordSchema = z.object({
   country: z.string().regex(/^[A-Z]{2}$/),
   verification: z.enum(["verified", "unverified"]),
   passes: z.array(coverageSchema),
+  hiddenReason: z.string().min(1).nullable(),
   website: sourced(httpUrl).nullable(),
   dayTicket: sourced(
     z.object({
@@ -97,10 +100,16 @@ export const resortRecordSchema = z.object({
       season: z.string().min(1),
     }),
   ).nullable(),
+  dayTicketDynamic: sourced(z.literal(true)).nullable(),
   seasonDates: sourced(z.string().min(1)).nullable(),
   publicTransport: z.string().min(1).nullable(),
   snowpark: sourced(z.literal(true)).nullable(),
   nightSkiing: sourced(z.literal(true)).nullable(),
+  snowReport: sourced(httpUrl).nullable(),
+  webcam: sourced(httpUrl).nullable(),
+  networkPriceNote: z.string().min(1).nullable(),
+  needsRecheck: z.boolean(),
+  viaTourismSite: z.boolean(),
   notes: z.string().min(1).nullable(),
 });
 
@@ -133,6 +142,8 @@ export const osmResortSchema = z
     snowpark: trueOrNull,
     nightSkiing: trueOrNull,
     abandoned: z.boolean(),
+    /** True when piste km and lifts include nested sub-areas and must not be summed or filtered. */
+    aggregate: z.boolean(),
   })
   .superRefine((resort, ctx) => {
     if (
@@ -234,6 +245,13 @@ export const catalogSchema = z
     });
 
     data.resorts.resorts.forEach((resort, resortIndex) => {
+      if ((resort.verification === "unverified") !== Boolean(resort.hiddenReason)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Unverified resorts need a hiddenReason, and verified resorts must not have one",
+          path: ["resorts", "resorts", resortIndex, "hiddenReason"],
+        });
+      }
       if (!osmIds.has(resort.id)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -319,6 +337,36 @@ export interface Resort {
   public_transport: string | null;
   season_dates: string | null;
   notes: string | null;
+  /** Piste km used by filters and totals. Null when the area contains sub-areas. */
+  slope_km_display: number | null;
+  lifts_display: number | null;
+  stats_aggregate: boolean;
+  day_ticket_dynamic: boolean;
+  day_ticket_network_note: string | null;
+  needs_recheck: boolean;
+  via_tourism_site: boolean;
+  snow_report: string | null;
+  webcam: string | null;
+  provisional_passes: string[];
+  sources: Partial<Record<ResortFactKey, FactRef>>;
+}
+
+export type ResortFactKey =
+  | "dayTicket"
+  | "website"
+  | "season"
+  | "snowpark"
+  | "nightSkiing"
+  | "snowReport"
+  | "webcam"
+  | "dynamic"
+  | "slopes"
+  | "lifts"
+  | "elevation";
+
+export interface FactRef {
+  sourceUrl: string | null;
+  checkedAt: string | null;
 }
 
 export interface City {
