@@ -17,6 +17,8 @@
     "apply:edits": "tsx scripts/apply-edits.ts",
     "test:part6-e2e": "node scripts/part6-e2e.mjs",
     "test:part7-e2e": "node scripts/part7-e2e.mjs",
+    "test:part8-e2e": "node scripts/part8-e2e.mjs",
+    "backup:local": "node scripts/backup-local.mjs",
     "fetch-pistes": "tsx scripts/fetch-pistes.ts"
   },
   "dependencies": {

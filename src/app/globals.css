@@ -972,6 +972,106 @@ legend { padding: 0 4px; font-weight: 650; }
 .portal-attribution { font-size: 0.9rem; border-left: 3px solid var(--accent); padding-left: 0.65rem; margin: 0.5rem 0 0.75rem; }
 .portal-promo { margin: 0.75rem 0; padding: 0.65rem 0.75rem; border: 1px dashed var(--line); border-radius: 10px; background: var(--surface); }
 
+.legal-draft-banner { background: #fef3c7; color: #92400e; padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.9rem; }
+.legal-body { display: grid; gap: 0.75rem; }
+.legal-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.legal-table th, .legal-table td { border: 1px solid var(--line); padding: 0.35rem 0.45rem; text-align: left; vertical-align: top; }
+.legal-crosslinks { display: flex; flex-wrap: wrap; gap: 0.65rem 1rem; margin-top: 1rem; font-size: 0.92rem; }
+html[data-bottom-overlay] .sheet-host {
+  bottom: var(--bottom-overlay-height, 0);
+  transition: bottom 0.2s ease;
+}
+html[data-bottom-overlay] .site-main:not(.explorer-main),
+html[data-bottom-overlay] .site-footer {
+  padding-bottom: calc(var(--bottom-overlay-height, 0px) + 12px);
+}
+.consent-banner-host,
+.support-prompt-host {
+  position: fixed;
+  z-index: 80;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+.support-prompt-host { z-index: 75; }
+.consent-banner,
+.support-prompt {
+  pointer-events: auto;
+  max-width: 720px;
+  margin: 0 auto;
+}
+@media (min-width: 900px) {
+  .consent-banner-host,
+  .support-prompt-host {
+    left: 16px;
+    right: auto;
+    max-width: 720px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+.consent-banner-card,
+.support-prompt-card,
+.cookie-settings-drawer {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  box-shadow: var(--shadow);
+}
+.consent-banner-text { margin: 0 0 0.65rem; font-size: 0.92rem; line-height: 1.45; }
+.consent-banner-actions { display: flex; gap: 0.5rem; margin-bottom: 0.35rem; }
+.consent-eq {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.5rem 0.65rem;
+  background: var(--surface-2);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.consent-settings-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--ink-2);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cookie-settings-drawer {
+  position: fixed;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 1.5rem));
+  max-height: min(70vh, 520px);
+  overflow: auto;
+  z-index: 90;
+}
+.cookie-settings-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.75rem; }
+.compact-list { font-size: 0.82rem; margin: 0.35rem 0 0; padding-left: 1.1rem; }
+.support-prompt-title { margin: 0 0 0.5rem; font-weight: 600; font-size: 0.95rem; }
+.support-prompt-line { margin: 0.35rem 0; }
+.support-prompt-dismiss { margin-top: 0.35rem; width: 100%; }
+.legal-processing-table { font-size: 0.85rem; }
+.legal-processing-table th { vertical-align: top; }
+.affiliate-block { margin: 0.75rem 0; padding: 0.65rem 0.75rem; border: 1px dashed var(--line); border-radius: 10px; }
+.affiliate-label { display: block; font-size: 0.75rem; color: var(--ink-3); margin-bottom: 0.15rem; }
+.affiliate-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+.detail-tabs { display: flex; gap: 0.35rem; padding: 0 0.75rem; border-bottom: 1px solid var(--line); }
+.detail-tabs button { border: none; background: transparent; padding: 0.45rem 0.65rem; border-bottom: 2px solid transparent; font: inherit; cursor: pointer; }
+.detail-tabs button.active { border-bottom-color: var(--accent); font-weight: 600; }
+.footer-cookie { border: none; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline; }
+.admin-stats-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.admin-stats-table th, .admin-stats-table td { border: 1px solid var(--line); padding: 0.35rem; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
