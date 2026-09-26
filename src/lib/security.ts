@@ -10,7 +10,7 @@
  */
 export const REFERRER_POLICY = "strict-origin-when-cross-origin";
 
-export const CONTENT_SECURITY_POLICY = [
+const CSP_PARTS = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
@@ -20,8 +20,13 @@ export const CONTENT_SECURITY_POLICY = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://tiles.openfreemap.org https://tiles.opensnowmap.org https://api.mapbox.com https://*.tiles.mapbox.com",
   "connect-src 'self' https://tiles.openfreemap.org https://tiles.opensnowmap.org https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com https://challenges.cloudflare.com https://cloudflareinsights.com",
-  "frame-ancestors 'none'",
   "font-src 'self' data: https://tiles.openfreemap.org https://api.mapbox.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
-].join("; ");
+];
+
+/** HTTP header CSP (Cloudflare Pages `_headers`). Includes frame-ancestors. */
+export const CONTENT_SECURITY_POLICY = [...CSP_PARTS, "frame-ancestors 'none'"].join("; ");
+
+/** Meta-tag CSP for GitHub Pages (frame-ancestors is ignored in meta; omit to avoid console noise). */
+export const META_CONTENT_SECURITY_POLICY = CSP_PARTS.join("; ");
