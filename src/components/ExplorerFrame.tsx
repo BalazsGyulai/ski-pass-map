@@ -8,6 +8,7 @@ import type { SheetSnap } from "@/lib/sheet";
 import { FilterSheet } from "./FilterSheet";
 import { LayersPanel, MapTools } from "./MapTools";
 import { ListSheet } from "./ListSheet";
+import { LanguageSwitcher, useLocalizedPath } from "./LanguageSwitcher";
 import { MenuDrawer } from "./MenuDrawer";
 import { PlanPill } from "./PlanPill";
 import { ResortCard } from "./ResortCard";
@@ -18,6 +19,7 @@ import { useNarrow } from "./useNarrow";
 
 export function ExplorerFrame() {
   const { share, selectResort, t, offline, searchAsMove, setSearchAsMove, areaStale, searchThisArea, resortDays, copyLink } = useApp();
+  const href = useLocalizedPath();
   const narrow = useNarrow();
   const [menuOpen, setMenuOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -79,7 +81,7 @@ export function ExplorerFrame() {
       </a>
       {offline ? <p className="offline-banner">{t("offline")}</p> : null}
       <header className="topbar">
-        <Link href="/" className="brand desk-brand">
+        <Link href={href("/")} className="brand desk-brand">
           <span>{SITE_NAME}</span>
         </Link>
         <SearchPill
@@ -90,15 +92,13 @@ export function ExplorerFrame() {
           onShare={copyLink}
         />
         <nav className="topbar-links" aria-label={t("title")}>
-          <Link href="/plan">{days > 0 ? t("myPlanPillPlain", { days }) : t("myPlanLink")}</Link>
-          <Link href="/compare">{t("navCompare")}</Link>
-          <Link href="/about">{t("navAbout")}</Link>
-          <Link href="/support">
+          <Link href={href("/plan")}>{days > 0 ? t("myPlanPillPlain", { days }) : t("myPlanLink")}</Link>
+          <Link href={href("/compare")}>{t("navCompare")}</Link>
+          <Link href={href("/about")}>{t("navAbout")}</Link>
+          <Link href={href("/support")}>
             {t("supportSkimap")} <span className="todo-tag">{t("todoMark")}</span>
           </Link>
-          <span className="lang-toggle" role="group" aria-label={t("langLabel")}>
-            <LangButtons />
-          </span>
+          <LanguageSwitcher compact />
         </nav>
       </header>
       <div className="stage">
@@ -122,19 +122,5 @@ export function ExplorerFrame() {
       <MenuDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
       <FilterSheet open={filtersOpen} onClose={() => setFiltersOpen(false)} />
     </div>
-  );
-}
-
-function LangButtons() {
-  const { t, share, updateShare } = useApp();
-  return (
-    <>
-      <button type="button" aria-pressed={share.lang === "en"} onClick={() => updateShare({ lang: "en" })}>
-        {t("langEn")}
-      </button>
-      <button type="button" aria-pressed={share.lang === "hu"} onClick={() => updateShare({ lang: "hu" })}>
-        {t("langHu")}
-      </button>
-    </>
   );
 }

@@ -1,4 +1,5 @@
-import type { Lang } from "./url-state";
+import type { Lang } from "@/i18n/languages";
+import { intlLocale } from "@/i18n/languages";
 
 export function todayISO(date = new Date()): string {
   const year = date.getFullYear();
@@ -16,7 +17,7 @@ export function daysUntil(today: string, date: string): number {
 export function formatEur(lang: Lang, value: number): string {
   if (!Number.isFinite(value)) return "";
   const cents = Math.abs(value - Math.round(value)) > 0.001;
-  return new Intl.NumberFormat(lang === "hu" ? "hu-HU" : "en-GB", {
+  return new Intl.NumberFormat(intlLocale(lang), {
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: cents ? 2 : 0,
@@ -26,7 +27,7 @@ export function formatEur(lang: Lang, value: number): string {
 
 export function formatDate(lang: Lang, iso: string): string {
   const [year, month, day] = iso.split("-").map(Number);
-  return new Intl.DateTimeFormat(lang === "hu" ? "hu-HU" : "en-GB", {
+  return new Intl.DateTimeFormat(intlLocale(lang), {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -34,10 +35,15 @@ export function formatDate(lang: Lang, iso: string): string {
   }).format(new Date(Date.UTC(year, (month ?? 1) - 1, day ?? 1)));
 }
 
-export function formatKm(km: number): string {
+export function formatNumber(lang: Lang, value: number, options?: Intl.NumberFormatOptions): string {
+  if (!Number.isFinite(value)) return "";
+  return new Intl.NumberFormat(intlLocale(lang), options).format(value);
+}
+
+export function formatKm(lang: Lang, km: number): string {
   if (!Number.isFinite(km)) return "";
-  if (km < 10) return km.toFixed(1);
-  return Math.round(km).toString();
+  if (km < 10) return formatNumber(lang, km, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return formatNumber(lang, Math.round(km), { maximumFractionDigits: 0 });
 }
 
 export function formatBreakEven(days: number): string {

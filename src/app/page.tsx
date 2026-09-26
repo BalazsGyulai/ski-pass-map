@@ -1,5 +1,5 @@
-import { ExplorerFrame } from "@/components/ExplorerFrame";
+import { RootRedirect } from "@/components/RootRedirect";
 
-export default function HomePage() {
-  return <ExplorerFrame />;
+export default function RootPage() {
+  return <RootRedirect />;
 }

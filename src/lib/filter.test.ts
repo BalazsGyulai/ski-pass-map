@@ -130,7 +130,6 @@ describe("share url", () => {
       home: "",
       resort: "stuhleck",
       view: "list",
-      lang: "hu",
       sort: "name",
       maxKm: 80,
       regions: ["Styria", "Tirol"],

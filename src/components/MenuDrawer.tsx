@@ -5,25 +5,27 @@ import Link from "next/link";
 import { SITE_NAME } from "@/lib/site";
 import { BirthYearField } from "./BirthYearField";
 import { IconClose } from "./icons";
+import { LanguageSwitcher, useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 
-const mainLinks = [
-  { href: "/plan", key: "myPlanLink" as const },
-  { href: "/compare", key: "navCompare" as const },
-  { href: "/about", key: "navAboutSources" as const },
+export const mainLinks = [
+  { rest: "/plan", key: "myPlanLink" as const },
+  { rest: "/compare", key: "navCompare" as const },
+  { rest: "/about", key: "navAboutSources" as const },
 ];
 
-const legalLinks = [
-  { href: "/imprint", key: "imprint" as const },
-  { href: "/privacy", key: "privacy" as const },
-  { href: "/terms", key: "terms" as const },
-  { href: "/credits", key: "creditsTitle" as const },
-  { href: "/contact", key: "contact" as const },
-  { href: "/support", key: "supportSkimap" as const },
+export const legalLinks = [
+  { rest: "/imprint", key: "imprint" as const },
+  { rest: "/privacy", key: "privacy" as const },
+  { rest: "/terms", key: "terms" as const },
+  { rest: "/credits", key: "creditsTitle" as const },
+  { rest: "/contact", key: "contact" as const },
+  { rest: "/support", key: "supportSkimap" as const },
 ];
 
 export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t, share, updateShare, theme, setTheme } = useApp();
+  const { t, theme, setTheme } = useApp();
+  const href = useLocalizedPath();
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -45,20 +47,13 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         <p className="disclaimer">{t("globalDisclaimer")}</p>
         <nav className="drawer-nav" aria-label={t("menuTitle")}>
           {mainLinks.map((link) => (
-            <Link key={link.href} href={link.href} onClick={onClose}>
+            <Link key={link.rest} href={href(link.rest)} onClick={onClose}>
               {t(link.key)}
             </Link>
           ))}
         </nav>
         <div className="drawer-tools">
-          <div className="lang-toggle" role="group" aria-label={t("langLabel")}>
-            <button type="button" aria-pressed={share.lang === "en"} onClick={() => updateShare({ lang: "en" })}>
-              {t("langEn")}
-            </button>
-            <button type="button" aria-pressed={share.lang === "hu"} onClick={() => updateShare({ lang: "hu" })}>
-              {t("langHu")}
-            </button>
-          </div>
+          <LanguageSwitcher compact />
           <BirthYearField />
           <label className="field">
             <span>{t("theme")}</span>
@@ -71,7 +66,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         </div>
         <nav className="drawer-legal" aria-label={t("siteFooter")}>
           {legalLinks.map((link) => (
-            <Link key={link.href} href={link.href} onClick={onClose}>
+            <Link key={link.rest} href={href(link.rest)} onClick={onClose}>
               {t(link.key)} <span className="todo-tag">{t("todoMark")}</span>
             </Link>
           ))}
@@ -80,5 +75,3 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     </div>
   );
 }
-
-export { legalLinks };

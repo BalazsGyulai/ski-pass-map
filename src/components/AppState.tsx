@@ -4,12 +4,15 @@ import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { boundsMoved, type MapBounds } from "@/lib/bounds";
 import { countActiveFilters } from "@/lib/filter";
-import { translate, type MessageKey } from "@/lib/i18n";
+import type { Lang } from "@/i18n/languages";
+import { isLang, persistLangChoice } from "@/i18n/languages";
+import { isMapPath } from "@/i18n/routing";
+import { translate, type MessageKey, type Messages } from "@/lib/i18n";
 import { cityPlaceId, sanitizeActivePlaceId, sanitizePlaces, type ReferenceCity, type SavedPlace } from "@/lib/places";
 import { readStorage, writeStorage } from "@/lib/storage";
 import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
-import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type Lang, type ShareState } from "@/lib/url-state";
+import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type ShareState } from "@/lib/url-state";
 
 type ThemeChoice = "system" | "light" | "dark";
 
@@ -51,7 +54,10 @@ interface AppContextValue {
   locate: () => void;
   home: HomePoint | null;
   t: (key: MessageKey, vars?: Record<string, string | number>) => string;
+  messages: Messages;
   lang: Lang;
+  pathname: string;
+  search: string;
   ready: boolean;
   offline: boolean;
   copyMessage: string | null;
@@ -72,8 +78,9 @@ export interface SkiMapApi {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export function AppProvider({ lang, messages, children }: { lang: Lang; messages: Messages; children: React.ReactNode }) {
   const pathname = usePathname();
+  const [search, setSearch] = useState("");
   const [share, setShare] = useState<ShareState>(defaultShareState);
   const [theme, setTheme] = useState<ThemeChoice>("system");
   const [favourites, setFavourites] = useState<string[]>([]);
@@ -105,7 +112,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const parsed = parseShareState(params);
     const stored = readStorage();
     if (stored) {
-      if (!params.has("lang") && (stored.lang === "en" || stored.lang === "hu")) parsed.lang = stored.lang;
+      if (stored.lang && isLang(stored.lang)) {
+        persistLangChoice(stored.lang);
+      }
       const savedPlaces = sanitizePlaces(stored.places);
       setPlaces(savedPlaces);
       setActivePlaceId(sanitizeActivePlaceId(stored.activePlaceId, savedPlaces));
@@ -132,10 +141,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    document.documentElement.lang = share.lang;
+    document.documentElement.lang = lang;
+    persistLangChoice(lang);
     if (theme === "system") delete document.documentElement.dataset.theme;
     else document.documentElement.dataset.theme = theme;
-  }, [ready, share.lang, theme]);
+  }, [ready, lang, theme]);
 
   useEffect(() => {
     if (!ready) return;
@@ -145,14 +155,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       birthYear,
       purchaseDate,
       resortDays,
-      lang: share.lang,
       places,
       activePlaceId,
       version: 3,
     });
-  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, share.lang, places, activePlaceId]);
+  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId]);
 
-  const onMap = pathname === "/";
+  const onMap = isMapPath(pathname, lang);
   const pushedResort = useRef(false);
   const prevResort = useRef<string | null | undefined>(undefined);
   const rememberedBare = useRef<string | null>(null);
@@ -199,7 +208,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const qs = serializeShareState(share);
       next = qs ? `${path}?${qs}` : path;
     } else {
-      const params = shareableSearch(new URLSearchParams(window.location.search), share);
+      const params = shareableSearch(new URLSearchParams(window.location.search));
       const plan = serializePlan(resortDays);
       if (plan) params.set("plan", plan);
       else params.delete("plan");
@@ -247,6 +256,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     window.history.replaceState(null, "", step.url);
     if (!share.resort) rememberedBare.current = step.url;
+    setSearch(window.location.search.replace(/^\?/, ""));
   }, [ready, onMap, share, resortDays, purchaseDate]);
 
   useEffect(() => {
@@ -261,8 +271,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: MessageKey, vars?: Record<string, string | number>) => translate(share.lang, key, vars),
-    [share.lang],
+    (key: MessageKey, vars?: Record<string, string | number>) => translate(messages, key, vars),
+    [messages],
   );
   const home = useMemo(() => homePoint(places, activePlaceId), [places, activePlaceId]);
   const effectiveDate = purchaseDate ?? today;
@@ -358,7 +368,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const id = `geo-${Date.now().toString(36)}`;
         const place: SavedPlace = {
           id,
-          label: translate(share.lang, "myLocation"),
+          label: translate(messages, "myLocation"),
           lat: position.coords.latitude,
           lon: position.coords.longitude,
           kind: "geo",
@@ -407,7 +417,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   function copyLink() {
     const url = shareableHref(window.location.href);
     const done = (ok: boolean) => {
-      setCopyMessage(translate(share.lang, ok ? "copied" : "copyFailed"));
+      setCopyMessage(translate(messages, ok ? "copied" : "copyFailed"));
       window.setTimeout(() => setCopyMessage(null), 2200);
     };
     if (navigator.clipboard?.writeText) {
@@ -449,7 +459,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     locate,
     home,
     t,
-    lang: share.lang,
+    messages,
+    lang,
+    pathname,
+    search,
     ready,
     offline,
     copyMessage,

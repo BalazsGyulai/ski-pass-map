@@ -1,5 +1,5 @@
 import type { SavedPlace } from "./places";
-import type { Lang } from "./url-state";
+import type { Lang } from "@/i18n/languages";
 
 const KEY = "ski-pass-map-v1";
 

@@ -8,7 +8,7 @@ import { useApp } from "./AppState";
 import type { SortKey } from "@/lib/filter";
 
 export function Filters({ onClose }: { onClose?: () => void }) {
-  const { share, updateShare, resetFilters, activeFilterCount, t, lang, home } = useApp();
+  const { share, updateShare, resetFilters, activeFilterCount, t, home, messages } = useApp();
   const regions = [...new Set(resorts.map((resort) => resort.region))];
   const strictFilter = share.park || share.night || share.minElev != null || share.minSlope != null;
 
@@ -106,7 +106,7 @@ export function Filters({ onClose }: { onClose?: () => void }) {
                 updateShare({ regions: next });
               }}
             />
-            <span>{regionLabel(lang, region)}</span>
+            <span>{regionLabel(messages, region)}</span>
           </label>
         ))}
       </fieldset>

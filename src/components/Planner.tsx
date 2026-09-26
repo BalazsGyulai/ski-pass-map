@@ -7,7 +7,8 @@ import { fold } from "@/lib/filter";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur } from "@/lib/format";
 import { priceReasonText } from "@/lib/i18n";
 import { cheapestFullCoverage, dayTicketIsEstimate, nextPriceChange, quotePlan, savingsVsDayTickets, type PriceQuote } from "@/lib/pricing";
-import { BASE_PATH } from "@/lib/site";
+import type { Lang } from "@/i18n/languages";
+import { pathWithLang } from "@/i18n/routing";
 import { serializePlan } from "@/lib/url-state";
 import { BirthYearField } from "./BirthYearField";
 import { CompareView } from "./CompareView";
@@ -16,7 +17,7 @@ import { useApp } from "./AppState";
 
 export function Planner() {
   const app = useApp();
-  const { t, lang, birthYear, setPurchaseDate, effectiveDate, resortDays, setResortDaysCount, clearResortDays, ready, share, copyMessage } = app;
+  const { t, lang, birthYear, setPurchaseDate, effectiveDate, resortDays, setResortDaysCount, clearResortDays, ready, copyMessage } = app;
   const [tab, setTab] = useState<"plan" | "prices">("plan");
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -75,8 +76,8 @@ export function Planner() {
     const plan = serializePlan(resortDays);
     if (plan) params.set("plan", plan);
     if (app.purchaseDate) params.set("on", app.purchaseDate);
-    if (share.lang !== "en") params.set("lang", share.lang);
-    const url = `${window.location.origin}${BASE_PATH}/plan/${params.toString() ? `?${params}` : ""}`;
+    const qs = params.toString();
+    const url = `${window.location.origin}${pathWithLang(lang, "/plan")}${qs ? `?${qs}` : ""}`;
     if (navigator.clipboard?.writeText) {
       void navigator.clipboard.writeText(url).then(() => {
         setCopied(true);
@@ -230,7 +231,7 @@ export function Planner() {
 }
 
 function Breakdown({ quote, totalPlanned }: { quote: PriceQuote; totalPlanned: number }) {
-  const { t, lang, setPurchaseDate } = useApp();
+  const { t, lang, setPurchaseDate, messages } = useApp();
   return (
     <div className="breakdown">
       <p>{t("optionCovers", { covered: quote.coveredDays, total: totalPlanned })}</p>
@@ -243,7 +244,7 @@ function Breakdown({ quote, totalPlanned }: { quote: PriceQuote; totalPlanned: n
       {quote.usesEstimate ? <p className="hint">{t("estimate")}</p> : null}
       {quote.priceReason && quote.passPriceEur == null ? (
         <p className="hint warn">
-          {priceReasonText(lang, quote.priceReason, null, quote.nextPeriodStart)}
+          {priceReasonText(messages, lang, quote.priceReason, null, quote.nextPeriodStart)}
           {quote.nextPeriodStart ? (
             <button type="button" className="ghost" onClick={() => setPurchaseDate(quote.nextPeriodStart)}>
               {t("useThisDate", { date: formatDate(lang, quote.nextPeriodStart) })}
@@ -261,7 +262,7 @@ function quoteTitle(quote: PriceQuote, t: (key: "dayTicketsOnly" | "combo", vars
   return quote.kind === "combo" ? `${t("combo")}: ${names}` : names;
 }
 
-function money(lang: "en" | "hu", value: number | null, unknown: string): string {
+function money(lang: Lang, value: number | null, unknown: string): string {
   const amount = finiteOrBlank(value);
   return amount == null ? unknown : formatEur(lang, amount);
 }
