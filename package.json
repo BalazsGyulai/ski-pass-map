@@ -9,7 +9,7 @@
     "prebuild": "node scripts/copy-map-workers.mjs",
     "import:austria": "tsx scripts/import-austria.ts",
     "validate": "tsx scripts/validate-data.ts",
-    "build": "npm run validate && next build && node scripts/stamp-sw.mjs",
+    "build": "npm run validate && next build && node scripts/check-static-html-lang.mjs && node scripts/stamp-sw.mjs",
     "lint": "eslint .",
     "test": "vitest run",
     "fetch-pistes": "tsx scripts/fetch-pistes.ts"
