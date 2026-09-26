@@ -13,7 +13,17 @@ import {
 } from "./auth";
 import { hashInviteToken, isInviteExpired } from "./invite";
 import { submitPortalEdit } from "./submit-edit";
-import { createRegistrationOptions, verifyRegistration, webAuthnConfigFromRequest } from "./webauthn";
+import {
+  createAuthenticationOptions,
+  createRegistrationOptions,
+  verifyAuthentication,
+  verifyRegistration,
+  webAuthnConfigFromRequest,
+} from "./webauthn";
+import { checkPortalLoginRate } from "./login-rate";
+import { resortPortalSnapshot } from "./resort-edit-fields";
+import { submitPortalPromo } from "./promo-submit";
+import { resortNameForId } from "./resort-domains";
 import { buildOverridesPayload } from "./overrides-api";
 import type { SourceCheckerEnv } from "@/lib/source-checker";
 
@@ -180,6 +190,137 @@ export async function handlePortalRegisterVerify(request: Request, env: PortalEn
   return createPortalSession(portal, userId, secure);
 }
 
+export async function handlePortalLoginOptions(
+  request: Request,
+  env: PortalEnv,
+  portal: PortalStore,
+  app: AppStore,
+): Promise<Response> {
+  const disabled = portalDisabledResponse(env);
+  if (disabled) return disabled;
+  if (request.method !== "POST") return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
+  const rate = await checkPortalLoginRate(app, request, env);
+  if (!rate.ok) return jsonResponse({ ok: false, error: "rate_limit" }, rate.status);
+  const raw = await readJsonBody(request);
+  const schema = z.object({ email: z.string().email() });
+  const parsed = schema.safeParse(raw);
+  if (!parsed.success) return jsonResponse({ ok: false, error: "validation" }, 400);
+  const user = await portal.getUserByEmail(parsed.data.email.toLowerCase());
+  if (!user) return jsonResponse({ ok: false, error: "unknown_user" }, 404);
+  const creds = await portal.listCredentialsByUserId(user.id);
+  if (creds.length === 0) return jsonResponse({ ok: false, error: "no_credentials" }, 400);
+  const wconfig = webAuthnConfigFromRequest(request, env);
+  const options = await createAuthenticationOptions(wconfig, creds.map((c) => c.credential_id));
+  const challengeId = crypto.randomUUID();
+  await portal.insertChallenge({
+    id: challengeId,
+    challenge: options.challenge,
+    user_id: user.id,
+    email_lower: user.email_lower,
+    invite_id: null,
+    expires_at: Date.now() + 5 * 60 * 1000,
+  });
+  return jsonResponse({ ok: true, challengeId, options });
+}
+
+export async function handlePortalLoginVerify(request: Request, env: PortalEnv, portal: PortalStore, app: AppStore): Promise<Response> {
+  const disabled = portalDisabledResponse(env);
+  if (disabled) return disabled;
+  if (request.method !== "POST") return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
+  const rate = await checkPortalLoginRate(app, request, env);
+  if (!rate.ok) return jsonResponse({ ok: false, error: "rate_limit" }, rate.status);
+  const raw = await readJsonBody(request);
+  const schema = z.object({ challengeId: z.string().uuid(), response: z.unknown() });
+  const parsed = schema.safeParse(raw);
+  if (!parsed.success) return jsonResponse({ ok: false, error: "validation" }, 400);
+  const challengeRow = await portal.getChallenge(parsed.data.challengeId);
+  if (!challengeRow || challengeRow.expires_at < Date.now() || !challengeRow.user_id) {
+    return jsonResponse({ ok: false, error: "challenge_expired" }, 400);
+  }
+  const credId = (parsed.data.response as { id?: string })?.id;
+  if (!credId) return jsonResponse({ ok: false, error: "webauthn_failed" }, 400);
+  const cred = await portal.getCredentialById(credId);
+  if (!cred || cred.user_id !== challengeRow.user_id) return jsonResponse({ ok: false, error: "webauthn_failed" }, 400);
+  const wconfig = webAuthnConfigFromRequest(request, env);
+  const verification = await verifyAuthentication(wconfig, challengeRow.challenge, parsed.data.response, {
+    id: cred.credential_id,
+    publicKey: cred.public_key,
+    counter: cred.counter,
+  });
+  if (!verification.verified) return jsonResponse({ ok: false, error: "webauthn_failed" }, 401);
+  if (verification.authenticationInfo) {
+    await portal.updateCredentialCounter(cred.id, verification.authenticationInfo.newCounter);
+  }
+  await portal.deleteChallenge(parsed.data.challengeId);
+  const secure = new URL(request.url).protocol === "https:";
+  return createPortalSession(portal, challengeRow.user_id, secure);
+}
+
+export async function handlePortalResorts(request: Request, env: PortalEnv, portal: PortalStore): Promise<Response> {
+  const disabled = portalDisabledResponse(env);
+  if (disabled) return disabled;
+  const identity = await resolvePortalIdentity(request, env, portal);
+  if (!identity) return jsonResponse({ ok: false, error: "unauthorized" }, 401);
+  const ids = await portal.listUserResortIds(identity.userId);
+  const resorts = ids
+    .map((id) => resortPortalSnapshot(id))
+    .filter((r): r is NonNullable<typeof r> => r != null);
+  return jsonResponse({ ok: true, resorts });
+}
+
+export async function handlePortalPromo(request: Request, env: PortalEnv, portal: PortalStore, app: AppStore): Promise<Response> {
+  if (request.method === "GET") {
+    const disabled = portalDisabledResponse(env);
+    if (disabled) return disabled;
+    const identity = await resolvePortalIdentity(request, env, portal);
+    if (!identity) return jsonResponse({ ok: false, error: "unauthorized" }, 401);
+    const resortId = new URL(request.url).searchParams.get("resortId");
+    if (!resortId) return jsonResponse({ ok: false, error: "validation" }, 400);
+    const resortIds = await portal.listUserResortIds(identity.userId);
+    if (!resortIds.includes(resortId)) return jsonResponse({ ok: false, error: "forbidden" }, 403);
+    const approved = await portal.getApprovedPromoForResort(resortId);
+    const pending = (await portal.listPromos("pending")).find((p) => p.resort_id === resortId);
+    const rejected = (await portal.listPromos("rejected")).find((p) => p.resort_id === resortId);
+    return jsonResponse({ ok: true, promo: approved ?? pending ?? rejected ?? null, resortName: resortNameForId(resortId) });
+  }
+  const auth = await requirePortalPost(request, env, portal);
+  if ("error" in auth) return auth.error;
+  const result = await submitPortalPromo(portal, auth.identity.userId, await readJsonBody(request));
+  if (!result.ok) return jsonResponse({ ok: false, error: result.error }, 400);
+  await app.insertAudit({
+    id: crypto.randomUUID(),
+    created_at: Date.now(),
+    actor_email: auth.identity.email,
+    action: "portal.promo.submit",
+    entity_type: "promo",
+    entity_id: result.id,
+    details_json: null,
+  });
+  return jsonResponse(result);
+}
+
+function formatSubmissionRows(edits: Array<Record<string, unknown>>) {
+  return edits.map((edit) => {
+    const changes = JSON.parse(String(edit.changes_json)) as Array<{ path: string; before: unknown; after: unknown }>;
+    const reason = edit.rejection_reason ?? edit.rollback_reason ?? null;
+    return {
+      id: edit.id,
+      createdAt: edit.created_at,
+      resortId: edit.entity_id,
+      resortName: resortNameForId(String(edit.entity_id)),
+      status: edit.status,
+      tier: edit.tier,
+      sourceUrl: edit.source_url,
+      reason,
+      fields: changes.map((c) => ({
+        path: c.path,
+        before: c.before,
+        after: c.after,
+      })),
+    };
+  });
+}
+
 export async function handlePortalEdits(request: Request, env: PortalEnv, portal: PortalStore, app: AppStore): Promise<Response> {
   if (request.method === "GET") {
     const disabled = portalDisabledResponse(env);
@@ -195,7 +336,7 @@ export async function handlePortalEdits(request: Request, env: PortalEnv, portal
         edits.push(...rows.filter((e) => resortIds.has(e.entity_id)));
       }
     }
-    return jsonResponse({ ok: true, edits });
+    return jsonResponse({ ok: true, submissions: formatSubmissionRows(edits as unknown as Array<Record<string, unknown>>) });
   }
   const auth = await requirePortalPost(request, env, portal);
   if ("error" in auth) return auth.error;

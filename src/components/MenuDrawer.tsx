@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { SITE_NAME } from "@/lib/site";
+import { showDevTodo } from "@/lib/show-todo";
 import { BirthYearField } from "./BirthYearField";
 import { IconClose } from "./icons";
 import { LanguageSwitcher, useLocalizedPath } from "./LanguageSwitcher";
@@ -68,7 +69,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           {legalLinks.map((link) => (
             <Link key={link.rest} href={href(link.rest)} onClick={onClose}>
               {t(link.key)}
-              {link.todo ? <span className="todo-tag">{t("todoMark")}</span> : null}
+              {link.todo && showDevTodo() ? <span className="todo-tag">{t("todoMark")}</span> : null}
             </Link>
           ))}
         </nav>

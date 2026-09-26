@@ -15,6 +15,9 @@ import { PlacePicker } from "./PlacePicker";
 import { SourceLine } from "./SourceLine";
 import { startSheetDrag } from "./sheet-drag";
 import { useApp } from "./AppState";
+import { formatAttributionLine } from "@/lib/portal/attribution";
+import { mergeResortWithOverrides } from "@/lib/portal/overrides";
+import { useRuntimeOverrides } from "@/lib/runtime-overrides-client";
 import { useResortLists } from "./useResorts";
 
 const pages = ["prices", "pistes", "snow", "travel", "links"] as const;
@@ -29,7 +32,9 @@ const pageKey: Record<(typeof pages)[number], MessageKey> = {
 export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: SheetSnap) => void }) {
   const app = useApp();
   const { share, selectResort, t, lang, home, resortDays, setResortDaysCount, messages } = app;
-  const resort = share.resort ? resortById.get(share.resort) : undefined;
+  const overrides = useRuntimeOverrides();
+  const baseResort = share.resort ? resortById.get(share.resort) : undefined;
+  const resort = baseResort ? mergeResortWithOverrides(baseResort, baseResort.id, overrides) : undefined;
   const { sortedAll, filtered } = useResortLists();
   const sheetRef = useRef<HTMLElement>(null);
   const pagerRef = useRef<HTMLDivElement>(null);
@@ -130,6 +135,24 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         </button>
       </header>
       {!visible ? <p className="hint warn sheet-note">{t("hiddenByFilters")}</p> : null}
+      {resort.portalAttribution ? (
+        <p className="portal-attribution hint sheet-note" data-testid="portal-attribution">
+          {formatAttributionLine(resort.portalAttribution, lang === "de" ? "de" : "en")}
+        </p>
+      ) : null}
+      {resort.portalPromo ? (
+        <aside className="portal-promo sheet-note" data-testid="portal-promo" aria-label="Resort promotion">
+          <p className="badge">
+            {lang === "de" ? `Anzeige · vom ${resort.portalPromo.resortName}` : `Ad · From ${resort.portalPromo.resortName}`}
+          </p>
+          <p>{resort.portalPromo.text}</p>
+          {resort.portalPromo.linkUrl ? (
+            <a href={resort.portalPromo.linkUrl} rel="noopener noreferrer">
+              {resort.portalPromo.linkUrl}
+            </a>
+          ) : null}
+        </aside>
+      ) : null}
       <div className="card-tabs" role="tablist" aria-label={t("cardTabs")} onKeyDown={onTabsKey}>
         {pages.map((id, tabIndex) => (
           <button

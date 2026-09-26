@@ -21,6 +21,7 @@ export interface PortalAuthEnv {
   PORTAL_RP_ID?: string;
   SOURCE_CHECKER_DEV_HOSTS?: string;
   SOURCE_CHECKER_DEV_FIXTURE?: string;
+  MAP_LOAD_HASH_SALT?: string;
 }
 
 export type PortalEnv = PortalAuthEnv;
@@ -52,7 +53,11 @@ export async function resolvePortalIdentity(
   const cookie = parseSessionCookie(request.headers.get("cookie"));
   if (!cookie) return null;
   const session = await store.getSessionById(cookie.sessionId);
-  if (!session || session.expires_at < Date.now()) return null;
+  if (!session) return null;
+  if (session.expires_at < Date.now()) {
+    await store.deleteSession(session.id);
+    return null;
+  }
   const tokenHash = await hashSessionToken(cookie.token);
   if (tokenHash !== session.token_hash) return null;
   const user = await store.getUserById(session.user_id);

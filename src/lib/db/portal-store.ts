@@ -66,6 +66,7 @@ export interface PortalStore {
   listUserResortIds(userId: string): Promise<string[]>;
   insertCredential(row: { id: string; user_id: string; credential_id: string; public_key: string; counter: number; transports: string | null; created_at: number }): Promise<void>;
   getCredentialById(credentialId: string): Promise<{ id: string; user_id: string; credential_id: string; public_key: string; counter: number } | null>;
+  listCredentialsByUserId(userId: string): Promise<Array<{ id: string; credential_id: string; public_key: string; counter: number }>>;
   updateCredentialCounter(id: string, counter: number): Promise<void>;
   insertSession(row: PortalSessionRow): Promise<void>;
   getSessionById(id: string): Promise<PortalSessionRow | null>;
@@ -212,6 +213,15 @@ export function createPortalStore(sql: SqlExecutor): PortalStore {
     },
     async getCredentialById(credentialId) {
       return sql.get(`SELECT id, user_id, credential_id, public_key, counter FROM portal_credentials WHERE credential_id = ?`, [credentialId]);
+    },
+    async listCredentialsByUserId(userId) {
+      const rows = await sql.all(`SELECT id, credential_id, public_key, counter FROM portal_credentials WHERE user_id = ?`, [userId]);
+      return rows.map((row) => ({
+        id: String(row.id),
+        credential_id: String(row.credential_id),
+        public_key: String(row.public_key),
+        counter: Number(row.counter),
+      }));
     },
     async updateCredentialCounter(id, counter) {
       await sql.run(`UPDATE portal_credentials SET counter = ? WHERE id = ?`, [counter, id]);
@@ -376,6 +386,9 @@ export function createPortalStore(sql: SqlExecutor): PortalStore {
         tier: row.tier as EditRow["tier"],
         decided_at: row.decided_at == null ? null : Number(row.decided_at),
         decided_by: row.decided_by == null ? null : String(row.decided_by),
+        rejection_reason: row.rejection_reason == null ? null : String(row.rejection_reason),
+        rollback_reason: row.rollback_reason == null ? null : String(row.rollback_reason),
+        submitted_by: row.submitted_by == null ? null : String(row.submitted_by),
       }));
     },
   };

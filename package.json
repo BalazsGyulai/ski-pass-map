@@ -20,6 +20,7 @@
     "fetch-pistes": "tsx scripts/fetch-pistes.ts"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^13.1.2",
     "@simplewebauthn/server": "^13.1.2",
     "jose": "^5.10.0",
     "mapbox-gl": "^3.31.0",

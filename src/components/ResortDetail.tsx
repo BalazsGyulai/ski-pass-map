@@ -140,12 +140,12 @@ export function ResortDetail() {
       <div className="detail-body">
         {!visible ? <p className="hint warn">{t("hiddenByFilters")}</p> : null}
         {resort.portalAttribution ? (
-          <p className="portal-attribution hint">
+          <p className="portal-attribution hint" data-testid="portal-attribution">
             {formatAttributionLine(resort.portalAttribution, lang === "de" ? "de" : "en")}
           </p>
         ) : null}
         {resort.portalPromo ? (
-          <aside className="portal-promo" aria-label="Resort promotion">
+          <aside className="portal-promo" data-testid="portal-promo" aria-label="Resort promotion">
             <p className="badge">{lang === "de" ? `Anzeige · vom ${resort.portalPromo.resortName}` : `Ad · From ${resort.portalPromo.resortName}`}</p>
             <p>{resort.portalPromo.text}</p>
             {resort.portalPromo.linkUrl ? (

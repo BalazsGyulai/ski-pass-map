@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { resortById } from "@/lib/data";
 import { SITE_NAME } from "@/lib/site";
+import { showDevTodo } from "@/lib/show-todo";
 import type { SheetSnap } from "@/lib/sheet";
 import { FilterSheet } from "./FilterSheet";
 import { LayersPanel, MapTools } from "./MapTools";
@@ -96,7 +97,7 @@ export function ExplorerFrame() {
           <Link href={href("/compare")}>{t("navCompare")}</Link>
           <Link href={href("/about")}>{t("navAbout")}</Link>
           <Link href={href("/support")}>
-            {t("supportSkimap")} <span className="todo-tag">{t("todoMark")}</span>
+            {t("supportSkimap")} {showDevTodo() ? <span className="todo-tag">{t("todoMark")}</span> : null}
           </Link>
           <LanguageSwitcher compact />
         </nav>
