@@ -12,7 +12,7 @@ describe("resortCameraPadding", () => {
     const peek = resortCameraPadding({ narrow: true, sheet: "peek", height: 800 });
     expect(peek.bottom).toBe(200);
     const half = resortCameraPadding({ narrow: true, sheet: "half", height: 800 });
-    expect(half.bottom).toBe(240);
+    expect(half.bottom).toBe(440);
   });
 
   it("keeps modest padding on desktop", () => {

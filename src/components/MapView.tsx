@@ -155,7 +155,15 @@ export default function MapView() {
         const covered = resort.passes.map((id) => passById.get(id)).filter((pass) => pass != null);
         const shorts = covered.map((pass) => passShortName(pass));
         const fullNames = covered.map((pass) => pass.name);
-        const label = shorts.length === 0 ? t("dash") : shorts.length === 1 ? shorts[0] : `${shorts[0]} +${shorts.length - 1}`;
+        const noPass = resort.passes.length === 0;
+        const dotOnly = noPass && !selected && zoom < 11;
+        const label = noPass
+          ? dotOnly
+            ? ""
+            : resort.name
+          : shorts.length === 1
+            ? shorts[0]
+            : `${shorts[0]} +${shorts.length - 1}`;
         const accessible = [resort.name, fullNames.length > 0 ? fullNames.join(", ") : t("noPass"), price].join(", ");
         const button = document.createElement("button");
         button.type = "button";
@@ -168,7 +176,8 @@ export default function MapView() {
           name: resort.name,
           plannedDays: resortDays[resort.id] ?? 0,
           closed: resort.abandoned,
-          noPass: resort.passes.length === 0,
+          noPass,
+          dotOnly,
         });
         button.setAttribute("aria-label", accessible);
         button.title = accessible;

@@ -6,7 +6,7 @@ export const RESORT_ID = "skimap-12357";
 export const ARTIFACTS_DIR = "/opt/cursor/artifacts/screenshots/part10";
 
 let shotsTaken = 0;
-const MAX_SHOTS = 15;
+const MAX_SHOTS = 5;
 
 const MIN_MAP_CANVAS_VARIANCE = 6;
 

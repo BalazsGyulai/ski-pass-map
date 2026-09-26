@@ -324,7 +324,7 @@ img { max-width: 100%; }
 }
 .explorer[data-snap="half"] .plan-pill { bottom: calc(50dvh + 12px); }
 .explorer[data-panel="resort"][data-snap="peek"] .plan-pill { bottom: calc(45dvh + 12px); }
-.explorer[data-panel="resort"][data-snap="half"] .plan-pill { bottom: calc(min(560px, 70dvh) + 12px); }
+.explorer[data-panel="resort"][data-snap="half"] .plan-pill { bottom: calc(55dvh + 12px); }
 .explorer[data-snap="full"] .plan-pill { display: none; }
 
 .sheet-host {
@@ -360,7 +360,7 @@ img { max-width: 100%; }
   .list-sheet.snap-half { height: 50dvh; }
   .list-sheet.snap-full, .resort-card.snap-full { height: calc(100dvh - 84px); }
   .resort-card.snap-peek { height: 45dvh; }
-  .resort-card.snap-half { height: min(560px, 70dvh); }
+  .resort-card.snap-half { height: 55dvh; }
 }
 
 .sheet-grab {
@@ -760,9 +760,16 @@ legend { padding: 0 4px; font-weight: 650; }
 .maplibregl-map, .mapboxgl-map { font-family: inherit; }
 .maplibregl-ctrl-attrib, .mapboxgl-ctrl-attrib {
   font-size: 10px;
-  max-width: min(70vw, 420px);
   background: rgba(255, 255, 255, 0.92) !important;
   color: #334155;
+}
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib,
+.mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-attrib {
+  margin: 0 8px 8px 0;
+}
+.maplibregl-ctrl-attrib:not(.maplibregl-compact),
+.mapboxgl-ctrl-attrib:not(.mapboxgl-compact) {
+  max-width: min(280px, 46vw);
 }
 .maplibregl-ctrl-attrib a, .mapboxgl-ctrl-attrib a { color: #1d4ed8; }
 .mapboxgl-ctrl-logo { margin: 0 0 4px 4px; }
@@ -799,6 +806,49 @@ legend { padding: 0 4px; font-weight: 650; }
 }
 .price-pill.is-selected { height: 34px; background: #0f1b2d; color: #fff; padding-bottom: 2px; }
 .price-pill.is-empty { color: #64748b; }
+.price-pill.is-dot-only {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  padding: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  position: relative;
+}
+.price-pill.is-dot-only .marker-dot {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #94a3b8;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(15, 27, 45, 0.2);
+}
+.price-pill.is-dot-only .pill-name-reveal {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  display: none;
+  max-width: 160px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f1b2d;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 4px 12px rgba(15, 27, 45, 0.16);
+  pointer-events: none;
+}
+.resort-marker:hover .pill-name-reveal,
+.resort-marker:focus-visible .pill-name-reveal {
+  display: block;
+}
 .price-pill.is-closed { opacity: 0.6; outline: 1px dashed #64748b; }
 .pill-more { font-size: 11px; font-weight: 700; color: var(--ink-2); }
 .price-pill .pill-more { color: inherit; }
@@ -830,7 +880,7 @@ legend { padding: 0 4px; font-weight: 650; }
 .explorer[data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 236px; }
 .explorer[data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 50dvh; }
 .explorer[data-panel="resort"][data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 45dvh; }
-.explorer[data-panel="resort"][data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: min(560px, 70dvh); }
+.explorer[data-panel="resort"][data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 55dvh; }
 .explorer[data-snap="full"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
 .explorer[data-snap="full"] .map-tools,
 .explorer[data-snap="full"] .piste-float { display: none; }

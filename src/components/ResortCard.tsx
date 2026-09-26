@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { generated, passById, resortById } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
-import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm } from "@/lib/format";
+import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm, slopeKmDisplay } from "@/lib/format";
 import { countryLabel, priceReasonText, regionLabel, type MessageKey } from "@/lib/i18n";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { adultBracket, dayTicketIsEstimate, nextPriceChange, pricesOnDate, resolveForViewer } from "@/lib/pricing";
@@ -94,7 +94,9 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
 
   const stats = [
     finiteOrBlank(resort.top_elevation_m) != null ? t("keyStatElev", { n: resort.top_elevation_m ?? 0 }) : null,
-    finiteOrBlank(resort.slope_km) != null ? t("keyStatKm", { n: resort.slope_km ?? 0 }) : null,
+    slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) != null
+      ? t("keyStatKm", { n: slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) ?? 0 })
+      : null,
     finiteOrBlank(resort.lifts) != null ? t("keyStatLifts", { n: resort.lifts ?? 0 }) : null,
   ].filter(Boolean);
 
@@ -282,7 +284,7 @@ function NoPassPrices({ resort, day }: { resort: Resort; day: number | null }) {
       <p className="hint">{t("noPasses")}</p>
       <div className="stat-tiles">
         <Tile label={t("elevation")} value={finiteOrBlank(resort.top_elevation_m) != null ? `${resort.top_elevation_m} m` : t("dash")} />
-        <Tile label={t("slopeKm")} value={finiteOrBlank(resort.slope_km_display) != null ? `${resort.slope_km_display} km` : t("dash")} />
+        <Tile label={t("slopeKm")} value={slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) != null ? `${slopeKmDisplay(resort.slope_km_display ?? resort.slope_km)} km` : t("dash")} />
         <Tile label={t("lifts")} value={finiteOrBlank(resort.lifts_display) != null ? String(resort.lifts_display) : t("dash")} />
       </div>
       {day != null ? (
@@ -350,7 +352,7 @@ function PistesPage({ resort }: { resort: Resort }) {
   return (
     <div>
       <div className="stat-tiles">
-        <Tile label={t("slopeKm")} value={finiteOrBlank(resort.slope_km_display) != null ? `${resort.slope_km_display} km` : t("dash")} />
+        <Tile label={t("slopeKm")} value={slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) != null ? `${slopeKmDisplay(resort.slope_km_display ?? resort.slope_km)} km` : t("dash")} />
         <Tile label={t("lifts")} value={finiteOrBlank(resort.lifts_display) != null ? String(resort.lifts_display) : t("dash")} />
         <Tile label={t("snowpark")} value={resort.snowpark === true ? t("yes") : t("dash")} />
         <Tile label={t("nightSkiing")} value={resort.night_skiing === true ? t("yes") : t("dash")} />

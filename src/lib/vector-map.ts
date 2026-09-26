@@ -108,8 +108,12 @@ export function createVectorMap(lib: MapLib, options: CreateMapOptions): VectorM
     failIfMajorPerformanceCaveat: false,
     preserveDrawingBuffer: probe,
     ...(options.provider === "mapbox"
-      ? { accessToken: token, logoPosition: "bottom-left", attributionControl: true, customAttribution }
-      : { attributionControl: { customAttribution } }),
+      ? {
+          accessToken: token,
+          logoPosition: "bottom-left",
+          attributionControl: { compact: true, customAttribution },
+        }
+      : { attributionControl: { compact: true, customAttribution } }),
   });
 
   let loaded = false;

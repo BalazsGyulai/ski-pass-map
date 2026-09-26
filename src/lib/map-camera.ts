@@ -33,7 +33,7 @@ export function resortCameraPadding(options: {
       ? 200
       : options.sheet === "full"
         ? Math.min(280, Math.round(options.height * 0.5))
-        : Math.min(240, Math.round(options.height * 0.42));
+        : Math.round(options.height * 0.55);
   return { top: 88, bottom, left: 24, right: 24 };
 }
 
