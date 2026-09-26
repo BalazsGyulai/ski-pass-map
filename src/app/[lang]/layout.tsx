@@ -7,6 +7,7 @@ import { buildRootLayoutMetadata } from "@/i18n/metadata";
 import { AppProvider } from "@/components/AppState";
 import { Chrome } from "@/components/Chrome";
 import { ServiceWorker } from "@/components/ServiceWorker";
+import { SiteOverlays } from "@/components/SiteOverlays";
 import { DocumentShell, documentViewport } from "../DocumentShell";
 
 export const viewport = documentViewport;
@@ -30,6 +31,7 @@ export default async function LangRootLayout({ children, params }: { children: R
     <DocumentShell lang={lang}>
       <AppProvider lang={lang} messages={messages}>
         <Chrome>{children}</Chrome>
+        <SiteOverlays />
         <ServiceWorker />
       </AppProvider>
     </DocumentShell>

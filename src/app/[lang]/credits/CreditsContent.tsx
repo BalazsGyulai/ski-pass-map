@@ -1,22 +1,18 @@
 "use client";
 
-import { LegalStub } from "@/components/LegalStub";
+import { LegalShell, pickLegalLocale } from "@/components/legal/LegalShell";
+import { DataSourcesEn, DataSourcesHu } from "@/lib/legal/data-sources";
 import { useApp } from "@/components/AppState";
 import { SITE_NAME } from "@/lib/site";
 
 export function CreditsContent() {
-  const { t } = useApp();
+  const { t, lang } = useApp();
+  const locale = pickLegalLocale(lang);
+  const body = locale === "hu" ? <DataSourcesHu /> : <DataSourcesEn />;
   return (
-    <LegalStub titleKey="creditsTitle">
-      <ul className="source-list">
-        <li>{t("creditsOsm")}</li>
-        <li>{t("creditsOpenSkiMap")}</li>
-        <li>{t("creditsOpenFreeMap")}</li>
-        <li>{t("creditsMapbox")}</li>
-        <li>{t("creditsOpenSnowMap")}</li>
-        <li>{t("creditsPasses")}</li>
-        <li>{t("creditsCode", { name: SITE_NAME })}</li>
-      </ul>
-    </LegalStub>
+    <LegalShell titleKey="creditsTitle" locale={locale}>
+      {body}
+      <p className="hint">{t("creditsCode", { name: SITE_NAME })}</p>
+    </LegalShell>
   );
 }

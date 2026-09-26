@@ -13,6 +13,7 @@ import { readStorage, writeStorage } from "@/lib/storage";
 import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
 import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type ShareState } from "@/lib/url-state";
+import { markFirstVisitDone, resetSupportReminders as clearSupportReminders } from "@/lib/support/storage";
 
 type ThemeChoice = "system" | "light" | "dark";
 
@@ -69,6 +70,10 @@ interface AppContextValue {
   searchAsMove: boolean;
   setSearchAsMove: (on: boolean) => void;
   mapApi: React.MutableRefObject<SkiMapApi>;
+  supportPromptSignal: number;
+  bumpSupportPrompt: () => void;
+  resetSupportReminders: () => void;
+  openCookieSettings: () => void;
 }
 
 export interface SkiMapApi {
@@ -106,6 +111,32 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     zoomOut() {},
     fitAll() {},
   });
+  const [supportPromptSignal, setSupportPromptSignal] = useState(0);
+  const resortForPrompt = useRef<string | null>(null);
+
+  const bumpSupportPrompt = useCallback(() => {
+    setSupportPromptSignal((n) => n + 1);
+  }, []);
+
+  const resetSupportReminders = useCallback(() => {
+    if (typeof window !== "undefined") clearSupportReminders(window.localStorage);
+  }, []);
+
+  function openCookieSettings() {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("skimap-open-cookie-settings"));
+    }
+  }
+
+  useEffect(() => {
+    if (!ready) return;
+    const id = share.resort;
+    if (resortForPrompt.current && !id) {
+      markFirstVisitDone(window.localStorage);
+      bumpSupportPrompt();
+    }
+    resortForPrompt.current = id;
+  }, [share.resort, ready, bumpSupportPrompt]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -474,6 +505,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     searchAsMove,
     setSearchAsMove,
     mapApi,
+    supportPromptSignal,
+    bumpSupportPrompt,
+    resetSupportReminders,
+    openCookieSettings,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

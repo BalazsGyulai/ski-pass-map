@@ -19,6 +19,7 @@ import { formatAttributionLine } from "@/lib/portal/attribution";
 import { mergeResortWithOverrides } from "@/lib/portal/overrides";
 import { useRuntimeOverrides } from "@/lib/runtime-overrides-client";
 import { useResortLists } from "./useResorts";
+import { AffiliateLinksBlock } from "./AffiliateLinks";
 
 const pages = ["prices", "pistes", "snow", "travel", "links"] as const;
 const pageKey: Record<(typeof pages)[number], MessageKey> = {
@@ -454,6 +455,7 @@ function LinksPage({ resort }: { resort: Resort }) {
           </ul>
         </>
       ) : null}
+      <AffiliateLinksBlock />
       <div className="row-actions">
         <button type="button" className="ghost" onClick={copyLink}>
           {copyMessage ?? t("share")}
