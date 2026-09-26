@@ -7,8 +7,9 @@ import { passById, passes, resortById, resorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { filterResorts } from "@/lib/filter";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm } from "@/lib/format";
-import { bracketLabel, priceReasonText, regionLabel, type MessageKey } from "@/lib/i18n";
-import { dayTicketIsEstimate, resolvePrice } from "@/lib/pricing";
+import { priceReasonText, regionLabel, type MessageKey } from "@/lib/i18n";
+import { passHasShortName, passShortName } from "@/lib/pass-label";
+import { adultBracket, dayTicketIsEstimate, pricesOnDate, resolveForViewer } from "@/lib/pricing";
 import type { FactRef, Resort } from "@/lib/schema";
 import type { Lang } from "@/lib/url-state";
 import { useApp } from "./AppState";
@@ -136,23 +137,37 @@ export function ResortDetail() {
           {resort.passes.map((id) => {
             const pass = passById.get(id);
             if (!pass) return null;
-            const price = effectiveDate ? resolvePrice(pass, birthYear, effectiveDate) : null;
+            const price = effectiveDate ? resolveForViewer(pass, birthYear, effectiveDate) : null;
             const amount = price?.amountEur ?? null;
             const dayTicket = finiteOrBlank(resort.day_ticket_eur);
             const breakEven = amount != null && dayTicket != null && dayTicket > 0 ? amount / dayTicket : null;
+            const adult = adultBracket(pass);
+            const tariffs = effectiveDate ? pricesOnDate(pass, effectiveDate) : [];
+            const listed = birthYear == null ? tariffs.filter((row) => row.bracketId !== adult?.label) : tariffs;
+            const matched = birthYear != null && price?.reason === "ok" ? price.bracketId : null;
             return (
               <li key={id}>
                 <span className="swatch" style={{ background: pass.color }} />
                 <div>
-                  <strong>
-                    {pass.name}
+                  <strong className="pass-short">
+                    {passShortName(pass)}
                     {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
                   </strong>
+                  {passHasShortName(pass) ? <p className="pass-official">{pass.name}</p> : null}
                   <p>
-                    {price?.bracketId ? `${bracketLabel(lang, price.bracketId, price.bracketLabel ?? "")}: ` : `${t("priceForYou")}: `}
                     {amount != null ? formatEur(lang, amount) : price ? priceReasonText(lang, price.reason, price.bracketId, price.nextPeriodStart) : t("unknown")}
                     {price?.periodEnd ? ` · ${t("periodUntil", { date: formatDate(lang, price.periodEnd) })}` : ""}
                   </p>
+                  {listed.length > 0 ? (
+                    <ul className="bracket-list">
+                      {listed.map((row) => (
+                        <li key={row.bracketId} className={matched && row.bracketId === matched ? "is-match" : undefined}>
+                          {row.bracketLabel}{" "}
+                          {row.amountEur != null ? formatEur(lang, row.amountEur) : priceReasonText(lang, row.reason, row.bracketId, row.nextPeriodStart)}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                   <p className="hint">
                     {t("breakEvenHere")}:{" "}
                     {breakEven != null

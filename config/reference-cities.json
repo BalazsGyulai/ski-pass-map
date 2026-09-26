@@ -1,0 +1,13 @@
+[
+  { "id": "vienna", "name": "Vienna", "aliases": ["Wien"], "lat": 48.2084, "lon": 16.3725, "country": "AT" },
+  { "id": "graz", "name": "Graz", "aliases": [], "lat": 47.0707, "lon": 15.4395, "country": "AT" },
+  { "id": "linz", "name": "Linz", "aliases": [], "lat": 48.3059, "lon": 14.2864, "country": "AT" },
+  { "id": "salzburg", "name": "Salzburg", "aliases": [], "lat": 47.7984, "lon": 13.0477, "country": "AT" },
+  { "id": "innsbruck", "name": "Innsbruck", "aliases": [], "lat": 47.2654, "lon": 11.3928, "country": "AT" },
+  { "id": "klagenfurt", "name": "Klagenfurt", "aliases": [], "lat": 46.6247, "lon": 14.3078, "country": "AT" },
+  { "id": "villach", "name": "Villach", "aliases": [], "lat": 46.6111, "lon": 13.846, "country": "AT" },
+  { "id": "st-poelten", "name": "St. Pölten", "aliases": ["St Polten", "Sankt Pölten"], "lat": 48.2047, "lon": 15.6233, "country": "AT" },
+  { "id": "eisenstadt", "name": "Eisenstadt", "aliases": [], "lat": 47.8455, "lon": 16.518, "country": "AT" },
+  { "id": "bregenz", "name": "Bregenz", "aliases": [], "lat": 47.5031, "lon": 9.7471, "country": "AT" },
+  { "id": "munich", "name": "Munich", "aliases": ["München", "Munchen"], "lat": 48.1374, "lon": 11.5755, "country": "DE" }
+]

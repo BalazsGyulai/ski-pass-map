@@ -2,11 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { cities } from "@/lib/data";
 import { boundsMoved, type MapBounds } from "@/lib/bounds";
-import { isAgeCategory } from "@/lib/age";
 import { countActiveFilters } from "@/lib/filter";
 import { translate, type MessageKey } from "@/lib/i18n";
+import { cityPlaceId, sanitizeActivePlaceId, sanitizePlaces, type ReferenceCity, type SavedPlace } from "@/lib/places";
 import { readStorage, writeStorage } from "@/lib/storage";
 import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
@@ -32,6 +31,11 @@ interface AppContextValue {
   toggleFavourite: (id: string) => void;
   birthYear: number | null;
   setBirthYear: (year: number | null) => void;
+  places: SavedPlace[];
+  activePlaceId: string | null;
+  saveCity: (city: ReferenceCity) => void;
+  activatePlace: (id: string) => void;
+  removePlace: (id: string) => void;
   purchaseDate: string | null;
   setPurchaseDate: (date: string | null) => void;
   today: string | null;
@@ -73,7 +77,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [share, setShare] = useState<ShareState>(defaultShareState);
   const [theme, setTheme] = useState<ThemeChoice>("system");
   const [favourites, setFavourites] = useState<string[]>([]);
-  const [birthYear, setBirthYear] = useState<number | null>(null);
+  const [birthYear, setBirthYearState] = useState<number | null>(null);
+  const [places, setPlaces] = useState<SavedPlace[]>([]);
+  const [activePlaceId, setActivePlaceId] = useState<string | null>(null);
   const [purchaseDate, setPurchaseDate] = useState<string | null>(null);
   const [resortDays, setResortDays] = useState<Record<string, number>>({});
   const [today, setToday] = useState<string | null>(null);
@@ -100,19 +106,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const stored = readStorage();
     if (stored) {
       if (!params.has("lang") && (stored.lang === "en" || stored.lang === "hu")) parsed.lang = stored.lang;
-      if (!params.has("home")) {
-        if (typeof stored.home === "string" && !removedHome(stored.home)) {
-          parsed.home = stored.home;
-          if (stored.home === "geo") {
-            parsed.geoLat = stored.geoLat ?? null;
-            parsed.geoLon = stored.geoLon ?? null;
-          }
-        } else if (stored.home == null) parsed.home = "vienna";
-      }
-      if (!params.has("age") && isAgeCategory(stored.age)) parsed.age = stored.age;
+      const savedPlaces = sanitizePlaces(stored.places);
+      setPlaces(savedPlaces);
+      setActivePlaceId(sanitizeActivePlaceId(stored.activePlaceId, savedPlaces));
       if (stored.theme === "light" || stored.theme === "dark" || stored.theme === "system") setTheme(stored.theme);
       if (Array.isArray(stored.favourites)) setFavourites(stored.favourites.filter((id) => typeof id === "string"));
-      if (typeof stored.birthYear === "number") setBirthYear(stored.birthYear);
+      if (typeof stored.birthYear === "number") setBirthYearState(stored.birthYear);
       if (typeof stored.purchaseDate === "string") setPurchaseDate(stored.purchaseDate);
       if (stored.resortDays && typeof stored.resortDays === "object") {
         const days: Record<string, number> = {};
@@ -121,8 +120,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         setResortDays(days);
       }
-    } else if (!params.has("home")) {
-      parsed.home = "vienna";
     }
     const fromUrl = parsePlan(params.get("plan"));
     if (Object.keys(fromUrl).length > 0) setResortDays(fromUrl);
@@ -148,14 +145,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       birthYear,
       purchaseDate,
       resortDays,
-      home: share.home,
-      geoLat: share.geoLat,
-      geoLon: share.geoLon,
       lang: share.lang,
-      age: share.age,
-      version: 2,
+      places,
+      activePlaceId,
+      version: 3,
     });
-  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, share.home, share.geoLat, share.geoLon, share.lang, share.age]);
+  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, share.lang, places, activePlaceId]);
 
   const onMap = pathname === "/";
   const pushedResort = useRef(false);
@@ -269,7 +264,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (key: MessageKey, vars?: Record<string, string | number>) => translate(share.lang, key, vars),
     [share.lang],
   );
-  const home = useMemo(() => homePoint(share), [share]);
+  const home = useMemo(() => homePoint(places, activePlaceId), [places, activePlaceId]);
   const effectiveDate = purchaseDate ?? today;
   const activeFilterCount = countActiveFilters(share);
 
@@ -323,6 +318,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
+  function setBirthYear(year: number | null) {
+    if (year == null || !Number.isInteger(year)) {
+      setBirthYearState(null);
+      return;
+    }
+    setBirthYearState(Math.min(2026, Math.max(1920, year)));
+  }
+
+  function saveCity(city: ReferenceCity) {
+    const id = cityPlaceId(city.id);
+    setPlaces((current) => {
+      const next = current.filter((place) => place.id !== id);
+      next.push({ id, label: city.name, lat: city.lat, lon: city.lon, kind: "city" });
+      return next.slice(-12);
+    });
+    setActivePlaceId(id);
+  }
+
+  function activatePlace(id: string) {
+    setActivePlaceId(id);
+  }
+
+  function removePlace(id: string) {
+    setPlaces((current) => current.filter((place) => place.id !== id));
+    setActivePlaceId((current) => (current === id ? null : current));
+  }
+
   function locate() {
     if (!navigator.geolocation) {
       setGeoError("unsupported");
@@ -333,11 +355,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       (position) => {
         setLocating(false);
         setGeoError(null);
-        updateShare({
-          home: "geo",
-          geoLat: position.coords.latitude,
-          geoLon: position.coords.longitude,
-        });
+        const id = `geo-${Date.now().toString(36)}`;
+        const place: SavedPlace = {
+          id,
+          label: translate(share.lang, "myLocation"),
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          kind: "geo",
+        };
+        setPlaces((current) => [...current, place].slice(-12));
+        setActivePlaceId(id);
       },
       () => {
         setLocating(false);
@@ -402,6 +429,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     toggleFavourite,
     birthYear,
     setBirthYear,
+    places,
+    activePlaceId,
+    saveCity,
+    activatePlace,
+    removePlace,
     purchaseDate,
     setPurchaseDate,
     today,
@@ -440,20 +472,10 @@ export function useApp(): AppContextValue {
   return value;
 }
 
-function homePoint(share: ShareState): HomePoint | null {
-  if (share.home === "geo") {
-    if (share.geoLat == null || share.geoLon == null) return null;
-    return { lat: share.geoLat, lon: share.geoLon, label: "geo" };
-  }
-  const city = cities.find((item) => item.id === share.home);
-  if (!city) return null;
-  return { lat: city.lat, lon: city.lon, label: city.name };
-}
-
-const retiredHomes = new Set(["sopron", "graz", "wiener-neustadt"]);
-
-function removedHome(id: string): boolean {
-  return retiredHomes.has(id);
+function homePoint(places: SavedPlace[], activePlaceId: string | null): HomePoint | null {
+  const place = places.find((item) => item.id === activePlaceId);
+  if (!place) return null;
+  return { lat: place.lat, lon: place.lon, label: place.label };
 }
 
 function shareableHref(href: string): string {

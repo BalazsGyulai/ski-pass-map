@@ -69,10 +69,7 @@ export function filterResorts(
     if (filters.night && resort.night_skiing !== true) return false;
     if (filters.minElev != null && (resort.top_elevation_m == null || resort.top_elevation_m < filters.minElev)) return false;
     if (filters.minSlope != null && (resort.slope_km == null || resort.slope_km < filters.minSlope)) return false;
-    if (filters.maxKm != null) {
-      if (!context.home) return false;
-      if (distanceKm(context.home, resort) > filters.maxKm) return false;
-    }
+    if (filters.maxKm != null && context.home && distanceKm(context.home, resort) > filters.maxKm) return false;
     if (filters.favouritesOnly && !context.favourites.has(resort.id)) return false;
     return true;
   });

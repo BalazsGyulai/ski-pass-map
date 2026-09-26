@@ -5,7 +5,10 @@ function cssColor(value: string): string {
 }
 
 export interface PillOptions {
-  price: string;
+  /** Short pass name, or a dash when the resort has no pass. Full names stay in the marker title. */
+  label: string;
+  /** Resort, official pass names, and day-ticket price for the marker title and aria-label. */
+  accessibleName?: string;
   colors: string[];
   selected: boolean;
   name: string;
@@ -25,6 +28,7 @@ export function pricePillHtml(options: PillOptions): string {
   const hollow = options.noPass ? `<span class="pill-dot is-hollow"></span>` : "";
   const days = options.plannedDays > 0 ? `<span class="pill-days">${options.plannedDays}</span>` : "";
   const name = options.selected ? `<span class="pill-name">${escapeHtml(options.name)}</span>` : "";
+  const visible = options.selected ? "" : `<span class="pill-price">${escapeHtml(options.label)}</span>`;
   const classes = [
     "price-pill",
     options.selected ? "is-selected" : "",
@@ -33,7 +37,8 @@ export function pricePillHtml(options: PillOptions): string {
   ]
     .filter(Boolean)
     .join(" ");
-  return `<span class="${classes}">${hollow}${dots}${more}<span class="pill-price">${escapeHtml(options.price)}</span>${name}${days}${options.selected ? `<span class="pill-tail"></span>` : ""}</span>`;
+  const accessible = escapeHtml(options.accessibleName ?? (options.selected ? options.name : options.label));
+  return `<span class="${classes}" aria-label="${accessible}">${hollow}${dots}${more}${visible}${name}${days}${options.selected ? `<span class="pill-tail"></span>` : ""}</span>`;
 }
 
 export interface SharePart {

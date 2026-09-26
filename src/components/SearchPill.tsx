@@ -1,17 +1,9 @@
 "use client";
 
 import { passById } from "@/lib/data";
-import { regionLabel, type MessageKey } from "@/lib/i18n";
-import type { AgeCategory } from "@/lib/age";
+import { regionLabel } from "@/lib/i18n";
 import { IconClose, IconFilter, IconMenu } from "./icons";
 import { useApp } from "./AppState";
-
-const ageKey: Record<AgeCategory, MessageKey> = {
-  adult: "ageAdult",
-  "young-adult": "ageYoung",
-  youth: "ageYouth",
-  child: "ageChild",
-};
 
 export function SearchPill({
   onMenu,
@@ -66,15 +58,13 @@ export function SearchPill({
     else if (share.passes.length === 1) parts.push(passById.get(share.passes[0])?.name ?? t("anyPass"));
     else if (share.passes.length > 1) parts.push(t("passesSelected", { n: share.passes.length }));
     else parts.push(t("anyPass"));
-    parts.push(t(ageKey[share.age]));
     if (share.night) parts.push(t("nightSkiing"));
     if (share.park) parts.push(t("snowpark"));
     if (share.transit) parts.push(t("transportNote"));
     if (share.favouritesOnly) parts.push(t("favouritesOnly"));
     if (share.showAbandoned) parts.push(t("statusClosed"));
     if (share.regions.length > 0) parts.push(share.regions.map((region) => regionLabel(lang, region)).join(", "));
-    if (home && home.label !== "geo") parts.push(t("fromPlace", { place: home.label }));
-    else if (share.home === "geo") parts.push(t("fromPlace", { place: t("homeGeo") }));
+    if (home) parts.push(t("fromPlace", { place: home.label }));
     return parts.join(" · ");
   }
 }

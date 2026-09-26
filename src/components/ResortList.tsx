@@ -1,6 +1,7 @@
 "use client";
 
 import { passById } from "@/lib/data";
+import { passShortName } from "@/lib/pass-label";
 import { distanceKm } from "@/lib/distance";
 import { finiteOrBlank, formatEur, formatKm } from "@/lib/format";
 import { regionLabel } from "@/lib/i18n";
@@ -94,7 +95,8 @@ function PassDots({ ids }: { ids: string[] }) {
     <span className="pass-dots">
       {shown.map((id) => {
         const pass = passById.get(id);
-        return <span key={id} className="pass-dot" style={{ background: pass?.color ?? "#94A3B8" }} title={pass?.name ?? id} />;
+        const title = pass ? (passShortName(pass) === pass.name ? pass.name : `${passShortName(pass)}, ${pass.name}`) : id;
+        return <span key={id} className="pass-dot" style={{ background: pass?.color ?? "#94A3B8" }} title={title} />;
       })}
       {ids.length > 3 ? <span className="pill-more">+{ids.length - 3}</span> : null}
     </span>

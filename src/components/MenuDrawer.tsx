@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { SITE_NAME } from "@/lib/site";
+import { BirthYearField } from "./BirthYearField";
 import { IconClose } from "./icons";
 import { useApp } from "./AppState";
 
@@ -58,6 +59,7 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               {t("langHu")}
             </button>
           </div>
+          <BirthYearField />
           <label className="field">
             <span>{t("theme")}</span>
             <select value={theme} onChange={(event) => setTheme(event.target.value as "system" | "light" | "dark")}>

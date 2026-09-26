@@ -1,24 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
-import { cities, passes, resorts } from "@/lib/data";
+import { passes, resorts } from "@/lib/data";
 import { fold } from "@/lib/filter";
-import { regionLabel, type MessageKey } from "@/lib/i18n";
-import type { AgeCategory } from "@/lib/age";
-import { AGE_CATEGORIES } from "@/lib/age";
+import { passHasShortName, passShortName } from "@/lib/pass-label";
+import { matchReferenceCities } from "@/lib/places";
+import { regionLabel } from "@/lib/i18n";
 import { IconClose } from "./icons";
+import { PlacePicker } from "./PlacePicker";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
 
-const ageKey: Record<AgeCategory, MessageKey> = {
-  adult: "ageAdult",
-  "young-adult": "ageYoung",
-  youth: "ageYouth",
-  child: "ageChild",
-};
-
 export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { share, updateShare, resetFilters, selectResort, t, lang, locate, locating, geoError, home, birthYear, setBirthYear } = useApp();
+  const { share, updateShare, resetFilters, selectResort, saveCity, home, t, lang } = useApp();
   const { filtered } = useResortLists();
   const searchRef = useRef<HTMLInputElement>(null);
   const query = fold(share.q.trim());
@@ -42,7 +36,7 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
     const resortHits = resorts
       .filter((resort) => fold(`${resort.name} ${resort.region}`).includes(query))
       .slice(0, 8);
-    const passHits = passes.filter((pass) => fold(pass.name).includes(query));
+    const passHits = passes.filter((pass) => fold(`${pass.name} ${passShortName(pass)}`).includes(query));
     const regionHits = regions.filter((region) => fold(regionLabel(lang, region)).includes(query) || fold(region).includes(query));
     return { resortHits, passHits, regionHits };
   }, [query, regions, lang]);
@@ -109,7 +103,24 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
                     }}
                   >
                     <span className="swatch" style={{ background: pass.color }} />
-                    {pass.name}
+                    <span>
+                      {passShortName(pass)}
+                      {passHasShortName(pass) ? <span className="pass-official"> {pass.name}</span> : null}
+                    </span>
+                  </button>
+                ))}
+              </Group>
+              <Group title={t("referencePlace")}>
+                {matchReferenceCities(share.q).map((city) => (
+                  <button
+                    key={city.id}
+                    type="button"
+                    onClick={() => {
+                      saveCity(city);
+                      updateShare({ q: "" });
+                    }}
+                  >
+                    {t("savePlace", { name: city.name })}
                   </button>
                 ))}
               </Group>
@@ -139,9 +150,11 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
                       });
                     }}
                   />
-                  <span className="swatch" style={{ background: pass.color }} />
+                    <span className="swatch" style={{ background: pass.color }} />
                   <span>
-                    {pass.name} <span className="hint">{t("resortCount", { n: passCounts.get(pass.id) ?? 0 })}</span>
+                    <strong>{passShortName(pass)}</strong>
+                    {passHasShortName(pass) ? <span className="pass-official"> {pass.name}</span> : null}{" "}
+                    <span className="hint">{t("resortCount", { n: passCounts.get(pass.id) ?? 0 })}</span>
                   </span>
                 </label>
               );
@@ -160,35 +173,7 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
             </label>
           </fieldset>
 
-          <fieldset>
-            <legend>{t("pricesFor")}</legend>
-            <div className="seg" role="radiogroup" aria-label={t("ageGroupLabel")}>
-              {AGE_CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  role="radio"
-                  aria-checked={share.age === category}
-                  className={share.age === category ? "is-on" : ""}
-                  onClick={() => updateShare({ age: category })}
-                >
-                  {t(ageKey[category])}
-                </button>
-              ))}
-            </div>
-            <label className="field">
-              <span>{t("birthYearOptional")}</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1940}
-                max={2026}
-                value={birthYear ?? ""}
-                onChange={(event) => setBirthYear(event.target.value === "" ? null : Number(event.target.value))}
-              />
-            </label>
-            <p className="hint">{t("birthYearExact")}</p>
-          </fieldset>
+          <PlacePicker />
 
           <label className="check">
             <input type="checkbox" checked={share.night} onChange={() => updateShare({ night: !share.night })} />
@@ -224,41 +209,18 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
                 );
               })}
             </fieldset>
-            <label className="field">
-              <span>{t("homeBase")}</span>
-              <select
-                value={share.home}
-                onChange={(event) => {
-                  const next = event.target.value;
-                  updateShare(next === "geo" ? { home: next } : { home: next, geoLat: null, geoLon: null });
-                }}
-              >
-                <option value="">{t("homeNone")}</option>
-                {cities.map((city) => (
-                  <option key={city.id} value={city.id}>
-                    {city.name}
-                  </option>
-                ))}
-                <option value="geo">{t("homeGeo")}</option>
-              </select>
-            </label>
-            <button type="button" className="ghost wide" onClick={locate} disabled={locating}>
-              {locating ? t("locating") : t("useMyLocation")}
-            </button>
-            {geoError === "denied" ? <p className="hint warn">{t("geoDenied")}</p> : null}
-            {geoError === "unsupported" ? <p className="hint warn">{t("geoUnsupported")}</p> : null}
-            {share.home === "geo" && !home ? <p className="hint">{t("useMyLocation")}</p> : null}
-            <p className="hint">{t("straightLine")}</p>
-            <label className="field">
-              <span>{t("maxDistance")}</span>
-              <input
-                type="number"
-                inputMode="decimal"
-                min={0}
-                value={share.maxKm ?? ""}
-                onChange={(event) => updateShare({ maxKm: event.target.value === "" ? null : Number(event.target.value) })}
-              />
-            </label>
+            {home ? (
+              <label className="field">
+                <span>{t("maxDistance")}</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  value={share.maxKm ?? ""}
+                  onChange={(event) => updateShare({ maxKm: event.target.value === "" ? null : Number(event.target.value) })}
+                />
+              </label>
+            ) : null}
             <label className="field">
               <span>{t("minElev")}</span>
               <input

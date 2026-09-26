@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { passes, resorts } from "@/lib/data";
+import { passById, passes, resorts } from "@/lib/data";
+import { passShortName } from "@/lib/pass-label";
 import { clusterPoints } from "@/lib/cluster";
 import { filterResorts } from "@/lib/filter";
 import { formatEur } from "@/lib/format";
@@ -78,15 +79,20 @@ function MapLayers() {
       const clusters = clusterPoints(pool, zoom, { unclusterZoom: 9 });
       const resortMarker = (resort: (typeof filtered)[number], selected: boolean) => {
         const price = resort.day_ticket_eur != null ? formatEur(lang, resort.day_ticket_eur) : t("dash");
-        const names = resort.passes.map((id) => passNames.get(id) ?? id);
+        const covered = resort.passes.map((id) => passById.get(id)).filter((pass) => pass != null);
+        const shorts = covered.map((pass) => passShortName(pass));
+        const fullNames = covered.map((pass) => pass.name);
+        const label = shorts.length === 0 ? t("dash") : shorts.length === 1 ? shorts[0] : `${shorts[0]} +${shorts.length - 1}`;
+        const accessible = [resort.name, fullNames.length > 0 ? fullNames.join(", ") : t("noPass"), price].join(", ");
         const width = selected
           ? Math.min(240, 96 + resort.name.length * 7)
-          : Math.min(140, 44 + price.length * 8 + Math.min(3, resort.passes.length) * 10);
+          : Math.min(180, 36 + label.length * 8 + Math.min(3, resort.passes.length) * 10);
         const height = selected ? 46 : 30;
         const icon = L.divIcon({
           className: `resort-marker${highlightId === resort.id && !selected ? " is-hot" : ""}`,
           html: pricePillHtml({
-            price,
+            label,
+            accessibleName: accessible,
             colors: resort.passes.map((id) => colors.get(id) ?? "#94A3B8"),
             selected,
             name: resort.name,
@@ -100,7 +106,7 @@ function MapLayers() {
         const marker = L.marker([resort.lat, resort.lon], {
           icon,
           keyboard: true,
-          title: [resort.name, price, names.length > 0 ? names.join(", ") : t("noPass")].join(", "),
+          title: accessible,
           zIndexOffset: selected ? 1200 : highlightId === resort.id ? 800 : 0,
         });
         marker.on("click", () => selectResort(resort.id));
@@ -141,7 +147,7 @@ function MapLayers() {
       map.off("resize", draw);
       map.removeLayer(resortsLayer);
     };
-  }, [map, filtered, share.resort, highlightId, colors, selectResort, t, lang, passNames, resortDays]);
+  }, [map, filtered, share.resort, highlightId, colors, selectResort, t, lang, resortDays]);
 
   useEffect(() => {
     if (!share.resort || share.hideRuns) {

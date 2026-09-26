@@ -457,6 +457,14 @@ img { max-width: 100%; }
 
 .price-list, .link-list, .plan-list, .option-list, .source-list { list-style: none; margin: 0; padding: 0; }
 .price-row { display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.pass-short { font-size: 17px; line-height: 22px; }
+.pass-official { display: block; margin: 0; color: var(--ink-3); font-size: 13px; line-height: 18px; font-weight: 500; }
+.bracket-list { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; }
+.bracket-list li { font-size: 14px; color: var(--ink-2); }
+.bracket-list li.is-match { color: var(--ink); font-weight: 750; background: var(--amber-bg); border-radius: 8px; padding: 4px 8px; }
+.place-list { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+.place-row { display: flex; gap: 8px; align-items: center; }
+.place-row > button:first-child { flex: 1; min-height: 44px; text-align: left; }
 .price-bar { width: 4px; border-radius: 999px; flex: none; }
 .price-lg { margin: 4px 0; font-size: 22px; line-height: 28px; font-weight: 750; }
 .price-display { margin: 4px 0; font-size: 28px; line-height: 34px; font-weight: 800; }

@@ -1,4 +1,3 @@
-import { isAgeCategory, type AgeCategory } from "./age";
 import type { ResortFilters, SortDir, SortKey } from "./filter";
 
 export type MobileView = "map" | "list" | "filters";
@@ -16,7 +15,6 @@ export interface ShareState extends ResortFilters {
   showPistes: boolean;
   /** Hide the selected resort's own piste lines. The OpenSnowMap overlay is showPistes. */
   hideRuns: boolean;
-  age: AgeCategory;
 }
 
 export function defaultShareState(): ShareState {
@@ -44,7 +42,6 @@ export function defaultShareState(): ShareState {
     dir: "asc",
     showPistes: false,
     hideRuns: false,
-    age: "adult",
   };
 }
 
@@ -64,9 +61,8 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.maxKm = positiveOrNull(params.get("maxKm"));
   state.favouritesOnly = params.get("fav") === "1";
   state.showAbandoned = params.get("abandoned") === "1" || params.get("closed") === "1";
-  const home = params.get("home");
-  // "geo" is a device location. It is never read from a shared URL.
-  state.home = home && home !== "geo" ? (safeId(home, 64) ?? "") : "";
+  // Reference places stay in localStorage. A shared link never sets a city or a device location.
+  state.home = "";
   state.geoLat = null;
   state.geoLon = null;
   state.resort = safeId(params.get("resort"), 80);
@@ -78,8 +74,6 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.dir = params.get("dir") === "desc" ? "desc" : "asc";
   state.showPistes = params.get("pistes") === "1";
   state.hideRuns = params.get("runs") === "0";
-  const age = params.get("age");
-  state.age = isAgeCategory(age) ? age : "adult";
   return state;
 }
 
@@ -99,7 +93,6 @@ export function serializeShareState(state: ShareState): string {
   if (state.maxKm != null) params.set("maxKm", String(state.maxKm));
   if (state.favouritesOnly) params.set("fav", "1");
   if (state.showAbandoned) params.set("abandoned", "1");
-  if (state.home && state.home !== "geo" && state.home !== defaults.home) params.set("home", state.home);
   if (state.resort) params.set("resort", state.resort);
   if (state.view !== "map") params.set("view", state.view);
   if (state.lang !== "en") params.set("lang", state.lang);
@@ -107,7 +100,6 @@ export function serializeShareState(state: ShareState): string {
   if (state.dir !== "asc") params.set("dir", state.dir);
   if (state.showPistes) params.set("pistes", "1");
   if (state.hideRuns) params.set("runs", "0");
-  if (state.age !== "adult") params.set("age", state.age);
   return params.toString();
 }
 
@@ -167,19 +159,16 @@ export function parsePlan(value: string | null): Record<string, number> {
   return days;
 }
 
-/** Query string safe to put in the address bar or a copied link. Device coordinates are removed. */
-export function shareableSearch(params: URLSearchParams, share?: Pick<ShareState, "home" | "lang" | "age">): URLSearchParams {
+/** Query string safe to put in the address bar or a copied link. Places and birth year stay off the URL. */
+export function shareableSearch(params: URLSearchParams, share?: Pick<ShareState, "lang">): URLSearchParams {
   const next = new URLSearchParams(params);
   next.delete("lat");
   next.delete("lon");
-  if (next.get("home") === "geo") next.delete("home");
+  next.delete("home");
+  next.delete("age");
   if (share) {
-    if (share.home && share.home !== "geo") next.set("home", share.home);
-    else next.delete("home");
     if (share.lang === "en") next.delete("lang");
     else next.set("lang", share.lang);
-    if (share.age && share.age !== "adult") next.set("age", share.age);
-    else next.delete("age");
   }
   return next;
 }

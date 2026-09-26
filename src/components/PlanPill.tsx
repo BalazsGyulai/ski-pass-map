@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { useApp } from "./AppState";
 
 export function PlanPill() {
-  const { t, lang, resortDays, birthYear, effectiveDate, share } = useApp();
+  const { t, lang, resortDays, birthYear, effectiveDate } = useApp();
   const total = Object.values(resortDays).reduce((sum, days) => sum + days, 0);
   const best = useMemo(() => {
     if (!effectiveDate || total < 1) return null;
@@ -25,12 +25,11 @@ export function PlanPill() {
       birthYear,
       effectiveDate,
       Object.entries(resortDays).map(([id, days]) => ({ id, days })),
-      share.age,
     );
     const priced = quotes.filter((quote) => quote.totalEur != null);
     priced.sort((a, b) => (a.totalEur ?? 0) - (b.totalEur ?? 0));
     return priced[0] ?? null;
-  }, [effectiveDate, total, birthYear, resortDays, share.age]);
+  }, [effectiveDate, total, birthYear, resortDays]);
 
   if (total < 1) return null;
   const label =

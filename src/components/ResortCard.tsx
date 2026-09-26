@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { cities, generated, passById, resortById } from "@/lib/data";
+import { generated, passById, resortById } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm } from "@/lib/format";
 import { countryLabel, priceReasonText, regionLabel, type MessageKey } from "@/lib/i18n";
-import { dayTicketIsEstimate, nextPriceChange, resolveForViewer } from "@/lib/pricing";
+import { passHasShortName, passShortName } from "@/lib/pass-label";
+import { adultBracket, dayTicketIsEstimate, nextPriceChange, pricesOnDate, resolveForViewer } from "@/lib/pricing";
+import type { Pass } from "@/lib/schema";
 import { snapFromKey, type SheetSnap } from "@/lib/sheet";
 import type { Resort } from "@/lib/schema";
 import { IconClose } from "./icons";
+import { PlacePicker } from "./PlacePicker";
 import { SourceLine } from "./SourceLine";
 import { startSheetDrag } from "./sheet-drag";
 import { useApp } from "./AppState";
@@ -201,57 +204,17 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
 }
 
 function PricesPage({ resort }: { resort: Resort }) {
-  const { t, lang, share, birthYear, effectiveDate, updateShare, setBirthYear } = useApp();
+  const { t, lang, birthYear, effectiveDate } = useApp();
   const day = finiteOrBlank(resort.day_ticket_eur);
   return (
     <div>
-      <label className="field">
-        <span>{t("pricesFor")}</span>
-        <select value={share.age} onChange={(event) => updateShare({ age: event.target.value as typeof share.age })}>
-          <option value="adult">{t("ageAdult")}</option>
-          <option value="young-adult">{t("ageYoung")}</option>
-          <option value="youth">{t("ageYouth")}</option>
-          <option value="child">{t("ageChild")}</option>
-        </select>
-      </label>
-      <label className="field">
-        <span>{t("birthYearOptional")}</span>
-        <input
-          type="number"
-          inputMode="numeric"
-          min={1940}
-          max={2026}
-          value={birthYear ?? ""}
-          onChange={(event) => setBirthYear(event.target.value === "" ? null : Number(event.target.value))}
-        />
-      </label>
+      <p className="hint">{birthYear == null ? t("setBirthYearHint") : t("birthYearExact")}</p>
       {resort.passes.length === 0 ? <p>{t("noPasses")}</p> : null}
       <ul className="price-list">
         {resort.passes.map((id) => {
           const pass = passById.get(id);
           if (!pass || !effectiveDate) return null;
-          const price = resolveForViewer(pass, birthYear, effectiveDate, share.age);
-          const change = nextPriceChange(pass, birthYear, effectiveDate, share.age);
-          const breakEven = price.amountEur != null && day != null && day > 0 ? price.amountEur / day : null;
-          return (
-            <li key={id} className="price-row">
-              <span className="price-bar" style={{ background: pass.color }} />
-              <div>
-                <strong>
-                  {pass.name}
-                  {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
-                </strong>
-                <p className="price-lg num">
-                  {price.amountEur != null ? formatEur(lang, price.amountEur) : priceReasonText(lang, price.reason, price.bracketId, price.nextPeriodStart)}
-                </p>
-                {change ? (
-                  <p className="hint warn">{t("priceAfter", { price: formatEur(lang, change.toEur), date: formatDate(lang, change.date) })}</p>
-                ) : null}
-                {breakEven != null ? <p className="hint save">{t("paysOff", { n: formatBreakEven(breakEven) })}</p> : null}
-                <SourceLine source={pass.source} t={t} lang={lang} />
-              </div>
-            </li>
-          );
+          return <PassPrice key={id} pass={pass} day={day} />;
         })}
       </ul>
       {day != null || resort.day_ticket_dynamic ? (
@@ -272,6 +235,51 @@ function PricesPage({ resort }: { resort: Resort }) {
       ) : null}
       <p className="disclaimer">{t("globalDisclaimer")}</p>
     </div>
+  );
+}
+
+function PassPrice({ pass, day }: { pass: Pass; day: number | null }) {
+  const { t, lang, birthYear, effectiveDate } = useApp();
+  if (!effectiveDate) return null;
+  const price = resolveForViewer(pass, birthYear, effectiveDate);
+  const change = nextPriceChange(pass, birthYear, effectiveDate);
+  const tariffs = pricesOnDate(pass, effectiveDate);
+  const adult = adultBracket(pass);
+  const matched = birthYear != null && price.reason === "ok" ? price.bracketId : null;
+  const listed = birthYear == null ? tariffs.filter((row) => row.bracketId !== adult?.label) : tariffs;
+  const breakEven = price.amountEur != null && day != null && day > 0 ? price.amountEur / day : null;
+  return (
+    <li className="price-row">
+      <span className="price-bar" style={{ background: pass.color }} />
+      <div>
+        <strong className="pass-short">
+          {passShortName(pass)}
+          {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
+        </strong>
+        {passHasShortName(pass) ? <p className="pass-official">{pass.name}</p> : null}
+        <p className="price-lg num">
+          {price.amountEur != null ? formatEur(lang, price.amountEur) : priceReasonText(lang, price.reason, price.bracketId, price.nextPeriodStart)}
+        </p>
+        {change ? (
+          <p className="hint warn">{t("priceAfter", { price: formatEur(lang, change.toEur), date: formatDate(lang, change.date) })}</p>
+        ) : null}
+        {breakEven != null ? <p className="hint save">{t("paysOff", { n: formatBreakEven(breakEven) })}</p> : null}
+        {listed.length > 0 ? (
+          <>
+            <p className="hint">{birthYear == null ? t("otherTariffs") : t("yourBracket")}</p>
+            <ul className="bracket-list">
+              {listed.map((row) => (
+                <li key={row.bracketId} className={matched && row.bracketId === matched ? "is-match" : undefined}>
+                  {row.bracketLabel}{" "}
+                  {row.amountEur != null ? formatEur(lang, row.amountEur) : priceReasonText(lang, row.reason, row.bracketId, row.nextPeriodStart)}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+        <SourceLine source={pass.source} t={t} lang={lang} />
+      </div>
+    </li>
   );
 }
 
@@ -351,32 +359,20 @@ function SnowPage({ resort }: { resort: Resort }) {
 }
 
 function TravelPage({ resort }: { resort: Resort }) {
-  const { t, share, updateShare, home, locate, locating, geoError } = useApp();
+  const { t, home } = useApp();
   const distance = home ? distanceKm(home, resort) : null;
   const google = `https://www.google.com/maps/dir/?api=1&destination=${resort.lat},${resort.lon}`;
   const apple = `https://maps.apple.com/?daddr=${resort.lat},${resort.lon}`;
+  const km = distance != null ? formatKm(distance) : "";
   return (
     <div>
-      <label className="field">
-        <span>{t("homeBase")}</span>
-        <select
-          value={share.home}
-          onChange={(event) => {
-            const next = event.target.value;
-            updateShare(next === "geo" ? { home: next } : { home: next, geoLat: null, geoLon: null });
-          }}
-        >
-          <option value="">{t("homeNone")}</option>
-          {cities.map((city) => (
-            <option key={city.id} value={city.id}>
-              {city.name}
-            </option>
-          ))}
-          <option value="geo">{t("homeGeo")}</option>
-        </select>
-      </label>
-      <p>{distance != null && formatKm(distance) ? t("distanceValue", { n: formatKm(distance) }) : t("straightLine")}</p>
-      <p className="hint">{t("straightLine")}</p>
+      <PlacePicker />
+      {home && km ? (
+        <>
+          <p>{t("distanceValue", { n: km })}</p>
+          <p className="hint">{t("straightLine")}</p>
+        </>
+      ) : null}
       <div className="link-buttons">
         <a href={google} target="_blank" rel="noopener noreferrer">
           {t("directions")}
@@ -385,11 +381,6 @@ function TravelPage({ resort }: { resort: Resort }) {
           {t("directionsApple")}
         </a>
       </div>
-      <button type="button" className="ghost" onClick={locate} disabled={locating}>
-        {locating ? t("locating") : t("useMyLocation")}
-      </button>
-      {geoError === "denied" ? <p className="hint warn">{t("geoDenied")}</p> : null}
-      {geoError === "unsupported" ? <p className="hint warn">{t("geoUnsupported")}</p> : null}
       {resort.public_transport ? (
         <>
           <h3>{t("transportNote")}</h3>
@@ -431,8 +422,9 @@ function LinksPage({ resort }: { resort: Resort }) {
               <li key={pass.id}>
                 <span className="swatch" style={{ background: pass.color }} />
                 <a href={pass.url} target="_blank" rel="noopener noreferrer">
-                  {pass.name}
+                  {passShortName(pass)}
                 </a>
+                {passHasShortName(pass) ? <span className="pass-official">{pass.name}</span> : null}
                 {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
               </li>
             ))}

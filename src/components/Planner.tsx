@@ -9,12 +9,14 @@ import { priceReasonText } from "@/lib/i18n";
 import { cheapestFullCoverage, dayTicketIsEstimate, nextPriceChange, quotePlan, savingsVsDayTickets, type PriceQuote } from "@/lib/pricing";
 import { BASE_PATH } from "@/lib/site";
 import { serializePlan } from "@/lib/url-state";
+import { BirthYearField } from "./BirthYearField";
 import { CompareView } from "./CompareView";
+import { PlacePicker } from "./PlacePicker";
 import { useApp } from "./AppState";
 
 export function Planner() {
   const app = useApp();
-  const { t, lang, birthYear, setBirthYear, setPurchaseDate, effectiveDate, resortDays, setResortDaysCount, clearResortDays, ready, share, updateShare, copyMessage } = app;
+  const { t, lang, birthYear, setPurchaseDate, effectiveDate, resortDays, setResortDaysCount, clearResortDays, ready, share, copyMessage } = app;
   const [tab, setTab] = useState<"plan" | "prices">("plan");
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -35,9 +37,8 @@ export function Planner() {
       birthYear,
       effectiveDate,
       Object.entries(resortDays).map(([id, days]) => ({ id, days })),
-      share.age,
     );
-  }, [effectiveDate, birthYear, resortDays, share.age]);
+  }, [effectiveDate, birthYear, resortDays]);
 
   const totalPlanned = Object.values(resortDays).reduce((sum, days) => sum + days, 0);
   const priced = quotes.filter((quote) => quote.totalEur != null && totalPlanned > 0).sort((a, b) => (a.totalEur ?? 0) - (b.totalEur ?? 0));
@@ -61,20 +62,19 @@ export function Planner() {
       .map((id) => {
         const pass = passById.get(id);
         if (!pass) return null;
-        const change = nextPriceChange(pass, birthYear, effectiveDate, share.age);
+        const change = nextPriceChange(pass, birthYear, effectiveDate);
         return change ? { ...change, name: pass.name } : null;
       })
       .filter((item): item is NonNullable<typeof item> => item != null)
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 3);
-  }, [effectiveDate, resortDays, birthYear, share.age]);
+  }, [effectiveDate, resortDays, birthYear]);
 
   function sharePlan() {
     const params = new URLSearchParams();
     const plan = serializePlan(resortDays);
     if (plan) params.set("plan", plan);
     if (app.purchaseDate) params.set("on", app.purchaseDate);
-    if (share.age !== "adult") params.set("age", share.age);
     if (share.lang !== "en") params.set("lang", share.lang);
     const url = `${window.location.origin}${BASE_PATH}/plan/${params.toString() ? `?${params}` : ""}`;
     if (navigator.clipboard?.writeText) {
@@ -107,33 +107,14 @@ export function Planner() {
           <section className="card-block">
             <div className="chip-row">
               <label className="chip-field">
-                <span className="sr-only">{t("pricesFor")}</span>
-                <select value={share.age} aria-label={t("ageGroupLabel")} onChange={(event) => updateShare({ age: event.target.value as typeof share.age })}>
-                  <option value="adult">{t("ageAdult")}</option>
-                  <option value="young-adult">{t("ageYoung")}</option>
-                  <option value="youth">{t("ageYouth")}</option>
-                  <option value="child">{t("ageChild")}</option>
-                </select>
-              </label>
-              <label className="chip-field">
                 <span className="sr-only">{t("purchaseDate")}</span>
                 <input type="date" aria-label={t("purchaseDate")} value={effectiveDate ?? ""} onChange={(event) => setPurchaseDate(event.target.value || null)} />
               </label>
             </div>
             {effectiveDate ? <p className="hint">{t("buyOn", { date: formatDate(lang, effectiveDate) })}</p> : null}
-            <label className="field">
-              <span>{t("birthYearOptional")}</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1940}
-                max={2026}
-                value={birthYear ?? ""}
-                onChange={(event) => setBirthYear(event.target.value === "" ? null : Number(event.target.value))}
-              />
-            </label>
-            <p className="hint">{t("birthYearExact")}</p>
+            <BirthYearField />
             <p className="hint">{t("purchaseHelp")}</p>
+            <PlacePicker />
 
             <label className="field">
               <span>{t("planSearch")}</span>
