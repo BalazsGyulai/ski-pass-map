@@ -30,9 +30,32 @@ Do not create a Cloudflare project from this repository's scripts. When you conn
 - Set it to an **empty string** to serve the site at the domain root on Cloudflare Pages.
 - Set it to a path such as `/ski-pass-map` only if the site should stay under a prefix.
 
-No API keys or secrets are required. The map uses keyless OpenStreetMap tiles. Mapbox is not part of this build.
+The map draws with MapLibre and [OpenFreeMap](https://openfreemap.org) unless a public Mapbox token, storage consent, and the monthly load budget all allow Mapbox. OpenFreeMap needs no key. See [Mapbox load budget](#mapbox-load-budget) before turning Mapbox on. Do not commit a token.
 
-`npm run build` validates the data, runs `next build`, then stamps `out/sw.js` and `out/manifest.webmanifest` with the resolved base path and the site name. `public/sw.js` keeps the GitHub Pages prefix so local `next dev` matches that deployment.
+`npm run build` validates the data, runs `next build`, then stamps `out/sw.js` and `out/manifest.webmanifest` with the resolved base path and the site name. `public/sw.js` keeps the GitHub Pages prefix so local `next dev` matches that deployment. The build also copies the MapLibre worker into `public/vendor` (gitignored) so the static export can start it from this origin.
+
+## Mapbox load budget
+
+Mapbox is used only when all three are true at map start: `NEXT_PUBLIC_MAPBOX_TOKEN` was set for that build, the visitor has consented to map storage, and `POST /api/map-load` returns `{ "provider": "mapbox" }`. Anything else, including a missing function, a network error, or a short timeout, uses OpenFreeMap for that page load. The choice is not changed mid-session.
+
+The counter is a Cloudflare Pages Function in [`functions/api/map-load.ts`](functions/api/map-load.ts). It is not part of the static `out/` export, so GitHub Pages and `npx serve` stay on OpenFreeMap. Do not create the Cloudflare database from this repository, and do not put a token in git or in the GitHub Pages build.
+
+The function stores one row per UTC month (`YYYY-MM`) in D1 and increments it only while the count is under the budget. The default budget is 45,000 of Mapbox's 50,000 free monthly web map loads. One increment is one Mapbox `Map` construction, which is the billing unit, not a tile. At the budget it returns `{ "provider": "openfreemap" }` and stops incrementing. A new month starts at zero.
+
+Abuse limits, applied before the increment: only `POST`, the `Origin` must be this site (or `MAP_LOAD_ALLOWED_ORIGINS`), and each visitor gets 8 requests per 10 minutes. The address is hashed with `MAP_LOAD_HASH_SALT` into a bucket that expires with the window. The raw address is not stored and not returned. Requests over the limit get `429` and do not move the monthly count, so they cannot force the whole site onto OpenFreeMap.
+
+Consent lives in `localStorage` under `skimap-map-consent` and defaults to off. Part 8's banner should call `setMapConsent` from [`src/lib/map-consent.ts`](src/lib/map-consent.ts). Until that ships, visitors get OpenFreeMap. For local `next dev` only, `?mapConsent=1` or `NEXT_PUBLIC_MAP_CONSENT=1` simulates consent. Production builds ignore both.
+
+### Owner setup
+
+1. In the Cloudflare dashboard, create a D1 database named `skimap-map-loads`. Copy its id into [`wrangler.toml`](wrangler.toml), replacing `database_id`. The committed id is a placeholder.
+2. On the Pages project, bind that database as `MAP_LOADS`. The function creates the tables on first use. You can also apply [`functions/schema.sql`](functions/schema.sql) yourself with `npx wrangler d1 execute skimap-map-loads --file=functions/schema.sql` when you are ready. Do not run that from CI.
+3. Set `MAP_LOAD_HASH_SALT` in the Pages environment to a long random string. It is not a personal identifier and it does not belong in git.
+4. Optionally set `MAPBOX_MONTHLY_LIMIT` (default `45000`) and `MAP_LOAD_ALLOWED_ORIGINS` (comma-separated extra origins; the site's own origin is always allowed).
+5. Create a Mapbox **public** token. Before launch, restrict it by URL to the production site. Set `NEXT_PUBLIC_MAPBOX_TOKEN` on the Cloudflare Pages build only. Leave it unset for GitHub Pages. `.env.example` stays empty.
+6. Build command and output directory stay `npm ci && npm run build` and `out`.
+
+Styles: OpenFreeMap [Positron](https://tiles.openfreemap.org/styles/positron) (light, with Natural Earth shaded relief at low zoom) and Mapbox `light-v11`. Dark mode uses OpenFreeMap Dark and Mapbox `dark-v11`. Attribution for OpenStreetMap (ODbL), OpenSkiMap, OpenFreeMap, OpenMapTiles, and Mapbox stays on the map. The OpenSnowMap piste overlay is unchanged.
 
 ## Import Austria
 

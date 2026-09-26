@@ -29,6 +29,12 @@ now name OpenSkiMap, and this file does not store a Skimap.org URL.
 The optional piste overlay uses tiles from www.opensnowmap.org (CC BY-SA).
 Those tiles are not copied into this repository.
 
+The on-screen base map is not stored here. It is requested live from
+OpenFreeMap (OpenMapTiles schema, © OpenMapTiles, data © OpenStreetMap
+contributors) or, when a token, storage consent, and the monthly load budget
+allow it, from Mapbox. Positron, the OpenFreeMap style used here, includes
+Natural Earth shaded relief at low zoom.
+
 ## Files this licence does not cover
 
 - `data/resorts.json` and `data/passes.json` are our own notes: names, pass

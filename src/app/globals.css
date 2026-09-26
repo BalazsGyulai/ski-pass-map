@@ -692,7 +692,33 @@ legend { padding: 0 4px; font-weight: 650; }
 .mini-passes { list-style: none; margin: 0; padding: 0; }
 .boot { min-height: 100dvh; background: #f3f6f9; }
 
-.leaflet-div-icon.resort-marker, .leaflet-div-icon.city-marker { background: transparent; border: 0; overflow: visible; }
+.map-root { position: absolute; inset: 0; }
+.maplibregl-map, .mapboxgl-map { font-family: inherit; }
+.maplibregl-ctrl-attrib, .mapboxgl-ctrl-attrib {
+  font-size: 10px;
+  max-width: min(70vw, 420px);
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #334155;
+}
+.maplibregl-ctrl-attrib a, .mapboxgl-ctrl-attrib a { color: #1d4ed8; }
+.mapboxgl-ctrl-logo { margin: 0 0 4px 4px; }
+.resort-marker {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  line-height: 0;
+  overflow: visible;
+}
+.resort-marker.is-selected { padding-bottom: 8px; }
+.resort-marker:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 999px; }
+.piste-tip .maplibregl-popup-content, .piste-tip .mapboxgl-popup-content {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font: 600 12px/1.3 Inter, system-ui, sans-serif;
+  color: #0f1b2d;
+}
 .price-pill {
   display: inline-flex;
   align-items: center;
@@ -736,36 +762,23 @@ legend { padding: 0 4px; font-weight: 650; }
   border-style: solid;
   border-color: #0f1b2d transparent transparent;
 }
-.leaflet-marker-icon.is-hot .price-pill { box-shadow: 0 0 0 3px #f59e0b; }
-.leaflet-control-attribution {
-  font-size: 10px;
-  max-width: min(70%, 280px);
-  background: rgba(255, 255, 255, 0.92) !important;
-  color: #334155;
-}
-.explorer[data-snap="peek"] .leaflet-bottom.leaflet-left { margin-bottom: 236px; }
-.explorer[data-snap="half"] .leaflet-bottom.leaflet-left { margin-bottom: 50dvh; }
-.explorer[data-panel="resort"][data-snap="peek"] .leaflet-bottom.leaflet-left { margin-bottom: 45dvh; }
-.explorer[data-panel="resort"][data-snap="half"] .leaflet-bottom.leaflet-left { margin-bottom: min(560px, 70dvh); }
-.explorer[data-snap="full"] .leaflet-bottom.leaflet-left,
+.resort-marker.is-hot .price-pill { box-shadow: 0 0 0 3px #f59e0b; }
+.explorer[data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 236px; }
+.explorer[data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 50dvh; }
+.explorer[data-panel="resort"][data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 45dvh; }
+.explorer[data-panel="resort"][data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: min(560px, 70dvh); }
+.explorer[data-snap="full"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
 .explorer[data-snap="full"] .map-tools,
 .explorer[data-snap="full"] .piste-float { display: none; }
-
-:root[data-theme="dark"] .leaflet-tile-pane,
-:root:not([data-theme="light"]) .leaflet-tile-pane {
-  filter: none;
-}
+:root[data-theme="dark"] .map-canvas { background: #0b1320; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .leaflet-tile-pane {
-    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.92) saturate(0.7);
-  }
-}
-:root[data-theme="dark"] .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.92) saturate(0.7);
+  :root:not([data-theme="light"]) .map-canvas { background: #0b1320; }
 }
 
+@media (max-width: 899px), (pointer: coarse) {
+  .maplibregl-ctrl-top-right, .mapboxgl-ctrl-top-right { display: none !important; }
+}
 @media (max-width: 899px) {
-  .leaflet-control-zoom { display: none !important; }
   .move-toggle { display: none !important; }
 }
 
@@ -825,13 +838,14 @@ legend { padding: 0 4px; font-weight: 650; }
     font-size: 13px;
     font-weight: 650;
   }
-  .explorer .leaflet-bottom.leaflet-left,
-  .explorer[data-snap="peek"] .leaflet-bottom.leaflet-left,
-  .explorer[data-snap="half"] .leaflet-bottom.leaflet-left,
-  .explorer[data-panel="resort"] .leaflet-bottom.leaflet-left { margin-bottom: 0; display: block; }
+  .explorer :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
+  .explorer[data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
+  .explorer[data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
+  .explorer[data-snap="full"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
+  .explorer[data-panel="resort"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 0; display: block; }
   .explorer[data-snap="full"] .map-tools,
   .explorer[data-snap="full"] .piste-float { display: flex; }
-  .leaflet-top.leaflet-right { margin-top: 128px; }
+  .explorer :is(.maplibregl-ctrl-top-right, .mapboxgl-ctrl-top-right) { top: 128px; }
   .filter-sheet {
     inset: auto;
     top: 68px;

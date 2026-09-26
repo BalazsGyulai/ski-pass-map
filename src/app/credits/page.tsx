@@ -11,6 +11,8 @@ export default function CreditsPage() {
       <ul className="source-list">
         <li>{t("creditsOsm")}</li>
         <li>{t("creditsOpenSkiMap")}</li>
+        <li>{t("creditsOpenFreeMap")}</li>
+        <li>{t("creditsMapbox")}</li>
         <li>{t("creditsOpenSnowMap")}</li>
         <li>{t("creditsPasses")}</li>
         <li>{t("creditsCode", { name: SITE_NAME })}</li>

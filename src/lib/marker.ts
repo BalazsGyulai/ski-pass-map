@@ -17,7 +17,7 @@ export interface PillOptions {
   noPass: boolean;
 }
 
-/** Leaflet HTML for a price pill. Text is escaped. Colour is paired with the price and the marker title. */
+/** HTML for a price pill. Text is escaped. Colour is paired with the price and the marker title. */
 export function pricePillHtml(options: PillOptions): string {
   const colors = options.colors.slice(0, 3).map(cssColor);
   const extra = options.colors.length - colors.length;
