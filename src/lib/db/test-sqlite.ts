@@ -4,9 +4,12 @@ import path from "node:path";
 import { createSqlExecutor, type SqlExecutor } from "./types";
 
 export function createTestSqlExecutor(): SqlExecutor {
-  const migration = fs.readFileSync(path.join(process.cwd(), "migrations/0001_init.sql"), "utf8");
+  const root = process.cwd();
+  const migration1 = fs.readFileSync(path.join(root, "migrations/0001_init.sql"), "utf8");
+  const migration2 = fs.readFileSync(path.join(root, "migrations/0002_portal.sql"), "utf8");
   const db = new Database(":memory:");
-  db.exec(migration);
+  db.exec(migration1);
+  db.exec(migration2);
   const d1: import("./types").D1Like = {
     exec: async (sql) => {
       db.exec(sql);

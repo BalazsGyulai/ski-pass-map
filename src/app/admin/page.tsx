@@ -22,7 +22,14 @@ type Edit = {
   checker_result_json: string | null;
 };
 
-type Tab = "inbox" | "edits" | "audit";
+type Tab = "inbox" | "edits" | "portal" | "audit";
+
+type PortalQueue = {
+  postModeration: Edit[];
+  reviewB: Edit[];
+  reviewC: Edit[];
+  promos: unknown[];
+};
 
 async function api(path: string, init?: RequestInit) {
   const headers = new Headers(init?.headers);
@@ -39,6 +46,8 @@ export default function AdminPage() {
   const [edits, setEdits] = useState<Edit[]>([]);
   const [audit, setAudit] = useState<unknown[]>([]);
   const [checkerPreview, setCheckerPreview] = useState<string>("");
+  const [portalQueue, setPortalQueue] = useState<PortalQueue | null>(null);
+  const [inviteLink, setInviteLink] = useState<string>("");
   const [error, setError] = useState<string>("");
 
   const loadInbox = useCallback(async () => {
@@ -60,11 +69,18 @@ export default function AdminPage() {
     if (json.ok && json.audit) setAudit(json.audit);
   }, []);
 
+  const loadPortal = useCallback(async () => {
+    const res = await api("/api/admin/portal/queue");
+    const json = (await res.json()) as { ok?: boolean } & PortalQueue;
+    if (json.ok) setPortalQueue(json);
+  }, []);
+
   useEffect(() => {
     if (tab === "inbox") loadInbox();
     if (tab === "edits") loadEdits();
+    if (tab === "portal") loadPortal();
     if (tab === "audit") loadAudit();
-  }, [tab, loadInbox, loadEdits, loadAudit]);
+  }, [tab, loadInbox, loadEdits, loadPortal, loadAudit]);
 
   async function setStatus(id: string, status: string) {
     await api("/api/admin/messages", { method: "PATCH", body: JSON.stringify({ id, status }) });
@@ -102,6 +118,22 @@ export default function AdminPage() {
     await loadEdits();
   }
 
+  async function createInvite() {
+    const res = await api("/api/admin/portal/invites", {
+      method: "POST",
+      body: JSON.stringify({ email: "info@example.com", resortIds: ["skimap-12357"] }),
+    });
+    const json = (await res.json()) as { inviteUrl?: string; warnings?: string[] };
+    if (json.inviteUrl) setInviteLink(json.inviteUrl);
+    await loadPortal();
+  }
+
+  async function rollbackEdit(editId: string) {
+    const reason = "Rollback after post-moderation review: source mismatch.";
+    await api("/api/admin/portal/rollback", { method: "POST", body: JSON.stringify({ editId, reason }) });
+    await loadPortal();
+  }
+
   return (
     <main className="admin-page">
       <header className="admin-header">
@@ -110,6 +142,7 @@ export default function AdminPage() {
         <nav className="admin-tabs" aria-label="Admin sections">
           <button type="button" className={tab === "inbox" ? "active" : ""} onClick={() => setTab("inbox")}>Inbox</button>
           <button type="button" className={tab === "edits" ? "active" : ""} onClick={() => setTab("edits")}>Edit queue</button>
+          <button type="button" className={tab === "portal" ? "active" : ""} onClick={() => setTab("portal")}>Portal</button>
           <button type="button" className={tab === "audit" ? "active" : ""} onClick={() => setTab("audit")}>Audit log</button>
         </nav>
       </header>
@@ -154,6 +187,23 @@ export default function AdminPage() {
             ))}
           </ul>
           {checkerPreview ? <pre className="checker-result">{checkerPreview}</pre> : null}
+        </section>
+      ) : null}
+      {tab === "portal" ? (
+        <section className="admin-portal">
+          <button type="button" className="btn-primary" onClick={createInvite}>Create sample invite</button>
+          {inviteLink ? <p className="hint">Invite path: {inviteLink}</p> : null}
+          <h2>Tier A post-moderation</h2>
+          <ul>
+            {(portalQueue?.postModeration ?? []).map((e) => (
+              <li key={e.id}>
+                {e.entity_id} — {e.status}
+                <button type="button" onClick={() => rollbackEdit(e.id)}>Rollback</button>
+              </li>
+            ))}
+          </ul>
+          <h2>Tier B / C review</h2>
+          <pre>{JSON.stringify({ b: portalQueue?.reviewB, c: portalQueue?.reviewC, promos: portalQueue?.promos }, null, 2)}</pre>
         </section>
       ) : null}
       {tab === "audit" ? (

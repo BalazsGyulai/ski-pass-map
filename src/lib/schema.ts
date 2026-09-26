@@ -111,6 +111,7 @@ export const resortRecordSchema = z.object({
   needsRecheck: z.boolean(),
   viaTourismSite: z.boolean(),
   notes: z.string().min(1).nullable(),
+  listing: z.enum(["full", "link_only", "unlisted"]).optional(),
 });
 
 export const resortsFileSchema = z.object({
@@ -349,6 +350,7 @@ export interface Resort {
   webcam: string | null;
   provisional_passes: string[];
   sources: Partial<Record<ResortFactKey, FactRef>>;
+  listing?: "full" | "link_only" | "unlisted";
 }
 
 export type ResortFactKey =
