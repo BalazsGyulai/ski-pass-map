@@ -24,6 +24,7 @@ export function Header() {
   const { t } = useApp();
   const href = useLocalizedPath();
   const { rest } = parseLangPath(pathname);
+  const onSettings = rest === "/settings" || rest.startsWith("/settings/");
   return (
     <header className="site-header">
       <a className="skip" href="#main">
@@ -41,9 +42,8 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <LanguageSwitcher />
+        {onSettings ? null : <LanguageSwitcher compact />}
       </div>
-      <p className="disclaimer-bar">{t("globalDisclaimer")}</p>
     </header>
   );
 }

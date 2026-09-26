@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { legalLinks } from "./MenuDrawer";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
+import { SegmentedControl, SettingsGroup, SettingsRow, StyledSelect, ToggleSwitch } from "./ui/SettingsControls";
 
 export function SettingsView() {
   const {
@@ -53,79 +54,83 @@ export function SettingsView() {
 
   return (
     <div className="page-shell settings-page">
-      <h1>{t("settingsTitle")}</h1>
+      <header className="page-hero">
+        <h1>{t("settingsTitle")}</h1>
+      </header>
 
-      <section className="settings-section" aria-labelledby="settings-lang">
-        <h2 id="settings-lang">{t("settingsSectionLanguage")}</h2>
-        <LanguageSwitcher />
-      </section>
+      <SettingsGroup title={t("settingsSectionLanguage")}>
+        <SettingsRow label={t("langLabel")}>
+          <LanguageSwitcher />
+        </SettingsRow>
+      </SettingsGroup>
 
-      <section className="settings-section" aria-labelledby="settings-appearance">
-        <h2 id="settings-appearance">{t("settingsSectionAppearance")}</h2>
-        <label className="field">
-          <span>{t("theme")}</span>
-          <select value={theme} onChange={(event) => setTheme(event.target.value as "system" | "light" | "dark")}>
-            <option value="system">{t("themeSystem")}</option>
-            <option value="light">{t("themeLight")}</option>
-            <option value="dark">{t("themeDark")}</option>
-          </select>
-        </label>
-      </section>
+      <SettingsGroup title={t("settingsSectionAppearance")}>
+        <SettingsRow label={t("theme")}>
+          <SegmentedControl
+            ariaLabel={t("theme")}
+            value={theme}
+            options={[
+              { value: "system", label: t("themeSystem") },
+              { value: "light", label: t("themeLight") },
+              { value: "dark", label: t("themeDark") },
+            ]}
+            onChange={setTheme}
+          />
+        </SettingsRow>
+      </SettingsGroup>
 
-      <section className="settings-section" aria-labelledby="settings-map">
-        <h2 id="settings-map">{t("settingsSectionMap")}</h2>
-        <p className="hint">{t("mapProviderCurrent", { provider: providerLabel })}</p>
-        <label className="field row">
-          <input
-            type="checkbox"
+      <SettingsGroup title={t("settingsSectionMap")}>
+        <SettingsRow label={t("mapProviderLabel")} hint={t("mapProviderCurrent", { provider: providerLabel })}>
+          <ToggleSwitch
+            label={t("consentMapCategory")}
             checked={mapConsent}
-            onChange={(event) => {
-              setMapConsent(event.target.checked);
-              setMapConsentLocal(event.target.checked);
+            onChange={(on) => {
+              setMapConsent(on);
+              setMapConsentLocal(on);
               const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim();
-              setProviderLabel(token && event.target.checked ? t("mapProviderMapbox") : t("mapProviderFree"));
+              setProviderLabel(token && on ? t("mapProviderMapbox") : t("mapProviderFree"));
             }}
           />
-          <span>{t("consentMapCategory")}</span>
-        </label>
-        <p className="hint">{t("consentMapCategoryDesc")}</p>
-        <label className="field row">
-          <input
-            type="checkbox"
+        </SettingsRow>
+        <p className="settings-inline-hint">{t("consentMapCategoryDesc")}</p>
+        <SettingsRow label={t("pisteOverlayDefault")}>
+          <ToggleSwitch
+            label={t("pisteOverlayDefault")}
             checked={pisteOverlayDefault}
-            onChange={(event) => {
-              setPisteOverlayDefault(event.target.checked);
-              if (event.target.checked) updateShare({ showPistes: true });
+            onChange={(on) => {
+              setPisteOverlayDefault(on);
+              if (on) updateShare({ showPistes: true });
             }}
           />
-          <span>{t("pisteOverlayDefault")}</span>
-        </label>
-        <label className="field">
-          <span>{t("unitsLabel")}</span>
-          <select value={distanceUnits} onChange={(event) => setDistanceUnits(event.target.value as "km" | "mi")}>
-            <option value="km">{t("unitsKm")}</option>
-            <option value="mi">{t("unitsMi")}</option>
-          </select>
-        </label>
-      </section>
+        </SettingsRow>
+        <SettingsRow label={t("unitsLabel")}>
+          <StyledSelect
+            ariaLabel={t("unitsLabel")}
+            value={distanceUnits}
+            options={[
+              { value: "km", label: t("unitsKm") },
+              { value: "mi", label: t("unitsMi") },
+            ]}
+            onChange={setDistanceUnits}
+          />
+        </SettingsRow>
+      </SettingsGroup>
 
-      <section className="settings-section" aria-labelledby="settings-prices">
-        <h2 id="settings-prices">{t("settingsSectionPrices")}</h2>
+      <SettingsGroup title={t("settingsSectionPrices")}>
         <BirthYearField />
-        <p className="hint">{t("defaultAdultHint")}</p>
-        <label className="field">
-          <span>{t("purchaseDate")}</span>
+        <p className="settings-inline-hint">{t("defaultAdultHint")}</p>
+        <SettingsRow label={t("purchaseDate")}>
           <input
+            className="settings-input"
             type="date"
             value={purchaseDate ?? ""}
             onChange={(event) => setPurchaseDate(event.target.value || null)}
           />
-        </label>
-      </section>
+        </SettingsRow>
+      </SettingsGroup>
 
-      <section className="settings-section" aria-labelledby="settings-data">
-        <h2 id="settings-data">{t("settingsSectionData")}</h2>
-        <p className="hint">
+      <SettingsGroup title={t("settingsSectionData")}>
+        <p className="settings-inline-hint">
           {favourites.length} favourites · {Object.keys(resortDays).length} plan resorts · {places.length} places
         </p>
         <div className="settings-actions">
@@ -159,20 +164,18 @@ export function SettingsView() {
             {t("clearAllData")}
           </button>
         </div>
-      </section>
+      </SettingsGroup>
 
-      <section className="settings-section" aria-labelledby="settings-privacy">
-        <h2 id="settings-privacy">{t("settingsSectionPrivacy")}</h2>
-        <button type="button" className="ghost" onClick={() => openCookieSettings()}>
+      <SettingsGroup title={t("settingsSectionPrivacy")}>
+        <button type="button" className="settings-link-btn" onClick={() => openCookieSettings()}>
           {t("cookieSettings")}
         </button>
-        <button type="button" className="ghost" onClick={() => resetSupportReminders()}>
+        <button type="button" className="settings-link-btn" onClick={() => resetSupportReminders()}>
           {t("resetSupportReminders")}
         </button>
-      </section>
+      </SettingsGroup>
 
-      <section className="settings-section" aria-labelledby="settings-about">
-        <h2 id="settings-about">{t("settingsSectionAbout")}</h2>
+      <SettingsGroup title={t("settingsSectionAbout")}>
         <nav className="settings-links" aria-label={t("settingsSectionAbout")}>
           <Link href={href("/about")}>{t("navAboutSources")}</Link>
           <Link href={href("/contact")}>{t("contact")}</Link>
@@ -185,8 +188,7 @@ export function SettingsView() {
             </Link>
           ))}
         </nav>
-        <p className="disclaimer">{t("globalDisclaimer")}</p>
-      </section>
+      </SettingsGroup>
     </div>
   );
 }

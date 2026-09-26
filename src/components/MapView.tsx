@@ -13,7 +13,6 @@ import { providerAfterFailure, resolveMapProvider } from "@/lib/map-provider";
 import type { MapProviderId } from "@/lib/map-styles";
 import {
   PISTE_SOURCE_ID,
-  boundsOfGeoJson,
   createVectorMap,
   firstLabelLayer,
   glFitPadding,
@@ -28,6 +27,8 @@ import {
   type VectorMap,
   type VectorMarker,
 } from "@/lib/vector-map";
+import { attachMapProbe } from "@/lib/map-canvas-probe";
+import { flyToResort, readSheetSnap, resortCameraPadding, whenMapIdle } from "@/lib/map-camera";
 import { useApp } from "./AppState";
 
 const SNOW_SOURCE = "opensnow-pistes";
@@ -107,7 +108,10 @@ export default function MapView() {
         mapRef.current = map;
         appliedStyle.current = styleFor(provider, themeNow);
         map.on("load", () => {
-          if (!cancelled) setReady(true);
+          if (!cancelled && map) {
+            attachMapProbe(map);
+            setReady(true);
+          }
         });
       } catch (error) {
         console.error("Map failed to start", error);
@@ -131,6 +135,7 @@ export default function MapView() {
     if (appliedStyle.current === next) return;
     appliedStyle.current = next;
     map.setStyle(next);
+    map.once("idle", () => map.resize());
   }, [appearance, provider, ready]);
 
   useEffect(() => {
@@ -201,15 +206,20 @@ export default function MapView() {
         const marker = new lib.Marker({ element: button, anchor: "center" }).setLngLat([cluster.lon, cluster.lat]).addTo(map);
         markers.push(marker);
       });
-      const selected = filtered.find((resort) => resort.id === share.resort);
+      const selected =
+        share.resort != null ? resorts.find((resort) => resort.id === share.resort) ?? filtered.find((r) => r.id === share.resort) : undefined;
       if (selected) addResort(selected, true);
     };
     draw();
     map.on("zoomend", draw);
     map.on("resize", draw);
+    map.on("style.load", draw);
+    map.on("idle", draw);
     return () => {
       map.off("zoomend", draw);
       map.off("resize", draw);
+      map.off("style.load", draw);
+      map.off("idle", draw);
       for (const marker of markers) marker.remove();
     };
   }, [ready, filtered, share.resort, highlightId, colors, selectResort, t, lang, resortDays]);
@@ -259,27 +269,19 @@ export default function MapView() {
           const count = data?.features?.length ?? 0;
           if (data && count > 0) {
             pisteData.current = data;
-            apply(data);
-            const bounds = boundsOfGeoJson(data);
-            if (bounds && hasMapSize(map)) {
-              map.fitBounds(bounds, {
-                padding: glFitPadding(map.getContainer().clientHeight),
-                maxZoom: 14,
-                duration: motionDuration(600),
-              });
-            }
-            setPisteNote("ready");
+            void whenMapIdle(map).then(() => {
+              if (cancelled || !map.isStyleLoaded()) return;
+              try {
+                apply(data);
+                setPisteNote("ready");
+              } catch {
+                pisteData.current = null;
+                setPisteNote("empty");
+              }
+            });
             return;
           }
           pisteData.current = null;
-          if (hasMapSize(map)) {
-            map.flyTo({
-              center: [resort.lon, resort.lat],
-              zoom: Math.max(map.getZoom(), 12),
-              duration: motionDuration(600),
-              padding: glFitPadding(map.getContainer().clientHeight),
-            });
-          }
           setPisteNote("empty");
         })
         .catch(() => {
@@ -482,9 +484,7 @@ export default function MapView() {
     const map = mapRef.current;
     if (!map || !ready) return;
     const resize = () => {
-      requestAnimationFrame(() => {
-        map.resize();
-      });
+      requestAnimationFrame(() => map.resize());
     };
     resize();
     const observer = new MutationObserver(resize);
@@ -493,6 +493,32 @@ export default function MapView() {
     return () => {
       observer.disconnect();
       window.removeEventListener("resize", resize);
+    };
+  }, [ready, share.resort]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !share.resort) return;
+    const resort = resorts.find((item) => item.id === share.resort);
+    if (!resort) return;
+    let cancelled = false;
+    const fly = (duration: number) => {
+      if (cancelled || !hasMapSize(map)) return;
+      const narrow = window.matchMedia("(max-width: 899px)").matches;
+      const height = map.getContainer().clientHeight;
+      const padding = resortCameraPadding({ narrow, sheet: readSheetSnap(), height });
+      flyToResort(map, resort.lon, resort.lat, { duration, padding });
+      map.once("idle", () => map.resize());
+    };
+    const schedule = (duration: number) => {
+      void whenMapIdle(map).then(() => fly(duration));
+    };
+    schedule(motionDuration(500));
+    const observer = new MutationObserver(() => schedule(motionDuration(200)));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-sheet"] });
+    return () => {
+      cancelled = true;
+      observer.disconnect();
     };
   }, [ready, share.resort]);
 

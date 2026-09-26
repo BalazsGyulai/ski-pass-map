@@ -18,13 +18,14 @@ export function Chrome({ children }: { children: ReactNode }) {
   const tabShell = isTabShellPath(pathname, lang);
   const showMobileTabs = narrow && tabShell;
   const showDesktopHeader = !map && (!narrow || !tabShell);
+  const showFooter = showDesktopHeader && !tabShell;
   return (
     <div className={`site ${map ? "site-map" : ""} ${showMobileTabs ? "site-tabs" : ""}`}>
       {showDesktopHeader ? <Header /> : null}
       <main id="main" className={`site-main ${map ? "explorer-main" : ""}`}>
         {children}
       </main>
-      {showDesktopHeader ? <Footer /> : null}
+      {showFooter ? <Footer /> : null}
       {showMobileTabs ? <BottomTabBar /> : null}
       <ToastHost />
     </div>

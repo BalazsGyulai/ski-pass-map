@@ -5,6 +5,7 @@ import {
   attachOriginGuards,
   dismissConsent,
   originFromBase,
+  assertMapCanvasNotFlat,
   shotPart10,
   waitForMapMarkers,
 } from "./helpers";
@@ -40,6 +41,7 @@ test("map markers, search, filters, resort sheet tabs and pistes", async ({ page
   await page.waitForTimeout(400);
   await page.goto(`/en/?resort=${RESORT_ID}`);
   await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await assertMapCanvasNotFlat(page, "resort tablet");
   for (const tab of ["#tab-prices", "#tab-pistes", "#tab-links"]) {
     await page.click(tab);
     await page.waitForTimeout(400);
@@ -170,7 +172,7 @@ test("legal pages, sitemap, hreflang, 404, dark mode, service worker", async ({ 
   const notFound = await page.goto("/en/this-page-does-not-exist/");
   expect(notFound?.status()).toBe(404);
   await page.goto("/en/settings/");
-  await page.locator("#settings-appearance").locator("..").locator("select").selectOption("dark");
+  await page.getByRole("radio", { name: "Dark" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const sw = await page.request.get("/sw.js");
   expect(sw.ok()).toBeTruthy();
@@ -222,7 +224,7 @@ test("part10 UI screenshots", async ({ page, baseURL }) => {
   await waitForMapMarkers(page);
   await shotPart10(page, "map-phone-light");
   await page.goto("/en/settings/");
-  await page.locator("#settings-appearance").locator("..").locator("select").selectOption("dark");
+  await page.getByRole("radio", { name: "Dark" }).click();
   await page.goto("/en/");
   await waitForMapMarkers(page);
   await shotPart10(page, "map-phone-dark");
@@ -233,6 +235,7 @@ test("part10 UI screenshots", async ({ page, baseURL }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/en/?resort=${RESORT_ID}`);
   await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await assertMapCanvasNotFlat(page, "resort phone");
   await shotPart10(page, "resort-phone");
   await page.setViewportSize({ width: 820, height: 1180 });
   await page.goto(`/en/?resort=${RESORT_ID}`);
@@ -241,8 +244,12 @@ test("part10 UI screenshots", async ({ page, baseURL }) => {
   await page.waitForTimeout(800);
   await shotPart10(page, "resort-tablet");
   await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/en/");
+  await waitForMapMarkers(page);
+  await shotPart10(page, "resort-desktop-list");
   await page.goto(`/en/?resort=${RESORT_ID}`);
   await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await assertMapCanvasNotFlat(page, "resort desktop");
   await shotPart10(page, "resort-desktop");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: /filter|open filters/i }).first().click();

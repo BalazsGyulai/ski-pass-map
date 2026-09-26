@@ -7,6 +7,7 @@ import { ResortList } from "./ResortList";
 import { startSheetDrag } from "./sheet-drag";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
+import { StyledSelect } from "./ui/SettingsControls";
 
 const sorts: SortKey[] = ["distance", "day", "elevation", "slope", "name"];
 const sortKey = {
@@ -55,23 +56,12 @@ export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: 
           <h2>{t("inThisArea", { n: sorted.length })}</h2>
           <p className="hint">{t("sortedBy", { sort: t(sortKey[share.sort]) })}</p>
         </div>
-        <label className="sort-label">
-          <span className="sr-only">{t("sort")}</span>
-          <select
-            value={share.sort}
-            aria-label={t("sort")}
-            onChange={(event) => {
-              const sort = event.target.value as SortKey;
-              updateShare({ sort, dir: sort === "elevation" || sort === "slope" ? "desc" : "asc" });
-            }}
-          >
-            {sorts.map((sort) => (
-              <option key={sort} value={sort}>
-                {t(sortKey[sort])}
-              </option>
-            ))}
-          </select>
-        </label>
+        <StyledSelect
+          ariaLabel={t("sort")}
+          value={share.sort}
+          options={sorts.map((sort) => ({ value: sort, label: t(sortKey[sort]) }))}
+          onChange={(sort) => updateShare({ sort, dir: sort === "elevation" || sort === "slope" ? "desc" : "asc" })}
+        />
       </header>
       <div className="sheet-scroll">
         {!ready ? (

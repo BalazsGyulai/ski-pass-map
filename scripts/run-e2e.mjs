@@ -36,6 +36,7 @@ async function main() {
       "NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA",
       "NEXT_PUBLIC_STATS_ENABLED=1",
       "NEXT_PUBLIC_SUPPORT_PROMPT_FORCE=1",
+      "NEXT_PUBLIC_MAP_CANVAS_PROBE=1",
       "npm run build",
     ].join(" "),
     { stdio: "inherit" },
