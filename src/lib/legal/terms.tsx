@@ -28,7 +28,22 @@ export function TermsEn({ rankingPath }: { rankingPath: string }) {
         </p>
       </Block>
       <Block title="Intellectual property">
-        <p>Application code is all rights reserved. Open data licences are listed on the data sources page.</p>
+        <p>Application code is all rights reserved. Open data licences are listed on the data sources page. Resort names are used descriptively; logos and photos are shown only with permission or owner licence.</p>
+      </Block>
+      <Block title="Your use">
+        <p>You may use the public map for personal trip planning. Do not scrape the site in bulk, attempt to bypass rate limits, or misuse the contact form or portal.</p>
+      </Block>
+      <Block title="Resort portal">
+        <p>When enabled, resort operators accept separate Resort Terms. Tier A edits may auto-publish when checks pass; other content is moderated. We may roll back edits with reasons.</p>
+      </Block>
+      <Block title="Limitation of liability">
+        <p>
+          The service is provided “as is”. We do not warrant uninterrupted access. To the fullest extent permitted by Hungarian law, we are not liable for travel decisions you make based on the map.
+          Nothing here limits liability for intentional breach or for harm to life or physical integrity where such limitation is prohibited.
+        </p>
+      </Block>
+      <Block title="Changes">
+        <p>We may update these terms. Material changes are noted on this page with an updated date. Continued use after changes constitutes acceptance where the law allows.</p>
       </Block>
     </>
   );
@@ -50,6 +65,12 @@ export function TermsHu({ rankingPath }: { rankingPath: string }) {
           A síterep-sorrend a{" "}
           <a href={rankingPath}>rangsort leíró oldalon</a> olvasható. A fizetős promóciók és affiliate linkek nem befolyásolják a térképi sorrendet.
         </p>
+      </Block>
+      <Block title="Szellemi tulajdon és használat">
+        <p>Az alkalmazás kódja védett. A síterep nevek tájékoztató jellegűek. Ne használja vissza a szolgáltatást tömeges adatletöltésre vagy visszaélésre.</p>
+      </Block>
+      <Block title="Felelősségkorlátozás">
+        <p>A szolgáltatás „ahogy van” alapon érhető el. Az utazási döntésekért a jog által megengedett mértékig nem vállalunk felelősséget. A szándékos károkozás és az élet/egészség károsítása kizárása nem érintett, ahol a jog tiltja.</p>
       </Block>
     </>
   );

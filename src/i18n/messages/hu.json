@@ -447,7 +447,7 @@
   "legalFallbackNote": "A jogi szöveg angolul és magyarul érhető el.",
   "legalCrosslinks": "Jogi oldalak",
   "cookieSettings": "Süti beállítások",
-  "consentBannerBody": "Eszközön tároljuk a kedvenceket, a tervet, a nyelvet, a témát és opcionálisan a Mapbox térképet. Bármikor módosítható.",
+  "consentBannerIntro": "Opcionális: Mapbox térkép (eszközön tárolhat adatot). Elutasítás esetén az ingyenes OpenFreeMap marad, extra hozzájárulás nélkül. Részletek:",
   "consentAccept": "Elfogadom",
   "consentReject": "Elutasítom",
   "consentSettings": "Beállítások",

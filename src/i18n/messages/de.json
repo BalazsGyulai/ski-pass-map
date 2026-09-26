@@ -447,7 +447,7 @@
   "legalFallbackNote": "Rechtstexte auf Englisch und Ungarisch verfügbar.",
   "legalCrosslinks": "Rechtliche Seiten",
   "cookieSettings": "Cookie-Einstellungen",
-  "consentBannerBody": "Wir speichern Favoriten, Plan, Sprache, Darstellung und optional Mapbox-Karten lokal. Sie können dies jederzeit ändern.",
+  "consentBannerIntro": "Optional: Karte von Mapbox laden (kann Daten auf Ihrem Gerät speichern). Bei Ablehnung nutzen wir OpenFreeMap ohne zusätzliche Einwilligung. Details in unserer",
   "consentAccept": "Akzeptieren",
   "consentReject": "Ablehnen",
   "consentSettings": "Einstellungen",

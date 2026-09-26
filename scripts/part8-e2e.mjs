@@ -91,10 +91,27 @@ async function main() {
   await shot(page, "imprint-en-phone", 390, 844);
   await shot(page, "imprint-en-desktop", 1440, 900);
 
-  await page.goto(`${ORIGIN}/en/?supportPrompt=1`);
+  await page.addInitScript(() => {
+    localStorage.setItem("skimap-cookie-banner", "rejected");
+    localStorage.setItem("skimap-map-consent", "0");
+  });
+  await page.goto(`${ORIGIN}/en/?supportPrompt=1`, { waitUntil: "domcontentloaded" });
   await page.waitForSelector('[data-testid="support-prompt"]', { timeout: 15000 });
   await shot(page, "support-prompt-en-phone", 390, 844);
   await shot(page, "support-prompt-en-desktop", 1440, 900);
+
+  const mapCtx = await browser.newContext();
+  const mapPage = await mapCtx.newPage();
+  await mapPage.addInitScript(() => {
+    localStorage.setItem("skimap-cookie-banner", "accepted");
+    localStorage.setItem("skimap-map-consent", "1");
+  });
+  await mapPage.setViewportSize({ width: 390, height: 844 });
+  await mapPage.goto(`${ORIGIN}/hu/`, { waitUntil: "domcontentloaded" });
+  await mapPage.waitForSelector(".list-sheet", { timeout: 20000 });
+  await mapPage.waitForTimeout(600);
+  await shot(mapPage, "map-after-consent-hu-phone", 390, 844);
+  await mapCtx.close();
 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`${ORIGIN}/en/?resort=${RESORT_ID}`, { waitUntil: "domcontentloaded" });

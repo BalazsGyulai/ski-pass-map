@@ -447,7 +447,7 @@
   "legalFallbackNote": "Legal text available in English and Hungarian.",
   "legalCrosslinks": "Legal pages",
   "cookieSettings": "Cookie settings",
-  "consentBannerBody": "We use device storage for favourites, your trip plan, language, theme, and optional Mapbox map tiles. You can change this anytime.",
+  "consentBannerIntro": "Optional: load the map from Mapbox (may store data on your device). If you decline, we keep using the free OpenFreeMap tiles with no extra consent. Details in our",
   "consentAccept": "Accept",
   "consentReject": "Reject",
   "consentSettings": "Settings",

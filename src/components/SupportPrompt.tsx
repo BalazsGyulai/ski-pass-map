@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { isConsentPending } from "@/lib/consent/pending";
 import { SUPPORT_CONFIG } from "@/lib/config/support";
 import {
   recordSupportPromptShown,
@@ -9,6 +10,7 @@ import {
 } from "@/lib/support/storage";
 import { stubRewardedAds, type RewardedAdsProvider } from "@/lib/support/rewarded-ads";
 import { setCodeQuietUntil, setRewardQuietDays } from "@/lib/support/storage";
+import { setBottomOverlay } from "@/lib/overlay-layout";
 import { BASE_PATH } from "@/lib/site";
 import { useApp } from "./AppState";
 
@@ -21,12 +23,14 @@ export function setRewardedAdsProvider(provider: RewardedAdsProvider): void {
 export function SupportPrompt({ signal }: { signal: number }) {
   const { t } = useApp();
   const [open, setOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const kofiUrl = SUPPORT_CONFIG.kofiUrl?.trim();
   const rewardedEnabled = SUPPORT_CONFIG.rewardedAdsEnabled;
   const rewardedReady = rewardedEnabled && rewardedProvider.isReady();
 
-  const check = useCallback(() => {
+  const tryOpen = useCallback(() => {
     if (typeof window === "undefined") return;
+    if (isConsentPending()) return;
     const ok = shouldShowSupportPrompt({
       storage: window.localStorage,
       now: Date.now(),
@@ -42,10 +46,38 @@ export function SupportPrompt({ signal }: { signal: number }) {
   }, []);
 
   useEffect(() => {
-    check();
-  }, [signal, check]);
+    tryOpen();
+    const onConsent = () => tryOpen();
+    window.addEventListener("skimap-consent-resolved", onConsent);
+    return () => window.removeEventListener("skimap-consent-resolved", onConsent);
+  }, [signal, tryOpen]);
 
-  const close = () => setOpen(false);
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const el = cardRef.current;
+    if (!el) return;
+    const measure = () => {
+      const host = el.closest(".support-prompt-host") as HTMLElement | null;
+      setBottomOverlay("support", (host ?? el).getBoundingClientRect().height);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    if (el.parentElement) ro.observe(el.parentElement);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+      setBottomOverlay(null);
+    };
+  }, [open]);
+
+  const close = () => {
+    setOpen(false);
+    setBottomOverlay(null);
+  };
 
   async function onRewarded() {
     const granted = await rewardedProvider.showRewarded();
@@ -74,28 +106,32 @@ export function SupportPrompt({ signal }: { signal: number }) {
     }
   }
 
-  if (!open) return null;
+  if (!open || isConsentPending()) return null;
 
   return (
-    <aside className="support-prompt" data-testid="support-prompt" role="dialog" aria-label={t("supportPromptHeadline")}>
-      <p className="support-prompt-title">{t("supportPromptHeadline")}</p>
-      {kofiUrl ? (
-        <p className="support-prompt-line">
-          <a href={kofiUrl} target="_blank" rel="noopener noreferrer" className="primary linkish">
-            {t("supportPromptKofi")}
-          </a>
-        </p>
-      ) : null}
-      {rewardedReady ? (
-        <p className="support-prompt-line">
-          <button type="button" className="ghost" onClick={onRewarded}>{t("supportPromptRewarded")}</button>
-        </p>
-      ) : null}
-      <p className="support-prompt-line">
-        <button type="button" className="ghost" onClick={redeemCode}>{t("supportCodeEnter")}</button>
-      </p>
-      <button type="button" className="ghost support-prompt-dismiss" onClick={close}>{t("supportPromptNotNow")}</button>
-    </aside>
+    <div className="support-prompt-host" data-testid="support-prompt" role="presentation">
+      <aside className="support-prompt" role="dialog" aria-label={t("supportPromptHeadline")}>
+        <div className="support-prompt-card" ref={cardRef}>
+          <p className="support-prompt-title">{t("supportPromptHeadline")}</p>
+          {kofiUrl ? (
+            <p className="support-prompt-line">
+              <a href={kofiUrl} target="_blank" rel="noopener noreferrer" className="primary linkish">
+                {t("supportPromptKofi")}
+              </a>
+            </p>
+          ) : null}
+          {rewardedReady ? (
+            <p className="support-prompt-line">
+              <button type="button" className="ghost" onClick={onRewarded}>{t("supportPromptRewarded")}</button>
+            </p>
+          ) : null}
+          <p className="support-prompt-line">
+            <button type="button" className="ghost" onClick={redeemCode}>{t("supportCodeEnter")}</button>
+          </p>
+          <button type="button" className="ghost support-prompt-dismiss" onClick={close}>{t("supportPromptNotNow")}</button>
+        </div>
+      </aside>
+    </div>
   );
 }
 

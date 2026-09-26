@@ -10,7 +10,7 @@ const hu = {
   legalFallbackNote: "A jogi szöveg angolul és magyarul érhető el.",
   legalCrosslinks: "Jogi oldalak",
   cookieSettings: "Süti beállítások",
-  consentBannerBody: "Eszközön tároljuk a kedvenceket, a tervet, a nyelvet, a témát és opcionálisan a Mapbox térképet. Bármikor módosítható.",
+  consentBannerIntro: "Opcionális: Mapbox térkép (eszközön tárolhat adatot). Elutasítás esetén az ingyenes OpenFreeMap marad, extra hozzájárulás nélkül. Részletek:",
   consentAccept: "Elfogadom",
   consentReject: "Elutasítom",
   consentSettings: "Beállítások",
@@ -40,7 +40,7 @@ const de = {
   legalFallbackNote: "Rechtstexte auf Englisch und Ungarisch verfügbar.",
   legalCrosslinks: "Rechtliche Seiten",
   cookieSettings: "Cookie-Einstellungen",
-  consentBannerBody: "Wir speichern Favoriten, Plan, Sprache, Darstellung und optional Mapbox-Karten lokal. Sie können dies jederzeit ändern.",
+  consentBannerIntro: "Optional: Karte von Mapbox laden (kann Daten auf Ihrem Gerät speichern). Bei Ablehnung nutzen wir OpenFreeMap ohne zusätzliche Einwilligung. Details in unserer",
   consentAccept: "Akzeptieren",
   consentReject: "Ablehnen",
   consentSettings: "Einstellungen",
@@ -70,11 +70,18 @@ for (const file of langs) {
   const locPath = path.join(dir, file);
   const loc = JSON.parse(fs.readFileSync(locPath, "utf8"));
   for (const key of Object.keys(en)) {
+    if (key === "consentBannerBody") {
+      delete loc.consentBannerBody;
+    }
     if (loc[key] === undefined) {
       if (lang === "hu" && hu[key]) loc[key] = hu[key];
       else if (lang === "de" && de[key]) loc[key] = de[key];
       else loc[key] = en[key];
     }
+  }
+  if (loc.consentBannerBody) {
+    loc.consentBannerIntro = loc.consentBannerIntro ?? en.consentBannerIntro;
+    delete loc.consentBannerBody;
   }
   const sorted = Object.fromEntries(Object.keys(en).map((k) => [k, loc[k] ?? en[k]]));
   fs.writeFileSync(locPath, `${JSON.stringify(sorted, null, 2)}\n`);

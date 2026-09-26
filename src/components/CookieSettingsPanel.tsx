@@ -60,6 +60,7 @@ export function CookieSettingsOpener({ open, onOpenChange }: { open: boolean; on
         onOpenChange(false);
         writeBannerChoice(window.localStorage, mapOn ? "accepted" : "rejected");
         setMapConsent(mapOn);
+        window.dispatchEvent(new Event("skimap-consent-resolved"));
       }}
     />
   );
