@@ -62,6 +62,7 @@ function joinResort(record: (typeof catalog.resorts.resorts)[number]): Resort {
     provisional_passes: record.passes
       .map((coverage) => coverage.id)
       .filter((id) => passById.get(id)?.provisional),
+    listing: record.listing ?? "full",
     sources: {
       dayTicket: ref(record.dayTicket),
       website: ref(record.website),

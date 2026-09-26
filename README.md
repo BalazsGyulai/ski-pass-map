@@ -143,6 +143,32 @@ Backend features use Pages Functions in [`functions/`](functions/), a second D1 
 
 Contact form: `POST /api/contact`. Admin UI: static [`/admin/`](src/app/admin/page.tsx) (English, `noindex`). Approved edits export as JSON patches; apply with `npm run apply:edits <patch.json>` (re-runs `npm run validate`).
 
+## Resort portal (part 7)
+
+The resort self-service portal ships **disabled by default**. Configuration lives in [`config/portal.json`](config/portal.json) (`{ "enabled": false }`). You can override with the Pages environment variable `PORTAL_ENABLED=1` when you are ready.
+
+**Before enabling**, complete the legal checklist in the portal outreach memo (section 0.3): Resort Terms (DE/EN) and owner-content licence, DSA contact points and notice form, ranking-parameters page, checker tiers with limits/attribution/rollback/audit, updated privacy notice, outreach list rules, and reply templates.
+
+**Database:** apply the portal migration on `skimap-app`:
+
+```bash
+npm run db:migrate:local          # local D1 for wrangler pages dev
+npx wrangler d1 migrations apply skimap-app --remote   # production (owner only)
+```
+
+**Owner workflow (when enabled):**
+
+1. Create a one-time invite from the admin **Portal** tab (7-day expiry, hashed token). Copy the invite URL and send it yourself (no email service yet). Admin warns if the invite email domain does not match the resort’s official website domain.
+2. The resort accepts the draft Resort Terms on `/portal/invite/`, then registers a **passkey** (WebAuthn). Optional TOTP can be added later.
+3. Tier **A** edits auto-publish when the source checker passes and limits are met; they appear via `GET /api/overrides` (cached) and in the daily post-moderation queue (one-click rollback with a statement of reasons). Tier **B/C** and promos go to review queues.
+4. Set per-resort **listing** modes (`full`, `link_only`, `unlisted`) from admin; changes are audited.
+
+**Public pages:** [`/[lang]/for-resorts/`](src/app/[lang]/for-resorts/page.tsx) (EN/DE; other languages fall back to EN content via routing), draft [`/[lang]/resort-terms/`](src/app/[lang]/resort-terms/page.tsx), and `/portal/` (login/dashboard; `noindex` while disabled).
+
+**Local dev:** `PORTAL_ENABLED=1`, `PORTAL_DEV_BYPASS=1`, and `PORTAL_DEV_EMAIL=portal-dev@skimap.test` in `.dev.vars` (never in production). Use `POST /api/portal/dev-login` for e2e without WebAuthn.
+
+**Tests:** `npm test` (tier limits, invites, sessions, promos, listing), `npm run test:part7-e2e` (Playwright against `wrangler pages dev`).
+
 ## Licences
 
 Application code is “all rights reserved” until the owner chooses a licence. See [`LICENSE`](LICENSE). OpenStreetMap-derived files are ODbL 1.0. See [`DATA_LICENSE.md`](DATA_LICENSE.md).

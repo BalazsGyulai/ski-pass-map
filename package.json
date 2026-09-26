@@ -16,9 +16,11 @@
     "db:migrate:local": "node scripts/db-migrate-local.mjs",
     "apply:edits": "tsx scripts/apply-edits.ts",
     "test:part6-e2e": "node scripts/part6-e2e.mjs",
+    "test:part7-e2e": "node scripts/part7-e2e.mjs",
     "fetch-pistes": "tsx scripts/fetch-pistes.ts"
   },
   "dependencies": {
+    "@simplewebauthn/server": "^13.1.2",
     "jose": "^5.10.0",
     "mapbox-gl": "^3.31.0",
     "maplibre-gl": "^6.11.2",

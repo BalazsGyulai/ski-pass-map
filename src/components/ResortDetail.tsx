@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { nextSheetSnap, snapFromKey, type SheetSnap } from "@/lib/sheet";
 import Link from "next/link";
 import { passById, passes, resortById, resorts } from "@/lib/data";
+import { formatAttributionLine } from "@/lib/portal/attribution";
+import { mergeResortWithOverrides } from "@/lib/portal/overrides";
+import { useRuntimeOverrides } from "@/lib/runtime-overrides-client";
 import { distanceKm } from "@/lib/distance";
 import { filterResorts } from "@/lib/filter";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm } from "@/lib/format";
@@ -31,7 +34,9 @@ export function ResortDetail() {
     messages,
   } = useApp();
   const href = useLocalizedPath();
-  const resort = share.resort ? resortById.get(share.resort) : undefined;
+  const overrides = useRuntimeOverrides();
+  const baseResort = share.resort ? resortById.get(share.resort) : undefined;
+  const resort = baseResort ? mergeResortWithOverrides(baseResort, baseResort.id, overrides) : undefined;
   const closeRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
   const [snap, setSnap] = useState<SheetSnap>("half");
@@ -134,6 +139,22 @@ export function ResortDetail() {
       </header>
       <div className="detail-body">
         {!visible ? <p className="hint warn">{t("hiddenByFilters")}</p> : null}
+        {resort.portalAttribution ? (
+          <p className="portal-attribution hint">
+            {formatAttributionLine(resort.portalAttribution, lang === "de" ? "de" : "en")}
+          </p>
+        ) : null}
+        {resort.portalPromo ? (
+          <aside className="portal-promo" aria-label="Resort promotion">
+            <p className="badge">{lang === "de" ? `Anzeige · vom ${resort.portalPromo.resortName}` : `Ad · From ${resort.portalPromo.resortName}`}</p>
+            <p>{resort.portalPromo.text}</p>
+            {resort.portalPromo.linkUrl ? (
+              <a href={resort.portalPromo.linkUrl} rel="noopener noreferrer">
+                {resort.portalPromo.linkUrl}
+              </a>
+            ) : null}
+          </aside>
+        ) : null}
         <h3>{t("passes")}</h3>
         {resort.passes.length === 0 ? <p>{t("noPasses")}</p> : null}
         <ul className="pass-lines">
