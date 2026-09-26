@@ -140,7 +140,7 @@ export async function handleAdminCheck(request: Request, env: AdminEnv, store: A
   const parsed = schema.safeParse(raw);
   if (!parsed.success) return jsonResponse({ ok: false, error: "validation" }, 400);
   try {
-    const result = await checkSourceForEdit(parsed.data.sourceUrl, parsed.data.changes, env.AI, env);
+    const result = await checkSourceForEdit(parsed.data.sourceUrl, parsed.data.changes, env.AI, env, undefined, request);
     const checkerJson = JSON.stringify(result);
     if (parsed.data.editId) {
       await store.setEditStatus(parsed.data.editId, result.autoPublishable ? "auto-published" : "pending", auth.identity.email, checkerJson);

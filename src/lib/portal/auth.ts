@@ -4,6 +4,7 @@ import { createSqlExecutor, type D1Like } from "@/lib/db/types";
 import { jsonResponse } from "@/lib/http-json";
 import { isPortalEnabled } from "./config";
 import { randomToken } from "./crypto";
+import { portalDevBypassAllowed } from "@/lib/dev-bypass";
 import {
   assertCsrf,
   clearSessionCookieHeader,
@@ -43,7 +44,7 @@ export async function resolvePortalIdentity(
   env: PortalAuthEnv,
   store: ReturnType<typeof createPortalStore>,
 ): Promise<PortalIdentity | null> {
-  if (env.PORTAL_DEV_BYPASS === "1" && env.NODE_ENV !== "production") {
+  if (portalDevBypassAllowed(request, env)) {
     const devEmail = request.headers.get("x-portal-dev-email") ?? env.PORTAL_DEV_EMAIL ?? "portal-dev@skimap.test";
     const user = await store.getUserByEmail(devEmail.toLowerCase());
     if (user) {
@@ -81,7 +82,7 @@ export async function requirePortalPost(
   if (disabled) return { error: disabled };
   const identity = await resolvePortalIdentity(request, env, store);
   if (!identity) return { error: jsonResponse({ ok: false, error: "unauthorized" }, 401) };
-  if (env.PORTAL_DEV_BYPASS === "1" && env.NODE_ENV !== "production" && identity.sessionId === "dev") {
+  if (portalDevBypassAllowed(request, env) && identity.sessionId === "dev") {
     return { identity };
   }
   if (!assertCsrf(identity.csrfToken, request.headers.get("x-csrf-token"))) {

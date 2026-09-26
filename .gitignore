@@ -11,3 +11,4 @@ tsconfig.tsbuildinfo
 .dev.vars
 .wrangler/
 public/vendor/
+test-results/

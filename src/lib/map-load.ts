@@ -1,3 +1,5 @@
+import { clientIpFromRequest } from "./client-ip";
+
 /**
  * Monthly Mapbox map-load counter for the Cloudflare Pages function.
  * The client calls POST /api/map-load once per Mapbox map construction.
@@ -180,7 +182,7 @@ export async function handleMapLoad(
   try {
     if (request.method !== "POST") return json("openfreemap", 405, { allow: "POST" });
     if (!originAllowed(request, parseOrigins(env.MAP_LOAD_ALLOWED_ORIGINS))) return json("openfreemap", 403);
-    const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+    const ip = clientIpFromRequest(request, "unknown");
     const windowStart = Math.floor(now.getTime() / RATE_WINDOW_MS) * RATE_WINDOW_MS;
     const bucket = await hashBucket(saltFor(env), windowStart, ip);
     const hits = await store.bumpBucket(bucket, now.getTime(), RATE_WINDOW_MS);

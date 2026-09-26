@@ -12,6 +12,7 @@ export interface SubmitEditInput {
   body: unknown;
   userId: string;
   userEmail: string;
+  request?: Request;
 }
 
 export async function submitPortalEdit(
@@ -29,7 +30,7 @@ export async function submitPortalEdit(
   const limits = evaluateChangeLimits(parsed.data.changes);
   let checker;
   try {
-    checker = await checkSourceForEdit(parsed.data.sourceUrl, parsed.data.changes, undefined, checkerEnv);
+    checker = await checkSourceForEdit(parsed.data.sourceUrl, parsed.data.changes, undefined, checkerEnv, undefined, input.request);
   } catch {
     checker = null;
   }

@@ -22,8 +22,9 @@ export async function checkSourceForEdit(
   ai?: AiBinding,
   env?: SourceCheckerEnv,
   deps?: SourceCheckerDeps,
+  request?: Request,
 ): Promise<CheckerSummary & { sourceUrl: string; fetchedChars: number }> {
-  applySourceCheckerDevEnv(env);
+  applySourceCheckerDevEnv(env, request);
   const fetchText = deps?.fetchText ?? safeFetchText;
   const { text, finalUrl } = await fetchText(sourceUrl, { maxBytes: 2_000_000, timeoutMs: 10_000, maxRedirects: 3 });
   const deterministic = runDeterministicChecks(changes, text);

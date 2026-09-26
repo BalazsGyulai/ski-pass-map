@@ -8,6 +8,6 @@ interface Env extends PortalEnv {
 
 export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
   if (!context.env.DB) return new Response(JSON.stringify({ ok: false, error: "service_unavailable" }), { status: 503 });
-  const { portal } = createStores(context.env.DB);
-  return handlePortalRegisterOptions(context.request, context.env, portal);
+  const { portal, app } = createStores(context.env.DB);
+  return handlePortalRegisterOptions(context.request, context.env, portal, app);
 }
