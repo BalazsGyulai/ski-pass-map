@@ -1,6 +1,7 @@
 "use client";
 
 import { passById } from "@/lib/data";
+import { passShortName } from "@/lib/pass-label";
 import { regionLabel } from "@/lib/i18n";
 import { IconClose, IconFilter, IconMenu } from "./icons";
 import { useApp } from "./AppState";
@@ -55,7 +56,10 @@ export function SearchPill({
   function summaryLine(): string {
     const parts: string[] = [];
     if (share.noPass) parts.push(t("noPassShort"));
-    else if (share.passes.length === 1) parts.push(passById.get(share.passes[0])?.name ?? t("anyPass"));
+    else if (share.passes.length === 1) {
+      const pass = passById.get(share.passes[0]);
+      parts.push(pass ? passShortName(pass) : t("anyPass"));
+    }
     else if (share.passes.length > 1) parts.push(t("passesSelected", { n: share.passes.length }));
     else parts.push(t("anyPass"));
     if (share.night) parts.push(t("nightSkiing"));
