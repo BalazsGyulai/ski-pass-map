@@ -18,6 +18,11 @@ export function selectMapProvider(input: {
 /** Short enough that a missing Pages function does not hold the map. */
 export const MAP_COUNTER_TIMEOUT_MS = 1500;
 
+/** Development strict mode mounts the map twice. Only a production build may increment the counter. */
+export function shouldCountMapLoad(nodeEnv: string | undefined = process.env.NODE_ENV): boolean {
+  return nodeEnv === "production";
+}
+
 export function mapLoadEndpoint(): string {
   if (typeof window === "undefined") return "/api/map-load";
   return new URL("/api/map-load", window.location.origin).href;
@@ -63,10 +68,13 @@ export async function resolveMapProvider(options?: {
   endpoint?: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
+  /** Defaults to production builds only, so dev strict mode does not increment. */
+  countLoads?: boolean;
 }): Promise<MapProviderId> {
   const token = (options?.token !== undefined ? options.token : process.env.NEXT_PUBLIC_MAPBOX_TOKEN) ?? "";
   const consented = options?.consented ?? getMapConsent();
   if (!token.trim() || !consented) return "openfreemap";
+  if (!(options?.countLoads ?? shouldCountMapLoad())) return "mapbox";
   const counter = await readCounter({
     endpoint: options?.endpoint ?? mapLoadEndpoint(),
     timeoutMs: options?.timeoutMs ?? MAP_COUNTER_TIMEOUT_MS,

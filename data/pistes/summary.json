@@ -1,7 +1,9 @@
 {
-  "generated": "2026-09-25",
-  "resortsWithPistes": 122,
-  "features": 5377,
-  "droppedOutsideRadius": 0,
-  "note": "Built by scripts/fetch-pistes.ts from OpenStreetMap via the Overpass API. Not refreshed in CI."
+  "generated": "2026-09-26",
+  "resortsOnMap": 292,
+  "resortsWithPistes": 291,
+  "resortsWithoutPistes": 1,
+  "features": 15862,
+  "droppedOutsideRadius": 670,
+  "note": "Built by scripts/fetch-pistes.ts from OpenStreetMap via the Overpass API. Files are keyed by the current resort id. Resorts with no lines are listed in public/pistes/none.json. Not refreshed in CI."
 }

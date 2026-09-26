@@ -10,12 +10,13 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const rawDir = join(root, "data", "pistes", "raw");
 const outDir = join(root, "public", "pistes");
 const refresh = process.argv.includes("--refresh");
-const endpoints = [
-  "https://lz4.overpass-api.de/api/interpreter",
-  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
-];
+const fromCache = process.argv.includes("--from-cache");
+const missingOnly = process.argv.includes("--missing");
+const primaryEndpoint = "https://lz4.overpass-api.de/api/interpreter";
+/** Used once, only after the primary instance stays busy. */
+const fallbackEndpoint = "https://maps.mail.ru/osm/tools/overpass/api/interpreter";
 const userAgent = "ski-pass-map/1.0 (static educational map; caches Overpass responses; not a tile scraper)";
-const delayMs = 4000;
+const delayMs = 8000;
 
 interface ResortPoint {
   id: string;
@@ -53,12 +54,19 @@ const liftTypes = new Set([
 const osm = JSON.parse(readFileSync(join(root, "data", "osm.json"), "utf8")) as {
   resorts: Array<{ id: string; lat: number; lon: number; slopeKm: number | null }>;
 };
-const resorts: ResortPoint[] = osm.resorts.map((resort) => ({
-  id: resort.id,
-  lat: resort.lat,
-  lon: resort.lon,
-  slope_km: resort.slopeKm,
-}));
+const catalog = JSON.parse(readFileSync(join(root, "data", "resorts.json"), "utf8")) as {
+  resorts: Array<{ id: string; verification?: string }>;
+};
+/** Same set the map draws: verified catalog rows that have an OpenStreetMap point. */
+const visibleIds = new Set(catalog.resorts.filter((resort) => resort.verification === "verified").map((resort) => resort.id));
+const resorts: ResortPoint[] = osm.resorts
+  .filter((resort) => visibleIds.has(resort.id))
+  .map((resort) => ({
+    id: resort.id,
+    lat: resort.lat,
+    lon: resort.lon,
+    slope_km: resort.slopeKm,
+  }));
 
 function radiusKm(resort: ResortPoint): number {
   const km = resort.slope_km;
@@ -70,8 +78,8 @@ function radiusKm(resort: ResortPoint): number {
   return 1.8;
 }
 
-function clusters(): ResortPoint[][] {
-  const pending = [...resorts].sort((a, b) => a.lon - b.lon || a.lat - b.lat);
+function clusters(points: ResortPoint[]): ResortPoint[][] {
+  const pending = [...points].sort((a, b) => a.lon - b.lon || a.lat - b.lat);
   const heavy = pending.filter((resort) => radiusKm(resort) >= 6.5);
   const remaining = pending.filter((resort) => radiusKm(resort) < 6.5);
   const groups: ResortPoint[][] = heavy.map((resort) => [resort]);
@@ -123,43 +131,50 @@ type OverpassPayload = { elements?: Array<Record<string, unknown>>; osm3s?: { ti
 
 let lastRequestAt = 0;
 
+async function requestOverpass(endpoint: string, query: string): Promise<OverpassPayload> {
+  const wait = delayMs - (Date.now() - lastRequestAt);
+  if (lastRequestAt > 0 && wait > 0) await sleep(wait);
+  lastRequestAt = Date.now();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 70_000);
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      signal: controller.signal,
+      headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": userAgent },
+      body: `data=${encodeURIComponent(query)}`,
+    });
+    const text = await response.text();
+    if (response.ok && !text.startsWith("<") && !text.startsWith("<?")) {
+      const payload = JSON.parse(text) as OverpassPayload;
+      if (usablePayload(payload)) return payload;
+      throw new Error(`${endpoint} unusable timestamp ${payload.osm3s?.timestamp_osm_base ?? "missing"}`);
+    }
+    throw new Error(`${endpoint} ${response.status} ${text.slice(0, 80).replace(/\s+/g, " ")}`);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith(endpoint)) throw error;
+    throw new Error(`${endpoint} ${error instanceof Error ? error.message : "failed"}`);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** One request at a time. A busy dispatcher waits on the same instance before any fallback. */
 async function fetchOverpass(query: string): Promise<OverpassPayload> {
   let last = "no attempt";
-  for (let round = 1; round <= 4; round++) {
-    for (const endpoint of endpoints) {
-      const wait = delayMs - (Date.now() - lastRequestAt);
-      if (lastRequestAt > 0 && wait > 0) await sleep(wait);
-      lastRequestAt = Date.now();
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 70_000);
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          signal: controller.signal,
-          headers: { "content-type": "application/x-www-form-urlencoded", "user-agent": userAgent },
-          body: `data=${encodeURIComponent(query)}`,
-        });
-        const text = await response.text();
-        if (response.ok && !text.startsWith("<") && !text.startsWith("<?")) {
-          const payload = JSON.parse(text) as OverpassPayload;
-          if (usablePayload(payload)) return payload;
-          last = `${endpoint} unusable timestamp ${payload.osm3s?.timestamp_osm_base ?? "missing"}`;
-          continue;
-        }
-        last = `${endpoint} ${response.status} ${text.slice(0, 80).replace(/\s+/g, " ")}`;
-      } catch (error) {
-        last = `${endpoint} ${error instanceof Error ? error.message : "failed"}`;
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-    if (round < 4) {
-      const pause = 8000 * round;
+  for (let round = 1; round <= 5; round++) {
+    try {
+      return await requestOverpass(primaryEndpoint, query);
+    } catch (error) {
+      last = error instanceof Error ? error.message : "failed";
+      if (round === 5) break;
+      const pause = 20_000 * round;
       console.log(`  waiting ${pause / 1000}s after ${last}`);
       await sleep(pause);
     }
   }
-  throw new Error(last);
+  console.log(`  trying fallback after ${last}`);
+  return requestOverpass(fallbackEndpoint, query);
 }
 
 function mergePayloads(parts: OverpassPayload[]): OverpassPayload {
@@ -313,40 +328,87 @@ function nearestResort(draft: Draft): { resort: ResortPoint; distance: number } 
   return best;
 }
 
-async function main() {
-  mkdirSync(rawDir, { recursive: true });
-  mkdirSync(outDir, { recursive: true });
-  const groups = clusters();
+function cachedElements(): Array<Record<string, unknown>> {
   const elements: Array<Record<string, unknown>> = [];
   const seenElements = new Set<string>();
-  console.log(`Fetching ${groups.length} Overpass batches for ${resorts.length} resorts`);
-  for (let index = 0; index < groups.length; index++) {
-    const group = groups[index];
-    const key = createHash("sha1").update(group.map((resort) => resort.id).sort().join("\n")).digest("hex").slice(0, 12);
-    const cachePath = join(rawDir, `${key}.json`);
-    let payload: OverpassPayload;
-    if (!refresh && existsSync(cachePath)) {
-      const cached = JSON.parse(readFileSync(cachePath, "utf8")) as OverpassPayload;
-      if (usablePayload(cached)) {
-        payload = cached;
-        console.log(`cache ${index + 1}/${groups.length} ${key} (${cached.elements?.length ?? 0} elements)`);
-      } else {
-        console.log(`query ${index + 1}/${groups.length} ${group.map((resort) => resort.id).join(", ")} (replacing unusable cache)`);
-        payload = await fetchGroup(group);
-        writeFileSync(cachePath, stripPortalUrls(JSON.stringify(payload)));
-        console.log(`  stored ${payload.elements?.length ?? 0} elements`);
-      }
-    } else {
-      console.log(`query ${index + 1}/${groups.length} ${group.map((resort) => resort.id).join(", ")}`);
-      payload = await fetchGroup(group);
-      writeFileSync(cachePath, stripPortalUrls(JSON.stringify(payload)));
-      console.log(`  stored ${payload.elements?.length ?? 0} elements`);
-    }
+  for (const name of readdirSync(rawDir)) {
+    if (!name.endsWith(".json")) continue;
+    const payload = JSON.parse(readFileSync(join(rawDir, name), "utf8")) as OverpassPayload;
+    if (!usablePayload(payload)) continue;
     for (const element of payload.elements ?? []) {
       const id = `${element.type}/${element.id}`;
       if (seenElements.has(id)) continue;
       seenElements.add(id);
       elements.push(element);
+    }
+  }
+  return elements;
+}
+
+async function main() {
+  mkdirSync(rawDir, { recursive: true });
+  mkdirSync(outDir, { recursive: true });
+  const elements: Array<Record<string, unknown>> = [];
+  const seenElements = new Set<string>();
+  if (fromCache || missingOnly) {
+    elements.push(...cachedElements());
+    for (const element of elements) seenElements.add(`${element.type}/${element.id}`);
+  }
+  if (fromCache) {
+    console.log(`Reassigning ${elements.length} cached OSM elements onto ${resorts.length} map resorts`);
+  } else {
+    const targets = missingOnly
+      ? resorts.filter((resort) => !existsSync(join(outDir, `${resort.id}.geojson`)))
+      : resorts;
+    const groups = clusters(targets);
+    console.log(
+      missingOnly
+        ? `Fetching ${groups.length} Overpass batches for ${targets.length} resorts that have no piste file (${elements.length} cached elements kept)`
+        : `Fetching ${groups.length} Overpass batches for ${targets.length} resorts`,
+    );
+    const failed: ResortPoint[][] = [];
+    const absorb = (payload: OverpassPayload) => {
+      for (const element of payload.elements ?? []) {
+        const id = `${element.type}/${element.id}`;
+        if (seenElements.has(id)) continue;
+        seenElements.add(id);
+        elements.push(element);
+      }
+    };
+    const loadGroup = async (group: ResortPoint[], label: string) => {
+      const key = createHash("sha1").update(group.map((resort) => resort.id).sort().join("\n")).digest("hex").slice(0, 12);
+      const cachePath = join(rawDir, `${key}.json`);
+      if (!refresh && existsSync(cachePath)) {
+        const cached = JSON.parse(readFileSync(cachePath, "utf8")) as OverpassPayload;
+        if (usablePayload(cached)) {
+          console.log(`cache ${label} ${key} (${cached.elements?.length ?? 0} elements)`);
+          absorb(cached);
+          return;
+        }
+      }
+      console.log(`query ${label} ${group.map((resort) => resort.id).join(", ")}`);
+      try {
+        const payload = await fetchGroup(group);
+        writeFileSync(cachePath, stripPortalUrls(JSON.stringify(payload)));
+        console.log(`  stored ${payload.elements?.length ?? 0} elements`);
+        absorb(payload);
+      } catch (error) {
+        console.log(`  failed ${label}: ${error instanceof Error ? error.message : error}`);
+        failed.push(group);
+      }
+    };
+    for (let index = 0; index < groups.length; index++) {
+      await loadGroup(groups[index], `${index + 1}/${groups.length}`);
+    }
+    if (failed.length > 0) {
+      const again = failed.splice(0, failed.length);
+      console.log(`Retrying ${again.length} batches that the Overpass instance did not finish`);
+      for (let index = 0; index < again.length; index++) {
+        await loadGroup(again[index], `retry ${index + 1}/${again.length}`);
+      }
+    }
+    if (failed.length > 0) {
+      throw new Error(`Overpass still missing ${failed.flat().length} resorts; cached batches were kept and piste files were not rewritten`);
     }
   }
   const drafts = draftsFrom({ elements });
@@ -391,12 +453,16 @@ async function main() {
     files += 1;
     features += collection.features.length;
   }
+  const without = resorts.map((resort) => resort.id).filter((id) => !byResort.has(id)).sort();
+  writeFileSync(join(outDir, "none.json"), JSON.stringify(without));
   const summary = {
     generated: new Date().toISOString().slice(0, 10),
+    resortsOnMap: resorts.length,
     resortsWithPistes: files,
+    resortsWithoutPistes: without.length,
     features,
     droppedOutsideRadius: dropped,
-    note: "Built by scripts/fetch-pistes.ts from OpenStreetMap via the Overpass API. Not refreshed in CI.",
+    note: "Built by scripts/fetch-pistes.ts from OpenStreetMap via the Overpass API. Files are keyed by the current resort id. Resorts with no lines are listed in public/pistes/none.json. Not refreshed in CI.",
   };
   writeFileSync(join(root, "data", "pistes", "summary.json"), JSON.stringify(summary, null, 2));
   console.log(summary);

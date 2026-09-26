@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MAP_COUNTER_TIMEOUT_MS, providerAfterFailure, readCounter, resolveMapProvider, selectMapProvider, type CounterOutcome } from "./map-provider";
+import { MAP_COUNTER_TIMEOUT_MS, providerAfterFailure, readCounter, resolveMapProvider, selectMapProvider, shouldCountMapLoad, type CounterOutcome } from "./map-provider";
 
 const tokens = [undefined, null, "", "   ", "pk.dummy"] as const;
 const consents = [false, true];
@@ -35,13 +35,14 @@ describe("map provider selection", () => {
   it("reads a granted or refused counter response", async () => {
     const asJson = (provider: string, ok = true) =>
       (async () => new Response(JSON.stringify({ provider }), { status: ok ? 200 : 500 })) as typeof fetch;
-    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, fetchImpl: asJson("mapbox") })).resolves.toBe("mapbox");
-    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, fetchImpl: asJson("openfreemap") })).resolves.toBe("openfreemap");
-    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, fetchImpl: asJson("mapbox", false) })).resolves.toBe("openfreemap");
+    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, countLoads: true, fetchImpl: asJson("mapbox") })).resolves.toBe("mapbox");
+    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, countLoads: true, fetchImpl: asJson("openfreemap") })).resolves.toBe("openfreemap");
+    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, countLoads: true, fetchImpl: asJson("mapbox", false) })).resolves.toBe("openfreemap");
     await expect(
       resolveMapProvider({
         token: "pk.dummy",
         consented: true,
+        countLoads: true,
         fetchImpl: (async () => new Response("<!doctype html>", { status: 200 })) as typeof fetch,
       }),
     ).resolves.toBe("openfreemap");
@@ -49,6 +50,7 @@ describe("map provider selection", () => {
       resolveMapProvider({
         token: "pk.dummy",
         consented: true,
+        countLoads: true,
         fetchImpl: (async () => new Response(JSON.stringify({ provider: "somewhere" }), { status: 200 })) as typeof fetch,
       }),
     ).resolves.toBe("openfreemap");
@@ -59,6 +61,7 @@ describe("map provider selection", () => {
       resolveMapProvider({
         token: "pk.dummy",
         consented: true,
+        countLoads: true,
         fetchImpl: (async () => {
           throw new TypeError("Failed to fetch");
         }) as typeof fetch,
@@ -73,17 +76,28 @@ describe("map provider selection", () => {
           reject(error);
         });
       })) as typeof fetch;
-    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, timeoutMs: 20, fetchImpl: hanging })).resolves.toBe("openfreemap");
+    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, countLoads: true, timeoutMs: 20, fetchImpl: hanging })).resolves.toBe("openfreemap");
 
     const seen: RequestInit[] = [];
     const recording = ((url: string, init?: RequestInit) => {
       seen.push(init ?? {});
       return Promise.resolve(new Response(JSON.stringify({ provider: "mapbox" }), { status: 200 }));
     }) as typeof fetch;
-    await resolveMapProvider({ token: "pk.dummy", consented: true, endpoint: "https://example.test/api/map-load", fetchImpl: recording });
+    await resolveMapProvider({ token: "pk.dummy", consented: true, countLoads: true, endpoint: "https://example.test/api/map-load", fetchImpl: recording });
     expect(JSON.stringify(seen)).not.toMatch(/pk\.|203\.0\.113|cf-connecting-ip/i);
     expect(seen[0]?.method).toBe("POST");
     expect(MAP_COUNTER_TIMEOUT_MS).toBeLessThanOrEqual(2000);
+  });
+
+  it("does not increment the counter outside a production build", async () => {
+    expect(shouldCountMapLoad("production")).toBe(true);
+    expect(shouldCountMapLoad("development")).toBe(false);
+    expect(shouldCountMapLoad("test")).toBe(false);
+    const fetchImpl = (() => {
+      throw new Error("counter should not be called");
+    }) as typeof fetch;
+    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, countLoads: false, fetchImpl })).resolves.toBe("mapbox");
+    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, fetchImpl })).resolves.toBe("mapbox");
   });
 });
 

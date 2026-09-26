@@ -16,6 +16,7 @@ https://opendatacommons.org/licenses/odbl/1-0/.
   flags that came from OpenStreetMap or OpenSkiMap. The file itself is marked
   `"licence": "ODbL-1.0"`.
 - `public/pistes/*.geojson` — piste and lift lines served with the map.
+- `public/pistes/none.json` — resort ids that have no piste or lift line inside their search radius.
 - `data/pistes/raw/*.json` — cached Overpass responses. Geometry is unchanged
   from OpenStreetMap. A few `website` tags that pointed at commercial ski
   portals were blanked so those URLs are not stored here.

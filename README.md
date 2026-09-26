@@ -38,7 +38,7 @@ The map draws with MapLibre and [OpenFreeMap](https://openfreemap.org) unless a 
 
 Mapbox is used only when all three are true at map start: `NEXT_PUBLIC_MAPBOX_TOKEN` was set for that build, the visitor has consented to map storage, and `POST /api/map-load` returns `{ "provider": "mapbox" }`. Anything else, including a missing function, a network error, or a short timeout, uses OpenFreeMap for that page load. The choice is not changed mid-session.
 
-The counter is a Cloudflare Pages Function in [`functions/api/map-load.ts`](functions/api/map-load.ts). It is not part of the static `out/` export, so GitHub Pages and `npx serve` stay on OpenFreeMap. Do not create the Cloudflare database from this repository, and do not put a token in git or in the GitHub Pages build.
+The counter is a Cloudflare Pages Function in [`functions/api/map-load.ts`](functions/api/map-load.ts). It is not part of the static `out/` export, so GitHub Pages and `npx serve` stay on OpenFreeMap. The browser posts to it only in a production build. `next dev` does not, so React strict mode cannot count the same map twice. Do not create the Cloudflare database from this repository, and do not put a token in git or in the GitHub Pages build.
 
 The function stores one row per UTC month (`YYYY-MM`) in D1 and increments it only while the count is under the budget. The default budget is 45,000 of Mapbox's 50,000 free monthly web map loads. One increment is one Mapbox `Map` construction, which is the billing unit, not a tile. At the budget it returns `{ "provider": "openfreemap" }` and stops incrementing. A new month starts at zero.
 
@@ -119,7 +119,7 @@ Areas OpenStreetMap marks as abandoned stay off the map until “Show areas mark
 
 `npm run validate` also checks that `public/sw.js` and `public/manifest.webmanifest` still contain `config/site.json`'s `basePath`, and that the manifest contains the site name. It fails if any JSON or GeoJSON file under `data/` or `public/` contains a skiresort.info, bergfex, snow-forecast, OnTheSnow, Skiinfo, or Snow-Online URL.
 
-Piste lines are OpenStreetMap ways, fetched once with `npm run fetch-pistes` (Overpass at `lz4.overpass-api.de`, with a delay between requests, raw responses cached in `data/pistes/raw/`). That script is not part of `npm run build` or CI. It writes `public/pistes/<resort-id>.geojson`, which the map loads when a resort is opened. An optional overlay uses the OpenSnowMap pistes-only tiles (`https://tiles.opensnowmap.org/pistes/{z}/{x}/{y}.png`). Their terms allow that layer on a website if the browser sends a referer, the app does not bulk-download tiles, and the map credits OpenStreetMap (ODbL) and OpenSnowMap (CC BY-SA).
+Piste lines are OpenStreetMap ways, fetched once with `npm run fetch-pistes` (Overpass at `lz4.overpass-api.de`, then a second public instance, with a user-agent, a delay between requests, and raw responses cached in `data/pistes/raw/`). `--missing` queries only resorts that do not yet have a file and reuses that cache. That script is not part of `npm run build` or CI. It writes `public/pistes/<resort-id>.geojson`, which the map loads when a resort is opened, and lists resorts with no lines in `public/pistes/none.json`. An optional overlay uses the OpenSnowMap pistes-only tiles (`https://tiles.opensnowmap.org/pistes/{z}/{x}/{y}.png`). Their terms allow that layer on a website if the browser sends a referer, the app does not bulk-download tiles, and the map credits OpenStreetMap (ODbL) and OpenSnowMap (CC BY-SA).
 
 ## What the pages do
 
