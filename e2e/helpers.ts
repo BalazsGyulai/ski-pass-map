@@ -25,6 +25,8 @@ export function attachOriginGuards(page: Page, origin: string): string[] {
       problems.push(`console: ${text}`);
     }
   });
+  // Uncaught errors, including React's hydration mismatches (#418), which only show up here.
+  page.on("pageerror", (error) => problems.push(`pageerror: ${error.message}`));
   page.on("requestfailed", (req) => {
     const url = req.url();
     if (!url.startsWith(origin)) return;
@@ -44,8 +46,21 @@ export function attachOriginGuards(page: Page, origin: string): string[] {
   return problems;
 }
 
+/** Waits for entrance animations to end. Endless ones (loading shimmer) are left running. */
+export async function settleAnimations(page: Page): Promise<void> {
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
+        .map((animation) => animation.finished.catch(() => undefined)),
+    ),
+  );
+}
+
 export async function shotPart10(page: Page, name: string, options?: { fullPage?: boolean }): Promise<void> {
   if (shotsTaken >= MAX_SHOTS) return;
+  await settleAnimations(page);
   fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
   const file = path.join(ARTIFACTS_DIR, `${name}.png`);
   await page.screenshot({ path: file, fullPage: options?.fullPage ?? true });

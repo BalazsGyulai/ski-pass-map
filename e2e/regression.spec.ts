@@ -10,8 +10,10 @@ import {
   shotPart10Viewport,
   waitForMapMarkers,
   mapboxStubBuild,
+  settleAnimations,
 } from "./helpers";
 import { installMapboxStub, installMapStub, mapStubEnabled } from "./map-stub";
+import { LANGS } from "../src/i18n/languages";
 
 /** Obertauern: covered by two passes. */
 const MULTI_PASS_RESORT = "osm-relation-3165847";
@@ -405,6 +407,68 @@ test("3D: a resort tilts the map over the terrain, closing levels it, and the sw
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
+test("lifts move uphill on an open resort and stand still for reduced motion", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  const chairPattern = () =>
+    page.evaluate(() => {
+      const map = window.__skiMapProbe as { getLayer(id: string): unknown; getPaintProperty(id: string, name: string): unknown } | undefined;
+      return map?.getLayer("lift-chair") ? JSON.stringify(map.getPaintProperty("lift-chair", "line-dasharray")) : null;
+    });
+  // Opening a resort keeps the regional view; the lifts come alive once you zoom in.
+  const zoomIn = () => page.evaluate(() => (window.__skiMapProbe as { jumpTo(options: { zoom: number }): void } | undefined)?.jumpTo({ zoom: 13 }));
+
+  await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await expect.poll(chairPattern, { timeout: 30_000 }).not.toBeNull();
+  const first = await chairPattern();
+  await page.waitForTimeout(1000);
+  expect(await chairPattern(), "no motion in the regional view").toBe(first);
+  await zoomIn();
+  await expect.poll(chairPattern, { timeout: 15_000 }).not.toBe(first);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await expect.poll(chairPattern, { timeout: 30_000 }).not.toBeNull();
+  await zoomIn();
+  const still = await chairPattern();
+  await page.waitForTimeout(1500);
+  expect(await chairPattern()).toBe(still);
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
+test("motion: panels ease in, the switch knob slides, and reduced motion keeps everything still", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  const sheetAnimation = () => page.locator(".filter-sheet").evaluate((el) => getComputedStyle(el).animationName);
+  const knob = page.getByRole("switch", { name: "3D terrain" }).locator(".toggle-knob");
+
+  await page.goto("/en/");
+  await page.getByRole("button", { name: /open filters/i }).click();
+  await expect(page.locator(".filter-sheet")).toBeVisible();
+  expect(await sheetAnimation()).not.toBe("none");
+  await page.keyboard.press("Escape");
+
+  await page.goto("/en/settings/");
+  // Transitions start once the stored settings are painted, so nothing slides into place on load.
+  await expect(page.locator("html")).toHaveAttribute("data-ready", "true");
+  expect(await knob.evaluate((el) => getComputedStyle(el).translate)).toBe("none");
+  await knob.click();
+  await expect.poll(() => knob.evaluate((el) => getComputedStyle(el).translate)).toBe("20px");
+  expect(await knob.evaluate((el) => getComputedStyle(el).transitionDuration)).not.toBe("0s");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await knob.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe("0s");
+  await page.goto("/en/");
+  await page.getByRole("button", { name: /open filters/i }).click();
+  await expect(page.locator(".filter-sheet")).toBeVisible();
+  expect(await sheetAnimation()).toBe("none");
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
 test("contact form with Turnstile test keys", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);
@@ -466,6 +530,19 @@ test("legal pages, sitemap, hreflang, 404, dark mode, service worker", async ({ 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const sw = await page.request.get("/sw.js");
   expect(sw.ok()).toBeTruthy();
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
+test("every language hydrates the pre-rendered passes page without a mismatch", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  for (const lang of LANGS) {
+    await page.goto(`/${lang}/passes/`);
+    // The purchase date fills in from today only once React has taken over the page.
+    await expect(page.locator('.passes-page input[type="date"]'), lang).not.toHaveValue("");
+    await expect(page.locator(".passes-page .pass-card").first(), lang).toBeVisible();
+  }
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
@@ -537,6 +614,8 @@ test("accessibility: no serious axe violations on main pages", async ({ page }) 
   for (const path of ["/en/", "/en/plan/"]) {
     await page.goto(path);
     await page.waitForTimeout(800);
+    // Contrast is measured on the settled page, not halfway through a fade.
+    await settleAnimations(page);
     const results = await new AxeBuilder({ page })
       .exclude(".cf-turnstile, iframe")
       .withTags(["wcag2a", "wcag2aa"])
@@ -556,6 +635,8 @@ test.describe("phone bottom sheet", () => {
     await page.goto("/en/");
     const list = page.locator(".list-sheet");
     await expect(list).toHaveAttribute("data-snap", "peek");
+    // The pre-rendered page already says "peek"; wait until the sheet is measured and listening.
+    await expect(list).toHaveAttribute("data-sheet-live", "true");
     const client = await context.newCDPSession(page);
     const drag = async (selector: string, distance: number) => {
       const box = await page.locator(selector).first().boundingBox();
@@ -577,6 +658,7 @@ test.describe("phone bottom sheet", () => {
     await page.waitForSelector("#resort-title", { timeout: 30_000 });
     const card = page.locator(".resort-card");
     await expect(card).toHaveAttribute("data-snap", "half");
+    await expect(card).toHaveAttribute("data-sheet-live", "true");
     await drag(".resort-card .resort-head", 700);
     await expect(page.locator("#resort-title")).toHaveCount(0, { timeout: 10_000 });
     await expect(page).not.toHaveURL(/resort=/);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, type CSSProperties } from "react";
 import Link from "next/link";
 import { generated, passById, resortById, resorts as allResorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
@@ -16,6 +16,7 @@ import { useRuntimeOverrides } from "@/lib/runtime-overrides-client";
 import { IconClose, IconHeart } from "./icons";
 import { SourceLine } from "./SourceLine";
 import { useBottomSheet } from "./useBottomSheet";
+import { prefersReducedMotion } from "./useNarrow";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
@@ -25,6 +26,9 @@ import { AffiliateLinksBlock } from "./AffiliateLinks";
  * One scrolling card per resort: name and key facts, the passes that cover it with your price
  * (cheapest first), then facts, snow, travel and links. Sources sit next to the numbers they back.
  */
+/** The page's --ease-out curve, for animations started from script. */
+const EASE_OUT = "cubic-bezier(0.22, 1, 0.36, 1)";
+
 export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: SheetSnap) => void }) {
   const { share, selectResort, t, lang, home, resortDays, setResortDaysCount, messages, favourites, toggleFavourite, birthYear, effectiveDate } =
     useApp();
@@ -36,6 +40,19 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   const closeCard = useCallback(() => selectResort(null), [selectResort]);
   const sheet = useBottomSheet({ kind: "resort", snap, setSnap, onClose: closeCard });
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const sheetRef = sheet.ref;
+  const shownResort = useRef<string | null>(null);
+
+  // Stepping to another resort cross-fades the card. The first open already rises with the sheet.
+  useEffect(() => {
+    const id = share.resort ?? null;
+    const before = shownResort.current;
+    shownResort.current = id;
+    if (!before || !id || before === id || prefersReducedMotion()) return;
+    sheetRef.current?.querySelectorAll<HTMLElement>(".resort-head, .resort-scroll").forEach((el) => {
+      if (typeof el.animate === "function") el.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 240, easing: EASE_OUT });
+    });
+  }, [share.resort, sheetRef]);
 
   if (!resort) return null;
   const index = sortedAll.findIndex((item) => item.id === resort.id);
@@ -73,7 +90,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   ].filter(Boolean);
 
   return (
-    <article ref={sheet.ref} className={`resort-card snap-${snap}`} data-snap={snap} style={sheet.style} aria-labelledby="resort-title">
+    <article ref={sheet.ref} className={`resort-card snap-${snap}`} data-snap={snap} data-sheet-live={sheet.metrics ? "true" : undefined} style={sheet.style} aria-labelledby="resort-title">
       <div
         className="sheet-grab"
         data-sheet-handle
@@ -109,7 +126,14 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
             className={favourite ? "icon-btn is-on" : "icon-btn"}
             aria-pressed={favourite}
             aria-label={favourite ? t("favouriteRemove") : t("favouriteAdd")}
-            onClick={() => toggleFavourite(resort.id)}
+            onClick={(event) => {
+              // A small beat when a resort is saved; removing it stays quiet.
+              const heart = event.currentTarget.querySelector("svg");
+              if (!favourite && heart && typeof heart.animate === "function" && !prefersReducedMotion()) {
+                heart.animate([{ scale: 1 }, { scale: 1.25 }, { scale: 1 }], { duration: 320, easing: EASE_OUT });
+              }
+              toggleFavourite(resort.id);
+            }}
           >
             <IconHeart />
           </button>

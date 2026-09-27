@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { showDevTodo } from "@/lib/show-todo";
 import { legalLinks } from "./legal-links";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
@@ -15,7 +14,6 @@ export function Footer() {
         {legalLinks.map((link) => (
           <Link key={link.rest} href={href(link.rest)}>
             {t(link.key)}
-            {link.todo && showDevTodo() ? <span className="todo-tag">{t("todoMark")}</span> : null}
           </Link>
         ))}
         <button type="button" className="linkish footer-cookie" onClick={() => openCookieSettings()}>

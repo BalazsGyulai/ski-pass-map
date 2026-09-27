@@ -31,7 +31,7 @@ export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: 
   }
 
   return (
-    <section ref={sheet.ref} className={`list-sheet snap-${snap}`} data-snap={snap} style={sheet.style} aria-label={t("resorts")}>
+    <section ref={sheet.ref} className={`list-sheet snap-${snap}`} data-snap={snap} data-sheet-live={sheet.metrics ? "true" : undefined} style={sheet.style} aria-label={t("resorts")}>
       <div
         className="sheet-grab"
         data-sheet-handle

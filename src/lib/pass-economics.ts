@@ -27,8 +27,8 @@ export function sortPasses<T>(items: T[], sort: PassSort, key: (item: T) => { pr
   return [...items].sort((a, b) => {
     const x = key(a);
     const y = key(b);
-    if (sort === "resorts") return y.resorts - x.resorts || x.name.localeCompare(y.name);
-    if (sort === "name") return x.name.localeCompare(y.name);
-    return (x.price ?? Number.POSITIVE_INFINITY) - (y.price ?? Number.POSITIVE_INFINITY) || x.name.localeCompare(y.name);
+    if (sort === "resorts") return y.resorts - x.resorts || x.name.localeCompare(y.name, "de");
+    if (sort === "name") return x.name.localeCompare(y.name, "de");
+    return (x.price ?? Number.POSITIVE_INFINITY) - (y.price ?? Number.POSITIVE_INFINITY) || x.name.localeCompare(y.name, "de");
   });
 }

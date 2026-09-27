@@ -51,8 +51,15 @@ export interface PriceQuote {
 export interface Deadline {
   id: string;
   date: string;
+  /** presale: sales open; ends: the last day of a price; opens: a tariff whose price starts only later. */
+  event: "presale" | "ends" | "opens";
+  /** For the countdown: something starts or something ends on this date. */
   kind: "starts" | "ends";
-  label: string;
+  /** The adult price on its last day and after it, when the pass has one adult tariff that changes here. */
+  adult?: { fromEur: number; toEur: number | null };
+  /** For "opens": the tariff as the operator names it, and its price. */
+  bracket?: string;
+  priceEur?: number | null;
 }
 
 const EMPTY_PRICE: ResolvedPrice = {
@@ -187,38 +194,24 @@ export function pricesOnDate(pass: Pass, purchaseDate: string): BracketPrice[] {
 export function deadlinesFor(pass: Pass): Deadline[] {
   const events: Deadline[] = [];
   const start = presaleStart(pass);
-  if (start) {
-    events.push({ id: `${pass.id}-presale`, date: start, kind: "starts", label: "Presale starts" });
-  }
-  const byDate = new Map<string, string[]>();
+  if (start) events.push({ id: `${pass.id}-presale`, date: start, event: "presale", kind: "starts" });
+  const adult = adultBracket(pass);
+  const ends = new Map<string, Deadline>();
   for (const bracket of pass.pricing.brackets) {
     const periods = periodsFor(pass, bracket.label);
     for (let index = 0; index < periods.length; index++) {
       const period = periods[index];
       if (!period.valid_until || period.price_eur == null) continue;
-      const next = periods[index + 1];
-      const change =
-        next && next.price_eur != null
-          ? `${bracket.label} €${period.price_eur} → €${next.price_eur}`
-          : `${bracket.label} €${period.price_eur} ends`;
-      const list = byDate.get(period.valid_until) ?? [];
-      list.push(change);
-      byDate.set(period.valid_until, list);
+      const event = ends.get(period.valid_until) ?? { id: `${pass.id}-${period.valid_until}`, date: period.valid_until, event: "ends", kind: "ends" };
+      if (bracket === adult) event.adult = { fromEur: period.price_eur, toEur: periods[index + 1]?.price_eur ?? null };
+      ends.set(period.valid_until, event);
     }
     const opens = openBracketStart(pass, bracket);
     if (opens) {
-      const price = periods[0]?.price_eur;
-      events.push({
-        id: `${pass.id}-open-${opens}`,
-        date: opens,
-        kind: "starts",
-        label: price == null ? bracket.label : `${bracket.label} €${price}`,
-      });
+      events.push({ id: `${pass.id}-open-${opens}`, date: opens, event: "opens", kind: "starts", bracket: bracket.label, priceEur: periods[0]?.price_eur ?? null });
     }
   }
-  for (const [date, changes] of byDate) {
-    events.push({ id: `${pass.id}-${date}`, date, kind: "ends", label: changes.join("; ") });
-  }
+  events.push(...ends.values());
   events.sort((a, b) => a.date.localeCompare(b.date) || a.kind.localeCompare(b.kind));
   return events;
 }

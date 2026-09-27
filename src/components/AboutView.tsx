@@ -78,11 +78,6 @@ export function AboutView() {
         <p>{t("osmLicence")}</p>
         <p>{t("opensnowmapLicence")}</p>
       </section>
-      <section className="card-block">
-        <h2>data/resorts.json</h2>
-        <p>{t("howToUpdate")}</p>
-        <p>{t("pagesSetting")}</p>
-      </section>
     </div>
   );
 }

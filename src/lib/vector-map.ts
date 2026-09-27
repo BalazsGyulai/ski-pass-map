@@ -10,6 +10,7 @@ import {
   type MapProviderId,
 } from "./map-styles";
 import { pisteStyle, type PisteDifficulty } from "./pistes";
+import { LIFT_CLASSES, LIFT_MOTION, LIFT_MOTION_MINZOOM, LIFT_TYPES, dashCycle, liftLayerId } from "./lift-motion";
 
 export interface MapEvent {
   lngLat?: { lng: number; lat: number };
@@ -285,6 +286,10 @@ export interface PisteLayerSpec {
   color: string;
   width: number;
   dash?: number[];
+  /** Butt caps keep moving dashes crisp; piste lines use round caps. */
+  cap?: "round" | "butt";
+  opacity?: number;
+  minzoom?: number;
 }
 
 export const PISTE_SOURCE_ID = "resort-pistes";
@@ -318,15 +323,41 @@ export function pisteLayerSpecs(dark: boolean): PisteLayerSpec[] {
     color: pisteStyle("unknown", "piste").color,
     width: pisteStyle("unknown", "piste").weight,
   });
-  const lift = pisteStyle(null, "lift");
-  specs.push({
-    id: "piste-lift",
-    filter: ["==", ["get", "kind"], "lift"],
-    color: dark ? "#e5e7eb" : lift.color,
-    width: lift.weight,
-    dash: [0.8, 1.2],
-  });
+  const liftColor = dark ? "#e5e7eb" : pisteStyle(null, "lift").color;
+  // The cable: every lift, thin and solid. Tips and taps land on it.
+  specs.push({ id: "piste-lift", filter: ["==", ["get", "kind"], "lift"], color: liftColor, width: 1.25, opacity: 0.7 });
+  // Cabins, chairs and hangers on the cable, one layer per lift type. lift-motion moves them.
+  for (const cls of LIFT_CLASSES) {
+    const motion = LIFT_MOTION[cls];
+    specs.push({
+      id: liftLayerId(cls),
+      filter: ["all", ["==", ["get", "kind"], "lift"], ["in", ["coalesce", ["get", "aerialway"], ""], ["literal", [...LIFT_TYPES[cls]]]]],
+      color: liftColor,
+      width: motion.width,
+      dash: dashCycle(motion)[0],
+      cap: "butt",
+      minzoom: LIFT_MOTION_MINZOOM,
+    });
+  }
   return specs;
+}
+
+/** A piste or lift spec as a line layer on the resort's piste source. */
+export function pisteLayer(spec: PisteLayerSpec): Record<string, unknown> {
+  return {
+    id: spec.id,
+    type: "line",
+    source: PISTE_SOURCE_ID,
+    filter: spec.filter,
+    ...(spec.minzoom != null ? { minzoom: spec.minzoom } : {}),
+    layout: { "line-cap": spec.cap ?? "round", "line-join": "round" },
+    paint: {
+      "line-color": spec.color,
+      "line-width": spec.width,
+      "line-opacity": spec.opacity ?? 0.95,
+      ...(spec.dash ? { "line-dasharray": spec.dash } : {}),
+    },
+  };
 }
 
 export function pisteLayerIds(): string[] {
