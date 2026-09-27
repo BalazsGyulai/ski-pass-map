@@ -1,3 +1,4 @@
+import turnstile from "../../config/turnstile.json";
 import { TURNSTILE_TEST_SITE_KEY } from "@/lib/contact/turnstile";
 
 /** Public Turnstile site key for the contact form widget. */
@@ -5,5 +6,6 @@ export function resolveTurnstileSiteKey(fromEnv: string | undefined, nodeEnv: st
   const configured = fromEnv?.trim();
   if (configured) return configured;
   if (nodeEnv !== "production") return TURNSTILE_TEST_SITE_KEY;
+  if (process.env.CF_PAGES === "1") return turnstile.siteKey.trim();
   return "";
 }
