@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef } from "react";
 import { snapFromKey, type SheetSnap } from "@/lib/sheet";
 import type { SortKey } from "@/lib/filter";
 import { ResortList } from "./ResortList";
-import { startSheetDrag } from "./sheet-drag";
+import { useBottomSheet } from "./useBottomSheet";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
 import { StyledSelect } from "./ui/SettingsControls";
@@ -21,7 +20,7 @@ const sortKey = {
 export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: SheetSnap) => void }) {
   const { share, updateShare, t, ready, resetFilters, mapApi, areaStale, searchThisArea } = useApp();
   const { sorted, filtered, relaxed } = useResortLists();
-  const sheetRef = useRef<HTMLElement>(null);
+  const sheet = useBottomSheet({ kind: "list", snap, setSnap });
 
   function onKey(event: React.KeyboardEvent) {
     if (!window.matchMedia("(max-width: 899px)").matches) return;
@@ -32,9 +31,10 @@ export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: 
   }
 
   return (
-    <section ref={sheetRef} className={`list-sheet snap-${snap}`} aria-label={t("resorts")}>
+    <section ref={sheet.ref} className={`list-sheet snap-${snap}`} data-snap={snap} style={sheet.style} aria-label={t("resorts")}>
       <div
         className="sheet-grab"
+        data-sheet-handle
         role="separator"
         tabIndex={0}
         aria-orientation="horizontal"
@@ -43,15 +43,11 @@ export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: 
         aria-valuemax={2}
         aria-valuenow={snap === "peek" ? 0 : snap === "half" ? 1 : 2}
         aria-valuetext={snap}
-        onPointerDown={(event) => startSheetDrag(event, { snap, apply: setSnap, sheet: sheetRef.current, mode: "list" })}
         onKeyDown={onKey}
       >
         <span className="grab-bar" />
       </div>
-      <header
-        className="sheet-head"
-        onPointerDown={(event) => startSheetDrag(event, { snap, apply: setSnap, sheet: sheetRef.current, mode: "list" })}
-      >
+      <header className="sheet-head" data-sheet-handle>
         <div>
           <h2>{t("inThisArea", { n: sorted.length })}</h2>
           <p className="hint">{t("sortedBy", { sort: t(sortKey[share.sort]) })}</p>

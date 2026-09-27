@@ -39,7 +39,8 @@ import {
   type VectorMap,
 } from "@/lib/vector-map";
 import { attachMapProbe } from "@/lib/map-canvas-probe";
-import { flyToResort, readSheetSnap, resortCameraPadding, whenMapIdle } from "@/lib/map-camera";
+import { flyToResort, readSheetVisible, resortCameraPadding } from "@/lib/map-camera";
+import { SHEET_EVENT } from "@/lib/sheet";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
 
@@ -462,43 +463,24 @@ export default function MapView() {
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !ready) return;
-    const resize = () => {
-      requestAnimationFrame(() => map.resize());
-    };
-    resize();
-    const observer = new MutationObserver(resize);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-sheet", "data-panel"] });
-    window.addEventListener("resize", resize);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", resize);
-    };
-  }, [ready, share.resort]);
-
-  useEffect(() => {
-    const map = mapRef.current;
     if (!map || !ready || !share.resort) return;
-    const resort = resorts.find((item) => item.id === share.resort);
+    const resort = resortById.get(share.resort);
     if (!resort) return;
-    let cancelled = false;
     const fly = (duration: number) => {
-      if (cancelled || !hasMapSize(map)) return;
+      if (!hasMapSize(map)) return;
       const narrow = window.matchMedia("(max-width: 899px)").matches;
       const height = map.getContainer().clientHeight;
-      const padding = resortCameraPadding({ narrow, sheet: readSheetSnap(), height });
+      const padding = resortCameraPadding({ narrow, sheetPx: readSheetVisible(), height });
       flyToResort(map, resort.lon, resort.lat, { duration, padding });
-      map.once("idle", () => map.resize());
     };
-    const schedule = (duration: number) => {
-      void whenMapIdle(map).then(() => fly(duration));
-    };
-    schedule(motionDuration(500));
-    const observer = new MutationObserver(() => schedule(motionDuration(200)));
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-sheet"] });
+    // One frame lets the sheet publish its height. The camera moves at once; tiles fill in on the way.
+    const frame = requestAnimationFrame(() => fly(motionDuration(700)));
+    // When the sheet settles at another height, keep the resort in the visible part of the map.
+    const onSheet = () => fly(motionDuration(320));
+    window.addEventListener(SHEET_EVENT, onSheet);
     return () => {
-      cancelled = true;
-      observer.disconnect();
+      cancelAnimationFrame(frame);
+      window.removeEventListener(SHEET_EVENT, onSheet);
     };
   }, [ready, share.resort]);
 

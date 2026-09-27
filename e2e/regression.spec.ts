@@ -302,3 +302,41 @@ test("accessibility: no serious axe violations on main pages", async ({ page }) 
     expect(serious, `${path}: ${JSON.stringify(serious.map((v) => v.id))}`).toEqual([]);
   }
 });
+
+test.describe("phone bottom sheet", () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+  test("follows a drag, settles on a snap, and a pull down closes a resort", async ({ page, context, baseURL }) => {
+    const origin = originFromBase(baseURL);
+    const problems = attachOriginGuards(page, origin);
+    await dismissConsent(page, "rejected");
+    await page.goto("/en/");
+    const list = page.locator(".list-sheet");
+    await expect(list).toHaveAttribute("data-snap", "peek");
+    const client = await context.newCDPSession(page);
+    const drag = async (selector: string, distance: number) => {
+      const box = await page.locator(selector).first().boundingBox();
+      if (!box) throw new Error(`no box for ${selector}`);
+      const x = box.x + box.width / 2;
+      const y = box.y + Math.min(box.height / 2, 30);
+      await client.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+      for (let i = 1; i <= 12; i++) {
+        await client.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: y + (distance * i) / 12 }] });
+      }
+      await client.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    };
+    await drag(".list-sheet .sheet-head", -320);
+    await expect(list).toHaveAttribute("data-snap", /half|full/);
+    await drag(".list-sheet .sheet-head", 600);
+    await expect(list).toHaveAttribute("data-snap", "peek");
+
+    await page.goto(`/en/?resort=${RESORT_ID}`);
+    await page.waitForSelector("#resort-title", { timeout: 30_000 });
+    const card = page.locator(".resort-card");
+    await expect(card).toHaveAttribute("data-snap", "half");
+    await drag(".resort-card .resort-head", 700);
+    await expect(page.locator("#resort-title")).toHaveCount(0, { timeout: 10_000 });
+    await expect(page).not.toHaveURL(/resort=/);
+    expect(problems, problems.join("\n")).toEqual([]);
+  });
+});

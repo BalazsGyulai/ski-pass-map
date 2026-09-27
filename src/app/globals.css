@@ -421,8 +421,9 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   position: absolute;
   z-index: 33;
   left: 12px;
-  bottom: 240px;
+  bottom: calc(var(--sheet-visible, 196px) + 12px);
   max-width: calc(100% - 24px);
+  transition: bottom var(--dur-slow) var(--ease-sheet), scale var(--dur-fast) var(--ease-out);
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -435,9 +436,6 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   font-size: var(--text-sm);
   box-shadow: var(--shadow-float);
 }
-.explorer[data-snap="half"] .plan-pill { bottom: calc(50dvh + 12px); }
-.explorer[data-panel="resort"][data-snap="peek"] .plan-pill { bottom: calc(45dvh + 12px); }
-.explorer[data-panel="resort"][data-snap="half"] .plan-pill { bottom: calc(55dvh + 12px); }
 .explorer[data-snap="full"] .plan-pill { display: none; }
 
 .sheet-host {
@@ -464,17 +462,30 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   max-width: 100%;
 }
 :root[data-theme="dark"] :is(.list-sheet, .resort-card) { box-shadow: var(--sheet-shadow), inset 0 1px 0 var(--glass-edge); }
-@media (prefers-reduced-motion: no-preference) {
-  .list-sheet, .resort-card {
-    transition: height 0.22s cubic-bezier(0.32, 0.72, 0, 1);
-  }
-}
 @media (max-width: 899px) {
-  .list-sheet.snap-peek { height: 228px; }
-  .list-sheet.snap-half { height: 50dvh; }
-  .list-sheet.snap-full, .resort-card.snap-full { height: calc(100dvh - 84px); }
-  .resort-card.snap-peek { height: 45dvh; }
-  .resort-card.snap-half { height: 55dvh; }
+  /* The sheet keeps its full height and moves with a transform (see useBottomSheet). */
+  .sheet-host { clip-path: inset(-80px 0 0 0); }
+  .list-sheet, .resort-card {
+    height: 228px;
+    will-change: transform;
+    transition: transform var(--dur-slow) var(--ease-sheet);
+  }
+  .list-sheet[data-dragging], .resort-card[data-dragging] { transition: none; }
+  [data-sheet-handle] { touch-action: none; }
+  /* Until the sheet is full, vertical drags on the content move the sheet; sideways swipes still page. */
+  .list-sheet:is([data-snap="peek"], [data-snap="half"]) .sheet-scroll,
+  .resort-card:is([data-snap="peek"], [data-snap="half"]) :is(.card-pager, .card-page) {
+    touch-action: pan-x;
+    overflow-y: hidden;
+  }
+  /* The action bar stays on the visible bottom edge while the sheet moves. */
+  .resort-card .action-bar {
+    transform: translate3d(0, calc(-1 * var(--sheet-offset, 0px)), 0);
+    transition: var(--sheet-transition, transform var(--dur-slow) var(--ease-sheet));
+    position: relative;
+    z-index: 2;
+  }
+  .resort-card[data-dragging] .action-bar { transition: none; }
 }
 
 .sheet-grab {
@@ -487,6 +498,7 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   flex: none;
 }
 .grab-bar { width: 36px; height: 5px; border-radius: var(--radius-pill); background: var(--line-strong); }
+.sheet-grab:focus-visible { outline-offset: -6px; border-radius: 14px; }
 .sheet-head { display: flex; justify-content: space-between; gap: var(--space-2); align-items: flex-start; padding: 0 var(--space-4) var(--space-2); position: relative; }
 .sheet-head h2 { margin: 0; font-size: var(--text-lg); line-height: 24px; font-weight: 700; }
 .resort-head {
@@ -959,10 +971,12 @@ legend { padding: 0 4px; font-weight: 600; }
   color: #0d1321;
   box-shadow: var(--shadow-2);
 }
-.explorer[data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 236px; }
-.explorer[data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 50dvh; }
-.explorer[data-panel="resort"][data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 45dvh; }
-.explorer[data-panel="resort"][data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 55dvh; }
+@media (max-width: 899px) {
+  .explorer :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) {
+    bottom: calc(var(--sheet-visible, 196px) + 4px) !important;
+    transition: bottom var(--dur-slow) var(--ease-sheet);
+  }
+}
 .explorer[data-snap="full"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
 .explorer[data-snap="full"] .map-tools,
 .explorer[data-snap="full"] .piste-float { display: none; }

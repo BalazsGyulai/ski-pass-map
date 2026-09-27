@@ -209,8 +209,9 @@ export function hasMapSize(map: { getContainer(): HTMLElement }): boolean {
 
 export function glFitPadding(height: number): { top: number; bottom: number; left: number; right: number } {
   const narrow = typeof window !== "undefined" && window.matchMedia("(max-width: 899px)").matches;
-  const sheet = typeof document !== "undefined" ? (document.documentElement.dataset.sheet ?? null) : null;
-  const pad = mapFitPadding({ narrow, sheet, height });
+  const raw = typeof document !== "undefined" ? Number(document.documentElement.dataset.sheetPx) : Number.NaN;
+  const sheetPx = Number.isFinite(raw) && raw > 0 ? raw : null;
+  const pad = mapFitPadding({ narrow, sheetPx, height });
   return {
     left: pad.paddingTopLeft[0],
     top: pad.paddingTopLeft[1],

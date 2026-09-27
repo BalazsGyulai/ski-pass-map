@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { generated, passById, resortById } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm, slopeKmDisplay } from "@/lib/format";
@@ -13,7 +13,7 @@ import type { Resort } from "@/lib/schema";
 import { IconClose } from "./icons";
 import { PlacePicker } from "./PlacePicker";
 import { SourceLine } from "./SourceLine";
-import { startSheetDrag } from "./sheet-drag";
+import { useBottomSheet } from "./useBottomSheet";
 import Link from "next/link";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
@@ -39,7 +39,8 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   const baseResort = share.resort ? resortById.get(share.resort) : undefined;
   const resort = baseResort ? mergeResortWithOverrides(baseResort, baseResort.id, overrides) : undefined;
   const { sortedAll, filtered } = useResortLists();
-  const sheetRef = useRef<HTMLElement>(null);
+  const closeCard = useCallback(() => selectResort(null), [selectResort]);
+  const sheet = useBottomSheet({ kind: "resort", snap, setSnap, onClose: closeCard });
   const pagerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [page, setPage] = useState(0);
@@ -101,9 +102,10 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   ].filter(Boolean);
 
   return (
-    <article ref={sheetRef} className={`resort-card snap-${snap}`} aria-labelledby="resort-title">
+    <article ref={sheet.ref} className={`resort-card snap-${snap}`} data-snap={snap} style={sheet.style} aria-labelledby="resort-title">
       <div
         className="sheet-grab"
+        data-sheet-handle
         role="separator"
         tabIndex={0}
         aria-orientation="horizontal"
@@ -112,15 +114,11 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         aria-valuemax={2}
         aria-valuenow={snap === "peek" ? 0 : snap === "half" ? 1 : 2}
         aria-valuetext={snap}
-        onPointerDown={(event) => startSheetDrag(event, { snap, apply: setSnap, close: () => selectResort(null), sheet: sheetRef.current, mode: "resort" })}
         onKeyDown={onHandleKey}
       >
         <span className="grab-bar" />
       </div>
-      <header
-        className="sheet-head resort-head"
-        onPointerDown={(event) => startSheetDrag(event, { snap, apply: setSnap, close: () => selectResort(null), sheet: sheetRef.current, mode: "resort" })}
-      >
+      <header className="sheet-head resort-head" data-sheet-handle>
         <p className="eyebrow">
           {regionLabel(messages, resort.region)} · {countryLabel(messages, resort.country)}
           {distance != null && formatKm(lang, distance) ? ` · ${t("kmAway", { n: formatKm(lang, distance) })}` : ""}
