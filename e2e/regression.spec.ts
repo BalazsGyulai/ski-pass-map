@@ -12,6 +12,9 @@ import {
 } from "./helpers";
 import { installMapStub, mapStubEnabled } from "./map-stub";
 
+/** Obertauern: covered by two passes. */
+const MULTI_PASS_RESORT = "osm-relation-3165847";
+
 test.describe.configure({ mode: "serial" });
 
 test.beforeEach(async ({ context }) => {
@@ -48,10 +51,10 @@ test("map markers, search, filters, resort sheet tabs and pistes", async ({ page
   await page.goto(`/en/?resort=${RESORT_ID}`);
   await page.waitForSelector("#resort-title", { timeout: 30_000 });
   await assertMapCanvasNotFlat(page, "resort tablet");
-  for (const tab of ["#tab-prices", "#tab-pistes", "#tab-links"]) {
-    await page.click(tab);
-    await page.waitForTimeout(400);
-  }
+  // One scrolling card: passes first, links at the end.
+  await expect(page.locator("#resort-passes")).toBeVisible();
+  await page.locator(".resort-card .resort-scroll").evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+  await expect(page.locator("#resort-links")).toBeVisible();
   await page.waitForResponse((res) => res.url().includes("/pistes/") && res.ok(), { timeout: 45_000 }).catch(() => null);
   expect(problems, problems.join("\n")).toEqual([]);
 });
@@ -118,6 +121,26 @@ test("three tabs, the settings gear, and old addresses", async ({ page, baseURL 
   await page.goto("/en/");
   await page.locator(".topbar-links a[aria-label='Settings']").click();
   await expect(page).toHaveURL(/\/en\/settings\/$/);
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
+test("resort card lists the cheapest pass first and reports a mistake with the resort filled in", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  const rows = page.locator(".resort-card .pass-row");
+  await expect(rows).toHaveCount(2);
+  await expect(rows.first()).toHaveClass(/is-cheapest/);
+  const prices = await rows.locator(".pass-row-price .price-lg").allInnerTexts();
+  const euros = prices.map((text) => Number(text.replace(/[^0-9]/g, "")));
+  expect(euros[0]).toBeLessThanOrEqual(euros[1]);
+  await page.locator(".resort-card .resort-scroll").evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+  await page.getByRole("link", { name: /report a map issue/i }).click();
+  await expect(page).toHaveURL(/\/en\/contact\/\?category=data-error&resort=/);
+  await expect(page.locator("select").first()).toHaveValue("data-error");
+  await expect(page.locator(`input[value="${MULTI_PASS_RESORT}"]`)).toHaveCount(1);
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
@@ -256,7 +279,7 @@ test("affiliate block hidden when config empty", async ({ page, baseURL }) => {
   await dismissConsent(page, "accepted");
   await page.goto(`/en/?resort=${RESORT_ID}`);
   await page.waitForSelector("#resort-title", { timeout: 30_000 });
-  await page.click("#tab-links");
+  await expect(page.locator("#resort-links")).toHaveCount(1);
   await expect(page.locator('[data-testid="affiliate-block"]')).toHaveCount(0);
   expect(problems, problems.join("\n")).toEqual([]);
 });

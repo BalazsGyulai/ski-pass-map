@@ -356,6 +356,7 @@
   "noPrevResort": "Station précédente",
   "noNextResort": "Station suivante",
   "paysOff": "Paye après{n}jours ici",
+  "cheapestHere": "Forfait le moins cher ici",
   "priceAfter": "{price}après{date}",
   "showRuns": "Afficher les pistes et les ascenseurs sur la carte",
   "verticalDrop": "Vertical",

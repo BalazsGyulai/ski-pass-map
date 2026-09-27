@@ -356,6 +356,7 @@
   "noPrevResort": "Anterior recurs",
   "noNextResort": "Següent recurs",
   "paysOff": "Paga després de{n}dies aquí",
+  "cheapestHere": "Forfet més barat aquí",
   "priceAfter": "{price}després{date}",
   "showRuns": "Mostra les sortides i puja en el mapa",
   "verticalDrop": "Vertical",

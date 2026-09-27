@@ -1,54 +1,41 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { generated, passById, resortById } from "@/lib/data";
+import { useCallback, useRef, type CSSProperties } from "react";
+import Link from "next/link";
+import { generated, passById, resortById, resorts as allResorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm, slopeKmDisplay } from "@/lib/format";
-import { countryLabel, priceReasonText, regionLabel, type MessageKey } from "@/lib/i18n";
+import { countryLabel, priceReasonText, regionLabel } from "@/lib/i18n";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
-import { adultBracket, dayTicketIsEstimate, nextPriceChange, pricesOnDate, resolveForViewer } from "@/lib/pricing";
-import type { Pass } from "@/lib/schema";
+import { adultBracket, dayTicketIsEstimate, nextPriceChange, pricesOnDate, resolveForViewer, type ResolvedPrice } from "@/lib/pricing";
+import type { FactRef, Pass, Resort } from "@/lib/schema";
 import { snapFromKey, type SheetSnap } from "@/lib/sheet";
-import type { Resort } from "@/lib/schema";
-import { IconClose } from "./icons";
-import { PlacePicker } from "./PlacePicker";
-import { SourceLine } from "./SourceLine";
-import { useBottomSheet } from "./useBottomSheet";
-import Link from "next/link";
-import { useLocalizedPath } from "./LanguageSwitcher";
-import { useApp } from "./AppState";
 import { formatAttributionLine } from "@/lib/portal/attribution";
 import { mergeResortWithOverrides } from "@/lib/portal/overrides";
 import { useRuntimeOverrides } from "@/lib/runtime-overrides-client";
+import { IconClose, IconHeart } from "./icons";
+import { SourceLine } from "./SourceLine";
+import { useBottomSheet } from "./useBottomSheet";
+import { useLocalizedPath } from "./LanguageSwitcher";
+import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
 import { AffiliateLinksBlock } from "./AffiliateLinks";
 
-const pages = ["prices", "pistes", "snow", "travel", "links"] as const;
-const pageKey: Record<(typeof pages)[number], MessageKey> = {
-  prices: "tabPrices",
-  pistes: "tabPistes",
-  snow: "tabSnow",
-  travel: "tabTravelShort",
-  links: "tabLinks",
-};
-
+/**
+ * One scrolling card per resort: name and key facts, the passes that cover it with your price
+ * (cheapest first), then facts, snow, travel and links. Sources sit next to the numbers they back.
+ */
 export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: SheetSnap) => void }) {
-  const app = useApp();
-  const { share, selectResort, t, lang, home, resortDays, setResortDaysCount, messages } = app;
+  const { share, selectResort, t, lang, home, resortDays, setResortDaysCount, messages, favourites, toggleFavourite, birthYear, effectiveDate } =
+    useApp();
+  const href = useLocalizedPath();
   const overrides = useRuntimeOverrides();
   const baseResort = share.resort ? resortById.get(share.resort) : undefined;
   const resort = baseResort ? mergeResortWithOverrides(baseResort, baseResort.id, overrides) : undefined;
   const { sortedAll, filtered } = useResortLists();
   const closeCard = useCallback(() => selectResort(null), [selectResort]);
   const sheet = useBottomSheet({ kind: "resort", snap, setSnap, onClose: closeCard });
-  const pagerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const [page, setPage] = useState(0);
-
-  useEffect(() => {
-    setPage(0);
-    pagerRef.current?.scrollTo({ left: 0 });
-  }, [resort?.id]);
 
   if (!resort) return null;
   const index = sortedAll.findIndex((item) => item.id === resort.id);
@@ -57,32 +44,17 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   const days = resortDays[resort.id] ?? 0;
   const distance = home ? distanceKm(home, resort) : null;
   const visible = filtered.some((item) => item.id === resort.id);
+  const favourite = favourites.includes(resort.id);
+  const day = finiteOrBlank(resort.day_ticket_eur);
 
-  function go(nextPage: number) {
-    const clamped = Math.max(0, Math.min(pages.length - 1, nextPage));
-    setPage(clamped);
-    const pager = pagerRef.current;
-    const child = pager?.children[clamped] as HTMLElement | undefined;
-    if (!pager || !child) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    pager.scrollTo({ left: child.offsetLeft, behavior: reduced ? "auto" : "smooth" });
-  }
-
-  function onTabsKey(event: React.KeyboardEvent) {
-    if (event.key === "ArrowRight") {
-      event.preventDefault();
-      go(page + 1);
-    } else if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      go(page - 1);
-    } else if (event.key === "Home") {
-      event.preventDefault();
-      go(0);
-    } else if (event.key === "End") {
-      event.preventDefault();
-      go(pages.length - 1);
-    }
-  }
+  const quotes = effectiveDate
+    ? resort.passes
+        .map((id) => passById.get(id))
+        .filter((pass): pass is Pass => pass != null)
+        .map((pass) => ({ pass, price: resolveForViewer(pass, birthYear, effectiveDate) }))
+        .sort((a, b) => (a.price.amountEur ?? Number.POSITIVE_INFINITY) - (b.price.amountEur ?? Number.POSITIVE_INFINITY))
+    : [];
+  const cheapest = quotes.find((quote) => quote.price.amountEur != null) ?? null;
 
   function onHandleKey(event: React.KeyboardEvent) {
     if (!window.matchMedia("(max-width: 899px)").matches) return;
@@ -93,11 +65,10 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
     else setSnap(nextSnap);
   }
 
+  const km = slopeKmDisplay(resort.slope_km_display ?? resort.slope_km);
   const stats = [
     finiteOrBlank(resort.top_elevation_m) != null ? t("keyStatElev", { n: resort.top_elevation_m ?? 0 }) : null,
-    slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) != null
-      ? t("keyStatKm", { n: slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) ?? 0 })
-      : null,
+    km != null ? t("keyStatKm", { n: km }) : null,
     finiteOrBlank(resort.lifts) != null ? t("keyStatLifts", { n: resort.lifts ?? 0 }) : null,
   ].filter(Boolean);
 
@@ -132,74 +103,76 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
           {resort.needs_recheck ? <span className="badge warn">{t("needsRecheck")}</span> : null}
           {stats.length > 0 ? <span>{stats.join(" · ")}</span> : null}
         </p>
-        <button type="button" className="icon-btn close-card" onClick={() => selectResort(null)} aria-label={t("closeNamed", { name: resort.name })}>
-          <IconClose />
-        </button>
-      </header>
-      {!visible ? <p className="hint warn sheet-note">{t("hiddenByFilters")}</p> : null}
-      {resort.portalAttribution ? (
-        <p className="portal-attribution hint sheet-note" data-testid="portal-attribution">
-          {formatAttributionLine(resort.portalAttribution, lang === "de" ? "de" : "en")}
-        </p>
-      ) : null}
-      {resort.portalPromo ? (
-        <aside className="portal-promo sheet-note" data-testid="portal-promo" aria-label="Resort promotion">
-          <p className="badge">
-            {lang === "de" ? `Anzeige · vom ${resort.portalPromo.resortName}` : `Ad · From ${resort.portalPromo.resortName}`}
-          </p>
-          <p>{resort.portalPromo.text}</p>
-          {resort.portalPromo.linkUrl ? (
-            <a href={resort.portalPromo.linkUrl} rel="noopener noreferrer">
-              {resort.portalPromo.linkUrl}
-            </a>
-          ) : null}
-        </aside>
-      ) : null}
-      <div className="card-tabs" role="tablist" aria-label={t("cardTabs")} onKeyDown={onTabsKey}>
-        {pages.map((id, tabIndex) => (
+        <div className="resort-head-actions">
           <button
-            key={id}
             type="button"
-            role="tab"
-            id={`tab-${id}`}
-            aria-selected={page === tabIndex}
-            aria-controls={`panel-${id}`}
-            tabIndex={page === tabIndex ? 0 : -1}
-            className={page === tabIndex ? "is-on" : ""}
-            onClick={() => go(tabIndex)}
+            className={favourite ? "icon-btn is-on" : "icon-btn"}
+            aria-pressed={favourite}
+            aria-label={favourite ? t("favouriteRemove") : t("favouriteAdd")}
+            onClick={() => toggleFavourite(resort.id)}
           >
-            {t(pageKey[id])}
+            <IconHeart />
           </button>
-        ))}
+          <button type="button" className="icon-btn close-card" onClick={() => selectResort(null)} aria-label={t("closeNamed", { name: resort.name })}>
+            <IconClose />
+          </button>
+        </div>
+      </header>
+
+      <div className="resort-scroll">
+        {!visible ? <p className="hint warn">{t("hiddenByFilters")}</p> : null}
+        {resort.portalAttribution ? (
+          <p className="portal-attribution hint" data-testid="portal-attribution">
+            {formatAttributionLine(resort.portalAttribution, lang === "de" ? "de" : "en")}
+          </p>
+        ) : null}
+        {resort.portalPromo ? (
+          <aside className="portal-promo" data-testid="portal-promo" aria-label="Resort promotion">
+            <p className="badge">{lang === "de" ? `Anzeige · vom ${resort.portalPromo.resortName}` : `Ad · From ${resort.portalPromo.resortName}`}</p>
+            <p>{resort.portalPromo.text}</p>
+            {resort.portalPromo.linkUrl ? (
+              <a href={resort.portalPromo.linkUrl} rel="noopener noreferrer">
+                {resort.portalPromo.linkUrl}
+              </a>
+            ) : null}
+          </aside>
+        ) : null}
+
+        <section className="resort-section" aria-labelledby="resort-passes">
+          <h3 id="resort-passes">{t("passes")}</h3>
+          {birthYear == null ? (
+            <p className="hint">
+              {t("setBirthYearHintPrefix")} <Link href={href("/settings")}>{t("navSettings")}</Link>.
+            </p>
+          ) : null}
+          {quotes.length === 0 ? (
+            <p className="hint">{t("noPasses")}</p>
+          ) : (
+            <ul className="pass-list">
+              {quotes.map((quote) => (
+                <PassRow key={quote.pass.id} pass={quote.pass} price={quote.price} day={day} cheapest={quote === cheapest && quotes.length > 1} />
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="resort-section" aria-labelledby="resort-facts">
+          <h3 id="resort-facts">{t("tabPistes")}</h3>
+          <FactGrid resort={resort} day={day} />
+        </section>
+
+        <SnowSection resort={resort} />
+        <TravelSection resort={resort} />
+        <LinksSection resort={resort} />
       </div>
-      <div
-        className="card-pager"
-        ref={pagerRef}
-        onScroll={(event) => {
-          const pager = event.currentTarget;
-          const width = (pager.children[0] as HTMLElement | undefined)?.offsetWidth ?? pager.clientWidth;
-          if (width <= 0) return;
-          const nextPage = Math.round(pager.scrollLeft / width);
-          if (nextPage !== page) setPage(Math.max(0, Math.min(pages.length - 1, nextPage)));
-        }}
-      >
-        <section className="card-page" role="tabpanel" id="panel-prices" aria-labelledby="tab-prices">
-          <PricesPage resort={resort} />
-        </section>
-        <section className="card-page" role="tabpanel" id="panel-pistes" aria-labelledby="tab-pistes">
-          <PistesPage resort={resort} />
-        </section>
-        <section className="card-page" role="tabpanel" id="panel-snow" aria-labelledby="tab-snow">
-          <SnowPage resort={resort} />
-        </section>
-        <section className="card-page" role="tabpanel" id="panel-travel" aria-labelledby="tab-travel">
-          <TravelPage resort={resort} />
-        </section>
-        <section className="card-page" role="tabpanel" id="panel-links" aria-labelledby="tab-links">
-          <LinksPage resort={resort} />
-        </section>
-      </div>
+
       <footer className="action-bar">
+        {resort.website ? (
+          <a className="ghost website-btn" href={resort.website} target="_blank" rel="noopener noreferrer">
+            {t("openWebsite")}
+            <span aria-hidden="true"> ↗</span>
+          </a>
+        ) : null}
         {days > 0 ? (
           <div className="stepper">
             <button type="button" aria-label={t("decreaseDays")} onClick={() => setResortDaysCount(resort.id, days - 1)}>
@@ -215,7 +188,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
             {t("addToPlan")}
           </button>
         )}
-        <div className="resort-nav">
+        <div className="resort-nav desk-only">
           <button type="button" className="icon-btn" disabled={!previous} aria-label={previous ? t("prevResort", { name: previous.name }) : t("noPrevResort")} onClick={() => previous && selectResort(previous.id)}>
             ‹
           </button>
@@ -228,165 +201,164 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   );
 }
 
-function BirthYearHint() {
-  const { t, birthYear } = useApp();
-  const href = useLocalizedPath();
-  if (birthYear != null) return <p className="hint">{t("birthYearExact")}</p>;
-  return (
-    <p className="hint">
-      {t("setBirthYearHintPrefix")}{" "}
-      <Link href={href("/settings")}>{t("navSettings")}</Link>.
-    </p>
-  );
-}
-
-function PricesPage({ resort }: { resort: Resort }) {
-  const { t, lang, effectiveDate } = useApp();
-  const day = finiteOrBlank(resort.day_ticket_eur);
-  return (
-    <div>
-      <BirthYearHint />
-      {resort.passes.length === 0 ? <NoPassPrices resort={resort} day={day} /> : null}
-      <ul className="price-list">
-        {resort.passes.map((id) => {
-          const pass = passById.get(id);
-          if (!pass || !effectiveDate) return null;
-          return <PassPrice key={id} pass={pass} day={day} />;
-        })}
-      </ul>
-      {day != null || resort.day_ticket_dynamic ? (
-        <div className="day-tile">
-          <p className="hint">{t("dayTicket")}</p>
-          <p className="price-lg num">
-            {day != null ? formatEur(lang, day) : t("dynamicPricing")}
-            {day != null && resort.day_ticket_season ? <span className="hint"> {resort.day_ticket_season}</span> : null}
-          </p>
-          <p>
-            {day != null && dayTicketIsEstimate(resort.day_ticket_season, day) ? <span className="badge">{t("estimate")}</span> : null}
-            {resort.day_ticket_dynamic ? <span className="badge warn">{t("dynamicPricing")}</span> : null}
-            {resort.day_ticket_network_note ? <span className="badge">{t("networkPrice")}</span> : null}
-          </p>
-          {resort.day_ticket_network_note ? <p className="fact-source">{resort.day_ticket_network_note}</p> : null}
-          <SourceLine source={resort.sources.dayTicket ?? resort.sources.dynamic} t={t} lang={lang} tourism={resort.via_tourism_site} />
-        </div>
-      ) : null}
-      <p className="disclaimer">{t("globalDisclaimer")}</p>
-    </div>
-  );
-}
-
-function NoPassPrices({ resort, day }: { resort: Resort; day: number | null }) {
-  const { t, lang } = useApp();
-  return (
-    <div className="no-pass-block">
-      <p className="hint">{t("noPasses")}</p>
-      <div className="stat-tiles">
-        <Tile label={t("elevation")} value={finiteOrBlank(resort.top_elevation_m) != null ? `${resort.top_elevation_m} m` : t("dash")} />
-        <Tile label={t("slopeKm")} value={slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) != null ? `${slopeKmDisplay(resort.slope_km_display ?? resort.slope_km)} km` : t("dash")} />
-        <Tile label={t("lifts")} value={finiteOrBlank(resort.lifts_display) != null ? String(resort.lifts_display) : t("dash")} />
-      </div>
-      {day != null ? (
-        <div className="day-tile">
-          <p className="hint">{t("dayTicket")}</p>
-          <p className="price-lg num">{formatEur(lang, day)}</p>
-        </div>
-      ) : null}
-      {resort.website ? (
-        <a className="primary wide" href={resort.website} target="_blank" rel="noopener noreferrer">
-          {t("openWebsite")}
-        </a>
-      ) : null}
-    </div>
-  );
-}
-
-function PassPrice({ pass, day }: { pass: Pass; day: number | null }) {
+function PassRow({ pass, price, day, cheapest }: { pass: Pass; price: ResolvedPrice; day: number | null; cheapest: boolean }) {
   const { t, lang, birthYear, effectiveDate, messages } = useApp();
   if (!effectiveDate) return null;
-  const price = resolveForViewer(pass, birthYear, effectiveDate);
   const change = nextPriceChange(pass, birthYear, effectiveDate);
   const tariffs = pricesOnDate(pass, effectiveDate);
   const adult = adultBracket(pass);
   const matched = birthYear != null && price.reason === "ok" ? price.bracketId : null;
   const listed = birthYear == null ? tariffs.filter((row) => row.bracketId !== adult?.label) : tariffs;
   const breakEven = price.amountEur != null && day != null && day > 0 ? price.amountEur / day : null;
+  const covered = allResorts.filter((resort) => resort.passes.includes(pass.id) && !resort.abandoned).length;
   return (
-    <li className="price-row">
-      <span className="price-bar" style={{ background: pass.color }} />
-      <div>
-        <strong className="pass-short">
-          {passShortName(pass)}
-          {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
-        </strong>
-        {passHasShortName(pass) ? <p className="pass-official">{pass.name}</p> : null}
-        <p className="price-lg num">
-          {price.amountEur != null ? formatEur(lang, price.amountEur) : priceReasonText(messages, lang, price.reason, price.bracketId, price.nextPeriodStart)}
-        </p>
-        {change ? (
-          <p className="hint warn">{t("priceAfter", { price: formatEur(lang, change.toEur), date: formatDate(lang, change.date) })}</p>
-        ) : null}
-        {breakEven != null ? <p className="hint save">{t("paysOff", { n: formatBreakEven(breakEven) })}</p> : null}
-        {listed.length > 0 ? (
-          <>
-            <p className="hint">{birthYear == null ? t("otherTariffs") : t("yourBracket")}</p>
-            <ul className="bracket-list">
-              {listed.map((row) => (
-                <li key={row.bracketId} className={matched && row.bracketId === matched ? "is-match" : undefined}>
-                  {row.bracketLabel}{" "}
-                  {row.amountEur != null ? formatEur(lang, row.amountEur) : priceReasonText(messages, lang, row.reason, row.bracketId, row.nextPeriodStart)}
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : null}
-        <SourceLine source={pass.source} t={t} lang={lang} />
+    <li className={cheapest ? "pass-row is-cheapest" : "pass-row"} style={{ "--pass": pass.color } as CSSProperties}>
+      <div className="pass-row-top">
+        <span className="pass-mark" aria-hidden="true" />
+        <div className="pass-row-names">
+          {cheapest ? <span className="best-label">{t("cheapestHere")}</span> : null}
+          <strong className="pass-short">
+            {passShortName(pass)}
+            {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
+          </strong>
+          {passHasShortName(pass) ? <span className="pass-official">{pass.name}</span> : null}
+          <span className="pass-meta">{t("resortsCovered", { n: covered })}</span>
+        </div>
+        <div className="pass-row-price">
+          <span className="price-lg num">
+            {price.amountEur != null ? formatEur(lang, price.amountEur) : priceReasonText(messages, lang, price.reason, price.bracketId, price.nextPeriodStart)}
+          </span>
+          {price.amountEur != null && price.periodEnd ? <span className="until-chip">{t("periodUntil", { date: formatDate(lang, price.periodEnd) })}</span> : null}
+        </div>
       </div>
+      {change ? <p className="hint warn">{t("priceAfter", { price: formatEur(lang, change.toEur), date: formatDate(lang, change.date) })}</p> : null}
+      {breakEven != null ? <p className="hint save">{t("paysOff", { n: formatBreakEven(breakEven) })}</p> : null}
+      {listed.length > 0 ? (
+        <details className="tariffs" open={birthYear != null}>
+          <summary>{birthYear == null ? t("otherTariffs") : t("yourBracket")}</summary>
+          <ul className="bracket-list">
+            {listed.map((row) => (
+              <li key={row.bracketId} className={matched && row.bracketId === matched ? "is-match" : undefined}>
+                <span>{row.bracketLabel}</span>
+                <span className="num">
+                  {row.amountEur != null ? formatEur(lang, row.amountEur) : priceReasonText(messages, lang, row.reason, row.bracketId, row.nextPeriodStart)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+      <SourceLine source={pass.source} t={t} lang={lang} />
     </li>
   );
 }
 
-function PistesPage({ resort }: { resort: Resort }) {
+function FactGrid({ resort, day }: { resort: Resort; day: number | null }) {
   const { t, lang, share, updateShare } = useApp();
+  const top = finiteOrBlank(resort.top_elevation_m);
+  const base = finiteOrBlank(resort.base_elevation_m);
+  const drop = top != null && base != null ? top - base : null;
+  const km = slopeKmDisplay(resort.slope_km_display ?? resort.slope_km);
+  const lifts = finiteOrBlank(resort.lifts_display);
   return (
-    <div>
-      <div className="stat-tiles">
-        <Tile label={t("slopeKm")} value={slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) != null ? `${slopeKmDisplay(resort.slope_km_display ?? resort.slope_km)} km` : t("dash")} />
-        <Tile label={t("lifts")} value={finiteOrBlank(resort.lifts_display) != null ? String(resort.lifts_display) : t("dash")} />
-        <Tile label={t("snowpark")} value={resort.snowpark === true ? t("yes") : t("dash")} />
-        <Tile label={t("nightSkiing")} value={resort.night_skiing === true ? t("yes") : t("dash")} />
+    <>
+      <div className="fact-grid">
+        {day != null || resort.day_ticket_dynamic ? (
+          <div className="fact fact-wide">
+            <span className="fact-label">{t("dayTicket")}</span>
+            <span className="fact-value num">{day != null ? formatEur(lang, day) : t("dynamicPricing")}</span>
+            <span className="fact-sub">
+              {day != null && resort.day_ticket_season ? resort.day_ticket_season : null}
+              {day != null && dayTicketIsEstimate(resort.day_ticket_season, day) ? <span className="badge">{t("estimate")}</span> : null}
+              {resort.day_ticket_network_note ? <span className="badge">{t("networkPrice")}</span> : null}
+            </span>
+            {resort.day_ticket_network_note ? <span className="fact-source">{resort.day_ticket_network_note}</span> : null}
+            <SourceLine source={resort.sources.dayTicket ?? resort.sources.dynamic} t={t} lang={lang} tourism={resort.via_tourism_site} />
+          </div>
+        ) : null}
+        {top != null ? (
+          <div className="fact">
+            <span className="fact-label">{t("elevation")}</span>
+            <span className="fact-value num">{top} m</span>
+            {base != null ? <span className="fact-sub">{t("baseToTop", { base, top })}</span> : null}
+          </div>
+        ) : null}
+        {drop != null && drop > 0 ? (
+          <div className="fact">
+            <span className="fact-label">{t("verticalDrop")}</span>
+            <span className="fact-value num">{drop} m</span>
+          </div>
+        ) : null}
+        {km != null ? (
+          <div className="fact">
+            <span className="fact-label">{t("slopeKm")}</span>
+            <span className="fact-value num">{km} km</span>
+          </div>
+        ) : null}
+        {lifts != null ? (
+          <div className="fact">
+            <span className="fact-label">{t("lifts")}</span>
+            <span className="fact-value num">{lifts}</span>
+          </div>
+        ) : null}
+        {resort.snowpark === true ? (
+          <div className="fact">
+            <span className="fact-label">{t("snowpark")}</span>
+            <span className="fact-value">{t("yes")}</span>
+          </div>
+        ) : null}
+        {resort.night_skiing === true ? (
+          <div className="fact">
+            <span className="fact-label">{t("nightSkiing")}</span>
+            <span className="fact-value">{t("yes")}</span>
+          </div>
+        ) : null}
       </div>
       {resort.stats_aggregate ? <p className="hint">{t("statsAggregate")}</p> : null}
-      <SourceLine source={resort.sources.slopes} t={t} lang={lang} />
-      <SourceLine source={resort.sources.lifts} t={t} lang={lang} />
-      {resort.snowpark === true ? <SourceLine source={resort.sources.snowpark} t={t} lang={lang} /> : null}
-      {resort.night_skiing === true ? <SourceLine source={resort.sources.nightSkiing} t={t} lang={lang} /> : null}
+      <SourceRow
+        sources={[
+          resort.sources.slopes,
+          resort.sources.lifts,
+          resort.sources.elevation,
+          resort.snowpark === true ? resort.sources.snowpark : undefined,
+          resort.night_skiing === true ? resort.sources.nightSkiing : undefined,
+        ]}
+      />
       <label className="check">
         <input type="checkbox" checked={!share.hideRuns} onChange={() => updateShare({ hideRuns: !share.hideRuns })} />
         <span>{t("showRuns")}</span>
       </label>
-    </div>
+    </>
   );
 }
 
-function SnowPage({ resort }: { resort: Resort }) {
+/** Several facts often share one source (OpenStreetMap). Show each source once. */
+function SourceRow({ sources }: { sources: Array<FactRef | undefined> }) {
   const { t, lang } = useApp();
-  const top = finiteOrBlank(resort.top_elevation_m);
-  const base = finiteOrBlank(resort.base_elevation_m);
-  const drop = top != null && base != null ? top - base : null;
+  const seen = new Set<string>();
+  const unique = sources.filter((source): source is FactRef => {
+    if (!source) return false;
+    const key = `${source.sourceUrl ?? "osm"}|${source.checkedAt ?? ""}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  if (unique.length === 0) return null;
   return (
-    <div>
-      {top != null && base != null ? (
-        <div className="profile" aria-hidden="true">
-          <span>{base} m</span>
-          <span className="profile-bar" />
-          <span>{top} m</span>
-        </div>
-      ) : null}
-      <div className="stat-tiles">
-        {drop != null ? <Tile label={t("verticalDrop")} value={`${drop} m`} /> : null}
-        {top != null && base != null ? <Tile label={t("elevation")} value={t("baseToTop", { base, top })} /> : null}
-      </div>
-      <SourceLine source={resort.sources.elevation} t={t} lang={lang} />
+    <p className="source-row">
+      {unique.map((source) => (
+        <SourceLine key={`${source.sourceUrl ?? "osm"}|${source.checkedAt ?? ""}`} source={source} t={t} lang={lang} />
+      ))}
+    </p>
+  );
+}
+
+function SnowSection({ resort }: { resort: Resort }) {
+  const { t, lang } = useApp();
+  if (!resort.season_dates && !resort.snow_report && !resort.webcam && !resort.notes) return null;
+  return (
+    <section className="resort-section" aria-labelledby="resort-snow">
+      <h3 id="resort-snow">{t("tabSnow")}</h3>
       {resort.season_dates ? (
         <p>
           <strong>{t("seasonDates")}: </strong>
@@ -394,21 +366,19 @@ function SnowPage({ resort }: { resort: Resort }) {
           <SourceLine source={resort.sources.season} t={t} lang={lang} />
         </p>
       ) : null}
-      {resort.snow_report ? (
-        <p>
-          <a href={resort.snow_report} target="_blank" rel="noopener noreferrer">
-            {t("snowReport")}
-          </a>
-          <SourceLine source={resort.sources.snowReport} t={t} lang={lang} />
-        </p>
-      ) : null}
-      {resort.webcam ? (
-        <p>
-          <a href={resort.webcam} target="_blank" rel="noopener noreferrer">
-            {t("webcams")}
-          </a>
-          <SourceLine source={resort.sources.webcam} t={t} lang={lang} />
-        </p>
+      {resort.snow_report || resort.webcam ? (
+        <div className="link-buttons">
+          {resort.snow_report ? (
+            <a href={resort.snow_report} target="_blank" rel="noopener noreferrer">
+              {t("snowReport")}
+            </a>
+          ) : null}
+          {resort.webcam ? (
+            <a href={resort.webcam} target="_blank" rel="noopener noreferrer">
+              {t("webcams")}
+            </a>
+          ) : null}
+        </div>
       ) : null}
       {resort.notes ? (
         <p>
@@ -416,24 +386,24 @@ function SnowPage({ resort }: { resort: Resort }) {
           {resort.notes}
         </p>
       ) : null}
-    </div>
+    </section>
   );
 }
 
-function TravelPage({ resort }: { resort: Resort }) {
+function TravelSection({ resort }: { resort: Resort }) {
   const { t, home, lang } = useApp();
   const distance = home ? distanceKm(home, resort) : null;
+  const km = distance != null ? formatKm(lang, distance) : "";
   const google = `https://www.google.com/maps/dir/?api=1&destination=${resort.lat},${resort.lon}`;
   const apple = `https://maps.apple.com/?daddr=${resort.lat},${resort.lon}`;
-  const km = distance != null ? formatKm(lang, distance) : "";
   return (
-    <div>
-      <PlacePicker />
+    <section className="resort-section" aria-labelledby="resort-travel">
+      <h3 id="resort-travel">{t("tabTravelShort")}</h3>
       {home && km ? (
-        <>
-          <p>{t("distanceValue", { n: km })}</p>
-          <p className="hint">{t("straightLine")}</p>
-        </>
+        <p>
+          {t("distanceValue", { n: km })}
+          <span className="fact-source">{t("straightLine")}</span>
+        </p>
       ) : null}
       <div className="link-buttons">
         <a href={google} target="_blank" rel="noopener noreferrer">
@@ -444,76 +414,54 @@ function TravelPage({ resort }: { resort: Resort }) {
         </a>
       </div>
       {resort.public_transport ? (
-        <>
-          <h3>{t("transportNote")}</h3>
-          <p>{resort.public_transport}</p>
-        </>
+        <p>
+          <strong>{t("transportNote")}: </strong>
+          {resort.public_transport}
+        </p>
       ) : null}
-    </div>
+    </section>
   );
 }
 
-function LinksPage({ resort }: { resort: Resort }) {
-  const { t, lang, favourites, toggleFavourite, copyLink, copyMessage } = useApp();
-  const covered = resort.passes.map((id) => passById.get(id)).filter((pass) => pass != null);
+function LinksSection({ resort }: { resort: Resort }) {
+  const { t, lang, copyLink, copyMessage } = useApp();
+  const href = useLocalizedPath();
+  const covered = resort.passes.map((id) => passById.get(id)).filter((pass): pass is Pass => pass != null);
   return (
-    <div>
-      <div className="link-buttons">
-        {resort.website ? (
-          <a href={resort.website} target="_blank" rel="noopener noreferrer">
-            {t("openWebsite")}
+    <section className="resort-section" aria-labelledby="resort-links">
+      <h3 id="resort-links">{t("tabLinks")}</h3>
+      {resort.website ? (
+        <p>
+          <a className="text-link" href={resort.website} target="_blank" rel="noopener noreferrer">
+            {t("openWebsite")} ↗
           </a>
-        ) : null}
-        {resort.snow_report ? (
-          <a href={resort.snow_report} target="_blank" rel="noopener noreferrer">
-            {t("snowReport")}
-          </a>
-        ) : null}
-        {resort.webcam ? (
-          <a href={resort.webcam} target="_blank" rel="noopener noreferrer">
-            {t("webcams")}
-          </a>
-        ) : null}
-      </div>
-      {resort.website ? <SourceLine source={resort.sources.website} t={t} lang={lang} tourism={resort.via_tourism_site} /> : null}
+          <SourceLine source={resort.sources.website} t={t} lang={lang} tourism={resort.via_tourism_site} />
+        </p>
+      ) : null}
       {covered.length > 0 ? (
-        <>
-          <h3>{t("passSites")}</h3>
-          <ul className="link-list">
-            {covered.map((pass) => (
-              <li key={pass.id}>
-                <span className="swatch" style={{ background: pass.color }} />
-                <a href={pass.url} target="_blank" rel="noopener noreferrer">
-                  {passShortName(pass)}
-                </a>
-                {passHasShortName(pass) ? <span className="pass-official">{pass.name}</span> : null}
-                {pass.provisional ? <span className="badge">{t("provisional")}</span> : null}
-              </li>
-            ))}
-          </ul>
-        </>
+        <ul className="link-list">
+          {covered.map((pass) => (
+            <li key={pass.id}>
+              <span className="swatch" style={{ background: pass.color }} />
+              <a href={pass.url} target="_blank" rel="noopener noreferrer">
+                {passShortName(pass)} ↗
+              </a>
+            </li>
+          ))}
+        </ul>
       ) : null}
       <AffiliateLinksBlock />
       <div className="row-actions">
         <button type="button" className="ghost" onClick={copyLink}>
           {copyMessage ?? t("share")}
         </button>
-        <button type="button" className={favourites.includes(resort.id) ? "primary" : "ghost"} aria-pressed={favourites.includes(resort.id)} onClick={() => toggleFavourite(resort.id)}>
-          {favourites.includes(resort.id) ? t("favouriteRemove") : t("favouriteAdd")}
-        </button>
+        <Link className="ghost" href={`${href("/contact")}?category=data-error&resort=${encodeURIComponent(resort.id)}`}>
+          {t("reportMapIssue")}
+        </Link>
       </div>
       <p className="fact-source">{t("dataFileDate", { date: formatDate(lang, generated) })}</p>
       <p className="fact-source">{t("osmSource")}</p>
       <p className="disclaimer">{t("globalDisclaimer")}</p>
-    </div>
-  );
-}
-
-function Tile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="stat-tile">
-      <p className="hint">{label}</p>
-      <p className="num">{value}</p>
-    </div>
+    </section>
   );
 }

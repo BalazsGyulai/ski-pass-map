@@ -356,6 +356,7 @@
   "noPrevResort": "Eelmine abinõu",
   "noNextResort": "Järgmine abinõu",
   "paysOff": "Tasub pärast{n}päevi",
+  "cheapestHere": "Odavaim pilet siin",
   "priceAfter": "{price}pärast{date}",
   "showRuns": "Jooste ja liftide näitamine kaardil",
   "verticalDrop": "Vertikaalne",

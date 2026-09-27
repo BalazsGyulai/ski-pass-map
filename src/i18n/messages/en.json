@@ -356,6 +356,7 @@
   "noPrevResort": "Previous resort",
   "noNextResort": "Next resort",
   "paysOff": "Pays off after {n} days here",
+  "cheapestHere": "Cheapest pass here",
   "priceAfter": "{price} after {date}",
   "showRuns": "Show runs and lifts on map",
   "verticalDrop": "Vertical",

@@ -356,6 +356,7 @@
   "noPrevResort": "Iepriekšējais kūrorts",
   "noNextResort": "Nākamais kūrorts",
   "paysOff": "Atmaksā pēc{n}dienas šeit",
+  "cheapestHere": "Lētākais abonements šeit",
   "priceAfter": "{price}pēc{date}",
   "showRuns": "Rādīt skrējienus un liftus uz kartes",
   "verticalDrop": "Vertikāli",

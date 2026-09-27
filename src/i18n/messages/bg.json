@@ -356,6 +356,7 @@
   "noPrevResort": "Предходен курорт",
   "noNextResort": "Следващ курорт",
   "paysOff": "Изплаща се след{n}дни тук",
+  "cheapestHere": "Най-евтината карта тук",
   "priceAfter": "{price}след{date}",
   "showRuns": "Показване на пробега и асансьорите на картата",
   "verticalDrop": "Вертикално",
