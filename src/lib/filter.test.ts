@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { cities, passes, resorts } from "./data";
 import { distanceKm } from "./distance";
 import { filterResorts, sortResorts } from "./filter";
-import type { Resort } from "./schema";
 import { parseShareState, serializeShareState } from "./url-state";
 
 const names = new Map(passes.map((pass) => [pass.id, pass.name]));

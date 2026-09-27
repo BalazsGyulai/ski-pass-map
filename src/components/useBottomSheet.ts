@@ -30,17 +30,22 @@ export function useBottomSheet(options: {
     if (!narrow) return;
     const el = ref.current;
     if (!el) return;
+    const host = el.parentElement;
+    const explorer = el.closest(".explorer");
     const measure = () => {
-      const host = el.parentElement;
-      const explorer = el.closest(".explorer");
       if (!host || !explorer) return;
       const space = host.getBoundingClientRect().bottom - explorer.getBoundingClientRect().top;
       if (space > 0) setAvailable(Math.round(space));
     };
     measure();
+    // Layout can settle after the first paint (fonts, a reload from the service worker, the
+    // browser bar). Watching the frame keeps the snap heights right without polling.
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    if (explorer) observer?.observe(explorer);
     window.addEventListener("resize", measure);
     window.visualViewport?.addEventListener("resize", measure);
     return () => {
+      observer?.disconnect();
       window.removeEventListener("resize", measure);
       window.visualViewport?.removeEventListener("resize", measure);
     };

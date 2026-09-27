@@ -5,19 +5,9 @@ import { usePathname } from "next/navigation";
 import { parseLangPath } from "@/i18n/routing";
 import { SITE_NAME } from "@/lib/site";
 import { LanguageSwitcher, useLocalizedPath } from "./LanguageSwitcher";
+import { SettingsLink } from "./SettingsLink";
 import { useApp } from "./AppState";
-
-const links = [
-  { rest: "/", key: "navMap" as const },
-  { rest: "/plan", key: "navPlan" as const },
-  { rest: "/saved", key: "navSaved" as const },
-  { rest: "/settings", key: "navSettings" as const },
-];
-
-function navIsCurrent(rest: string, linkRest: string): boolean {
-  if (linkRest === "/") return rest === "/";
-  return rest === linkRest || rest.startsWith(`${linkRest}/`);
-}
+import { isCurrentTab, primaryTabs } from "./nav-links";
 
 export function Header() {
   const pathname = usePathname();
@@ -36,13 +26,16 @@ export function Header() {
           <small>{t("season")}</small>
         </Link>
         <nav className="primary-nav" aria-label={t("title")}>
-          {links.map((link) => (
-            <Link key={link.rest} href={href(link.rest)} aria-current={navIsCurrent(rest, link.rest) ? "page" : undefined}>
+          {primaryTabs.map((link) => (
+            <Link key={link.rest} href={href(link.rest)} aria-current={isCurrentTab(rest, link.rest) ? "page" : undefined}>
               {t(link.key)}
             </Link>
           ))}
         </nav>
-        {onSettings ? null : <LanguageSwitcher compact />}
+        <div className="bar-tools">
+          {onSettings ? null : <LanguageSwitcher compact />}
+          <SettingsLink className="icon-btn" />
+        </div>
       </div>
     </header>
   );

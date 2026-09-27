@@ -2,12 +2,12 @@ import { BASE_PATH } from "@/lib/site";
 import { DEFAULT_LANG, LANGS, type Lang } from "./languages";
 import { isLang } from "./languages";
 
+/** Pages listed in the sitemap. /compare and /saved only redirect now, so they are left out. */
 const PAGE_SUFFIXES = [
   "",
   "plan",
-  "saved",
+  "passes",
   "settings",
-  "compare",
   "about",
   "credits",
   "contact",
@@ -48,7 +48,7 @@ export function isMapPath(pathname: string, lang: Lang): boolean {
   return parsed === lang && (rest === "/" || rest === "");
 }
 
-const TAB_REST = new Set(["/", "/plan", "/saved", "/settings"]);
+const TAB_REST = new Set(["/", "/plan", "/passes", "/settings", "/saved", "/compare"]);
 
 export function isTabShellPath(pathname: string, lang: Lang): boolean {
   const { lang: parsed, rest } = parseLangPath(pathname);

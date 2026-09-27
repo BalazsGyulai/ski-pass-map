@@ -13,6 +13,7 @@ import { serializePlan } from "@/lib/url-state";
 import { BirthYearField } from "./BirthYearField";
 import { CompareView } from "./CompareView";
 import { PlacePicker } from "./PlacePicker";
+import { SavedView } from "./SavedView";
 import { useApp } from "./AppState";
 import { AffiliateLinksBlock } from "./AffiliateLinks";
 import { markFirstVisitDone } from "@/lib/support/storage";
@@ -230,6 +231,7 @@ export function Planner() {
           </section>
         </div>
       ) : null}
+      {tab === "plan" ? <SavedView /> : null}
       <AffiliateLinksBlock />
     </div>
   );

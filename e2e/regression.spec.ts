@@ -97,6 +97,30 @@ test("tapping a cluster zooms in and tapping a resort dot opens it", async ({ pa
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
+test("three tabs, the settings gear, and old addresses", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/en/");
+  const tabs = page.locator(".bottom-tab-bar a");
+  await expect(tabs).toHaveCount(3);
+  await tabs.nth(1).click();
+  await expect(page).toHaveURL(/\/en\/passes\/$/);
+  await page.locator(".mobile-top a[aria-label='Settings']").click();
+  await expect(page).toHaveURL(/\/en\/settings\/$/);
+  await page.goto("/en/compare/?birth=1");
+  await expect(page).toHaveURL(/\/en\/passes\/\?birth=1$/);
+  await page.goto("/en/saved/");
+  await expect(page).toHaveURL(/\/en\/plan\/#saved$/);
+  await expect(page.locator("#saved")).toBeVisible();
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/en/");
+  await page.locator(".topbar-links a[aria-label='Settings']").click();
+  await expect(page).toHaveURL(/\/en\/settings\/$/);
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
 test("planner, compare, birth-year prices, favourites persistence", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);
