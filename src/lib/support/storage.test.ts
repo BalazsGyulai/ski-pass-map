@@ -24,6 +24,15 @@ describe("support prompt storage", () => {
     expect(shouldShowSupportPrompt({ storage: mock, now: Date.now(), dev: false, search: "" })).toBe(true);
   });
 
+  it("stays hidden when there is nothing to offer, unless forced", () => {
+    storage.clear();
+    markFirstVisitDone(mock);
+    expect(shouldShowSupportPrompt({ storage: mock, now: Date.now(), dev: false, search: "", canOffer: false })).toBe(false);
+    expect(
+      shouldShowSupportPrompt({ storage: mock, now: Date.now(), dev: false, search: "?supportPrompt=1", forceDevParam: true, allowForceParam: true, canOffer: false }),
+    ).toBe(true);
+  });
+
   it("caps at four prompts per utc day", () => {
     storage.clear();
     markFirstVisitDone(mock);

@@ -7,6 +7,7 @@ import { BottomTabBar } from "./BottomTabBar";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { MobileTopBar } from "./MobileTopBar";
+import { SiteOverlays } from "./SiteOverlays";
 import { ToastHost } from "./Toast";
 import { useApp } from "./AppState";
 import { useNarrow } from "./useNarrow";
@@ -30,6 +31,8 @@ export function Chrome({ children }: { children: ReactNode }) {
       {showFooter ? <Footer /> : null}
       {showMobileTabs ? <BottomTabBar /> : null}
       <ToastHost />
+      {/* Inside .site so the consent and support cards can sit above the tab bar. */}
+      <SiteOverlays />
     </div>
   );
 }

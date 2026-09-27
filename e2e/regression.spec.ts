@@ -250,6 +250,14 @@ test("consent banner and cookie settings", async ({ page, baseURL }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/hu/");
   await page.waitForSelector('[data-testid="consent-banner"]', { timeout: 20_000 });
+  // On phones the card sits on the tab bar instead of covering it (once its entrance settles).
+  await expect
+    .poll(async () => {
+      const card = await page.locator(".consent-banner-card").boundingBox();
+      const tabs = await page.locator(".bottom-tab-bar").boundingBox();
+      return card && tabs ? Math.round(tabs.y - (card.y + card.height)) : -999;
+    })
+    .toBeGreaterThanOrEqual(-1); // it may rest on the bar's 1px top border, like the sheet does
   await page.getByRole("button", { name: /reject|elutasít/i }).click();
   await expect.poll(() => page.evaluate(() => localStorage.getItem("skimap-cookie-banner"))).toBe("rejected");
   await page.evaluate(() => {
@@ -278,6 +286,11 @@ test("support prompt rules", async ({ page, baseURL }) => {
   await page.evaluate(() => localStorage.setItem("skimap-support-first-visit", "1"));
   await page.goto("/en/?supportPrompt=1");
   await page.waitForSelector('[data-testid="support-prompt"]', { timeout: 15_000 });
+  // The supporter code opens inline, not in a browser prompt.
+  await page.getByRole("button", { name: "Enter supporter code" }).click();
+  await expect(page.getByRole("textbox", { name: "Enter supporter code" })).toBeFocused();
+  await page.getByRole("button", { name: "Not now" }).click();
+  await expect(page.locator('[data-testid="support-prompt"]')).toHaveCount(0);
   await page.addInitScript(() => localStorage.removeItem("skimap-cookie-banner"));
   await page.goto("/en/?supportPrompt=1");
   await page.waitForSelector('[data-testid="consent-banner"]');
