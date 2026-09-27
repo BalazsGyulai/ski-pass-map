@@ -31,6 +31,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   // Vector tiles, glyphs, and sprites stay online. The app shell is cached below.
   if (isMapTileHost(url.hostname)) return;
+  // Map worker scripts (and anything they import) go straight to the network. Answering them from
+  // here while this worker takes control of a fresh page can leave the map without its workers,
+  // and the map needs the network for tiles anyway.
+  if (request.destination === "worker" || request.destination === "sharedworker" || url.pathname.includes("/vendor/")) return;
   if (url.origin !== self.location.origin) return;
 
   if (url.pathname.endsWith("/sw.js")) {

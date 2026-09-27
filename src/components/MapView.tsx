@@ -321,7 +321,15 @@ export default function MapView() {
       map.off("resize", sync);
       coarseMedia.removeEventListener("change", sync);
       narrowMedia.removeEventListener("change", sync);
-      if (control) map.removeControl(control);
+      // Leaving the page removes the map first (the map effect cleans up before this one), and a
+      // removed map has already dropped its controls. Removing again throws and takes the page down.
+      if (control && mapRef.current === map) {
+        try {
+          map.removeControl(control);
+        } catch {
+          // The map is already gone.
+        }
+      }
     };
   }, [ready, provider]);
 
