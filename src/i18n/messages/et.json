@@ -316,7 +316,7 @@
   "noSavedPlace": "Viitekohta veel pole. Vahemaad jäävad varjatuks, kuni päästate linna või kasutate oma asukohta.",
   "noPlaceMatch": "Ükski loetletud linn ei vasta sellele tekstile. Proovige linna nime või kasutage oma asukohta.",
   "clearBirthYear": "Eemalda sünniaasta",
-  "birthYearWhere": "Salvestatud selles seadmes. Määra või eemalda see siin Seadetes.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Näita{n}kuurordid",
   "clearAll": "Puhasta",
   "moreFilters": "Rohkem",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

@@ -316,7 +316,7 @@
   "noSavedPlace": "Ni še nobenega referenčnega mesta. Razdalje ostanejo skrite, dokler ne shranite mesta ali uporabite svojo lokacijo.",
   "noPlaceMatch": "Nobeno mesto se ne ujema s tem besedilom. Poskusite ime mesta ali uporabite lokacijo.",
   "clearBirthYear": "Odstrani porodno leto",
-  "birthYearWhere": "Shranjeno na tej napravi. Nastavite ali odstranite tukaj v Nastavitvah.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Prikaži{n}letovišča",
   "clearAll": "Počisti vse",
   "moreFilters": "Več",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

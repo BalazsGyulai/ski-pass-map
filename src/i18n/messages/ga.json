@@ -316,7 +316,7 @@
   "noSavedPlace": "Níl aon áit tagartha fós. Fad fanacht i bhfolach go dtí go shábháil tú chathair nó a úsáid do shuíomh.",
   "noPlaceMatch": "Ní oireann aon chathair atá liostaithe téacs sin. Bain triail as ainm na cathrach, nó a úsáid do shuíomh.",
   "clearBirthYear": "Bain an bhliain breithe",
-  "birthYearWhere": "Sábháilte ar an bhfeiste seo. Socraigh nó bain é anseo i Socruithe.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Taispeáin Taispeáin{n}ionaid saoire",
   "clearAll": "Glan go léir",
   "moreFilters": "Tuilleadh eolais",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

@@ -316,7 +316,7 @@
   "noSavedPlace": "Ei viitepaikkaa vielä. Etäisyydet pysyvät piilossa, kunnes pelastat kaupungin tai käytät sijaintiasi.",
   "noPlaceMatch": "Mikään kaupunki ei vastaa tuota tekstiä. Kokeile kaupungin nimeä tai käytä sijaintiasi.",
   "clearBirthYear": "Poista syntymävuosi",
-  "birthYearWhere": "Tallennettu tälle laitteelle. Aseta tai poista se tässä Asetuksissa.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Näytä{n}lomakohteet",
   "clearAll": "Tyhjennä kaikki",
   "moreFilters": "Lisää",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

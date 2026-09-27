@@ -316,7 +316,7 @@
   "noSavedPlace": "Все още няма място за справка. Разстоянията остават скрити, докато не спасите град или не използвате местоположението си.",
   "noPlaceMatch": "Никой град не съвпада с този текст. Опитай с градско име или използвай местоположението си.",
   "clearBirthYear": "Премахване на годината на раждане",
-  "birthYearWhere": "Запазено на това устройство. Задайте или премахнете го тук в Настройки.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Показване{n}курорти",
   "clearAll": "Изчистване на всичко",
   "moreFilters": "Още",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

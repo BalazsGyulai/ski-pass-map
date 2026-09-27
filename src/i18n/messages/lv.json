@@ -316,7 +316,7 @@
   "noSavedPlace": "Vēl nav atsauces vietas. Attālumi palikt paslēpta, līdz jūs saglabāt pilsētu vai izmantot savu vietu.",
   "noPlaceMatch": "Neviena pilsēta neatbilst šim tekstam. Izmēģiniet pilsētas nosaukumu, vai izmantot savu vietu.",
   "clearBirthYear": "Izņemt dzimšanas gadu",
-  "birthYearWhere": "Saglabāts šajā ierīcē. Iestatiet vai noņemiet to šeit Iestatījumos.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Parādītt{n}kūrorti,",
   "clearAll": "Notīrīt visu",
   "moreFilters": "Vairāk",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

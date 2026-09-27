@@ -316,7 +316,7 @@
   "noSavedPlace": "Distanzi jibqgħu moħbija sakemm issalva belt jew tuża l-post tiegħek.",
   "noPlaceMatch": "L- ebda belt elenkata ma taqbel maʼ dak it- test.",
   "clearBirthYear": "Tneħħi s- sena tat- twelid",
-  "birthYearWhere": "Maħżun fuq dan it-tagħmir. Issettjah jew neħħih hawn fis-Settings.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Ippreżentaw{n}resorts",
   "clearAll": "Ħa nikkura kollox",
   "moreFilters": "Aktar",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

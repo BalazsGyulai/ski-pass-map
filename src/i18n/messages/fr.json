@@ -316,7 +316,7 @@
   "noSavedPlace": "Pas encore de référence. Les distances restent cachées jusqu'à ce que vous économisez une ville ou utilisez votre emplacement.",
   "noPlaceMatch": "Aucune ville ne correspond à ce texte. Essayez un nom de ville, ou utilisez votre emplacement.",
   "clearBirthYear": "Supprimer l'année de naissance",
-  "birthYearWhere": "Enregistré sur cet appareil. Définissez ou supprimez-le ici dans Réglages.",
+  "birthYearWhere": "Enregistré uniquement sur cet appareil.",
   "showResorts": "Afficher{n}stations balnéaires",
   "clearAll": "Tout effacer",
   "moreFilters": "Plus",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

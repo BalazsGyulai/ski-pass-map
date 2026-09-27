@@ -316,7 +316,7 @@
   "noSavedPlace": "Zatiaľ žiadne referenčné miesto. Vzdialenosti zostávajú skryté, kým nezachránite mesto starých či starých.",
   "noPlaceMatch": "Žiadne mesto sa nezhoduje s tým textom. Skúste názov mesta, alebo použite svoju polohu.",
   "clearBirthYear": "Odstrániť rok narodenia",
-  "birthYearWhere": "Uložené na tomto zariadení. Nastavte alebo odstráňte tu v Nastaveniach.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Zobraziť{n}rezorty",
   "clearAll": "Vyčistiť všetko",
   "moreFilters": "Viac",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

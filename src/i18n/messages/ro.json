@@ -316,7 +316,7 @@
   "noSavedPlace": "Nici un loc de referinţă încă. Distanţele rămân ascunse până când salvaţi un oraş sau folosiţi-vă locaţia.",
   "noPlaceMatch": "Niciun oraş nu se potriveşte cu acel text. Încercați un nume de oraș, sau utilizați locația.",
   "clearBirthYear": "Elimină anul nașterii",
-  "birthYearWhere": "Salvat pe acest dispozitiv. Setați sau eliminați aici în Setări.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Arată{n}stațiuni",
   "clearAll": "Curăță tot",
   "moreFilters": "Mai mult",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

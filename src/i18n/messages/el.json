@@ -316,7 +316,7 @@
   "noSavedPlace": "Δεν υπάρχει σημείο αναφοράς ακόμα. Οι αποστάσεις παραμένουν κρυφές μέχρι να αποθηκεύσετε μια πόλη ή να χρησιμοποιήσετε την τοποθεσία σας.",
   "noPlaceMatch": "Καμία απαριθμημένη πόλη δεν ταιριάζει με αυτό το κείμενο. Δοκιμάστε ένα όνομα πόλης, ή χρησιμοποιήστε τη θέση σας.",
   "clearBirthYear": "Αφαίρεση έτους γέννησης",
-  "birthYearWhere": "Αποθηκεύεται σε αυτή τη συσκευή. Ορίστε ή αφαιρέστε το εδώ στις Ρυθμίσεις.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Εμφάνιση{n}θέρετρα",
   "clearAll": "Καθαρισμός όλων",
   "moreFilters": "Περισσότερα",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

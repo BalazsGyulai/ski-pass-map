@@ -316,7 +316,7 @@
   "noSavedPlace": "Zatím žádné referenční místo. Vzdálenosti zůstanou skryté, dokud neušetříte město nebo nepoužijete svou polohu.",
   "noPlaceMatch": "Žádná zmíněná města neodpovídá té zprávě. Zkuste jméno města, nebo použijte svou polohu.",
   "clearBirthYear": "Odstranit rok narození",
-  "birthYearWhere": "Uloženo na tomto zařízení. Nastavte nebo odstraňte zde v Nastavení.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Zobrazit{n}resorts",
   "clearAll": "Vyčistit všechny",
   "moreFilters": "Více",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

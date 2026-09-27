@@ -316,7 +316,7 @@
   "noSavedPlace": "Noch kein Referenzort. Entfernungen bleiben aus, bis du eine Stadt speicherst oder deinen Standort nutzt.",
   "noPlaceMatch": "Keine gelistete Stadt passt. Stadtname versuchen oder Standort nutzen.",
   "clearBirthYear": "Geburtsjahr entfernen",
-  "birthYearWhere": "Auf diesem Gerät gespeichert. Hier unter Einstellungen setzen oder entfernen.",
+  "birthYearWhere": "Nur auf diesem Gerät gespeichert.",
   "showResorts": "{n} Skigebiete anzeigen",
   "clearAll": "Alles löschen",
   "moreFilters": "Mehr",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

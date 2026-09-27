@@ -316,7 +316,7 @@
   "noSavedPlace": "Ainda não há lugar de referência. Distâncias ficar escondido até que você salvar uma cidade ou usar a sua localização.",
   "noPlaceMatch": "Nenhuma cidade listada corresponde a esse texto. Tente um nome de cidade, ou use sua localização.",
   "clearBirthYear": "Remover o ano de nascimento",
-  "birthYearWhere": "Salvo neste dispositivo. Defina ou remova aqui em Configurações.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Mostrar{n}resorts",
   "clearAll": "Limpar tudo",
   "moreFilters": "Mais",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

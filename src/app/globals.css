@@ -1266,10 +1266,17 @@ html[data-bottom-overlay] .site-footer {
   font-size: 15px;
   font-weight: 500;
 }
-.toggle-switch {
+button.toggle-switch {
   position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
   width: 51px;
+  min-width: 51px;
+  max-width: 51px;
   height: 31px;
+  min-height: 31px;
+  max-height: 31px;
   border-radius: 999px;
   border: 0;
   padding: 2px;
@@ -1277,8 +1284,12 @@ html[data-bottom-overlay] .site-footer {
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.2s ease;
+  justify-content: flex-start;
 }
-.toggle-switch.is-on { background: var(--save); }
+button.toggle-switch.is-on {
+  background: var(--save);
+  justify-content: flex-end;
+}
 .toggle-knob {
   display: block;
   width: 27px;
@@ -1286,9 +1297,9 @@ html[data-bottom-overlay] .site-footer {
   border-radius: 999px;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
   transition: transform 0.2s ease;
 }
-.toggle-switch.is-on .toggle-knob { transform: translateX(20px); }
 .seg-control {
   display: inline-flex;
   padding: 2px;

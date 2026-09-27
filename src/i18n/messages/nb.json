@@ -316,7 +316,7 @@
   "noSavedPlace": "Ikke noe referansested ennå. Avstander forblir skjult til du lagrer en by eller bruker plasseringen dinWhat.",
   "noPlaceMatch": "Ingen listet by matcher den teksten. Prøv et bynavn eller bruk plasseringen din.",
   "clearBirthYear": "Fjern fødselsåret",
-  "birthYearWhere": "Lagret på denne enheten. Sett eller fjern det her under Innstillinger.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Vis{n}feriesteder",
   "clearAll": "Fjern alle",
   "moreFilters": "Mer",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

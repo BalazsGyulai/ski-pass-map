@@ -316,7 +316,7 @@
   "noSavedPlace": "Ingen referensplats ännu. Avstånden är dolda tills du sparar en stad eller använder din plats.",
   "noPlaceMatch": "Ingen listad stad matchar den texten. Prova ett stadsnamn eller använd din plats.",
   "clearBirthYear": "Ta bort födelseår",
-  "birthYearWhere": "Sparat på den här enheten. Ställ in eller ta bort det här under Inställningar.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Visa{n}resorts",
   "clearAll": "Tydliga alla",
   "moreFilters": "Mer",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

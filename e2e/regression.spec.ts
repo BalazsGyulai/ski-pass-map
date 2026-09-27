@@ -7,6 +7,7 @@ import {
   originFromBase,
   assertMapCanvasNotFlat,
   shotPart10,
+  shotPart10Viewport,
   waitForMapMarkers,
 } from "./helpers";
 
@@ -232,9 +233,13 @@ test("part10 UI screenshots", async ({ page, baseURL }) => {
   await assertMapCanvasNotFlat(page, "resort desktop");
   await shotPart10(page, "resort-desktop");
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("skimap-map-consent", "0"));
   await page.goto("/en/settings/");
   await page.waitForSelector("h1");
-  await shotPart10(page, "settings-phone");
+  await shotPart10Viewport(page, "settings-phone");
+  await page.getByRole("radio", { name: "Dark" }).click();
+  await page.getByRole("switch", { name: "Mapbox map" }).click();
+  await shotPart10Viewport(page, "settings-phone-dark");
   expect(problems, problems.join("\n")).toEqual([]);
 });
 

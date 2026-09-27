@@ -316,7 +316,7 @@
   "noSavedPlace": "Még nincs viszonyítási hely. A távolságok rejtve maradnak, amíg nem mentesz egy várost, vagy nem kéred a helyzetedet.",
   "noPlaceMatch": "Egy ismert város sem illik a szövegre. Próbálj várost, vagy használd a helyzetedet.",
   "clearBirthYear": "Születési év törlése",
-  "birthYearWhere": "Ezen az eszközön tároljuk. Itt a Beállításokban megadhatod vagy törölheted.",
+  "birthYearWhere": "Csak ezen az eszközön tároljuk.",
   "showResorts": "{n} síterep mutatása",
   "clearAll": "Minden törlése",
   "moreFilters": "Továbbiak",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

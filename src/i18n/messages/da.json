@@ -316,7 +316,7 @@
   "noSavedPlace": "Der er ikke noget sted endnu. Distancer holdes skjult, indtil du gemmer en by eller bruge din placering.",
   "noPlaceMatch": "Ingen samordningen af teksten. Prøv samordningen eller brug din placering.",
   "clearBirthYear": "Fjern fødselsår",
-  "birthYearWhere": "Gemt på denne enhed. Indstil eller fjern det her under Indstillinger.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Vis{n}resorts",
   "clearAll": "Ryd alle",
   "moreFilters": "Mere",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

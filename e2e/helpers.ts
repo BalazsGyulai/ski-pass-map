@@ -6,7 +6,7 @@ export const RESORT_ID = "skimap-12357";
 export const ARTIFACTS_DIR = "/opt/cursor/artifacts/screenshots/part10";
 
 let shotsTaken = 0;
-const MAX_SHOTS = 5;
+const MAX_SHOTS = 6;
 
 const MIN_MAP_CANVAS_VARIANCE = 6;
 
@@ -41,13 +41,17 @@ export function attachOriginGuards(page: Page, origin: string): string[] {
   return problems;
 }
 
-export async function shotPart10(page: Page, name: string): Promise<void> {
+export async function shotPart10(page: Page, name: string, options?: { fullPage?: boolean }): Promise<void> {
   if (shotsTaken >= MAX_SHOTS) return;
   fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
   const file = path.join(ARTIFACTS_DIR, `${name}.png`);
-  await page.screenshot({ path: file, fullPage: true });
+  await page.screenshot({ path: file, fullPage: options?.fullPage ?? true });
   shotsTaken += 1;
   console.log("screenshot", file);
+}
+
+export async function shotPart10Viewport(page: Page, name: string): Promise<void> {
+  await shotPart10(page, name, { fullPage: false });
 }
 
 export async function dismissConsent(page: Page, choice: "accepted" | "rejected"): Promise<void> {

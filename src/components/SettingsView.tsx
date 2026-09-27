@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { legalLinks } from "./MenuDrawer";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
+import { mapboxShowingStatusKey } from "@/lib/settings-map-status";
 import { SegmentedControl, SettingsGroup, SettingsRow, StyledSelect, ToggleSwitch } from "./ui/SettingsControls";
 
 export function SettingsView() {
@@ -36,14 +37,13 @@ export function SettingsView() {
   const href = useLocalizedPath();
   const fileRef = useRef<HTMLInputElement>(null);
   const [mapConsent, setMapConsentLocal] = useState(false);
-  const [providerLabel, setProviderLabel] = useState<string>(t("mapProviderFree"));
+  const hasMapboxToken = Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim());
 
   useEffect(() => {
     setMapConsentLocal(getMapConsent());
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim();
-    const using = token && getMapConsent() ? t("mapProviderMapbox") : t("mapProviderFree");
-    setProviderLabel(using);
-  }, [t]);
+  }, []);
+
+  const mapStatusHint = t(mapboxShowingStatusKey(mapConsent, hasMapboxToken));
 
   function onImportFile(file: File) {
     void file.text().then((text) => {
@@ -80,19 +80,17 @@ export function SettingsView() {
       </SettingsGroup>
 
       <SettingsGroup title={t("settingsSectionMap")}>
-        <SettingsRow label={t("mapProviderLabel")} hint={t("mapProviderCurrent", { provider: providerLabel })}>
+        <SettingsRow label={t("mapboxMapLabel")} hint={mapStatusHint}>
           <ToggleSwitch
-            label={t("consentMapCategory")}
+            label={t("mapboxMapLabel")}
             checked={mapConsent}
             onChange={(on) => {
               setMapConsent(on);
               setMapConsentLocal(on);
-              const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim();
-              setProviderLabel(token && on ? t("mapProviderMapbox") : t("mapProviderFree"));
             }}
           />
         </SettingsRow>
-        <p className="settings-inline-hint">{t("consentMapCategoryDesc")}</p>
+        <p className="settings-inline-hint">{t("mapboxMapHelper")}</p>
         <SettingsRow label={t("pisteOverlayDefault")}>
           <ToggleSwitch
             label={t("pisteOverlayDefault")}

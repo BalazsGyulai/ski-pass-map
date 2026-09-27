@@ -316,7 +316,7 @@
   "noSavedPlace": "Kol kas nėra vietos. Atstumai likti paslėptas, kol jūs išsaugote miestą arba naudoti savo vietą.",
   "noPlaceMatch": "Nė vienas į sąrašą įtrauktas miestas neatitinka šio teksto. Pabandykite miesto pavadinimą, arba naudokite savo vietą.",
   "clearBirthYear": "Pašalinti gimimo metus",
-  "birthYearWhere": "Išsaugota šiame įrenginyje. Nustatykite arba pašalinkite čia Nustatymuose.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Rodyti{n}kurortai",
   "clearAll": "Išvalyti viską",
   "moreFilters": "Daugiau",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

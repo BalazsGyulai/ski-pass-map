@@ -316,7 +316,7 @@
   "noSavedPlace": "Encara no hi ha lloc de referència. Les distàncies s'amaguen fins que salveu una ciutat o useu el vostre emplaçament.",
   "noPlaceMatch": "No hi ha ciutat llistada que coincideixi amb aquest text. Prova un nom de ciutat o utilitza la teva ubicació.",
   "clearBirthYear": "Elimina l' any de naixement",
-  "birthYearWhere": "Desat en aquest dispositiu. Estableix-lo o elimina-lo aquí a Configuració.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Mostra{n}resorts",
   "clearAll": "Neteja- ho tot",
   "moreFilters": "Més",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

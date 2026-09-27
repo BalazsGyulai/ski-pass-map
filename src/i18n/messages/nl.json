@@ -316,7 +316,7 @@
   "noSavedPlace": "Nog geen referentieplek. Afstanden blijven verborgen totdat u een stad opslaat of uw locatie gebruikt.",
   "noPlaceMatch": "Geen enkele stad komt overeen met die tekst. Probeer een stadsnaam, of gebruik je locatie.",
   "clearBirthYear": "Geboortejaar verwijderen",
-  "birthYearWhere": "Opgeslagen op dit apparaat. Stel het hier in of verwijder het onder Instellingen.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Tonen{n}resorts",
   "clearAll": "Alles wissen",
   "moreFilters": "Meer",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }

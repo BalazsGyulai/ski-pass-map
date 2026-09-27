@@ -316,7 +316,7 @@
   "noSavedPlace": "Nie ma jeszcze referencji. Odległość pozostaje ukryta, dopóki nie uratujesz miasta lub nie użyjesz swojej lokalizacji.",
   "noPlaceMatch": "Żadne miasto nie pasuje do tego tekstu. Spróbuj nazwy miasta, albo użyj swojej lokalizacji.",
   "clearBirthYear": "Usuń rok urodzenia",
-  "birthYearWhere": "Zapisane na tym urządzeniu. Ustaw lub usuń tutaj w Ustawieniach.",
+  "birthYearWhere": "Saved only on this device.",
   "showResorts": "Pokaż{n}kurorty",
   "clearAll": "Wyczyść wszystko",
   "moreFilters": "Więcej",
@@ -504,5 +504,10 @@
   "toastSaved": "Saved",
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
-  "unitsMi": "Miles"
+  "unitsMi": "Miles",
+  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapLabel": "Mapbox map",
+  "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
+  "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
+  "mapProviderNowMapbox": "Now showing: Mapbox"
 }
