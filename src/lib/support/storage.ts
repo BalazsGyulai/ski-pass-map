@@ -85,7 +85,7 @@ export function shouldShowSupportPrompt(input: SupportPromptInput): boolean {
   }
   if (!hasCompletedFirstVisit(input.storage)) return false;
   if (isInQuietPeriod(input.storage, input.now)) return false;
-  const daily = readSupportDaily(input.storage);
+  const daily = readSupportDaily(input.storage, input.now);
   return daily.count < 4;
 }
 

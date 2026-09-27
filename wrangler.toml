@@ -8,10 +8,16 @@ binding = "MAP_LOADS"
 database_name = "skimap-map-loads"
 database_id = "b5642fda-4805-44a4-afad-947a837a1a0f"
 
-# REPLACE_ME: create D1 database `skimap-app` in Western Europe, paste its id below, then run migrations.
+# Migrations 0001–0003 applied on the remote skimap-app D1 database.
 [[d1_databases]]
 binding = "DB"
 database_name = "skimap-app"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "e9738dac-1112-4930-9cf9-15aee3f0c7ef"
 migrations_dir = "migrations"
 
+# Enable on the Pages project (Workers AI for admin source checker).
+[ai]
+binding = "AI"
+
+[vars]
+NEXT_PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAAFE_gQPZQBi9Ea5I"
