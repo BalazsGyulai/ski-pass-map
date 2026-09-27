@@ -12,7 +12,7 @@ import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
 
 export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { share, updateShare, resetFilters, selectResort, saveCity, home, t, lang } = useApp();
+  const { share, updateShare, resetFilters, selectResort, saveCity, home, t, messages } = useApp();
   const { filtered } = useResortLists();
   const searchRef = useRef<HTMLInputElement>(null);
   const query = fold(share.q.trim());
@@ -37,9 +37,9 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
       .filter((resort) => fold(`${resort.name} ${resort.region}`).includes(query))
       .slice(0, 8);
     const passHits = passes.filter((pass) => fold(`${pass.name} ${passShortName(pass)}`).includes(query));
-    const regionHits = regions.filter((region) => fold(regionLabel(lang, region)).includes(query) || fold(region).includes(query));
+    const regionHits = regions.filter((region) => fold(regionLabel(messages, region)).includes(query) || fold(region).includes(query));
     return { resortHits, passHits, regionHits };
-  }, [query, regions, lang]);
+  }, [query, regions, messages]);
 
   if (!open) return null;
 
@@ -88,7 +88,7 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
                     }}
                   >
                     <strong>{resort.name}</strong>
-                    <span>{regionLabel(lang, resort.region)}</span>
+                    <span>{regionLabel(messages, resort.region)}</span>
                   </button>
                 ))}
               </Group>
@@ -127,7 +127,7 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
               <Group title={t("groupRegions")}>
                 {groups.regionHits.map((region) => (
                   <button key={region} type="button" onClick={() => updateShare({ regions: [region], q: "" })}>
-                    {regionLabel(lang, region)}
+                    {regionLabel(messages, region)}
                   </button>
                 ))}
               </Group>
@@ -204,7 +204,7 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
                         updateShare({ regions: on ? share.regions.filter((item) => item !== region) : [...share.regions, region] })
                       }
                     />
-                    <span>{regionLabel(lang, region)}</span>
+                    <span>{regionLabel(messages, region)}</span>
                   </label>
                 );
               })}

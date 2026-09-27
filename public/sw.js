@@ -1,5 +1,5 @@
 const BASE = "/ski-pass-map";
-const CACHE = "ski-pass-map-v3-__BUILD_ID__";
+const CACHE = "ski-pass-map-v4-__BUILD_ID__";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
@@ -25,6 +25,8 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
+  // Vector tiles, glyphs, and sprites stay online. The app shell is cached below.
+  if (isMapTileHost(url.hostname)) return;
   if (url.origin !== self.location.origin) return;
 
   if (url.pathname.endsWith("/sw.js")) {
@@ -123,6 +125,13 @@ function staticUrls(html) {
 
 function isHtml(response) {
   return (response.headers.get("content-type") || "").includes("text/html");
+}
+
+function isMapTileHost(hostname) {
+  if (hostname === "tiles.openfreemap.org" || hostname === "tiles.opensnowmap.org") return true;
+  if (hostname === "api.mapbox.com" || hostname === "events.mapbox.com") return true;
+  if (hostname === "tiles.mapbox.com" || hostname.endsWith(".tiles.mapbox.com")) return true;
+  return false;
 }
 
 function offlineDocument() {

@@ -5,8 +5,10 @@ function cssColor(value: string): string {
 }
 
 export interface PillOptions {
-  /** Short pass name, or a dash when the resort has no pass. Full names stay in the marker title. */
+  /** Short pass name when the resort has passes. Full names stay in the marker title. */
   label: string;
+  /** Grey dot only (no price pill) for no-pass resorts until high zoom or selection. */
+  dotOnly?: boolean;
   /** Resort, official pass names, and day-ticket price for the marker title and aria-label. */
   accessibleName?: string;
   colors: string[];
@@ -17,8 +19,12 @@ export interface PillOptions {
   noPass: boolean;
 }
 
-/** Leaflet HTML for a price pill. Text is escaped. Colour is paired with the price and the marker title. */
+/** HTML for a price pill. Text is escaped. Colour is paired with the price and the marker title. */
 export function pricePillHtml(options: PillOptions): string {
+  const accessible = escapeHtml(options.accessibleName ?? (options.selected ? options.name : options.label));
+  if (options.noPass && options.dotOnly) {
+    return `<span class="price-pill is-dot-only is-empty" aria-label="${accessible}" title="${escapeHtml(options.name)}"><span class="marker-dot" aria-hidden="true"></span><span class="pill-name pill-name-reveal">${escapeHtml(options.name)}</span></span>`;
+  }
   const colors = options.colors.slice(0, 3).map(cssColor);
   const extra = options.colors.length - colors.length;
   const dots = colors
@@ -37,7 +43,6 @@ export function pricePillHtml(options: PillOptions): string {
   ]
     .filter(Boolean)
     .join(" ");
-  const accessible = escapeHtml(options.accessibleName ?? (options.selected ? options.name : options.label));
   return `<span class="${classes}" aria-label="${accessible}">${hollow}${dots}${more}${visible}${name}${days}${options.selected ? `<span class="pill-tail"></span>` : ""}</span>`;
 }
 

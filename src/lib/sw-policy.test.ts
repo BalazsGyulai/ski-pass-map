@@ -5,7 +5,7 @@ const sw = readFileSync(new URL("../../public/sw.js", import.meta.url), "utf8");
 
 describe("service worker update policy", () => {
   it("versions the cache per build and drops the old fixed cache", () => {
-    expect(sw).toContain('const CACHE = "ski-pass-map-v3-__BUILD_ID__"');
+    expect(sw).toContain('const CACHE = "ski-pass-map-v4-__BUILD_ID__"');
     expect(sw).not.toContain('const CACHE = "ski-pass-map-v1"');
     expect(sw).toContain("keys.filter((key) => key !== CACHE)");
   });
@@ -16,6 +16,15 @@ describe("service worker update policy", () => {
     expect(sw).toContain('url.pathname.includes("/_next/static/")');
     expect(sw).toContain("cacheFirst");
     expect(sw).toContain("usableDocument");
+  });
+
+  it("leaves map tiles online and only caches the app shell", () => {
+    expect(sw).toContain("isMapTileHost");
+    expect(sw).toContain("tiles.openfreemap.org");
+    expect(sw).toContain("tiles.opensnowmap.org");
+    expect(sw).toContain("api.mapbox.com");
+    expect(sw).toContain(".tiles.mapbox.com");
+    expect(sw.indexOf("isMapTileHost(url.hostname)")).toBeLessThan(sw.indexOf("caches.open"));
   });
 
   it("takes control immediately so the previous worker cannot keep serving stale HTML", () => {

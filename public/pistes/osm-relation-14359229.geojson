@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Sinesfuierlift","aerialway":"rope_tow","osm":"way/581000068"},"geometry":{"type":"LineString","coordinates":[[10.53513,47.26681],[10.53802,47.26643]]}}]}

@@ -5,13 +5,13 @@ import dynamic from "next/dynamic";
 import { useApp } from "../AppState";
 
 /**
- * Map boundary. Part 4 swaps the Leaflet implementation imported here
- * for Mapbox, with an OpenFreeMap or MapLibre fallback. Callers should
- * depend on this component, not on Leaflet.
+ * Map boundary. The canvas is Mapbox GL when the token, consent, and load
+ * budget allow it, and MapLibre with OpenFreeMap otherwise. Callers should
+ * depend on this component, not on a map library.
  */
-const LeafletMap = dynamic(() => import("../MapView"), {
+const VectorMap = dynamic(() => import("../MapView"), {
   ssr: false,
-  loading: () => <MapSkeleton />,
+  loading: () => <MapLoading />,
 });
 
 class MapErrorBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
@@ -31,15 +31,16 @@ class MapErrorBoundary extends Component<{ fallback: ReactNode; children: ReactN
   }
 }
 
-function MapSkeleton() {
-  return <div className="map-skeleton" role="status" />;
+function MapLoading() {
+  const { t } = useApp();
+  return <div className="map-skeleton" role="status" aria-label={t("loadingMap")} />;
 }
 
 export function SkiMap() {
   const { t } = useApp();
   return (
     <MapErrorBoundary fallback={<div className="map-skeleton" role="alert">{t("mapError")}</div>}>
-      <LeafletMap />
+      <VectorMap />
     </MapErrorBoundary>
   );
 }

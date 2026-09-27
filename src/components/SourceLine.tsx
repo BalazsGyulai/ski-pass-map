@@ -1,7 +1,7 @@
 import { formatDate } from "@/lib/format";
 import type { MessageKey } from "@/lib/i18n";
 import type { FactRef } from "@/lib/schema";
-import type { Lang } from "@/lib/url-state";
+import type { Lang } from "@/i18n/languages";
 
 export function SourceLine({
   source,

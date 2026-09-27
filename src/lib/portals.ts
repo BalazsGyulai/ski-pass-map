@@ -19,7 +19,7 @@ export const FORBIDDEN_PORTAL_MARKERS = [
 ] as const;
 
 const portalUrl =
-  /https?:\/\/(?:www\.)?(?:skiresort\.(?:info|com|at|de|ch)|bergfex\.(?:at|com|de|ch|it)|onthesnow\.com|skiinfo\.[a-z.]+|snow-online\.com)[^"\\\s]*/gi;
+  /https?:\/\/(?:[a-z0-9-]+\.)*(?:skiresort\.(?:info|com|at|de|ch)|bergfex\.(?:at|com|de|ch|it)|onthesnow\.com|skiinfo\.[a-z.]+|snow-online\.com|snow-forecast\.(?:com|co\.uk))[^"\\\s]*/gi;
 
 export function portalMarkersIn(text: string): string[] {
   const lower = text.toLowerCase();

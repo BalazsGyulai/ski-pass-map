@@ -1,29 +1,39 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { SITE_NAME } from "@/lib/site";
+import { getMapConsent, setMapConsent } from "@/lib/map-consent";
+import { showDevTodo } from "@/lib/show-todo";
 import { BirthYearField } from "./BirthYearField";
 import { IconClose } from "./icons";
+import { LanguageSwitcher, useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 
-const mainLinks = [
-  { href: "/plan", key: "myPlanLink" as const },
-  { href: "/compare", key: "navCompare" as const },
-  { href: "/about", key: "navAboutSources" as const },
+export const mainLinks = [
+  { rest: "/plan", key: "myPlanLink" as const },
+  { rest: "/compare", key: "navCompare" as const },
+  { rest: "/about", key: "navAboutSources" as const },
 ];
 
-const legalLinks = [
-  { href: "/imprint", key: "imprint" as const },
-  { href: "/privacy", key: "privacy" as const },
-  { href: "/terms", key: "terms" as const },
-  { href: "/credits", key: "creditsTitle" as const },
-  { href: "/contact", key: "contact" as const },
-  { href: "/support", key: "supportSkimap" as const },
+export const legalLinks = [
+  { rest: "/imprint", key: "imprint" as const, todo: false },
+  { rest: "/privacy", key: "privacy" as const, todo: false },
+  { rest: "/terms", key: "terms" as const, todo: false },
+  { rest: "/resort-ranking", key: "rankingTitle" as const, todo: false },
+  { rest: "/credits", key: "creditsTitle" as const, todo: false },
+  { rest: "/contact", key: "contact" as const, todo: false },
+  { rest: "/support", key: "supportSkimap" as const, todo: false },
 ];
 
 export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t, share, updateShare, theme, setTheme } = useApp();
+  const { t, theme, setTheme, openCookieSettings, resetSupportReminders } = useApp();
+  const [mapConsent, setMapConsentLocal] = useState(false);
+
+  useEffect(() => {
+    if (open) setMapConsentLocal(getMapConsent());
+  }, [open]);
+  const href = useLocalizedPath();
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -45,20 +55,13 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         <p className="disclaimer">{t("globalDisclaimer")}</p>
         <nav className="drawer-nav" aria-label={t("menuTitle")}>
           {mainLinks.map((link) => (
-            <Link key={link.href} href={link.href} onClick={onClose}>
+            <Link key={link.rest} href={href(link.rest)} onClick={onClose}>
               {t(link.key)}
             </Link>
           ))}
         </nav>
         <div className="drawer-tools">
-          <div className="lang-toggle" role="group" aria-label={t("langLabel")}>
-            <button type="button" aria-pressed={share.lang === "en"} onClick={() => updateShare({ lang: "en" })}>
-              {t("langEn")}
-            </button>
-            <button type="button" aria-pressed={share.lang === "hu"} onClick={() => updateShare({ lang: "hu" })}>
-              {t("langHu")}
-            </button>
-          </div>
+          <LanguageSwitcher compact />
           <BirthYearField />
           <label className="field">
             <span>{t("theme")}</span>
@@ -68,11 +71,29 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               <option value="dark">{t("themeDark")}</option>
             </select>
           </label>
+          <label className="field row">
+            <input
+              type="checkbox"
+              checked={mapConsent}
+              onChange={(event) => {
+                setMapConsent(event.target.checked);
+                setMapConsentLocal(event.target.checked);
+              }}
+            />
+            <span>{t("consentMapCategory")}</span>
+          </label>
+          <button type="button" className="ghost" onClick={() => { openCookieSettings(); onClose(); }}>
+            {t("cookieSettings")}
+          </button>
+          <button type="button" className="ghost" onClick={() => resetSupportReminders()}>
+            {t("resetSupportReminders")}
+          </button>
         </div>
         <nav className="drawer-legal" aria-label={t("siteFooter")}>
           {legalLinks.map((link) => (
-            <Link key={link.href} href={link.href} onClick={onClose}>
-              {t(link.key)} <span className="todo-tag">{t("todoMark")}</span>
+            <Link key={link.rest} href={href(link.rest)} onClick={onClose}>
+              {t(link.key)}
+              {link.todo && showDevTodo() ? <span className="todo-tag">{t("todoMark")}</span> : null}
             </Link>
           ))}
         </nav>
@@ -80,5 +101,3 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     </div>
   );
 }
-
-export { legalLinks };

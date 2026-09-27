@@ -4,12 +4,17 @@ import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { boundsMoved, type MapBounds } from "@/lib/bounds";
 import { countActiveFilters } from "@/lib/filter";
-import { translate, type MessageKey } from "@/lib/i18n";
+import type { Lang } from "@/i18n/languages";
+import { isLang, persistLangChoice } from "@/i18n/languages";
+import { isMapPath } from "@/i18n/routing";
+import { translate, type MessageKey, type Messages } from "@/lib/i18n";
 import { cityPlaceId, sanitizeActivePlaceId, sanitizePlaces, type ReferenceCity, type SavedPlace } from "@/lib/places";
+import type { DistanceUnits, ExportedUserData } from "@/lib/storage";
 import { readStorage, writeStorage } from "@/lib/storage";
 import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
-import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type Lang, type ShareState } from "@/lib/url-state";
+import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type ShareState } from "@/lib/url-state";
+import { markFirstVisitDone, resetSupportReminders as clearSupportReminders } from "@/lib/support/storage";
 
 type ThemeChoice = "system" | "light" | "dark";
 
@@ -51,7 +56,10 @@ interface AppContextValue {
   locate: () => void;
   home: HomePoint | null;
   t: (key: MessageKey, vars?: Record<string, string | number>) => string;
+  messages: Messages;
   lang: Lang;
+  pathname: string;
+  search: string;
   ready: boolean;
   offline: boolean;
   copyMessage: string | null;
@@ -63,6 +71,19 @@ interface AppContextValue {
   searchAsMove: boolean;
   setSearchAsMove: (on: boolean) => void;
   mapApi: React.MutableRefObject<SkiMapApi>;
+  supportPromptSignal: number;
+  bumpSupportPrompt: () => void;
+  resetSupportReminders: () => void;
+  openCookieSettings: () => void;
+  distanceUnits: DistanceUnits;
+  setDistanceUnits: (units: DistanceUnits) => void;
+  pisteOverlayDefault: boolean;
+  setPisteOverlayDefault: (on: boolean) => void;
+  exportSavedData: () => boolean;
+  importSavedData: (json: string) => boolean;
+  clearAllSavedData: () => void;
+  toast: string | null;
+  showToast: (message: string) => void;
 }
 
 export interface SkiMapApi {
@@ -72,8 +93,9 @@ export interface SkiMapApi {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export function AppProvider({ lang, messages, children }: { lang: Lang; messages: Messages; children: React.ReactNode }) {
   const pathname = usePathname();
+  const [search, setSearch] = useState("");
   const [share, setShare] = useState<ShareState>(defaultShareState);
   const [theme, setTheme] = useState<ThemeChoice>("system");
   const [favourites, setFavourites] = useState<string[]>([]);
@@ -92,6 +114,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [areaBounds, setAreaBounds] = useState<MapBounds | null>(null);
   const [areaStale, setAreaStale] = useState(false);
   const [searchAsMove, setSearchAsMoveState] = useState(false);
+  const [distanceUnits, setDistanceUnitsState] = useState<DistanceUnits>("km");
+  const [pisteOverlayDefault, setPisteOverlayDefaultState] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const areaRef = useRef<MapBounds | null>(null);
   const liveRef = useRef<MapBounds | null>(null);
   const moveRef = useRef(false);
@@ -99,13 +124,41 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     zoomOut() {},
     fitAll() {},
   });
+  const [supportPromptSignal, setSupportPromptSignal] = useState(0);
+  const resortForPrompt = useRef<string | null>(null);
+
+  const bumpSupportPrompt = useCallback(() => {
+    setSupportPromptSignal((n) => n + 1);
+  }, []);
+
+  const resetSupportReminders = useCallback(() => {
+    if (typeof window !== "undefined") clearSupportReminders(window.localStorage);
+  }, []);
+
+  function openCookieSettings() {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("skimap-open-cookie-settings"));
+    }
+  }
+
+  useEffect(() => {
+    if (!ready) return;
+    const id = share.resort;
+    if (resortForPrompt.current && !id) {
+      markFirstVisitDone(window.localStorage);
+      bumpSupportPrompt();
+    }
+    resortForPrompt.current = id;
+  }, [share.resort, ready, bumpSupportPrompt]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const parsed = parseShareState(params);
     const stored = readStorage();
     if (stored) {
-      if (!params.has("lang") && (stored.lang === "en" || stored.lang === "hu")) parsed.lang = stored.lang;
+      if (stored.lang && isLang(stored.lang)) {
+        persistLangChoice(stored.lang);
+      }
       const savedPlaces = sanitizePlaces(stored.places);
       setPlaces(savedPlaces);
       setActivePlaceId(sanitizeActivePlaceId(stored.activePlaceId, savedPlaces));
@@ -120,22 +173,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         setResortDays(days);
       }
+      if (stored.distanceUnits === "km" || stored.distanceUnits === "mi") setDistanceUnitsState(stored.distanceUnits);
+      if (stored.pisteOverlayDefault) setPisteOverlayDefaultState(true);
     }
     const fromUrl = parsePlan(params.get("plan"));
     if (Object.keys(fromUrl).length > 0) setResortDays(fromUrl);
     const bought = params.get("on");
     if (bought && /^\d{4}-\d{2}-\d{2}$/.test(bought)) setPurchaseDate(bought);
     setToday(todayISO());
-    setShare(parsed);
+    const initialShare =
+      stored?.pisteOverlayDefault && !params.get("pistes") ? { ...parsed, showPistes: true } : parsed;
+    setShare(initialShare);
     setReady(true);
   }, []);
 
   useEffect(() => {
     if (!ready) return;
-    document.documentElement.lang = share.lang;
+    document.documentElement.lang = lang;
+    persistLangChoice(lang);
     if (theme === "system") delete document.documentElement.dataset.theme;
     else document.documentElement.dataset.theme = theme;
-  }, [ready, share.lang, theme]);
+  }, [ready, lang, theme]);
 
   useEffect(() => {
     if (!ready) return;
@@ -145,14 +203,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       birthYear,
       purchaseDate,
       resortDays,
-      lang: share.lang,
       places,
       activePlaceId,
-      version: 3,
+      distanceUnits,
+      pisteOverlayDefault,
+      version: 4,
     });
-  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, share.lang, places, activePlaceId]);
+  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault]);
 
-  const onMap = pathname === "/";
+  const onMap = isMapPath(pathname, lang);
   const pushedResort = useRef(false);
   const prevResort = useRef<string | null | undefined>(undefined);
   const rememberedBare = useRef<string | null>(null);
@@ -199,7 +258,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const qs = serializeShareState(share);
       next = qs ? `${path}?${qs}` : path;
     } else {
-      const params = shareableSearch(new URLSearchParams(window.location.search), share);
+      const params = shareableSearch(new URLSearchParams(window.location.search));
       const plan = serializePlan(resortDays);
       if (plan) params.set("plan", plan);
       else params.delete("plan");
@@ -247,6 +306,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     window.history.replaceState(null, "", step.url);
     if (!share.resort) rememberedBare.current = step.url;
+    setSearch(window.location.search.replace(/^\?/, ""));
   }, [ready, onMap, share, resortDays, purchaseDate]);
 
   useEffect(() => {
@@ -261,8 +321,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: MessageKey, vars?: Record<string, string | number>) => translate(share.lang, key, vars),
-    [share.lang],
+    (key: MessageKey, vars?: Record<string, string | number>) => translate(messages, key, vars),
+    [messages],
   );
   const home = useMemo(() => homePoint(places, activePlaceId), [places, activePlaceId]);
   const effectiveDate = purchaseDate ?? today;
@@ -304,8 +364,85 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setShare((current) => ({ ...current, resort: id, ...(id && narrow ? { view: "map" as const } : {}) }));
   }, []);
 
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast(null), 2000);
+  }, []);
+
   function toggleFavourite(id: string) {
-    setFavourites((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+    setFavourites((current) => {
+      const adding = !current.includes(id);
+      const next = adding ? [...current, id] : current.filter((item) => item !== id);
+      if (adding) showToast(translate(messages, "toastSaved"));
+      return next;
+    });
+  }
+
+  function setDistanceUnits(units: DistanceUnits) {
+    setDistanceUnitsState(units);
+  }
+
+  function setPisteOverlayDefault(on: boolean) {
+    setPisteOverlayDefaultState(on);
+  }
+
+  function exportSavedData(): boolean {
+    if (typeof window === "undefined") return false;
+    const payload: ExportedUserData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      favourites,
+      resortDays,
+      places,
+      activePlaceId,
+      birthYear,
+      purchaseDate,
+      theme,
+      distanceUnits,
+      pisteOverlayDefault,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "skimap-export.json";
+    anchor.click();
+    URL.revokeObjectURL(url);
+    return true;
+  }
+
+  function importSavedData(json: string): boolean {
+    try {
+      const parsed = JSON.parse(json) as Partial<ExportedUserData>;
+      if (!parsed || parsed.version !== 1) return false;
+      if (Array.isArray(parsed.favourites)) setFavourites(parsed.favourites.filter((id) => typeof id === "string"));
+      if (parsed.resortDays && typeof parsed.resortDays === "object") setResortDays(parsed.resortDays);
+      if (Array.isArray(parsed.places)) {
+        const savedPlaces = sanitizePlaces(parsed.places);
+        setPlaces(savedPlaces);
+        setActivePlaceId(sanitizeActivePlaceId(parsed.activePlaceId ?? null, savedPlaces));
+      }
+      if (typeof parsed.birthYear === "number" || parsed.birthYear === null) setBirthYearState(parsed.birthYear ?? null);
+      if (typeof parsed.purchaseDate === "string" || parsed.purchaseDate === null) setPurchaseDate(parsed.purchaseDate ?? null);
+      if (parsed.theme === "light" || parsed.theme === "dark" || parsed.theme === "system") setTheme(parsed.theme);
+      if (parsed.distanceUnits === "km" || parsed.distanceUnits === "mi") setDistanceUnitsState(parsed.distanceUnits);
+      if (typeof parsed.pisteOverlayDefault === "boolean") {
+        setPisteOverlayDefaultState(parsed.pisteOverlayDefault);
+        if (parsed.pisteOverlayDefault) setShare((current) => ({ ...current, showPistes: true }));
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function clearAllSavedData() {
+    setFavourites([]);
+    setResortDays({});
+    setPlaces([]);
+    setActivePlaceId(null);
+    setBirthYearState(null);
+    setPurchaseDate(null);
   }
 
   function setResortDaysCount(id: string, days: number) {
@@ -358,7 +495,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const id = `geo-${Date.now().toString(36)}`;
         const place: SavedPlace = {
           id,
-          label: translate(share.lang, "myLocation"),
+          label: translate(messages, "myLocation"),
           lat: position.coords.latitude,
           lon: position.coords.longitude,
           kind: "geo",
@@ -407,7 +544,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   function copyLink() {
     const url = shareableHref(window.location.href);
     const done = (ok: boolean) => {
-      setCopyMessage(translate(share.lang, ok ? "copied" : "copyFailed"));
+      setCopyMessage(translate(messages, ok ? "copied" : "copyFailed"));
       window.setTimeout(() => setCopyMessage(null), 2200);
     };
     if (navigator.clipboard?.writeText) {
@@ -449,7 +586,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     locate,
     home,
     t,
-    lang: share.lang,
+    messages,
+    lang,
+    pathname,
+    search,
     ready,
     offline,
     copyMessage,
@@ -461,6 +601,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     searchAsMove,
     setSearchAsMove,
     mapApi,
+    supportPromptSignal,
+    bumpSupportPrompt,
+    resetSupportReminders,
+    openCookieSettings,
+    distanceUnits,
+    setDistanceUnits,
+    pisteOverlayDefault,
+    setPisteOverlayDefault,
+    exportSavedData,
+    importSavedData,
+    clearAllSavedData,
+    toast,
+    showToast,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
