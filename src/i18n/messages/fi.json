@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap on ilmainen. Haluatko vähemmän muistutuksia?",
+  "supportPromptMapPerk": "Tukijat saavat myös tarkemman Mapbox-kartan.",
   "supportPromptKofi": "Tue meitä Ko-fissa",
   "supportPromptNotNow": "Ei nyt",
   "supportPromptRewarded": "Katso lyhyt mainos – ei muistutuksia 2 päivään",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox piirtää tarkemman kartan. Suostumuksellasi se on käytössä ensimmäisillä {n} käynnilläsi, sen jälkeen käytetään ilmaista OpenFreeMap-karttaa.",
+  "mapboxSupporterPerk": "Tukijat saavat Mapbox-kartan takaisin joksikin aikaa.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Mapbox-kartta on käytössä. Ilmaisia käyntejä tämän jälkeen: {n}.",
+  "mapAccessTrialLast": "Mapbox-kartta on käytössä viimeisellä ilmaisella käynnilläsi.",
+  "mapAccessSupporter": "Mapbox-kartta on käytössä {date} asti. Kiitos tuestasi!",
+  "mapAccessUsed": "Nyt ilmainen kartta: kaikki {n} ilmaista Mapbox-käyntiä on käytetty."
 }

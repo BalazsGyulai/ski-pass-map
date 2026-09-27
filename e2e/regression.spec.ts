@@ -9,8 +9,9 @@ import {
   shotPart10,
   shotPart10Viewport,
   waitForMapMarkers,
+  mapboxStubBuild,
 } from "./helpers";
-import { installMapStub, mapStubEnabled } from "./map-stub";
+import { installMapboxStub, installMapStub, mapStubEnabled } from "./map-stub";
 
 /** Obertauern: covered by two passes. */
 const MULTI_PASS_RESORT = "osm-relation-3165847";
@@ -19,6 +20,7 @@ test.describe.configure({ mode: "serial" });
 
 test.beforeEach(async ({ context }) => {
   if (mapStubEnabled()) await installMapStub(context);
+  await installMapboxStub(context);
 });
 
 test("language redirect and switcher (hu, en, de)", async ({ page, baseURL }) => {
@@ -296,6 +298,57 @@ test("support prompt rules", async ({ page, baseURL }) => {
   await page.waitForSelector('[data-testid="consent-banner"]');
   await expect(page.locator('[data-testid="support-prompt"]')).toHaveCount(0);
   expect(problems, problems.join("\n")).toEqual([]);
+});
+
+test.describe("Mapbox access", () => {
+  test.skip(!mapboxStubBuild(), "needs the e2e build with a stub Mapbox token");
+
+  test("three free visits after consent, then the free map, and supporters get it back", async ({ page, baseURL }) => {
+    const origin = originFromBase(baseURL);
+    const problems = attachOriginGuards(page, origin);
+    await page.addInitScript(() => {
+      localStorage.setItem("skimap-cookie-banner", "accepted");
+      localStorage.setItem("skimap-map-consent", "1");
+    });
+    await page.goto("/en/");
+    await expect(page.locator(".map-root")).toHaveAttribute("data-map-provider", "mapbox", { timeout: 30_000 });
+    expect(await waitForMapMarkers(page)).toBeGreaterThan(0);
+    // The piste data credit (OpenSkiMap, ODbL) shows on Mapbox too.
+    await expect(page.locator(".mapboxgl-ctrl-attrib")).toContainText("OpenSkiMap");
+    await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("skimap-mapbox-trial") ?? "{}").visits)).toBe(1);
+
+    // Two more visits later, the free visits are used up.
+    await page.evaluate(() => localStorage.setItem("skimap-mapbox-trial", JSON.stringify({ visits: 3, lastSeen: Date.now() - 3 * 60 * 60 * 1000 })));
+    await page.reload();
+    await expect(page.locator(".map-root")).toHaveAttribute("data-map-provider", "openfreemap", { timeout: 30_000 });
+    expect(await waitForMapMarkers(page)).toBeGreaterThan(0);
+
+    // Watching an ad (a two-day supporter period) brings Mapbox back.
+    await page.evaluate(() => localStorage.setItem("skimap-support-reward-until", String(Date.now() + 2 * 24 * 60 * 60 * 1000)));
+    await page.reload();
+    await expect(page.locator(".map-root")).toHaveAttribute("data-map-provider", "mapbox", { timeout: 30_000 });
+    expect(await waitForMapMarkers(page)).toBeGreaterThan(0);
+    expect(problems, problems.join("\n")).toEqual([]);
+  });
+
+  test("accepting in the cookie card switches to Mapbox at once", async ({ page }) => {
+    // A first-time visitor: clear the answer on the first page only, not on later navigations.
+    await page.addInitScript(() => {
+      if (sessionStorage.getItem("e2e-fresh")) return;
+      sessionStorage.setItem("e2e-fresh", "1");
+      localStorage.removeItem("skimap-cookie-banner");
+      localStorage.removeItem("skimap-map-consent");
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/en/");
+    await page.waitForSelector('[data-testid="consent-banner"]', { timeout: 20_000 });
+    await expect(page.locator(".map-root")).toHaveAttribute("data-map-provider", "openfreemap", { timeout: 30_000 });
+    await page.getByRole("button", { name: "Accept" }).click();
+    await expect(page.locator(".map-root")).toHaveAttribute("data-map-provider", "mapbox", { timeout: 30_000 });
+    expect(await waitForMapMarkers(page)).toBeGreaterThan(0);
+    await page.goto("/en/settings/");
+    await expect(page.getByText("Mapbox map is on. Free visits left after this one: 2.")).toBeVisible();
+  });
 });
 
 test("contact form with Turnstile test keys", async ({ page, baseURL }) => {

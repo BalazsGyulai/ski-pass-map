@@ -3,14 +3,19 @@ import type { MapProviderId } from "./map-styles";
 
 export type CounterOutcome = "mapbox" | "openfreemap" | "error" | "timeout" | "unreachable";
 
-/** Mapbox only when a token, consent, and a granted counter response are all present. */
+/**
+ * Mapbox only when a token, consent, access (free visits or a supporter period, see map-access)
+ * and a granted counter response are all present.
+ */
 export function selectMapProvider(input: {
   token: string | null | undefined;
   consented: boolean;
   counter: CounterOutcome;
+  allowed?: boolean;
 }): MapProviderId {
   if (!input.token?.trim()) return "openfreemap";
   if (!input.consented) return "openfreemap";
+  if (input.allowed === false) return "openfreemap";
   if (input.counter !== "mapbox") return "openfreemap";
   return "mapbox";
 }
@@ -65,6 +70,8 @@ export async function readCounter(options: {
 export async function resolveMapProvider(options?: {
   token?: string | null;
   consented?: boolean;
+  /** False once the free visits are used and no supporter period runs. Checked before counting a load. */
+  allowed?: boolean;
   endpoint?: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
@@ -73,14 +80,15 @@ export async function resolveMapProvider(options?: {
 }): Promise<MapProviderId> {
   const token = (options?.token !== undefined ? options.token : process.env.NEXT_PUBLIC_MAPBOX_TOKEN) ?? "";
   const consented = options?.consented ?? getMapConsent();
-  if (!token.trim() || !consented) return "openfreemap";
+  const allowed = options?.allowed ?? true;
+  if (!token.trim() || !consented || !allowed) return "openfreemap";
   if (!(options?.countLoads ?? shouldCountMapLoad())) return "mapbox";
   const counter = await readCounter({
     endpoint: options?.endpoint ?? mapLoadEndpoint(),
     timeoutMs: options?.timeoutMs ?? MAP_COUNTER_TIMEOUT_MS,
     fetchImpl: options?.fetchImpl,
   });
-  return selectMapProvider({ token, consented, counter });
+  return selectMapProvider({ token, consented, counter, allowed });
 }
 
 /** A Mapbox init failure falls back once. OpenFreeMap has nowhere else to go. */

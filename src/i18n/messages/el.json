@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Το Skimap είναι δωρεάν. Θέλετε λιγότερες υπενθυμίσεις;",
+  "supportPromptMapPerk": "Όσοι στηρίζουν το Skimap έχουν και τον πιο λεπτομερή χάρτη Mapbox.",
   "supportPromptKofi": "Στηρίξτε μας στο Ko-fi",
   "supportPromptNotNow": "Όχι τώρα",
   "supportPromptRewarded": "Δείτε μια σύντομη διαφήμιση – χωρίς υπενθυμίσεις για 2 ημέρες",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Το Mapbox σχεδιάζει πιο λεπτομερή χάρτη. Με τη συγκατάθεσή σας είναι ενεργός στις πρώτες {n} επισκέψεις· μετά χρησιμοποιείται ο δωρεάν χάρτης OpenFreeMap.",
+  "mapboxSupporterPerk": "Όσοι στηρίζουν το Skimap παίρνουν ξανά τον χάρτη Mapbox για λίγο.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Ο χάρτης Mapbox είναι ενεργός. Δωρεάν επισκέψεις μετά από αυτήν: {n}.",
+  "mapAccessTrialLast": "Ο χάρτης Mapbox είναι ενεργός στην τελευταία δωρεάν επίσκεψή σας.",
+  "mapAccessSupporter": "Ο χάρτης Mapbox είναι ενεργός έως {date}. Ευχαριστούμε για τη στήριξη!",
+  "mapAccessUsed": "Τώρα ο δωρεάν χάρτης: έχουν χρησιμοποιηθεί και οι {n} δωρεάν επισκέψεις με Mapbox."
 }

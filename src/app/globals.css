@@ -1084,7 +1084,12 @@ legend { padding: 0 4px; font-weight: 600; }
 .mapboxgl-ctrl-attrib:not(.mapboxgl-compact) {
   max-width: min(280px, 46vw);
 }
-.maplibregl-ctrl-attrib a, .mapboxgl-ctrl-attrib a { color: inherit; }
+/* The map libraries' own CSS loads after this file, so these need the extra .map-root to win. */
+.map-root :is(.maplibregl-ctrl-attrib, .mapboxgl-ctrl-attrib) a { color: inherit; }
+:root[data-theme="dark"] .map-root :is(.maplibregl-ctrl-attrib-button, .mapboxgl-ctrl-attrib-button) { filter: invert(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .map-root :is(.maplibregl-ctrl-attrib-button, .mapboxgl-ctrl-attrib-button) { filter: invert(1); }
+}
 .mapboxgl-ctrl-logo { margin: 0 0 4px 4px; }
 .piste-tip { pointer-events: none; }
 .map-root :is(.maplibregl-ctrl-group, .mapboxgl-ctrl-group) {
@@ -1806,11 +1811,10 @@ button.toggle-switch.is-on {
   background: color-mix(in srgb, #e5484d 12%, transparent);
 }
 .support-prompt-mark svg { width: 17px; height: 17px; }
+.support-prompt-copy { flex: 1; min-width: 0; padding-top: 6px; display: grid; gap: 2px; }
+.support-prompt-perk { margin: 0; font-size: var(--text-sm); color: var(--ink-2); line-height: 1.4; }
 .support-prompt-title {
-  flex: 1;
-  min-width: 0;
   margin: 0;
-  padding-top: 6px;
   font-size: var(--text-md);
   font-weight: 650;
   line-height: 1.35;

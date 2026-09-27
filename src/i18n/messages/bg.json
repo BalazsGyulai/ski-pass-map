@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap е безплатен. Искате по-малко напомняния?",
+  "supportPromptMapPerk": "Поддръжниците получават и по-подробната карта Mapbox.",
   "supportPromptKofi": "Подкрепете ни в Ko-fi",
   "supportPromptNotNow": "Не сега",
   "supportPromptRewarded": "Гледайте кратка реклама – без напомняния 2 дни",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox рисува по-подробна карта. С ваше съгласие тя е включена при първите {n} посещения, след това се използва безплатната карта OpenFreeMap.",
+  "mapboxSupporterPerk": "Поддръжниците получават картата Mapbox отново за известно време.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Картата Mapbox е включена. Безплатни посещения след това: {n}.",
+  "mapAccessTrialLast": "Картата Mapbox е включена при последното ви безплатно посещение.",
+  "mapAccessSupporter": "Картата Mapbox е включена до {date}. Благодарим за подкрепата!",
+  "mapAccessUsed": "Сега безплатната карта: всички {n} безплатни посещения с Mapbox са използвани."
 }

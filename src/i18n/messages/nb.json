@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap er gratis. Vil du ha færre påminnelser?",
+  "supportPromptMapPerk": "De som støtter Skimap, får også det mer detaljerte Mapbox-kartet.",
   "supportPromptKofi": "Støtt oss på Ko-fi",
   "supportPromptNotNow": "Ikke nå",
   "supportPromptRewarded": "Se en kort reklame – ingen påminnelser i 2 dager",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox tegner et mer detaljert kart. Med ditt samtykke er det på de første {n} besøkene; deretter brukes det gratis kartet fra OpenFreeMap.",
+  "mapboxSupporterPerk": "De som støtter Skimap, får Mapbox-kartet tilbake en stund.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Mapbox-kartet er på. Gratis besøk igjen etter dette: {n}.",
+  "mapAccessTrialLast": "Mapbox-kartet er på under ditt siste gratis besøk.",
+  "mapAccessSupporter": "Mapbox-kartet er på til {date}. Takk for støtten!",
+  "mapAccessUsed": "Nå gratiskartet: alle {n} gratis besøk med Mapbox er brukt."
 }

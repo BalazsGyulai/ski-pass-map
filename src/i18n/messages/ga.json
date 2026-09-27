@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Tá Skimap saor in aisce. Ar mhaith leat níos lú meabhrúchán?",
+  "supportPromptMapPerk": "Faigheann tacadóirí an léarscáil Mapbox níos mionsonraithe freisin.",
   "supportPromptKofi": "Tacaigh linn ar Ko-fi",
   "supportPromptNotNow": "Ní anois",
   "supportPromptRewarded": "Féach ar fhógra gearr – gan meabhrúchán ar feadh 2 lá",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Tarraingíonn Mapbox léarscáil níos mionsonraithe. Le do thoiliú bíonn sí ar siúl ar do chéad {n} chuairt; ina dhiaidh sin úsáidtear léarscáil saor in aisce OpenFreeMap.",
+  "mapboxSupporterPerk": "Faigheann tacadóirí léarscáil Mapbox ar ais ar feadh tamaill.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Tá léarscáil Mapbox ar siúl. Cuairteanna saor in aisce fágtha ina dhiaidh seo: {n}.",
+  "mapAccessTrialLast": "Tá léarscáil Mapbox ar siúl ar do chuairt dheireanach saor in aisce.",
+  "mapAccessSupporter": "Tá léarscáil Mapbox ar siúl go dtí {date}. Go raibh maith agat as do thacaíocht!",
+  "mapAccessUsed": "An léarscáil saor in aisce anois: tá na {n} chuairt saor in aisce le Mapbox úsáidte."
 }

@@ -471,6 +471,7 @@
   "resetSupportReminders": "Support-Erinnerungen zurücksetzen",
   "rankingTitle": "Sortierung der Skigebiete",
   "supportPromptHeadline": "Skimap ist kostenlos. Weniger Erinnerungen?",
+  "supportPromptMapPerk": "Unterstützer bekommen außerdem die detailliertere Mapbox-Karte.",
   "supportPromptKofi": "Auf Ko-fi unterstützen",
   "supportPromptNotNow": "Nicht jetzt",
   "supportPromptRewarded": "Kurze Anzeige – 2 Tage keine Erinnerungen",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox zeigt eine detailliertere Karte. Mit Ihrer Einwilligung ist sie bei den ersten {n} Besuchen aktiv, danach wird die freie OpenFreeMap-Karte verwendet.",
+  "mapboxSupporterPerk": "Unterstützer bekommen die Mapbox-Karte eine Zeit lang zurück.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Mapbox-Karte aktiv. Kostenlose Besuche danach: {n}.",
+  "mapAccessTrialLast": "Mapbox-Karte aktiv – letzter kostenloser Besuch.",
+  "mapAccessSupporter": "Mapbox-Karte aktiv bis {date}. Danke für Ihre Unterstützung!",
+  "mapAccessUsed": "Jetzt freie Karte: alle {n} kostenlosen Mapbox-Besuche sind verbraucht."
 }

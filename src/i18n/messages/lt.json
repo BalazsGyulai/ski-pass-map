@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap yra nemokamas. Norite mažiau priminimų?",
+  "supportPromptMapPerk": "Rėmėjai gauna ir išsamesnį „Mapbox“ žemėlapį.",
   "supportPromptKofi": "Paremkite mus Ko-fi",
   "supportPromptNotNow": "Ne dabar",
   "supportPromptRewarded": "Peržiūrėkite trumpą reklamą – 2 dienos be priminimų",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "„Mapbox“ piešia išsamesnį žemėlapį. Jums sutikus, jis įjungtas per pirmuosius {n} apsilankymus, vėliau naudojamas nemokamas „OpenFreeMap“ žemėlapis.",
+  "mapboxSupporterPerk": "Rėmėjai kuriam laikui atgauna „Mapbox“ žemėlapį.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "„Mapbox“ žemėlapis įjungtas. Nemokamų apsilankymų po šio: {n}.",
+  "mapAccessTrialLast": "„Mapbox“ žemėlapis įjungtas per paskutinį nemokamą apsilankymą.",
+  "mapAccessSupporter": "„Mapbox“ žemėlapis įjungtas iki {date}. Ačiū už paramą!",
+  "mapAccessUsed": "Dabar nemokamas žemėlapis: visi nemokami apsilankymai su „Mapbox“ ({n}) išnaudoti."
 }

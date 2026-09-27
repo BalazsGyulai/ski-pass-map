@@ -143,9 +143,12 @@ export function SupportPrompt({ signal }: { signal: number }) {
             <span className="support-prompt-mark" aria-hidden="true">
               <IconHeart />
             </span>
-            <p className="support-prompt-title" id="support-prompt-title">
-              {t("supportPromptHeadline")}
-            </p>
+            <div className="support-prompt-copy">
+              <p className="support-prompt-title" id="support-prompt-title">
+                {t("supportPromptHeadline")}
+              </p>
+              {process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim() ? <p className="support-prompt-perk">{t("supportPromptMapPerk")}</p> : null}
+            </div>
             <button type="button" className="icon-btn support-prompt-close" aria-label={t("supportPromptNotNow")} title={t("supportPromptNotNow")} onClick={close}>
               <IconClose />
             </button>

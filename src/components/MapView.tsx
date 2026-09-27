@@ -20,6 +20,8 @@ import {
 import { BASE_PATH } from "@/lib/site";
 import { OPENSNOWMAP_ATTRIBUTION, OPENSNOWMAP_TILES, mapAppearance, styleFor } from "@/lib/map-styles";
 import { providerAfterFailure, resolveMapProvider } from "@/lib/map-provider";
+import { mapboxAccess, recordMapboxUse, touchMapboxVisit } from "@/lib/map-access";
+import { onMapConsentChange } from "@/lib/map-consent";
 import type { MapAppearance, MapProviderId } from "@/lib/map-styles";
 import {
   PISTE_SOURCE_ID,
@@ -103,13 +105,25 @@ export default function MapView() {
   useEffect(() => {
     if (choice || offline) return;
     let cancelled = false;
-    void resolveMapProvider().then((next) => {
+    void resolveMapProvider({ allowed: mapboxAllowedNow() }).then((next) => {
       if (!cancelled) setChoice(next);
     });
     return () => {
       cancelled = true;
     };
   }, [choice, offline]);
+
+  // Saying yes (or no) to Mapbox applies right away, not on the next visit.
+  useEffect(
+    () =>
+      onMapConsentChange(() => {
+        void resolveMapProvider({ allowed: mapboxAllowedNow() }).then((next) => {
+          setOverride(null);
+          setChoice(next);
+        });
+      }),
+    [],
+  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -142,9 +156,20 @@ export default function MapView() {
           if (!cancelled && map) {
             attachMapProbe(map);
             compactMapAttribution(map.getContainer());
+            if (provider === "mapbox") withStorage((storage) => recordMapboxUse(storage));
             setReady(true);
           }
         });
+        if (provider === "mapbox") {
+          // Using the map keeps the visit open, so a long session is one visit.
+          let touched = 0;
+          map.on("moveend", () => {
+            const now = Date.now();
+            if (now - touched < 60_000) return;
+            touched = now;
+            withStorage((storage) => touchMapboxVisit(storage, now));
+          });
+        }
       } catch (error) {
         console.error("Map failed to start", error);
         fail();
@@ -523,6 +548,23 @@ export default function MapView() {
       ) : null}
     </div>
   );
+}
+
+function withStorage(run: (storage: Storage) => void): void {
+  try {
+    run(window.localStorage);
+  } catch {
+    // Storage blocked (private mode): the visit just is not remembered.
+  }
+}
+
+/** Free visits left or a supporter period running. Blocked storage counts as a first visit. */
+function mapboxAllowedNow(): boolean {
+  try {
+    return mapboxAccess(window.localStorage).allowed;
+  } catch {
+    return true;
+  }
 }
 
 function compactMapAttribution(container: HTMLElement): void {

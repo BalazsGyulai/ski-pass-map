@@ -156,7 +156,9 @@ export function createSqlStore(executor: SqlExecutor): MapLoadStore {
 
 export function createD1Store(db: D1Like): MapLoadStore {
   return createSqlStore({
-    exec: (sql) => db.exec(sql).then(() => undefined),
+    // D1's exec() runs every line as a separate statement, so a multi-line CREATE TABLE fails and
+    // every load answered 503 (the free map). One line per statement.
+    exec: (sql) => db.exec(sql.replace(/\s+/g, " ").trim()).then(() => undefined),
     run: async (sql, args) => {
       await db.prepare(sql).bind(...args).first();
     },

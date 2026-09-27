@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap est gratuit. Moins de rappels ?",
+  "supportPromptMapPerk": "Les soutiens profitent aussi de la carte Mapbox, plus détaillée.",
   "supportPromptKofi": "Soutenir sur Ko-fi",
   "supportPromptNotNow": "Pas maintenant",
   "supportPromptRewarded": "Regarder une courte pub – pas de rappel pendant 2 jours",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox affiche une carte plus détaillée. Avec votre consentement, elle est active lors de vos {n} premières visites ; ensuite, la carte gratuite OpenFreeMap est utilisée.",
+  "mapboxSupporterPerk": "Les soutiens retrouvent la carte Mapbox pendant un temps.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Carte Mapbox activée. Visites gratuites restantes après celle-ci : {n}.",
+  "mapAccessTrialLast": "Carte Mapbox activée pour votre dernière visite gratuite.",
+  "mapAccessSupporter": "Carte Mapbox activée jusqu'au {date}. Merci pour votre soutien !",
+  "mapAccessUsed": "Carte gratuite désormais : vos {n} visites Mapbox gratuites sont utilisées."
 }

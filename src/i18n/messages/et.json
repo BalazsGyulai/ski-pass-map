@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap on tasuta. Kas soovid vähem meeldetuletusi?",
+  "supportPromptMapPerk": "Toetajad saavad ka üksikasjalikuma Mapboxi kaardi.",
   "supportPromptKofi": "Toeta meid Ko-fis",
   "supportPromptNotNow": "Mitte praegu",
   "supportPromptRewarded": "Vaata lühikest reklaami – 2 päeva ilma meeldetuletusteta",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox joonistab üksikasjalikuma kaardi. Sinu nõusolekul on see sees esimesel {n} külastusel, seejärel kasutatakse tasuta OpenFreeMapi kaarti.",
+  "mapboxSupporterPerk": "Toetajad saavad Mapboxi kaardi mõneks ajaks tagasi.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Mapboxi kaart on sees. Tasuta külastusi pärast seda: {n}.",
+  "mapAccessTrialLast": "Mapboxi kaart on sees sinu viimasel tasuta külastusel.",
+  "mapAccessSupporter": "Mapboxi kaart on sees kuni {date}. Aitäh toetuse eest!",
+  "mapAccessUsed": "Nüüd tasuta kaart: kõik {n} tasuta Mapboxi külastust on kasutatud."
 }

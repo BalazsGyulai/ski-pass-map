@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap je zdarma. Chcete méně připomínek?",
+  "supportPromptMapPerk": "Podporovatelé mají také podrobnější mapu Mapbox.",
   "supportPromptKofi": "Podpořit na Ko-fi",
   "supportPromptNotNow": "Teď ne",
   "supportPromptRewarded": "Krátká reklama – 2 dny bez připomínek",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox kreslí podrobnější mapu. S vaším souhlasem je zapnutá při prvních {n} návštěvách, potom se použije bezplatná mapa OpenFreeMap.",
+  "mapboxSupporterPerk": "Podporovatelé dostanou mapu Mapbox na čas zpět.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Mapa Mapbox je zapnutá. Bezplatné návštěvy po této: {n}.",
+  "mapAccessTrialLast": "Mapa Mapbox je zapnutá při vaší poslední bezplatné návštěvě.",
+  "mapAccessSupporter": "Mapa Mapbox je zapnutá do {date}. Děkujeme za podporu!",
+  "mapAccessUsed": "Teď bezplatná mapa: všechny bezplatné návštěvy s Mapboxem ({n}) jsou vyčerpané."
 }

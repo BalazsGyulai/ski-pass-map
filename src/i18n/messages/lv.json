@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap ir bezmaksas. Vēlaties mazāk atgādinājumu?",
+  "supportPromptMapPerk": "Atbalstītāji saņem arī detalizētāko Mapbox karti.",
   "supportPromptKofi": "Atbalstiet mūs Ko-fi",
   "supportPromptNotNow": "Ne tagad",
   "supportPromptRewarded": "Noskatieties īsu reklāmu – 2 dienas bez atgādinājumiem",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox zīmē detalizētāku karti. Ar jūsu piekrišanu tā ir ieslēgta pirmajos {n} apmeklējumos, pēc tam tiek izmantota bezmaksas OpenFreeMap karte.",
+  "mapboxSupporterPerk": "Atbalstītāji uz laiku atgūst Mapbox karti.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Mapbox karte ir ieslēgta. Bezmaksas apmeklējumi pēc šī: {n}.",
+  "mapAccessTrialLast": "Mapbox karte ir ieslēgta jūsu pēdējā bezmaksas apmeklējumā.",
+  "mapAccessSupporter": "Mapbox karte ir ieslēgta līdz {date}. Paldies par atbalstu!",
+  "mapAccessUsed": "Tagad bezmaksas karte: visi bezmaksas Mapbox apmeklējumi ({n}) ir izmantoti."
 }

@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap huwa b'xejn. Trid inqas tfakkiriet?",
+  "supportPromptMapPerk": "Is-sostenituri jieħdu wkoll il-mappa ta' Mapbox, aktar dettaljata.",
   "supportPromptKofi": "Appoġġjana fuq Ko-fi",
   "supportPromptNotNow": "Mhux issa",
   "supportPromptRewarded": "Ara reklam qasir – l-ebda tfakkira għal jumejn",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox tpinġi mappa aktar dettaljata. Bil-kunsens tiegħek tkun mixgħula fl-ewwel {n} żjarat; wara tintuża l-mappa b'xejn ta' OpenFreeMap.",
+  "mapboxSupporterPerk": "Is-sostenituri jieħdu lura l-mappa ta' Mapbox għal xi żmien.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Il-mappa ta' Mapbox mixgħula. Żjarat b'xejn li fadal wara din: {n}.",
+  "mapAccessTrialLast": "Il-mappa ta' Mapbox mixgħula fl-aħħar żjara b'xejn tiegħek.",
+  "mapAccessSupporter": "Il-mappa ta' Mapbox mixgħula sa {date}. Grazzi tal-appoġġ!",
+  "mapAccessUsed": "Issa l-mappa b'xejn: intużaw iż-żjarat b'xejn kollha b'Mapbox ({n})."
 }

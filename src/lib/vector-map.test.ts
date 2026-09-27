@@ -56,10 +56,10 @@ describe("vector map init", () => {
     expect(maps[0].options.accessToken).toBe("pk.dummy");
     expect(maps[0].options.style).toBe(MAPBOX_STYLE_LIGHT);
     expect(maps[0].options.logoPosition).toBe("bottom-left");
-    expect(maps[0].options.attributionControl).toMatchObject({ compact: true });
-    const attribution = maps[0].options.attributionControl as { customAttribution?: unknown };
-    expect(String(attribution.customAttribution)).toContain("openskimap.org");
-    expect(String(attribution.customAttribution)).toContain("openstreetmap.org/copyright");
+    // Mapbox GL reads a boolean control flag and a top-level customAttribution (an object is ignored).
+    expect(maps[0].options.attributionControl).toBe(true);
+    expect(String(maps[0].options.customAttribution)).toContain("openskimap.org");
+    expect(String(maps[0].options.customAttribution)).toContain("openstreetmap.org/copyright");
     expect(JSON.stringify(maps[0].options)).not.toMatch(/pk\.ey/);
     expect(maps[0].options.center).toEqual([13.35, 47.5]);
 

@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap este gratuit. Doriți mai puține mementouri?",
+  "supportPromptMapPerk": "Susținătorii primesc și harta Mapbox, mai detaliată.",
   "supportPromptKofi": "Susțineți-ne pe Ko-fi",
   "supportPromptNotNow": "Nu acum",
   "supportPromptRewarded": "Vizionați o reclamă scurtă – fără mementouri 2 zile",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox desenează o hartă mai detaliată. Cu acordul dvs., este activă la primele {n} vizite; apoi se folosește harta gratuită OpenFreeMap.",
+  "mapboxSupporterPerk": "Susținătorii primesc din nou harta Mapbox pentru o vreme.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Harta Mapbox este activă. Vizite gratuite rămase după aceasta: {n}.",
+  "mapAccessTrialLast": "Harta Mapbox este activă la ultima dvs. vizită gratuită.",
+  "mapAccessSupporter": "Harta Mapbox este activă până la {date}. Mulțumim pentru sprijin!",
+  "mapAccessUsed": "Acum harta gratuită: toate cele {n} vizite gratuite cu Mapbox au fost folosite."
 }

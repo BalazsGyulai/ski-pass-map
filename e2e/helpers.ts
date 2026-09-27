@@ -57,12 +57,24 @@ export async function shotPart10Viewport(page: Page, name: string): Promise<void
   await shotPart10(page, name, { fullPage: false });
 }
 
+/**
+ * Answers the cookie banner before the page loads. An accepting visitor here has already used their
+ * free Mapbox visits, so the suite stays on the free map (and spends no map loads); the Mapbox
+ * tests set up their own visitor.
+ */
 export async function dismissConsent(page: Page, choice: "accepted" | "rejected"): Promise<void> {
   await page.addInitScript((c) => {
     localStorage.setItem("skimap-cookie-banner", c);
-    if (c === "accepted") localStorage.setItem("skimap-map-consent", "1");
-    else localStorage.setItem("skimap-map-consent", "0");
+    if (c === "accepted") {
+      localStorage.setItem("skimap-map-consent", "1");
+      localStorage.setItem("skimap-mapbox-trial", JSON.stringify({ visits: 99, lastSeen: 1 }));
+    } else localStorage.setItem("skimap-map-consent", "0");
   }, choice);
+}
+
+/** The e2e build carries a stub Mapbox token only when the runner says so (see scripts/run-e2e.mjs). */
+export function mapboxStubBuild(): boolean {
+  return process.env.E2E_MAPBOX_STUB_TOKEN === "1";
 }
 
 /** Resort dots and clusters are map layers. Requires NEXT_PUBLIC_MAP_CANVAS_PROBE=1 at build time. */
@@ -83,7 +95,7 @@ export async function countRenderedResorts(page: Page): Promise<number> {
 }
 
 export async function waitForMapMarkers(page: Page): Promise<number> {
-  await page.waitForSelector(".maplibregl-canvas", { timeout: 45_000 });
+  await page.waitForSelector(".maplibregl-canvas, .mapboxgl-canvas", { timeout: 45_000 });
   for (let i = 0; i < 40; i++) {
     const n = await countRenderedResorts(page);
     if (n > 0) return n;
@@ -94,7 +106,7 @@ export async function waitForMapMarkers(page: Page): Promise<number> {
 
 /** Requires NEXT_PUBLIC_MAP_CANVAS_PROBE=1 at build time (preserveDrawingBuffer). */
 export async function assertMapCanvasNotFlat(page: Page, label: string): Promise<void> {
-  await page.waitForSelector(".maplibregl-canvas", { timeout: 45_000 });
+  await page.waitForSelector(".maplibregl-canvas, .mapboxgl-canvas", { timeout: 45_000 });
   await page.waitForFunction(() => typeof window.__skiMapCanvasVariance === "function", { timeout: 45_000 });
   await page.evaluate(async () => {
     const map = window.__skiMapProbe;

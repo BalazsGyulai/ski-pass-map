@@ -471,6 +471,7 @@
   "resetSupportReminders": "Reset support reminders",
   "rankingTitle": "How resorts are ordered",
   "supportPromptHeadline": "Skimap je besplatan. Želite manje podsjetnika?",
+  "supportPromptMapPerk": "Podržavatelji dobivaju i detaljniju kartu Mapbox.",
   "supportPromptKofi": "Podržite nas na Ko-fiju",
   "supportPromptNotNow": "Ne sada",
   "supportPromptRewarded": "Pogledajte kratki oglas – 2 dana bez podsjetnika",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "Mapbox crta detaljniju kartu. Uz vaš pristanak uključena je tijekom prvih {n} posjeta, a zatim se koristi besplatna karta OpenFreeMap.",
+  "mapboxSupporterPerk": "Podržavatelji na neko vrijeme ponovno dobivaju kartu Mapbox.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "Karta Mapbox je uključena. Besplatni posjeti nakon ovoga: {n}.",
+  "mapAccessTrialLast": "Karta Mapbox je uključena za vaš posljednji besplatni posjet.",
+  "mapAccessSupporter": "Karta Mapbox je uključena do {date}. Hvala na podršci!",
+  "mapAccessUsed": "Sada besplatna karta: svi besplatni posjeti s Mapboxom ({n}) su iskorišteni."
 }

@@ -155,11 +155,14 @@ export function createVectorMap(lib: MapLib, options: CreateMapOptions): VectorM
     fadeDuration: options.reducedMotion ? 0 : 300,
     failIfMajorPerformanceCaveat: false,
     preserveDrawingBuffer: probe,
+    // Mapbox GL takes a boolean attributionControl and a top-level customAttribution; MapLibre
+    // takes the options object. Either way the OpenSkiMap / ODbL credit must show.
     ...(options.provider === "mapbox"
       ? {
           accessToken: token,
           logoPosition: "bottom-left",
-          attributionControl: { compact: true, customAttribution },
+          attributionControl: true,
+          customAttribution,
         }
       : { attributionControl: { compact: true, customAttribution } }),
   });

@@ -471,6 +471,7 @@
   "resetSupportReminders": "Támogatási emlékeztetők törlése",
   "rankingTitle": "Hogyan soroljuk a síterepeket",
   "supportPromptHeadline": "A Skimap ingyenes. Kevesebb emlékeztetőt szeretne?",
+  "supportPromptMapPerk": "A támogatók a részletesebb Mapbox térképet is megkapják.",
   "supportPromptKofi": "Támogatás Ko-fión",
   "supportPromptNotNow": "Most nem",
   "supportPromptRewarded": "Rövid reklám – 2 napig nincs emlékeztető",
@@ -517,9 +518,14 @@
   "unitsKm": "Kilometres",
   "unitsLabel": "Distance units",
   "unitsMi": "Miles",
-  "mapboxMapHelper": "Uses Mapbox when a token is configured and you consent; otherwise the free OpenFreeMap map is used.",
+  "mapboxMapHelper": "A Mapbox részletesebb térképet rajzol. Hozzájárulással az első {n} látogatáskor aktív, utána az ingyenes OpenFreeMap térkép jelenik meg.",
+  "mapboxSupporterPerk": "A támogatók egy időre visszakapják a Mapbox térképet.",
   "mapboxMapLabel": "Mapbox map",
   "mapProviderNowFreeConsentOff": "Now showing: free map (consent off)",
   "mapProviderNowFreeNoToken": "Now showing: free map (no Mapbox token)",
-  "mapProviderNowMapbox": "Now showing: Mapbox"
+  "mapProviderNowMapbox": "Now showing: Mapbox",
+  "mapAccessTrial": "A Mapbox térkép be van kapcsolva. Ezután még ennyi ingyenes látogatás: {n}.",
+  "mapAccessTrialLast": "A Mapbox térkép be van kapcsolva – ez az utolsó ingyenes látogatás.",
+  "mapAccessSupporter": "A Mapbox térkép eddig aktív: {date}. Köszönjük a támogatást!",
+  "mapAccessUsed": "Most az ingyenes térkép látszik: mind a {n} ingyenes Mapbox-látogatás elfogyott."
 }
