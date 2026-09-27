@@ -15,9 +15,6 @@ database_name = "skimap-app"
 database_id = "e9738dac-1112-4930-9cf9-15aee3f0c7ef"
 migrations_dir = "migrations"
 
-# Enable on the Pages project (Workers AI for admin source checker).
-[ai]
-binding = "AI"
 
 [vars]
 NEXT_PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAAFE_gQPZQBi9Ea5I"

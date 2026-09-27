@@ -180,6 +180,25 @@ test("links from other pages open the map on the right resort", async ({ page, b
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
+test("plan: days added on the map drive the answer pill and My plan", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await page.getByRole("button", { name: "Add to plan" }).click();
+  for (let i = 0; i < 9; i++) await page.getByRole("button", { name: "More days" }).click();
+  const pill = page.locator(".plan-pill");
+  await expect(pill.locator(".plan-pill-days")).toHaveText("10");
+  await expect(pill.locator("strong")).toContainText("€");
+  await pill.click();
+  await expect(page).toHaveURL(/\/en\/plan\//);
+  await expect(page.locator(".best-card h3")).not.toBeEmpty();
+  await expect(page.locator(".best-card .price-display")).toContainText("€");
+  await expect(page.locator(".plan-list li")).toHaveCount(1);
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
 test("planner, compare, birth-year prices, favourites persistence", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);
@@ -420,6 +439,26 @@ test.describe("phone bottom sheet", () => {
     await drag(".resort-card .resort-head", 700);
     await expect(page.locator("#resort-title")).toHaveCount(0, { timeout: 10_000 });
     await expect(page).not.toHaveURL(/resort=/);
+    expect(problems, problems.join("\n")).toEqual([]);
+  });
+
+  test("the plan answer sits above the sheet, not under it", async ({ page, baseURL }) => {
+    const origin = originFromBase(baseURL);
+    const problems = attachOriginGuards(page, origin);
+    await dismissConsent(page, "rejected");
+    await page.goto(`/en/?plan=${encodeURIComponent(`${MULTI_PASS_RESORT}:5`)}`);
+    const pill = page.locator(".plan-pill");
+    await expect(pill).toBeVisible();
+    await expect(page.locator(".list-sheet")).toHaveAttribute("style", /transform/);
+    await expect
+      .poll(async () => {
+        const pillBox = await pill.boundingBox();
+        const sheetBox = await page.locator(".list-sheet").boundingBox();
+        if (!pillBox || !sheetBox) return Number.NaN;
+        // boundingBox already includes the sheet's transform.
+        return sheetBox.y - (pillBox.y + pillBox.height);
+      })
+      .toBeGreaterThan(0);
     expect(problems, problems.join("\n")).toEqual([]);
   });
 });

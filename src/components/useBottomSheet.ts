@@ -23,6 +23,8 @@ export function useBottomSheet(options: {
   const ref = useRef<HTMLElement | null>(null);
   const narrow = useNarrow();
   const [available, setAvailable] = useState<number | null>(null);
+  /** Space under the sheet host (the tab bar). The map runs underneath it. */
+  const [bottomInset, setBottomInset] = useState(0);
   const metrics = narrow && available ? sheetMetrics(kind, available) : null;
   const visible = metrics ? metrics[snap] : null;
 
@@ -34,8 +36,11 @@ export function useBottomSheet(options: {
     const explorer = el.closest(".explorer");
     const measure = () => {
       if (!host || !explorer) return;
-      const space = host.getBoundingClientRect().bottom - explorer.getBoundingClientRect().top;
+      const hostRect = host.getBoundingClientRect();
+      const frame = explorer.getBoundingClientRect();
+      const space = hostRect.bottom - frame.top;
       if (space > 0) setAvailable(Math.round(space));
+      setBottomInset(Math.max(0, Math.round(frame.bottom - hostRect.bottom)));
     };
     measure();
     // Layout can settle after the first paint (fonts, a reload from the service worker, the
@@ -51,7 +56,8 @@ export function useBottomSheet(options: {
     };
   }, [narrow]);
 
-  // Other parts of the page (the map camera, the plan pill) follow the settled height.
+  // Other parts of the page (the map camera, the plan pill) follow the settled height, measured
+  // from the bottom of the map, which runs under the tab bar.
   useEffect(() => {
     const root = document.documentElement;
     if (!narrow || visible == null) {
@@ -59,10 +65,11 @@ export function useBottomSheet(options: {
       delete root.dataset.sheetPx;
       return;
     }
-    root.style.setProperty("--sheet-visible", `${visible}px`);
-    root.dataset.sheetPx = String(visible);
-    window.dispatchEvent(new CustomEvent(SHEET_EVENT, { detail: { visible } }));
-  }, [narrow, visible]);
+    const covered = visible + bottomInset;
+    root.style.setProperty("--sheet-visible", `${covered}px`);
+    root.dataset.sheetPx = String(covered);
+    window.dispatchEvent(new CustomEvent(SHEET_EVENT, { detail: { visible: covered } }));
+  }, [narrow, visible, bottomInset]);
 
   useEffect(
     () => () => {
