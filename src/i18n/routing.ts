@@ -5,6 +5,8 @@ import { isLang } from "./languages";
 const PAGE_SUFFIXES = [
   "",
   "plan",
+  "saved",
+  "settings",
   "compare",
   "about",
   "credits",
@@ -44,6 +46,15 @@ export function pathWithLang(lang: Lang, rest: string): string {
 export function isMapPath(pathname: string, lang: Lang): boolean {
   const { lang: parsed, rest } = parseLangPath(pathname);
   return parsed === lang && (rest === "/" || rest === "");
+}
+
+const TAB_REST = new Set(["/", "/plan", "/saved", "/settings"]);
+
+export function isTabShellPath(pathname: string, lang: Lang): boolean {
+  const { lang: parsed, rest } = parseLangPath(pathname);
+  if (parsed !== lang) return false;
+  const normalized = rest.endsWith("/") && rest.length > 1 ? rest.replace(/\/+$/, "") : rest;
+  return TAB_REST.has(normalized === "" ? "/" : normalized);
 }
 
 export function switchLangHref(pathname: string, search: string, nextLang: Lang): string {

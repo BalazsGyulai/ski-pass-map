@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { mapFitPadding } from "./map-padding";
 
 describe("mapFitPadding", () => {
-  it("reserves the desktop dock on the left and only a gutter on the right", () => {
+  it("keeps horizontal gutter symmetric on desktop because the dock is outside the canvas", () => {
     const padding = mapFitPadding({ narrow: false, sheet: "half", height: 800 });
-    expect(padding.paddingTopLeft[0]).toBe(420);
+    expect(padding.paddingTopLeft[0]).toBe(28);
     expect(padding.paddingBottomRight[0]).toBe(28);
   });
 
