@@ -764,9 +764,15 @@ legend { padding: 0 4px; font-weight: 650; }
   color: #334155;
 }
 .map-root :is(.maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-right) {
-  right: 0;
-  bottom: 8px !important;
+  position: absolute;
+  right: 0 !important;
+  bottom: 0 !important;
   top: auto !important;
+  z-index: 2;
+}
+.map-root :is(.maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-right) .maplibregl-ctrl-attrib,
+.map-root :is(.maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-right) .mapboxgl-ctrl-attrib {
+  float: none;
 }
 .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib,
 .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-attrib {

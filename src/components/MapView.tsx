@@ -159,7 +159,7 @@ export default function MapView() {
         const covered = resort.passes.map((id) => passById.get(id)).filter((pass) => pass != null);
         const shorts = covered.map((pass) => passShortName(pass));
         const fullNames = covered.map((pass) => pass.name);
-        const noPass = resort.passes.length === 0;
+        const noPass = resort.passes.length === 0 || shorts.length === 0;
         const dotOnly = noPass && !selected && zoom < 11;
         const label = noPass
           ? dotOnly
