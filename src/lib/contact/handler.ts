@@ -1,6 +1,7 @@
 import { autoFlagContact, createAppStore, type AppStore } from "@/lib/db/app-store";
 import { createSqlExecutor, type D1Like } from "@/lib/db/types";
 import { originAllowed, parseOrigins, jsonResponse, readJsonBody } from "@/lib/http-json";
+import { clientIpFromRequest } from "@/lib/client-ip";
 import { hashIp, saltFromEnv } from "@/lib/ip-hash";
 import { checkContactRateLimits } from "./rate-limit";
 import { normalizeContactBody } from "./validation";
@@ -43,7 +44,7 @@ export async function handleContactPost(
   if (!raw) return jsonResponse({ ok: false, error: "invalid_json" }, 400);
   const body = normalizeContactBody(raw);
   if (!body.ok) return jsonResponse({ ok: false, error: "validation", message: body.error }, 400);
-  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
+  const ip = clientIpFromRequest(request, "unknown");
   const rate = await checkContactRateLimits(store, env, ip, nowMs);
   if (!rate.allowed) {
     return jsonResponse({ ok: false, error: "rate_limited" }, 429);

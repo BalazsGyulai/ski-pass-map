@@ -1,4 +1,5 @@
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
+import { adminDevBypassAllowed } from "@/lib/dev-bypass";
 
 export interface AdminAuthEnv {
   ACCESS_AUD?: string;
@@ -31,12 +32,12 @@ export function parseAdminEmails(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
-export function devBypassActive(env: AdminAuthEnv): boolean {
-  return env.ADMIN_DEV_BYPASS === "1" && env.NODE_ENV !== "production";
+export function devBypassActive(request: Request, env: AdminAuthEnv): boolean {
+  return adminDevBypassAllowed(request, env);
 }
 
 export async function verifyAdminRequest(request: Request, env: AdminAuthEnv): Promise<AdminIdentity | null> {
-  if (devBypassActive(env)) {
+  if (devBypassActive(request, env)) {
     const headerEmail = request.headers.get("x-admin-dev-email")?.trim().toLowerCase();
     const emails = parseAdminEmails(env.ADMIN_EMAILS);
     const email = headerEmail && emails.includes(headerEmail) ? headerEmail : emails[0];

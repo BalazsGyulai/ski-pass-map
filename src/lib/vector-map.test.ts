@@ -56,9 +56,9 @@ describe("vector map init", () => {
     expect(maps[0].options.accessToken).toBe("pk.dummy");
     expect(maps[0].options.style).toBe(MAPBOX_STYLE_LIGHT);
     expect(maps[0].options.logoPosition).toBe("bottom-left");
-    expect(maps[0].options.attributionControl).toBe(true);
-    expect(String(maps[0].options.customAttribution)).toContain("openskimap.org");
-    expect(String(maps[0].options.customAttribution)).toContain("openstreetmap.org/copyright");
+    expect(maps[0].options.attributionControl).toMatchObject({ compact: true });
+    expect(String(maps[0].options.attributionControl.customAttribution)).toContain("openskimap.org");
+    expect(String(maps[0].options.attributionControl.customAttribution)).toContain("openstreetmap.org/copyright");
     expect(JSON.stringify(maps[0].options)).not.toMatch(/pk\.ey/);
     expect(maps[0].options.center).toEqual([13.35, 47.5]);
 
@@ -89,6 +89,7 @@ describe("vector map init", () => {
     expect(lib.accessToken).toBe("");
     expect(maps[0].options.style).toBe(OPENFREEMAP_STYLE_LIGHT);
     expect(maps[0].options.accessToken).toBeUndefined();
+    expect(JSON.stringify(maps[0].options.attributionControl)).toContain("compact");
     expect(JSON.stringify(maps[0].options.attributionControl)).toContain("maplibre.org");
     expect(JSON.stringify(maps[0].options.attributionControl)).toContain("openskimap.org");
     maps[0].listeners.error[0]({ error: { status: 401, message: "Unauthorized" } });

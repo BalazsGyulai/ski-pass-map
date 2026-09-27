@@ -17,6 +17,7 @@ import type { FactRef, Resort } from "@/lib/schema";
 import type { Lang } from "@/i18n/languages";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
+import { AffiliateLinksBlock } from "./AffiliateLinks";
 
 export function ResortDetail() {
   const {
@@ -40,10 +41,12 @@ export function ResortDetail() {
   const closeRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
   const [snap, setSnap] = useState<SheetSnap>("half");
+  const [detailTab, setDetailTab] = useState<"overview" | "links">("overview");
 
   useEffect(() => {
     closeRef.current?.focus();
     setSnap("half");
+    setDetailTab("overview");
   }, [resort?.id]);
 
   useEffect(() => {
@@ -137,8 +140,28 @@ export function ResortDetail() {
           {t("close")}
         </button>
       </header>
+      <div className="detail-tabs" data-testid="resort-detail-tabs" role="tablist" aria-label={t("resortSheetTabs")}>
+        <button type="button" role="tab" aria-selected={detailTab === "overview"} className={detailTab === "overview" ? "active" : ""} onClick={() => setDetailTab("overview")}>
+          {t("resortTabOverview")}
+        </button>
+        <button type="button" role="tab" aria-selected={detailTab === "links"} className={detailTab === "links" ? "active" : ""} onClick={() => setDetailTab("links")}>
+          {t("resortTabLinks")}
+        </button>
+      </div>
       <div className="detail-body">
         {!visible ? <p className="hint warn">{t("hiddenByFilters")}</p> : null}
+        {detailTab === "links" ? (
+          <div role="tabpanel">
+            <div className="link-buttons">
+              <LinkButton href={resort.website} label={t("openWebsite")} />
+              <LinkButton href={resort.snow_report} label={t("snowReport")} />
+              <LinkButton href={resort.webcam} label={t("webcams")} />
+            </div>
+            <AffiliateLinksBlock />
+          </div>
+        ) : null}
+        {detailTab === "overview" ? (
+        <>
         {resort.portalAttribution ? (
           <p className="portal-attribution hint" data-testid="portal-attribution">
             {formatAttributionLine(resort.portalAttribution, lang === "de" ? "de" : "en")}
@@ -231,13 +254,10 @@ export function ResortDetail() {
           </>
         ) : null}
 
-        <div className="link-buttons">
-          <LinkButton href={resort.website} label={t("openWebsite")} />
-          <LinkButton href={resort.snow_report} label={t("snowReport")} />
-          <LinkButton href={resort.webcam} label={t("webcams")} />
-        </div>
         {resort.website ? <SourceLine source={resort.sources.website} t={t} lang={lang} tourism={resort.via_tourism_site} /> : null}
         {resort.season_dates ? <SourceLine source={resort.sources.season} t={t} lang={lang} /> : null}
+        </>
+        ) : null}
       </div>
       <footer className="sheet-actions">
         <button type="button" className={fav ? "primary" : "ghost"} aria-pressed={fav} onClick={() => toggleFavourite(resort.id)}>

@@ -1,4 +1,13 @@
-const BLOCKED_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "0.0.0.0"]);
+const BLOCKED_HOSTS = new Set([
+  "localhost",
+  "127.0.0.1",
+  "::1",
+  "0.0.0.0",
+  "metadata.google.internal",
+  "metadata.goog",
+]);
+
+const METADATA_IPV4 = new Set(["169.254.169.254", "100.100.100.200"]);
 
 function isPrivateIpv4(parts: number[]): boolean {
   if (parts.length !== 4) return false;
@@ -21,16 +30,62 @@ function parseIpv4(host: string): number[] | null {
   return nums;
 }
 
+function parseIpv4Mapped(hostname: string): number[] | null {
+  const lower = hostname.toLowerCase();
+  const m = lower.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (m) return parseIpv4(m[1]!);
+  return null;
+}
+
 export function isBlockedHost(hostname: string): boolean {
   const lower = hostname.toLowerCase();
   if (BLOCKED_HOSTS.has(lower)) return true;
-  if (lower.endsWith(".localhost") || lower.endsWith(".local")) return true;
+  if (lower.endsWith(".localhost") || lower.endsWith(".local") || lower.endsWith(".internal")) return true;
+  if (METADATA_IPV4.has(lower)) return true;
+  const mapped = parseIpv4Mapped(lower);
+  if (mapped && isPrivateIpv4(mapped)) return true;
   const ipv4 = parseIpv4(lower);
   if (ipv4 && isPrivateIpv4(ipv4)) return true;
   if (lower.includes(":")) {
-    if (lower === "::1" || lower.startsWith("fe80:") || lower.startsWith("fc") || lower.startsWith("fd")) return true;
+    if (
+      lower === "::1" ||
+      lower.startsWith("fe80:") ||
+      lower.startsWith("fc") ||
+      lower.startsWith("fd") ||
+      lower.startsWith("ff")
+    ) {
+      return true;
+    }
   }
   return false;
+}
+
+interface DnsAnswer {
+  name: string;
+  type: number;
+  data: string;
+}
+
+async function dnsAnswers(hostname: string, type: "A" | "AAAA"): Promise<string[]> {
+  const url = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(hostname)}&type=${type}`;
+  const res = await fetch(url, { headers: { accept: "application/dns-json" } });
+  if (!res.ok) throw new Error("dns_lookup_failed");
+  const json = (await res.json()) as { Answer?: DnsAnswer[] };
+  const answers = json.Answer ?? [];
+  return answers.filter((a) => a.type === (type === "A" ? 1 : 28)).map((a) => a.data);
+}
+
+/** Reject hostnames that resolve to private, loopback, or link-local addresses (DNS rebinding). */
+export async function assertResolvablePublicHost(hostname: string): Promise<void> {
+  if (isBlockedHost(hostname)) throw new Error("blocked_host");
+  if (devHostAllowed(hostname)) return;
+  const [aRecords, aaaaRecords] = await Promise.all([dnsAnswers(hostname, "A"), dnsAnswers(hostname, "AAAA")]);
+  const all = [...aRecords, ...aaaaRecords];
+  if (all.length === 0) throw new Error("dns_no_records");
+  for (const addr of all) {
+    const host = addr.includes(":") ? addr.split("%")[0]! : addr;
+    if (isBlockedHost(host)) throw new Error("blocked_host");
+  }
 }
 
 const devHosts = new Set<string>();
@@ -59,10 +114,20 @@ export interface SourceCheckerDevEnv {
   SOURCE_CHECKER_DEV_HOSTS?: string;
 }
 
-/** Dev/e2e only: relax host/port rules for local fixtures. Never active in production. */
-export function applySourceCheckerDevEnv(env: SourceCheckerDevEnv | undefined): void {
+function isLocalDevBypassRequest(request: Request): boolean {
+  try {
+    const host = new URL(request.url).hostname.toLowerCase();
+    return host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+  } catch {
+    return false;
+  }
+}
+
+/** Dev/e2e only: relax host/port rules for local fixtures. Never active on hosted Pages. */
+export function applySourceCheckerDevEnv(env: SourceCheckerDevEnv | undefined, request?: Request): void {
   resetSourceCheckerDev();
-  if (!env || env.NODE_ENV === "production" || env.SOURCE_CHECKER_DEV_FIXTURE !== "1") return;
+  if (!env || env.SOURCE_CHECKER_DEV_FIXTURE !== "1") return;
+  if (!request || !isLocalDevBypassRequest(request)) return;
   const hosts = env.SOURCE_CHECKER_DEV_HOSTS?.split(",").map((h) => h.trim()).filter(Boolean);
   setSourceCheckerDevHosts(hosts?.length ? hosts : ["127.0.0.1", "localhost"]);
   setSourceCheckerDevFixturePorts(true);
@@ -99,6 +164,7 @@ export async function safeFetchText(url: string, options: SafeFetchOptions): Pro
   let current = assertSafeHttpUrl(url);
   let redirects = 0;
   while (true) {
+    await assertResolvablePublicHost(current.hostname);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), options.timeoutMs);
     let response: Response;

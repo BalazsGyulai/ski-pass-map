@@ -6,6 +6,10 @@ The first launch covers Austria for 2026/27, plus a few neighbouring areas alrea
 
 The site is a Next.js static export. It is currently published on GitHub Pages at [https://balazsgyulai.github.io/ski-pass-map](https://balazsgyulai.github.io/ski-pass-map). The same export can be served from the site root on Cloudflare Pages.
 
+## Design system
+
+Shared tokens live in [`src/app/globals.css`](src/app/globals.css). Spacing uses a 4–32px scale (`--space-1` … `--space-6`). Corners use `--radius-sm` (12px) through `--radius-lg` (20px) on cards and sheets. Elevation uses three shadow levels (`--shadow-1` … `--shadow-3`). Typography is [Inter](https://fonts.google.com/specimen/Inter) via `next/font` (self-hosted at build time). The UI palette stays neutral (`--surface`, `--ink`, `--line`); pass colours appear only as dots or stripes on pass rows. Light and dark themes set `data-theme` on `<html>`. Focus rings use `:focus-visible` with `--focus-ring`, not loud outlines on programmatic focus.
+
 ## One-time GitHub setting
 
 The workflow cannot turn Pages on by itself. In the repository:
@@ -168,6 +172,35 @@ npx wrangler d1 migrations apply skimap-app --remote   # production (owner only)
 **Local dev:** `PORTAL_ENABLED=1`, `PORTAL_DEV_BYPASS=1`, and `PORTAL_DEV_EMAIL=portal-dev@skimap.test` in `.dev.vars` (never in production). Use `POST /api/portal/dev-login` for e2e without WebAuthn.
 
 **Tests:** `npm test` (tier limits, invites, sessions, promos, listing), `npm run test:part7-e2e` (Playwright against `wrangler pages dev`).
+
+## Part 8 — legal, consent, support, affiliates, stats, backups
+
+**Legal pages** (HU + EN full text; other languages show English with a short localized note): imprint (DSA contact points + notice form link), privacy notice (processors, retention table, portal accounts), terms, [how resorts are ordered](src/app/[lang]/resort-ranking/page.tsx), and data sources on `/credits`. Pages show **DRAFT – pending owner review** while `config/legal.json` has `"draft": true`.
+
+**Consent:** bottom banner (Accept / Reject equal prominence, Settings). Optional category: Mapbox map storage. Calls `setMapConsent` from [`src/lib/map-consent.ts`](src/lib/map-consent.ts). Cookie settings in the footer and menu.
+
+**Support prompt:** Ko-fi URL from [`config/support.json`](config/support.json) (`kofiUrl` empty hides the button). Rewarded-ad path behind `rewardedAdsEnabled: false`. Ko-fi webhook `POST /api/kofi` with `KOFI_VERIFICATION_TOKEN`; D1 migration [`migrations/0003_support.sql`](migrations/0003_support.sql). Admin **Stats & support** tab shows generated perk codes for manual email.
+
+**Affiliates:** [`config/affiliates.json`](config/affiliates.json) (empty by default). Partner block on resort **Links** tab and planner when entries exist.
+
+**Stats:** optional Cloudflare Web Analytics when `NEXT_PUBLIC_CF_BEACON_TOKEN` is set; first-party `/api/stat` when `STATS_ENABLED=1` and `NEXT_PUBLIC_STATS_ENABLED=1` on the build.
+
+**Backups:** [`.github/workflows/backup.yml`](.github/workflows/backup.yml) (weekly + manual, runs only when repo variable `BACKUP_ENABLED=true`). Needs secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `BACKUP_REPO_TOKEN`, and variable `BACKUP_REPO`. Local: `npm run backup:local`.
+
+### Owner actions (part 8)
+
+1. Fill imprint placeholders in [`src/lib/legal/imprint.tsx`](src/lib/legal/imprint.tsx): `[SEAT]`, `[REG NO]`, `[TAX NO]`, `[EMAIL]`.
+2. Set `kofiUrl` in `config/support.json`; on Pages set `KOFI_VERIFICATION_TOKEN` and `SUPPORT_CODE_SALT`.
+3. Optional: `NEXT_PUBLIC_CF_BEACON_TOKEN` (build) and `STATS_ENABLED=1` + `NEXT_PUBLIC_STATS_ENABLED=1`.
+4. Legal review: set `"draft": false` in `config/legal.json` when satisfied.
+5. Backups: private repo, `BACKUP_ENABLED=true`, GitHub secrets/vars as above.
+6. Apply `npm run db:migrate:local` / remote `0003_support.sql` before using Ko-fi or stats.
+
+**Tests:** `npm test`, `npm run test:part8-e2e` (Playwright screenshots under `/opt/cursor/artifacts/screenshots/part8/`), and `npm run test:e2e` (full regression suite in `e2e/regression.spec.ts` against local `wrangler pages dev`).
+
+## Part 9 — security review and regression
+
+Security findings and fixes are documented in [`docs/security-review.md`](docs/security-review.md). Run `npm run test:e2e` after `npm run build` prerequisites are installed (Playwright Chromium is downloaded on first run). CI runs lint and unit tests; e2e is local/owner-only unless added to CI when runtime is stable under five minutes.
 
 ## Licences
 

@@ -3,19 +3,15 @@
 import { passById } from "@/lib/data";
 import { passShortName } from "@/lib/pass-label";
 import { regionLabel } from "@/lib/i18n";
-import { IconClose, IconFilter, IconMenu } from "./icons";
+import { IconClose, IconFilter } from "./icons";
 import { useApp } from "./AppState";
 
 export function SearchPill({
-  onMenu,
   onOpen,
-  menuOpen,
   compact,
   onShare,
 }: {
-  onMenu: () => void;
   onOpen: () => void;
-  menuOpen: boolean;
   compact?: { name: string; onBack: () => void } | null;
   onShare?: () => void;
 }) {
@@ -39,9 +35,6 @@ export function SearchPill({
 
   return (
     <div className="search-pill">
-      <button type="button" className="pill-btn" aria-expanded={menuOpen} aria-controls="site-menu" onClick={onMenu} aria-label={t("openMenu")}>
-        <IconMenu />
-      </button>
       <button type="button" className="pill-copy" onClick={onOpen}>
         <span className="pill-title">{t("searchPillLabel")}</span>
         <span className="pill-summary">{summaryLine()}</span>

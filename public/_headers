@@ -2,7 +2,9 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src https://challenges.cloudflare.com; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; form-action 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org https://tiles.opensnowmap.org https://api.mapbox.com https://*.tiles.mapbox.com; connect-src 'self' https://tiles.openfreemap.org https://tiles.opensnowmap.org https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com https://challenges.cloudflare.com; font-src 'self' data: https://tiles.openfreemap.org https://api.mapbox.com; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(self), microphone=(), payment=(), usb=()
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src https://challenges.cloudflare.com; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com; form-action 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org https://tiles.opensnowmap.org https://api.mapbox.com https://*.tiles.mapbox.com; connect-src 'self' https://tiles.openfreemap.org https://tiles.opensnowmap.org https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com https://challenges.cloudflare.com https://cloudflareinsights.com; font-src 'self' data: https://tiles.openfreemap.org https://api.mapbox.com; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'
 
 /admin/*
   X-Robots-Tag: noindex

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { SITE_NAME } from "@/lib/site";
+import { getMapConsent, setMapConsent } from "@/lib/map-consent";
 import { showDevTodo } from "@/lib/show-todo";
 import { BirthYearField } from "./BirthYearField";
 import { IconClose } from "./icons";
@@ -16,16 +17,22 @@ export const mainLinks = [
 ];
 
 export const legalLinks = [
-  { rest: "/imprint", key: "imprint" as const, todo: true },
-  { rest: "/privacy", key: "privacy" as const, todo: true },
-  { rest: "/terms", key: "terms" as const, todo: true },
-  { rest: "/credits", key: "creditsTitle" as const, todo: true },
+  { rest: "/imprint", key: "imprint" as const, todo: false },
+  { rest: "/privacy", key: "privacy" as const, todo: false },
+  { rest: "/terms", key: "terms" as const, todo: false },
+  { rest: "/resort-ranking", key: "rankingTitle" as const, todo: false },
+  { rest: "/credits", key: "creditsTitle" as const, todo: false },
   { rest: "/contact", key: "contact" as const, todo: false },
-  { rest: "/support", key: "supportSkimap" as const, todo: true },
+  { rest: "/support", key: "supportSkimap" as const, todo: false },
 ];
 
 export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t, theme, setTheme } = useApp();
+  const { t, theme, setTheme, openCookieSettings, resetSupportReminders } = useApp();
+  const [mapConsent, setMapConsentLocal] = useState(false);
+
+  useEffect(() => {
+    if (open) setMapConsentLocal(getMapConsent());
+  }, [open]);
   const href = useLocalizedPath();
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -64,6 +71,23 @@ export function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               <option value="dark">{t("themeDark")}</option>
             </select>
           </label>
+          <label className="field row">
+            <input
+              type="checkbox"
+              checked={mapConsent}
+              onChange={(event) => {
+                setMapConsent(event.target.checked);
+                setMapConsentLocal(event.target.checked);
+              }}
+            />
+            <span>{t("consentMapCategory")}</span>
+          </label>
+          <button type="button" className="ghost" onClick={() => { openCookieSettings(); onClose(); }}>
+            {t("cookieSettings")}
+          </button>
+          <button type="button" className="ghost" onClick={() => resetSupportReminders()}>
+            {t("resetSupportReminders")}
+          </button>
         </div>
         <nav className="drawer-legal" aria-label={t("siteFooter")}>
           {legalLinks.map((link) => (

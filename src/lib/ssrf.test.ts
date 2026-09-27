@@ -18,15 +18,21 @@ describe("ssrf guards", () => {
     expect(() => assertSafeHttpUrl("http://example.com:8080/x")).toThrow();
   });
 
-  it("allows fixture host and port only with dev flag outside production", () => {
-    applySourceCheckerDevEnv({
-      NODE_ENV: "development",
-      SOURCE_CHECKER_DEV_FIXTURE: "1",
-      SOURCE_CHECKER_DEV_HOSTS: "127.0.0.1",
-    });
+  it("allows fixture host and port only with dev flag on localhost", () => {
+    const localReq = new Request("http://127.0.0.1/fixtures/source.html");
+    applySourceCheckerDevEnv(
+      {
+        SOURCE_CHECKER_DEV_FIXTURE: "1",
+        SOURCE_CHECKER_DEV_HOSTS: "127.0.0.1",
+      },
+      localReq,
+    );
     const url = assertSafeHttpUrl("http://127.0.0.1:8788/fixtures/source.html");
     expect(url.port).toBe("8788");
-    applySourceCheckerDevEnv({ NODE_ENV: "production", SOURCE_CHECKER_DEV_FIXTURE: "1", SOURCE_CHECKER_DEV_HOSTS: "127.0.0.1" });
+    applySourceCheckerDevEnv(
+      { SOURCE_CHECKER_DEV_FIXTURE: "1", SOURCE_CHECKER_DEV_HOSTS: "127.0.0.1" },
+      new Request("https://skimap.pages.dev/api/admin/check"),
+    );
     expect(() => assertSafeHttpUrl("http://127.0.0.1:8788/fixtures/source.html")).toThrow();
   });
 });

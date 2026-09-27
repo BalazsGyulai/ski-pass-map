@@ -55,3 +55,10 @@ export function finiteOrBlank(value: number | null | undefined): number | null {
   if (value == null || !Number.isFinite(value)) return null;
   return value;
 }
+
+/** Slopes: hide 0 and missing values (0 km in data usually means unknown). */
+export function slopeKmDisplay(value: number | null | undefined): number | null {
+  const n = finiteOrBlank(value);
+  if (n == null || n <= 0) return null;
+  return n;
+}
