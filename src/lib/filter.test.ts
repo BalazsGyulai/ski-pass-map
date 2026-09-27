@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { clusterPoints } from "./cluster";
 import { cities, passes, resorts } from "./data";
 import { distanceKm } from "./distance";
 import { filterResorts, sortResorts } from "./filter";
-import { pieSvg } from "./marker";
 import type { Resort } from "./schema";
 import { parseShareState, serializeShareState } from "./url-state";
 
@@ -102,23 +100,6 @@ describe("filterResorts", () => {
   });
 });
 
-describe("clusterPoints", () => {
-  it("groups nearby resorts at low zoom and separates them when labels would show", () => {
-    const grouped = clusterPoints(
-      resorts.filter((resort) => !resort.abandoned),
-      8,
-    ).find((cluster) => cluster.items.length >= 2);
-    if (!grouped) throw new Error("expected a cluster");
-    const pair = grouped.items.slice(0, 2);
-    expect(clusterPoints(pair, 8)).toHaveLength(1);
-    expect(clusterPoints(pair, 11)).toHaveLength(2);
-    const east = resorts.find((resort) => resort.region === "Lower Austria");
-    const west = resorts.find((resort) => resort.region === "Vorarlberg");
-    expect(east && west).toBeTruthy();
-    expect(clusterPoints([east as Resort, west as Resort], 8)).toHaveLength(2);
-  });
-});
-
 describe("share url", () => {
   it("round-trips the fields that should be shareable", () => {
     const state = parseShareState(new URLSearchParams("passes=bergerlebnispass,ostalpen&match=all&transit=1&home=vienna&resort=stuhleck&view=list&lang=hu&sort=name&maxKm=80&regions=Styria|Tirol&abandoned=1"));
@@ -138,14 +119,5 @@ describe("share url", () => {
     });
     const again = parseShareState(new URLSearchParams(serializeShareState(state)));
     expect(again).toEqual(state);
-  });
-});
-
-describe("pieSvg", () => {
-  it("draws one wedge per pass and a grey dot when nothing covers the resort", () => {
-    expect(pieSvg([], { selected: false, closed: false })).toContain('fill="#8b938e"');
-    const pie = pieSvg(["#1f5fd1", "#1a9a3a"], { selected: true, closed: false });
-    expect(pie.match(/<path /g)).toHaveLength(2);
-    expect(pie).toContain("#ffbf47");
   });
 });

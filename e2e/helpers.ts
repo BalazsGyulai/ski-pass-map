@@ -65,16 +65,31 @@ export async function dismissConsent(page: Page, choice: "accepted" | "rejected"
   }, choice);
 }
 
+/** Resort dots and clusters are map layers. Requires NEXT_PUBLIC_MAP_CANVAS_PROBE=1 at build time. */
+export async function countRenderedResorts(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const map = window.__skiMapProbe as
+      | { getLayer?: (id: string) => unknown; queryRenderedFeatures?: (options: { layers: string[] }) => unknown[] }
+      | undefined;
+    if (!map?.queryRenderedFeatures || !map.getLayer) return 0;
+    const layers = ["resorts-dot", "resorts-cluster", "resort-focus-dot"].filter((id) => map.getLayer?.(id));
+    if (layers.length === 0) return 0;
+    try {
+      return map.queryRenderedFeatures({ layers }).length;
+    } catch {
+      return 0;
+    }
+  });
+}
+
 export async function waitForMapMarkers(page: Page): Promise<number> {
   await page.waitForSelector(".maplibregl-canvas", { timeout: 45_000 });
-  for (let i = 0; i < 12; i++) {
-    const n = await page.locator(".maplibregl-marker").count();
+  for (let i = 0; i < 40; i++) {
+    const n = await countRenderedResorts(page);
     if (n > 0) return n;
     await page.waitForTimeout(500);
   }
-  const listRows = await page.locator(".list-sheet .resort-card, .list-sheet li").count();
-  if (listRows > 0) return listRows;
-  return page.locator(".maplibregl-marker").count();
+  return countRenderedResorts(page);
 }
 
 /** Requires NEXT_PUBLIC_MAP_CANVAS_PROBE=1 at build time (preserveDrawingBuffer). */
@@ -120,7 +135,14 @@ export async function assertMapCanvasNotFlat(page: Page, label: string): Promise
           }
         }
       }
-      const markers = document.querySelectorAll(".maplibregl-marker").length;
+      let markers = 0;
+      try {
+        const probe = map as unknown as { getLayer?: (id: string) => unknown; queryRenderedFeatures?: (options: { layers: string[] }) => unknown[] };
+        const layers = ["resorts-dot", "resorts-cluster", "resort-focus-dot"].filter((id) => probe.getLayer?.(id));
+        markers = layers.length > 0 ? (probe.queryRenderedFeatures?.({ layers }).length ?? 0) : 0;
+      } catch {
+        markers = 0;
+      }
       const ok =
         styleLoaded &&
         w > 16 &&
@@ -151,7 +173,15 @@ export async function assertMapCanvasNotFlat(page: Page, label: string): Promise
     return {
       variance: window.__skiMapCanvasVariance?.() ?? 0,
       featureHits,
-      markers: document.querySelectorAll(".maplibregl-marker").length,
+      markers: (() => {
+        try {
+          const probe = map as unknown as { getLayer?: (id: string) => unknown; queryRenderedFeatures?: (options: { layers: string[] }) => unknown[] };
+          const layers = ["resorts-dot", "resorts-cluster", "resort-focus-dot"].filter((id) => probe.getLayer?.(id));
+          return layers.length > 0 ? (probe.queryRenderedFeatures?.({ layers }).length ?? 0) : 0;
+        } catch {
+          return 0;
+        }
+      })(),
       styleLoaded: Boolean(map?.isStyleLoaded?.()),
       size: [w, h],
       minVariance,

@@ -38,8 +38,10 @@ export interface VectorMap {
     duration?: number;
     padding?: { top: number; bottom: number; left: number; right: number };
   }): void;
+  easeTo(options: { center?: [number, number]; zoom?: number; duration?: number }): void;
+  project(lngLat: [number, number]): { x: number; y: number };
   addSource(id: string, source: unknown): void;
-  getSource(id: string): { setData?: (data: unknown) => void } | undefined;
+  getSource(id: string): VectorGeoJsonSource | undefined;
   removeSource(id: string): void;
   addLayer(layer: unknown, before?: string): void;
   getLayer(id: string): unknown;
@@ -47,11 +49,57 @@ export interface VectorMap {
   setPaintProperty(layer: string, name: string, value: unknown): void;
   getStyle(): { layers?: Array<{ id: string; type: string }> } | null | undefined;
   isStyleLoaded(): boolean;
-  setStyle(style: string): void;
-  queryRenderedFeatures(point: [number, number], options: { layers: string[] }): Array<{ properties?: Record<string, unknown> | null }>;
+  setStyle(style: string, options?: { diff?: boolean }): void;
+  queryRenderedFeatures(
+    geometry: [number, number] | [[number, number], [number, number]],
+    options: { layers: string[] },
+  ): RenderedFeature[];
   addControl(control: unknown, position?: string): void;
   removeControl(control: unknown): void;
   loaded(): boolean;
+}
+
+export interface RenderedFeature {
+  properties?: Record<string, unknown> | null;
+  geometry?: { type?: string; coordinates?: unknown };
+  layer?: { id?: string };
+}
+
+/**
+ * GeoJSON source methods used here. MapLibre returns a promise from getClusterExpansionZoom;
+ * Mapbox GL takes a callback. See clusterExpansionZoom.
+ */
+export interface VectorGeoJsonSource {
+  setData?: (data: unknown) => void;
+  getClusterExpansionZoom?: (clusterId: number, callback?: (error: unknown, zoom?: number) => void) => unknown;
+}
+
+/** Zoom at which a cluster falls apart, for either library. Null when it cannot be read. */
+export function clusterExpansionZoom(source: VectorGeoJsonSource | undefined, clusterId: number): Promise<number | null> {
+  return new Promise((resolve) => {
+    const read = source?.getClusterExpansionZoom;
+    if (!read) {
+      resolve(null);
+      return;
+    }
+    let settled = false;
+    const done = (zoom: number | null) => {
+      if (settled) return;
+      settled = true;
+      resolve(zoom != null && Number.isFinite(zoom) ? zoom : null);
+    };
+    try {
+      const result = read.call(source, clusterId, (error, zoom) => done(error ? null : (zoom ?? null)));
+      if (result && typeof (result as Promise<number>).then === "function") {
+        (result as Promise<number>).then(
+          (zoom) => done(zoom),
+          () => done(null),
+        );
+      }
+    } catch {
+      done(null);
+    }
+  });
 }
 
 export interface VectorMarker {

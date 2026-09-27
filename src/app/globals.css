@@ -541,17 +541,16 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   font-size: 18px;
 }
 .star.is-on { color: var(--amber); }
-.pass-dots, .pill-dots { display: inline-flex; align-items: center; }
-.pass-dot, .pill-dot {
+.pass-dots { display: inline-flex; align-items: center; }
+.pass-dot {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  border: 1px solid #fff;
+  border: 1.5px solid var(--surface);
   margin-left: -3px;
   display: inline-block;
 }
-.pass-dot:first-child, .pill-dot:first-child { margin-left: 0; }
-.pill-dot.is-hollow { background: transparent !important; border: 2px solid #94a3b8; }
+.pass-dot:first-child { margin-left: 0; }
 .swatch { width: 12px; height: 12px; border-radius: 999px; display: inline-block; flex: none; }
 .swatch-grey { background: #94a3b8; }
 
@@ -935,17 +934,22 @@ legend { padding: 0 4px; font-weight: 600; }
 }
 .maplibregl-ctrl-attrib a, .mapboxgl-ctrl-attrib a { color: inherit; }
 .mapboxgl-ctrl-logo { margin: 0 0 4px 4px; }
-.resort-marker {
-  background: transparent;
-  border: 0;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  line-height: 0;
-  overflow: visible;
+.piste-tip { pointer-events: none; }
+.map-root :is(.maplibregl-ctrl-group, .mapboxgl-ctrl-group) {
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 14px;
+  box-shadow: var(--shadow-float);
+  overflow: hidden;
 }
-.resort-marker.is-selected { padding-bottom: 8px; }
-.resort-marker:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: 999px; }
+.map-root :is(.maplibregl-ctrl-group, .mapboxgl-ctrl-group) button { width: 44px; height: 44px; background-color: transparent; }
+.map-root :is(.maplibregl-ctrl-group, .mapboxgl-ctrl-group) button + button { border-top: 1px solid var(--line); }
+.map-root :is(.maplibregl-ctrl-group, .mapboxgl-ctrl-group) button:hover { background-color: var(--surface-3); }
+:root[data-theme="dark"] .map-root :is(.maplibregl-ctrl-icon, .mapboxgl-ctrl-icon) { filter: invert(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .map-root :is(.maplibregl-ctrl-icon, .mapboxgl-ctrl-icon) { filter: invert(1); }
+}
 .piste-tip .maplibregl-popup-content, .piste-tip .mapboxgl-popup-content {
   padding: 6px 10px;
   border-radius: 10px;
@@ -955,93 +959,6 @@ legend { padding: 0 4px; font-weight: 600; }
   color: #0d1321;
   box-shadow: var(--shadow-2);
 }
-.price-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 30px;
-  padding: 0 8px 0 6px;
-  background: #fff;
-  color: #0f1b2d;
-  border-radius: 999px;
-  box-shadow: 0 4px 16px rgba(15, 27, 45, 0.14);
-  font: 700 13px/1 Inter, system-ui, sans-serif;
-  white-space: nowrap;
-  position: relative;
-}
-.price-pill.is-selected { height: 34px; background: #0f1b2d; color: #fff; padding-bottom: 2px; }
-.price-pill.is-empty { color: #64748b; }
-.price-pill.is-dot-only {
-  width: 12px;
-  height: 12px;
-  min-width: 12px;
-  padding: 0;
-  border-radius: 999px;
-  background: transparent;
-  box-shadow: none;
-  position: relative;
-}
-.price-pill.is-dot-only .marker-dot {
-  display: block;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: #94a3b8;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 4px rgba(15, 27, 45, 0.2);
-}
-.price-pill.is-dot-only .pill-name-reveal {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 6px);
-  transform: translateX(-50%);
-  display: none;
-  max-width: 160px;
-  padding: 4px 8px;
-  border-radius: 8px;
-  background: #fff;
-  color: #0f1b2d;
-  font-size: 12px;
-  font-weight: 650;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-shadow: 0 4px 12px rgba(15, 27, 45, 0.16);
-  pointer-events: none;
-}
-.resort-marker:hover .pill-name-reveal,
-.resort-marker:focus-visible .pill-name-reveal {
-  display: block;
-}
-.price-pill.is-closed { opacity: 0.6; outline: 1px dashed #64748b; }
-.pill-more { font-size: 11px; font-weight: 700; color: var(--ink-2); }
-.price-pill .pill-more { color: inherit; }
-.pill-days {
-  position: absolute;
-  top: -7px;
-  right: -6px;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: #f59e0b;
-  color: #1f1300;
-  font-size: 11px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 3px;
-}
-.pill-tail {
-  position: absolute;
-  left: 50%;
-  bottom: -7px;
-  transform: translateX(-50%);
-  border-width: 7px 6px 0;
-  border-style: solid;
-  border-color: #0f1b2d transparent transparent;
-}
-.resort-marker.is-hot .price-pill { box-shadow: 0 0 0 3px #f59e0b; }
 .explorer[data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 236px; }
 .explorer[data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 50dvh; }
 .explorer[data-panel="resort"][data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 45dvh; }

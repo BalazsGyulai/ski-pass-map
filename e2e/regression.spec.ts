@@ -56,6 +56,47 @@ test("map markers, search, filters, resort sheet tabs and pistes", async ({ page
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
+test("tapping a cluster zooms in and tapping a resort dot opens it", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/en/");
+  await waitForMapMarkers(page);
+  type ProbeMap = {
+    getZoom(): number;
+    jumpTo(options: { center: [number, number]; zoom: number }): void;
+    project(lngLat: [number, number]): { x: number; y: number };
+    getCanvas(): HTMLCanvasElement;
+    queryRenderedFeatures(options: { layers: string[] }): Array<{ geometry: { coordinates: [number, number] } }>;
+  };
+  const screenPointOf = (layer: string) =>
+    page.evaluate((id) => {
+      const map = window.__skiMapProbe as unknown as ProbeMap;
+      const rect = map.getCanvas().getBoundingClientRect();
+      const features = map.queryRenderedFeatures({ layers: [id] });
+      for (const feature of features) {
+        const at = map.project(feature.geometry.coordinates);
+        const x = rect.left + at.x;
+        const y = rect.top + at.y;
+        if (x > rect.left + 60 && x < rect.right - 80 && y > rect.top + 60 && y < rect.bottom - 60) return { x, y };
+      }
+      return null;
+    }, layer);
+  const zoomBefore = await page.evaluate(() => (window.__skiMapProbe as unknown as ProbeMap).getZoom());
+  const cluster = await screenPointOf("resorts-cluster");
+  expect(cluster, "a cluster on screen").not.toBeNull();
+  await page.mouse.click(cluster!.x, cluster!.y);
+  await expect.poll(() => page.evaluate(() => (window.__skiMapProbe as unknown as ProbeMap).getZoom())).toBeGreaterThan(zoomBefore);
+  await page.evaluate(() => (window.__skiMapProbe as unknown as ProbeMap).jumpTo({ center: [13.5, 47.3], zoom: 10 }));
+  await expect.poll(() => screenPointOf("resorts-dot"), { timeout: 20_000 }).not.toBeNull();
+  const dot = await screenPointOf("resorts-dot");
+  await page.mouse.click(dot!.x, dot!.y);
+  await page.waitForSelector("#resort-title", { timeout: 15_000 });
+  await expect(page).toHaveURL(/resort=/);
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
 test("planner, compare, birth-year prices, favourites persistence", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);
