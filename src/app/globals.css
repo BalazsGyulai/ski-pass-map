@@ -763,9 +763,19 @@ legend { padding: 0 4px; font-weight: 650; }
   background: rgba(255, 255, 255, 0.92) !important;
   color: #334155;
 }
+.map-root :is(.maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-right) {
+  right: 0;
+  bottom: 8px !important;
+  top: auto !important;
+}
 .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib,
 .mapboxgl-ctrl-bottom-right .mapboxgl-ctrl-attrib {
-  margin: 0 8px 8px 0;
+  margin: 0 8px 0 0;
+}
+.maplibregl-ctrl-attrib.maplibregl-compact,
+.mapboxgl-ctrl-attrib.mapboxgl-compact {
+  min-height: 24px;
+  padding: 0;
 }
 .maplibregl-ctrl-attrib:not(.maplibregl-compact),
 .mapboxgl-ctrl-attrib:not(.mapboxgl-compact) {

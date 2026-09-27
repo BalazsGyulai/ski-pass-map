@@ -110,6 +110,7 @@ export default function MapView() {
         map.on("load", () => {
           if (!cancelled && map) {
             attachMapProbe(map);
+            compactMapAttribution(map.getContainer());
             setReady(true);
           }
         });
@@ -135,7 +136,10 @@ export default function MapView() {
     if (appliedStyle.current === next) return;
     appliedStyle.current = next;
     map.setStyle(next);
-    map.once("idle", () => map.resize());
+    map.once("idle", () => {
+      map.resize();
+      compactMapAttribution(map.getContainer());
+    });
   }, [appearance, provider, ready]);
 
   useEffect(() => {
@@ -547,6 +551,12 @@ export default function MapView() {
       ) : null}
     </div>
   );
+}
+
+function compactMapAttribution(container: HTMLElement): void {
+  container.querySelectorAll(".maplibregl-ctrl-attrib, .mapboxgl-ctrl-attrib").forEach((el) => {
+    el.classList.add("maplibregl-compact", "mapboxgl-compact");
+  });
 }
 
 function clearPistes(map: VectorMap) {
