@@ -14,6 +14,7 @@ export function AboutView() {
       <h1>{t("aboutTitle")}</h1>
       <section className="card-block">
         <h2>{t("disclaimerTitle")}</h2>
+        <p>{t("globalDisclaimer")}</p>
         <p>{t("disclaimer")}</p>
         <p>{t("checkOfficial")}</p>
       </section>
@@ -23,6 +24,7 @@ export function AboutView() {
         <p>{t("resortsInData", { n: resorts.length })}</p>
         {unverifiedResortIds.length > 0 ? <p>{t("unverifiedHeld", { n: unverifiedResortIds.length })}</p> : null}
         <p>{t("passesInData", { n: passes.length })}</p>
+        <p>{t("pisteTotal", { km: Math.round(resorts.reduce((sum, resort) => sum + (resort.slope_km ?? 0), 0)) })}</p>
         <p>{t("seedBody")}</p>
         <p>{t("gapsBody")}</p>
       </section>
@@ -57,6 +59,8 @@ export function AboutView() {
         <h2>{t("creditsTitle")}</h2>
         <p>{t("creditsOsm")}</p>
         <p>{t("creditsOpenSkiMap")}</p>
+        <p>{t("creditsOpenFreeMap")}</p>
+        <p>{t("creditsMapbox")}</p>
         <p>{t("creditsOpenSnowMap")}</p>
         <p>{t("creditsPasses")}</p>
         <p>

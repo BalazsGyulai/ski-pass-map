@@ -2,523 +2,2386 @@
   "generated": "2026-09-25",
   "passes": [
     {
-      "id": "bergerlebnispass",
-      "name": "Niederösterreichische Bergerlebnispass",
+      "id": "noe-bergerlebnispass",
+      "name": "NÖ Bergerlebnispass",
       "color": "#1f5fd1",
-      "price_note": "Season pass for Lower Austrian mountain lifts, plus Bürgeralpe Mariazell (Styria). Price rises in steps. Children are tied to age at purchase, not birth year. Family bonus until 31 Oct: 1 adult pass lets children up to 10.99 ride free; 2 adult passes let children up to 15.99 ride free.",
+      "price_note": "Presale from 2026-09-01. Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable.",
       "url": "https://www.bergerlebnispass.at/",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.bergerlebnispass.at/",
+        "checkedAt": "2026-09-25",
+        "snippet": "Der NÖ Bergerlebnispass für 10 Skigebiete in Niederösterreich"
+      },
       "pricing": {
         "brackets": [
           {
-            "label": "Adult (16+)",
+            "label": "child (age at purchase)",
             "birth_year_from": null,
-            "birth_year_to": null,
-            "note": "age-based at purchase, no birth-year cut-off published"
+            "birth_year_to": null
           },
           {
-            "label": "Child (up to 15.99 years)",
+            "label": "adult (age at purchase)",
             "birth_year_from": null,
-            "birth_year_to": null,
-            "note": "age-based at purchase"
+            "birth_year_to": null
           }
         ],
         "periods": [
           {
-            "bracket": "Adult (16+)",
-            "price_eur": 429,
-            "valid_until": "2026-10-31",
-            "source": {
-              "sourceUrl": "https://www.bergerlebnispass.at/",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Adult (16+)",
-            "price_eur": 500,
-            "valid_until": "2026-11-30",
-            "source": {
-              "sourceUrl": "https://www.bergerlebnispass.at/",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Adult (16+)",
-            "price_eur": 555,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.bergerlebnispass.at/",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Child (up to 15.99 years)",
+            "bracket": "child (age at purchase)",
             "price_eur": 170,
             "valid_until": "2026-10-31",
             "source": {
               "sourceUrl": "https://www.bergerlebnispass.at/",
-              "checkedAt": "2026-09-25"
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 429,- Kinder bis 15,99 Jahre € 170,-"
             }
           },
           {
-            "bracket": "Child (up to 15.99 years)",
+            "bracket": "child (age at purchase)",
             "price_eur": 235,
             "valid_until": "2026-11-30",
             "source": {
               "sourceUrl": "https://www.bergerlebnispass.at/",
-              "checkedAt": "2026-09-25"
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf Erwachsene € 500,- Kinder bis 15,99 Jahre € 235,-"
             }
           },
           {
-            "bracket": "Child (up to 15.99 years)",
+            "bracket": "child (age at purchase)",
             "price_eur": 300,
             "valid_until": null,
             "source": {
               "sourceUrl": "https://www.bergerlebnispass.at/",
-              "checkedAt": "2026-09-25"
+              "checkedAt": "2026-09-25",
+              "snippet": "Normalpreis Erwachsene € 555,- Kinder bis 15,99 Jahre € 300,-"
+            }
+          },
+          {
+            "bracket": "adult (age at purchase)",
+            "price_eur": 429,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bergerlebnispass.at/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 429,- Kinder bis 15,99 Jahre € 170,-"
+            }
+          },
+          {
+            "bracket": "adult (age at purchase)",
+            "price_eur": 500,
+            "valid_until": "2026-11-30",
+            "source": {
+              "sourceUrl": "https://www.bergerlebnispass.at/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf Erwachsene € 500,- Kinder bis 15,99 Jahre € 235,-"
+            }
+          },
+          {
+            "bracket": "adult (age at purchase)",
+            "price_eur": 555,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bergerlebnispass.at/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normalpreis Erwachsene € 555,- Kinder bis 15,99 Jahre € 300,-"
             }
           }
         ]
-      },
-      "source": {
-        "sourceUrl": "https://www.bergerlebnispass.at/",
-        "checkedAt": "2026-09-25"
       }
     },
     {
-      "id": "ostalpen",
-      "name": "Skiregion Ostalpen Card",
-      "color": "#1a9a3a",
-      "price_note": "2026/27 season card for 20 areas in Lower Austria and Styria. Regular prices listed; presale dates were not stated.",
-      "url": "https://www.skiregion-ostalpen.at/tarife",
-      "pricing": {
-        "brackets": [
-          {
-            "label": "Adult",
-            "birth_year_from": null,
-            "birth_year_to": 1999
-          },
-          {
-            "label": "U25",
-            "birth_year_from": 2000,
-            "birth_year_to": 2006
-          },
-          {
-            "label": "Youth",
-            "birth_year_from": 2007,
-            "birth_year_to": 2010
-          },
-          {
-            "label": "Child",
-            "birth_year_from": 2011,
-            "birth_year_to": 2019
-          }
-        ],
-        "periods": [
-          {
-            "bracket": "Adult",
-            "price_eur": 773,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "U25",
-            "price_eur": 587,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Youth",
-            "price_eur": 587,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Child",
-            "price_eur": 399,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
-              "checkedAt": "2026-09-25"
-            }
-          }
-        ]
-      },
+      "id": "schneebaeren-card",
+      "name": "Schneebären Card (Vielfahrer Card / season)",
+      "color": "#d4532b",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Family, weekday, and loyalty variants are not applied automatically.",
+      "url": "https://www.schneebärencard.com/",
+      "provisional": false,
+      "restricted": false,
       "source": {
-        "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
-        "checkedAt": "2026-09-25"
-      }
-    },
-    {
-      "id": "murmuerz",
-      "name": "Mur-Mürz Skiberge Saisonkarte",
-      "color": "#ff8c00",
-      "price_note": "2026/27. Early-bird price until 2026-12-15, regular price after. Also valid at Klippitztörl (Carinthia), which is not in this dataset.",
-      "url": "https://www.skiberge.at/saisonkarte",
-      "pricing": {
-        "brackets": [
-          {
-            "label": "Adult",
-            "birth_year_from": null,
-            "birth_year_to": 1997
-          },
-          {
-            "label": "U28",
-            "birth_year_from": 1998,
-            "birth_year_to": 2007
-          },
-          {
-            "label": "Youth",
-            "birth_year_from": 2008,
-            "birth_year_to": 2010
-          },
-          {
-            "label": "Child",
-            "birth_year_from": 2011,
-            "birth_year_to": 2020
-          }
-        ],
-        "periods": [
-          {
-            "bracket": "Adult",
-            "price_eur": 835,
-            "valid_until": "2026-12-15",
-            "source": {
-              "sourceUrl": "https://www.skiberge.at/saisonkarte",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Adult",
-            "price_eur": 919,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.skiberge.at/saisonkarte",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "U28",
-            "price_eur": 610,
-            "valid_until": "2026-12-15",
-            "source": {
-              "sourceUrl": "https://www.skiberge.at/saisonkarte",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "U28",
-            "price_eur": 671,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.skiberge.at/saisonkarte",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Youth",
-            "price_eur": 610,
-            "valid_until": "2026-12-15",
-            "source": {
-              "sourceUrl": "https://www.skiberge.at/saisonkarte",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Youth",
-            "price_eur": 671,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.skiberge.at/saisonkarte",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Child",
-            "price_eur": 460,
-            "valid_until": "2026-12-15",
-            "source": {
-              "sourceUrl": "https://www.skiberge.at/saisonkarte",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Child",
-            "price_eur": 506,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.skiberge.at/saisonkarte",
-              "checkedAt": "2026-09-25"
-            }
-          }
-        ]
+        "sourceUrl": "https://www.xn--schneebrencard-cib.com/",
+        "checkedAt": "2026-09-25",
+        "snippet": "ARGE Schneebären Card | www.schneebärencard.com"
       },
-      "source": {
-        "sourceUrl": "https://www.skiberge.at/saisonkarte",
-        "checkedAt": "2026-09-25"
-      }
-    },
-    {
-      "id": "joker",
-      "name": "Steiermark Joker",
-      "color": "#d62728",
-      "price_note": "2026/27. Presale until 2026-12-03, regular price after. The 27 partner areas come from the official partner list.",
-      "url": "https://www.steiermarkjoker.at/partner",
       "pricing": {
         "brackets": [
           {
-            "label": "Adult",
-            "birth_year_from": null,
-            "birth_year_to": 1997
-          },
-          {
-            "label": "U28",
-            "birth_year_from": 1998,
-            "birth_year_to": 2007
-          },
-          {
-            "label": "Youth",
-            "birth_year_from": 2008,
-            "birth_year_to": 2010
-          },
-          {
-            "label": "Child",
-            "birth_year_from": 2011,
-            "birth_year_to": 2020
-          }
-        ],
-        "periods": [
-          {
-            "bracket": "Adult",
-            "price_eur": 1148,
-            "valid_until": "2026-12-03",
-            "source": {
-              "sourceUrl": "https://www.steiermarkjoker.at/partner",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Adult",
-            "price_eur": 1264,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.steiermarkjoker.at/partner",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "U28",
-            "price_eur": 837,
-            "valid_until": "2026-12-03",
-            "source": {
-              "sourceUrl": "https://www.steiermarkjoker.at/partner",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "U28",
-            "price_eur": 923,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.steiermarkjoker.at/partner",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Youth",
-            "price_eur": 837,
-            "valid_until": "2026-12-03",
-            "source": {
-              "sourceUrl": "https://www.steiermarkjoker.at/partner",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Youth",
-            "price_eur": 923,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.steiermarkjoker.at/partner",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Child",
-            "price_eur": 620,
-            "valid_until": "2026-12-03",
-            "source": {
-              "sourceUrl": "https://www.steiermarkjoker.at/partner",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Child",
-            "price_eur": 683,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.steiermarkjoker.at/partner",
-              "checkedAt": "2026-09-25"
-            }
-          }
-        ]
-      },
-      "source": {
-        "sourceUrl": "https://www.steiermarkjoker.at/partner",
-        "checkedAt": "2026-09-25"
-      }
-    },
-    {
-      "id": "superskicard",
-      "name": "Salzburger Super Ski Card",
-      "color": "#8e44ad",
-      "price_note": "2026/27. Presale until 2026-12-03. From 2026-12-04 everyone 18+ pays one price. Child and youth prices were not captured. Figures come from earlier research and were not re-verified because the price page loads via JavaScript. Most areas are in Salzburg and are out of scope; only the Styrian and Tirol partners are included.",
-      "url": "https://www.superskicard.com/",
-      "pricing": {
-        "brackets": [
-          {
-            "label": "Adult",
-            "birth_year_from": null,
-            "birth_year_to": 2000
-          },
-          {
-            "label": "U25",
+            "label": "U25/Student (2001–2007)",
             "birth_year_from": 2001,
             "birth_year_to": 2007
           },
           {
-            "label": "Everyone 18+ (from 2026-12-04)",
-            "birth_year_from": null,
-            "birth_year_to": null,
-            "note": "single price for all adults incl. U25 after presale; exact birth-year cut-off not captured"
-          }
-        ],
-        "periods": [
-          {
-            "bracket": "Adult",
-            "price_eur": 1049,
-            "valid_until": "2026-12-03",
-            "source": {
-              "sourceUrl": "https://www.superskicard.com/",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "U25",
-            "price_eur": 890,
-            "valid_until": "2026-12-03",
-            "source": {
-              "sourceUrl": "https://www.superskicard.com/",
-              "checkedAt": "2026-09-25"
-            }
-          },
-          {
-            "bracket": "Everyone 18+ (from 2026-12-04)",
-            "price_eur": 1190,
-            "valid_until": null,
-            "source": {
-              "sourceUrl": "https://www.superskicard.com/",
-              "checkedAt": "2026-09-25"
-            }
-          }
-        ]
-      },
-      "source": {
-        "sourceUrl": "https://www.superskicard.com/",
-        "checkedAt": "2026-09-25"
-      }
-    },
-    {
-      "id": "snowcardtirol",
-      "name": "Snow Card Tirol",
-      "color": "#00a3a3",
-      "price_note": "2026/27. Presale from 2026-09-26 until 2026-10-31, regular price after. Children born 2021 or later ride free when accompanied.",
-      "url": "https://www.snowcard.tirol.at/",
-      "pricing": {
-        "brackets": [
-          {
-            "label": "Adult",
-            "birth_year_from": null,
-            "birth_year_to": 2007
-          },
-          {
-            "label": "Youth",
+            "label": "Jugend (2008–2010)",
             "birth_year_from": 2008,
             "birth_year_to": 2010
           },
           {
-            "label": "Child",
+            "label": "Kind (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Erw. (–2000)",
+            "birth_year_from": null,
+            "birth_year_to": 2000,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "U25/Student (2001–2007)",
+            "price_eur": 457,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.xn--schneebrencard-cib.com/de/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf bis 15.12.2026 617,- 457,- 314,- 209,-"
+            }
+          },
+          {
+            "bracket": "U25/Student (2001–2007)",
+            "price_eur": 735,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.xn--schneebrencard-cib.com/de/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf ab 16.12.2026 735,- 735,- 536,- 336,-"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 314,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.xn--schneebrencard-cib.com/de/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf bis 15.12.2026 617,- 457,- 314,- 209,-"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 536,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.xn--schneebrencard-cib.com/de/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf ab 16.12.2026 735,- 735,- 536,- 336,-"
+            }
+          },
+          {
+            "bracket": "Kind (2011–2020)",
+            "price_eur": 209,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.xn--schneebrencard-cib.com/de/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf bis 15.12.2026 617,- 457,- 314,- 209,-"
+            }
+          },
+          {
+            "bracket": "Kind (2011–2020)",
+            "price_eur": 336,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.xn--schneebrencard-cib.com/de/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf ab 16.12.2026 735,- 735,- 536,- 336,-"
+            }
+          },
+          {
+            "bracket": "Erw. (–2000)",
+            "price_eur": 617,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.xn--schneebrencard-cib.com/de/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf bis 15.12.2026 617,- 457,- 314,- 209,-"
+            }
+          },
+          {
+            "bracket": "Erw. (–2000)",
+            "price_eur": 735,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.xn--schneebrencard-cib.com/de/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf ab 16.12.2026 735,- 735,- 536,- 336,-"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "mur-muerz-top-skipass",
+      "name": "Mur-Mürz Top Skipass (Saisonkarte)",
+      "color": "#7a3ff0",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Family, weekday, and loyalty variants are not applied automatically.",
+      "url": "https://www.skiberge.at/",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.skiberge.at/",
+        "checkedAt": "2026-09-25",
+        "snippet": "Der Mur-Mürz Top Skipass: Einer für 15!"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "U28 (1998–2007)",
+            "birth_year_from": 1998,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Jugend (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Erwachsene (–1997)",
+            "birth_year_from": null,
+            "birth_year_to": 1997,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "U28 (1998–2007)",
+            "price_eur": 610,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "U28* (1998-2007) 610,00 671,00"
+            }
+          },
+          {
+            "bracket": "U28 (1998–2007)",
+            "price_eur": 671,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "U28* (1998-2007) 610,00 671,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 610,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugend (2008-2010) 610,00 671,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 671,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugend (2008-2010) 610,00 671,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 460,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder (2011-2020) 460,00 506,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 506,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder (2011-2020) 460,00 506,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–1997)",
+            "price_eur": 835,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene 835,00 919,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–1997)",
+            "price_eur": 919,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiberge.at/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene 835,00 919,00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "lieblings-steirer-kreischberg-lachtal",
+      "name": "Lieblings-Steirer Saisonkarte",
+      "color": "#0e8f8a",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable.",
+      "url": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+        "checkedAt": "2026-09-25",
+        "snippet": "Lieblings-Steirer Saisonkarten gültig am Kreischberg und am Lachtal"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "U28 (1998–2007)",
+            "birth_year_from": 1998,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Jugend (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Erwachsene (–1997)",
+            "birth_year_from": null,
+            "birth_year_to": 1997,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "U28 (1998–2007)",
+            "price_eur": 540,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+              "checkedAt": "2026-09-25",
+              "snippet": "U28* (1998-2007) 540,00 594,00"
+            }
+          },
+          {
+            "bracket": "U28 (1998–2007)",
+            "price_eur": 594,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+              "checkedAt": "2026-09-25",
+              "snippet": "U28* (1998-2007) 540,00 594,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 540,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugend (2008-2010) 540,00 594,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 594,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugend (2008-2010) 540,00 594,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 360,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder (2011-2020) 360,00 396,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 396,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder (2011-2020) 360,00 396,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–1997)",
+            "price_eur": 720,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene 720,00 792,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–1997)",
+            "price_eur": 792,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.kreischberg.at/tickets-preise/lieblings-steirer-saisonkarten/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene 720,00 792,00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "kaerntner-skipass",
+      "name": "Kärntner Skipass Saisonkarte Kärnten & Osttirol",
+      "color": "#c43b6e",
+      "price_note": "Presale from 2026-09-09. Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Family, weekday, and loyalty variants are not applied automatically. Proof-required tariffs (student, apprentice, disability, or a local youth card) are not selected from a birth year.",
+      "url": "https://www.kaerntner-skipass.com/",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.kaerntner-skipass.com/",
+        "checkedAt": "2026-09-25",
+        "snippet": "Ein Skipass für 31 Skigebiete in Kärnten und Osttirol."
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Erwachsene (–2007)",
+            "birth_year_from": null,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Jugendliche (2008–2011)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2011
+          },
+          {
+            "label": "Kinder (2012–2020)",
+            "birth_year_from": 2012,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Kleinkinder (2021–)",
+            "birth_year_from": 2021,
+            "birth_year_to": null
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Erwachsene (–2007)",
+            "price_eur": 814,
+            "valid_until": "2026-11-01",
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene Online-Super-Vorverkauf i Nur im Onlineshop erhältlich! 9.9.2026 bis 1.11.2026 € 814,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2007)",
+            "price_eur": 840,
+            "valid_until": "2026-12-08",
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "9.9.2026 bis 8.12.2026 € 840,00 € 884,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2007)",
+            "price_eur": 884,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "9.12.2026 bis 31.5.2027 € 884,00 Erwachsene Personen mit Behinderung"
+            }
+          },
+          {
+            "bracket": "Jugendliche (2008–2011)",
+            "price_eur": 611,
+            "valid_until": "2026-11-01",
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugendliche Online-Super-Vorverkauf i Nur im Onlineshop erhältlich! 9.9.2026 bis 1.11.2026 € 611,00"
+            }
+          },
+          {
+            "bracket": "Jugendliche (2008–2011)",
+            "price_eur": 630,
+            "valid_until": "2026-12-08",
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "9.9.2026 bis 8.12.2026 € 630,00 € 663,00"
+            }
+          },
+          {
+            "bracket": "Jugendliche (2008–2011)",
+            "price_eur": 663,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "9.12.2026 bis 31.5.2027 € 663,00 Kinder Online"
+            }
+          },
+          {
+            "bracket": "Kinder (2012–2020)",
+            "price_eur": 407,
+            "valid_until": "2026-11-01",
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder Online-Super-Vorverkauf i Nur im Onlineshop erhältlich! 9.9.2026 bis 1.11.2026 € 407,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2012–2020)",
+            "price_eur": 420,
+            "valid_until": "2026-12-08",
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "9.9.2026 bis 8.12.2026 € 420,00 € 442,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2012–2020)",
+            "price_eur": 442,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "9.12.2026 bis 31.5.2027 € 442,00 Kinder mit Behinderung"
+            }
+          },
+          {
+            "bracket": "Kleinkinder (2021–)",
+            "price_eur": 74,
+            "valid_until": "2026-11-01",
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kleinkinder Online-Super-Vorverkauf i Nur im Onlineshop erhältlich! 9.9.2026 bis 1.11.2026 € 74,00"
+            }
+          },
+          {
+            "bracket": "Kleinkinder (2021–)",
+            "price_eur": 76,
+            "valid_until": "2026-12-08",
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "9.9.2026 bis 8.12.2026 € 76,00 € 80,00"
+            }
+          },
+          {
+            "bracket": "Kleinkinder (2021–)",
+            "price_eur": 80,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.kaerntner-skipass.com/saisonkarte/",
+              "checkedAt": "2026-09-25",
+              "snippet": "9.12.2026 bis 31.5.2027 € 80,00 Übersicht Jahrgänge"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "lungo-wintercard",
+      "name": "LUNGO WinterCard",
+      "color": "#b45309",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Family, weekday, and loyalty variants are not applied automatically.",
+      "url": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+        "checkedAt": "2026-09-25",
+        "snippet": "PREISE 2026 / 2027"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Jugend (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Ermäßigte (U25) (2001–2007)",
+            "birth_year_from": 2001,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Ermäßigte (Senioren) (–1962)",
+            "birth_year_from": null,
+            "birth_year_to": 1962
+          },
+          {
+            "label": "Erwachsene (1963–2000)",
+            "birth_year_from": 1963,
+            "birth_year_to": 2000,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 374,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder 1 children ................................ Euro 374,00 ...................................... Euro 394,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 394,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder 1 children ................................ Euro 374,00 ...................................... Euro 394,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 579,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugendliche 2 teens .......................... Euro 579,00 ...................................... Euro 599,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 599,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugendliche 2 teens .......................... Euro 579,00 ...................................... Euro 599,00"
+            }
+          },
+          {
+            "bracket": "Ermäßigte (U25) (2001–2007)",
+            "price_eur": 669,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Ermäßigte 3 reduced ....................... Euro 669,00 ...................................... Euro 699,00"
+            }
+          },
+          {
+            "bracket": "Ermäßigte (U25) (2001–2007)",
+            "price_eur": 699,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Ermäßigte 3 reduced ....................... Euro 669,00 ...................................... Euro 699,00"
+            }
+          },
+          {
+            "bracket": "Ermäßigte (Senioren) (–1962)",
+            "price_eur": 669,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Ermäßigte 3 reduced ....................... Euro 669,00 ...................................... Euro 699,00"
+            }
+          },
+          {
+            "bracket": "Ermäßigte (Senioren) (–1962)",
+            "price_eur": 699,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Ermäßigte 3 reduced ....................... Euro 669,00 ...................................... Euro 699,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (1963–2000)",
+            "price_eur": 810,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene adults .......................... Euro 810,00 ...................................... Euro 840,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (1963–2000)",
+            "price_eur": 840,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.lungo.at/fileadmin/user_upload/PDF/LUNGO_Preise_2026-2027_WEB.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene adults .......................... Euro 810,00 ...................................... Euro 840,00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "sunnycard",
+      "name": "SunnyCard",
+      "color": "#2458a8",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Family, weekday, and loyalty variants are not applied automatically.",
+      "url": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+        "checkedAt": "2026-09-25",
+        "snippet": "Die SunnyCard ist mehr als eine klassische Saisonkarte, denn sie ermöglicht Skivergnügen in gleich acht Skigebieten in Österreich und Südtirol."
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "U25 (2001–2007)",
+            "birth_year_from": 2001,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Jugend (2008–2011)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2011
+          },
+          {
+            "label": "Kind (2012–)",
+            "birth_year_from": 2012,
+            "birth_year_to": null
+          },
+          {
+            "label": "Erwachsen (–2000)",
+            "birth_year_from": null,
+            "birth_year_to": 2000,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "U25 (2001–2007)",
+            "price_eur": 506,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+              "checkedAt": "2026-09-25",
+              "snippet": "SunnyCard (Kauf bis 31.10.2026) € 594,00 € 506,00 € 475,00 € 298,00"
+            }
+          },
+          {
+            "bracket": "U25 (2001–2007)",
+            "price_eur": 632,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+              "checkedAt": "2026-09-25",
+              "snippet": "SunnyCard (Kauf ab 01.11.2026) € 743,00 € 632,00 € 594,00 € 372,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2011)",
+            "price_eur": 475,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+              "checkedAt": "2026-09-25",
+              "snippet": "SunnyCard (Kauf bis 31.10.2026) € 594,00 € 506,00 € 475,00 € 298,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2011)",
+            "price_eur": 594,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+              "checkedAt": "2026-09-25",
+              "snippet": "SunnyCard (Kauf ab 01.11.2026) € 743,00 € 632,00 € 594,00 € 372,00"
+            }
+          },
+          {
+            "bracket": "Kind (2012–)",
+            "price_eur": 298,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+              "checkedAt": "2026-09-25",
+              "snippet": "SunnyCard (Kauf bis 31.10.2026) € 594,00 € 506,00 € 475,00 € 298,00"
+            }
+          },
+          {
+            "bracket": "Kind (2012–)",
+            "price_eur": 372,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+              "checkedAt": "2026-09-25",
+              "snippet": "SunnyCard (Kauf ab 01.11.2026) € 743,00 € 632,00 € 594,00 € 372,00"
+            }
+          },
+          {
+            "bracket": "Erwachsen (–2000)",
+            "price_eur": 594,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+              "checkedAt": "2026-09-25",
+              "snippet": "SunnyCard (Kauf bis 31.10.2026) € 594,00 € 506,00 € 475,00 € 298,00"
+            }
+          },
+          {
+            "bracket": "Erwachsen (–2000)",
+            "price_eur": 743,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://skisport.com/hinterstoder/de/tickets-preise/sunnycard",
+              "checkedAt": "2026-09-25",
+              "snippet": "SunnyCard (Kauf ab 01.11.2026) € 743,00 € 632,00 € 594,00 € 372,00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dachstein-west-saisonkarte",
+      "name": "Dachstein West Saisonkarte",
+      "color": "#3d6b2f",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Family, weekday, and loyalty variants are not applied automatically.",
+      "url": "https://www.bbds.at/de/tickets/saisonkarten",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+        "checkedAt": "2026-09-25",
+        "snippet": "Die Dachstein West Saisonkarte ermöglicht den Zugang zu folgenden 8 Skigebieten:"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "U25 (2001–2007)",
+            "birth_year_from": 2001,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Jugend (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Erwachsene (–2000)",
+            "birth_year_from": null,
+            "birth_year_to": 2000,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "U25 (2001–2007)",
+            "price_eur": 463,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 579,00 U25 € 463,00 Jugend € 318,00 Kinder € 182,00"
+            }
+          },
+          {
+            "bracket": "U25 (2001–2007)",
+            "price_eur": 479,
+            "valid_until": "2026-12-06",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 599,00 U25 € 479,00 Jugend € 329,00 Kinder € 189,00"
+            }
+          },
+          {
+            "bracket": "U25 (2001–2007)",
+            "price_eur": 779,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 779,00 U25 € 779,00 Jugend € 428,00 Kinder € 245,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 318,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 579,00 U25 € 463,00 Jugend € 318,00 Kinder € 182,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 329,
+            "valid_until": "2026-12-06",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 599,00 U25 € 479,00 Jugend € 329,00 Kinder € 189,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 428,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 779,00 U25 € 779,00 Jugend € 428,00 Kinder € 245,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 182,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 579,00 U25 € 463,00 Jugend € 318,00 Kinder € 182,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 189,
+            "valid_until": "2026-12-06",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 599,00 U25 € 479,00 Jugend € 329,00 Kinder € 189,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 245,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 779,00 U25 € 779,00 Jugend € 428,00 Kinder € 245,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2000)",
+            "price_eur": 579,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 579,00 U25 € 463,00 Jugend € 318,00 Kinder € 182,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2000)",
+            "price_eur": 599,
+            "valid_until": "2026-12-06",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 599,00 U25 € 479,00 Jugend € 329,00 Kinder € 189,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2000)",
+            "price_eur": 779,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene € 779,00 U25 € 779,00 Jugend € 428,00 Kinder € 245,00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "snow-and-fun-card",
+      "name": "Snow & Fun Card",
+      "color": "#9333ea",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable.",
+      "url": "https://www.bbds.at/de/tickets/saisonkarten",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+        "checkedAt": "2026-09-25",
+        "snippet": "Snow & Fun Card Gültig in der Wintersaison 2026/27"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Jugend (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Erwachsene (–2007)",
+            "birth_year_from": null,
+            "birth_year_to": 2007,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 345,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 31.10.2026 Erwachsene € 599,00 Jugend € 345,00 Kinder € 195,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 445,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normaltarif ab 01.11.2026 Erwachsene € 795,00 Jugend € 445,00 Kinder € 259,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 195,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 31.10.2026 Erwachsene € 599,00 Jugend € 345,00 Kinder € 195,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 259,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normaltarif ab 01.11.2026 Erwachsene € 795,00 Jugend € 445,00 Kinder € 259,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2007)",
+            "price_eur": 599,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 31.10.2026 Erwachsene € 599,00 Jugend € 345,00 Kinder € 195,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2007)",
+            "price_eur": 795,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.bbds.at/de/tickets/saisonkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normaltarif ab 01.11.2026 Erwachsene € 795,00 Jugend € 445,00 Kinder € 259,00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "traunsee-card",
+      "name": "Traunsee Card (Feuerkogel winter season card)",
+      "color": "#be123c",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable.",
+      "url": "https://www.feuerkogel.info/de/angebote-tickets/skipass/saisonkarten-feuerkogel",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.feuerkogel.info/de/angebote-tickets/skipass/saisonkarten-feuerkogel",
+        "checkedAt": "2026-09-25",
+        "snippet": "Traunsee Card Saisonkarte: www.feuerkogel.info"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Jugend (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Erwachsene (–2007)",
+            "birth_year_from": null,
+            "birth_year_to": 2007,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 359,
+            "valid_until": "2026-12-06",
+            "source": {
+              "sourceUrl": "https://www.feuerkogel.info/de/angebote-tickets/skipass/saisonkarten-feuerkogel",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 06.12.2026 Erwachsene 492,- Jugend 359,- Kinder 197,-"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 436,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.feuerkogel.info/de/angebote-tickets/skipass/saisonkarten-feuerkogel",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normalverkauf ab 07.12.2026 Erwachsene 590,- Jugend 436,- Kinder 283,-"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 197,
+            "valid_until": "2026-12-06",
+            "source": {
+              "sourceUrl": "https://www.feuerkogel.info/de/angebote-tickets/skipass/saisonkarten-feuerkogel",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 06.12.2026 Erwachsene 492,- Jugend 359,- Kinder 197,-"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 283,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.feuerkogel.info/de/angebote-tickets/skipass/saisonkarten-feuerkogel",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normalverkauf ab 07.12.2026 Erwachsene 590,- Jugend 436,- Kinder 283,-"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2007)",
+            "price_eur": 492,
+            "valid_until": "2026-12-06",
+            "source": {
+              "sourceUrl": "https://www.feuerkogel.info/de/angebote-tickets/skipass/saisonkarten-feuerkogel",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 06.12.2026 Erwachsene 492,- Jugend 359,- Kinder 197,-"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2007)",
+            "price_eur": 590,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.feuerkogel.info/de/angebote-tickets/skipass/saisonkarten-feuerkogel",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normalverkauf ab 07.12.2026 Erwachsene 590,- Jugend 436,- Kinder 283,-"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "superskicard-premium",
+      "name": "SuperSkiCard Premium",
+      "color": "#0369a1",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable.",
+      "url": "https://www.superskicard.com/de/superskicard-premium.html",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.superskicard.com/de/superskicard-premium.html",
+        "checkedAt": "2026-09-25",
+        "snippet": "Mit der SuperSkiCard Premium haben Sie den Schlüssel für bis zu 23 Skiregionen in Österreich und Bayern in der Jackentasche."
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "U25 (2001–2007)",
+            "birth_year_from": 2001,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Jugendliche (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Erwachsene (–2000)",
+            "birth_year_from": null,
+            "birth_year_to": 2000,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "U25 (2001–2007)",
+            "price_eur": 890,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/de/superskicard-premium.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf bis 03.12.2026 € 1.049,- € 890,- € 760,- € 499,-"
+            }
+          },
+          {
+            "bracket": "U25 (2001–2007)",
+            "price_eur": 1190,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/de/superskicard-premium.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf ab 04.12.2026 € 1.190,- € 1.190,- € 890,- € 595,-"
+            }
+          },
+          {
+            "bracket": "Jugendliche (2008–2010)",
+            "price_eur": 760,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/de/superskicard-premium.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf bis 03.12.2026 € 1.049,- € 890,- € 760,- € 499,-"
+            }
+          },
+          {
+            "bracket": "Jugendliche (2008–2010)",
+            "price_eur": 890,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/de/superskicard-premium.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf ab 04.12.2026 € 1.190,- € 1.190,- € 890,- € 595,-"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 499,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/de/superskicard-premium.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf bis 03.12.2026 € 1.049,- € 890,- € 760,- € 499,-"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 595,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/de/superskicard-premium.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf ab 04.12.2026 € 1.190,- € 1.190,- € 890,- € 595,-"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2000)",
+            "price_eur": 1049,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/de/superskicard-premium.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf bis 03.12.2026 € 1.049,- € 890,- € 760,- € 499,-"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2000)",
+            "price_eur": 1190,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superskicard.com/de/superskicard-premium.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kauf ab 04.12.2026 € 1.190,- € 1.190,- € 890,- € 595,-"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ski-amade-all-in-card-white",
+      "name": "Ski amadé ALL-IN Card White",
+      "color": "#4d7c0f",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Family, weekday, and loyalty variants are not applied automatically.",
+      "url": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+        "checkedAt": "2026-09-25",
+        "snippet": "Ski amadé ALL-IN Card White Ski amadé 10. Oktober 2026 bis 02. Mai 2027"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Erwachsen (–2000)",
+            "birth_year_from": null,
+            "birth_year_to": 2000
+          },
+          {
+            "label": "U25 (2001–2007)",
+            "birth_year_from": 2001,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Jugend (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kind (2011–2020)",
             "birth_year_from": 2011,
             "birth_year_to": 2020
           }
         ],
         "periods": [
           {
-            "bracket": "Adult",
-            "price_eur": 1080,
-            "valid_until": "2026-10-31",
+            "bracket": "Erwachsen (–2000)",
+            "price_eur": 855,
+            "valid_until": "2026-12-03",
             "source": {
-              "sourceUrl": "https://www.snowcard.tirol.at/",
-              "checkedAt": "2026-09-25"
+              "sourceUrl": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Ski amadé ALL-IN Card White Vorverkauf bis 03.12.2026 Ticket kaufen Erwachsen ab Jg. 2000 € 855,00 U25 2001 - 2007 € 601,00 Jugend 2008 – 2010 € 336,00 Kind 2011 – 2020 € 225,00"
             }
           },
           {
-            "bracket": "Adult",
-            "price_eur": 1227,
+            "bracket": "Erwachsen (–2000)",
+            "price_eur": 914,
             "valid_until": null,
             "source": {
-              "sourceUrl": "https://www.snowcard.tirol.at/",
-              "checkedAt": "2026-09-25"
+              "sourceUrl": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normaltarif ab 04.12.2026 Ticket kaufen Erwachsen ab Jg. 2000 € 914,00 U25 2001 - 2007 € 795,00 Jugend 2008 – 2010 € 646,00 Kind 2011 – 2020 € 359,00"
             }
           },
           {
-            "bracket": "Youth",
+            "bracket": "U25 (2001–2007)",
+            "price_eur": 601,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Ski amadé ALL-IN Card White Vorverkauf bis 03.12.2026 Ticket kaufen Erwachsen ab Jg. 2000 € 855,00 U25 2001 - 2007 € 601,00 Jugend 2008 – 2010 € 336,00 Kind 2011 – 2020 € 225,00"
+            }
+          },
+          {
+            "bracket": "U25 (2001–2007)",
+            "price_eur": 795,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normaltarif ab 04.12.2026 Ticket kaufen Erwachsen ab Jg. 2000 € 914,00 U25 2001 - 2007 € 795,00 Jugend 2008 – 2010 € 646,00 Kind 2011 – 2020 € 359,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 336,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Ski amadé ALL-IN Card White Vorverkauf bis 03.12.2026 Ticket kaufen Erwachsen ab Jg. 2000 € 855,00 U25 2001 - 2007 € 601,00 Jugend 2008 – 2010 € 336,00 Kind 2011 – 2020 € 225,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 646,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normaltarif ab 04.12.2026 Ticket kaufen Erwachsen ab Jg. 2000 € 914,00 U25 2001 - 2007 € 795,00 Jugend 2008 – 2010 € 646,00 Kind 2011 – 2020 € 359,00"
+            }
+          },
+          {
+            "bracket": "Kind (2011–2020)",
+            "price_eur": 225,
+            "valid_until": "2026-12-03",
+            "source": {
+              "sourceUrl": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Ski amadé ALL-IN Card White Vorverkauf bis 03.12.2026 Ticket kaufen Erwachsen ab Jg. 2000 € 855,00 U25 2001 - 2007 € 601,00 Jugend 2008 – 2010 € 336,00 Kind 2011 – 2020 € 225,00"
+            }
+          },
+          {
+            "bracket": "Kind (2011–2020)",
+            "price_eur": 359,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://tickets.skiamade.com/de/wintertickets/dauerkarten",
+              "checkedAt": "2026-09-25",
+              "snippet": "Normaltarif ab 04.12.2026 Ticket kaufen Erwachsen ab Jg. 2000 € 914,00 U25 2001 - 2007 € 795,00 Jugend 2008 – 2010 € 646,00 Kind 2011 – 2020 € 359,00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "snow-card-tirol",
+      "name": "Snow Card Tirol",
+      "color": "#a16207",
+      "price_note": "Presale from 2026-09-26. Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable.",
+      "url": "https://www.snowcard.tirol.at/",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.snowcard.tirol.at/",
+        "checkedAt": "2026-09-25",
+        "snippet": "Snow Card Tirol Deine Eintrittskarte zu über 90 Skigebieten!"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Jugendliche (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Erwachsene (–2007)",
+            "birth_year_from": null,
+            "birth_year_to": 2007,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Jugendliche (2008–2010)",
             "price_eur": 658,
             "valid_until": "2026-10-31",
             "source": {
               "sourceUrl": "https://www.snowcard.tirol.at/",
-              "checkedAt": "2026-09-25"
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugendliche Jahrgang 2008 bis 2010 982,- Euro VVK*/658,-EURO"
             }
           },
           {
-            "bracket": "Youth",
+            "bracket": "Jugendliche (2008–2010)",
             "price_eur": 982,
             "valid_until": null,
             "source": {
               "sourceUrl": "https://www.snowcard.tirol.at/",
-              "checkedAt": "2026-09-25"
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugendliche Jahrgang 2008 bis 2010 982,- Euro VVK*/658,-EURO"
             }
           },
           {
-            "bracket": "Child",
+            "bracket": "Kinder (2011–2020)",
             "price_eur": 367,
             "valid_until": "2026-10-31",
             "source": {
               "sourceUrl": "https://www.snowcard.tirol.at/",
-              "checkedAt": "2026-09-25"
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder Jahrgang 2011 bis 2020 613,- Euro VVK*/367,-EURO"
             }
           },
           {
-            "bracket": "Child",
+            "bracket": "Kinder (2011–2020)",
             "price_eur": 613,
             "valid_until": null,
             "source": {
               "sourceUrl": "https://www.snowcard.tirol.at/",
-              "checkedAt": "2026-09-25"
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder Jahrgang 2011 bis 2020 613,- Euro VVK*/367,-EURO"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2007)",
+            "price_eur": 1080,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.snowcard.tirol.at/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene 1.227,- Euro VVK*/1.080,-EURO"
+            }
+          },
+          {
+            "bracket": "Erwachsene (–2007)",
+            "price_eur": 1227,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.snowcard.tirol.at/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene 1.227,- Euro VVK*/1.080,-EURO"
             }
           }
         ]
-      },
+      }
+    },
+    {
+      "id": "freizeitticket-tirol",
+      "name": "Freizeitticket Tirol",
+      "color": "#4338ca",
+      "price_note": "Presale from 2026-10-01. Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable.",
+      "url": "https://www.freizeitticket.at/ticket/preise/",
+      "provisional": false,
+      "restricted": false,
       "source": {
-        "sourceUrl": "https://www.snowcard.tirol.at/",
-        "checkedAt": "2026-09-25"
+        "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+        "checkedAt": "2026-09-25",
+        "snippet": "PREISE 2026/27 Vorverkaufstarife"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Kinder (2011–)",
+            "birth_year_from": 2011,
+            "birth_year_to": null
+          },
+          {
+            "label": "Jugend (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "U23 (2003–2007)",
+            "birth_year_from": 2003,
+            "birth_year_to": 2007
+          },
+          {
+            "label": "Erwachsene (1962–2002)",
+            "birth_year_from": 1962,
+            "birth_year_to": 2002
+          },
+          {
+            "label": "Senior (–1961)",
+            "birth_year_from": null,
+            "birth_year_to": 1961
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Kinder (2011–)",
+            "price_eur": 410,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder Jahrgänge 2011 und jünger Vorverkaufspreis 1.10.–31.10.2026 € 410,-"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–)",
+            "price_eur": 472,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder Jahrgänge 2011 und jünger Normalpreis ab 1.11.2026 € 472,-"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 631,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "JUGEND Jahrgänge 2008 bis 2010 Vorverkaufspreis 1.10.–31.10.2026 € 631,-"
+            }
+          },
+          {
+            "bracket": "Jugend (2008–2010)",
+            "price_eur": 726,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "JUGEND Jahrgänge 2008 bis 2010 Normalpreis ab 1.11.2026 € 726,-"
+            }
+          },
+          {
+            "bracket": "U23 (2003–2007)",
+            "price_eur": 710,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "U23 Jahrgänge 2003 bis 2007 Vorverkaufspreis 1.10.–31.10.2026 € 710,-"
+            }
+          },
+          {
+            "bracket": "U23 (2003–2007)",
+            "price_eur": 817,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "U23 Jahrgänge 2003 bis 2007 Normalpreis ab 1.11.2026 € 817,-"
+            }
+          },
+          {
+            "bracket": "Erwachsene (1962–2002)",
+            "price_eur": 789,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene Jahrgänge 1962 bis 2002 Vorverkaufspreis 1.10.–31.10.2026 € 789,-"
+            }
+          },
+          {
+            "bracket": "Erwachsene (1962–2002)",
+            "price_eur": 908,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene Jahrgänge 1962 bis 2002 Normalpreis ab 1.11.2026 € 908,-"
+            }
+          },
+          {
+            "bracket": "Senior (–1961)",
+            "price_eur": 750,
+            "valid_until": "2026-10-31",
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "SENIOREN ab Jahrgang 1961 und älter Vorverkaufspreis 1.10.–31.10.2026 € 750,-"
+            }
+          },
+          {
+            "bracket": "Senior (–1961)",
+            "price_eur": 862,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.freizeitticket.at/ticket/preise/",
+              "checkedAt": "2026-09-25",
+              "snippet": "SENIOREN ab Jahrgang 1961 und älter Normalpreis ab 1.11.2026 € 862,-"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ski-arlberg-saisonkarte",
+      "name": "Saisonkarte Ski Arlberg",
+      "color": "#0e7490",
+      "price_note": "Presale from 2026-11-27. Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Provisional as of August 2026; changes possible.",
+      "url": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter",
+      "provisional": true,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter",
+        "checkedAt": "2026-09-25",
+        "snippet": "Ski Arlberg Skipässe im Überblick"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Schneemann (2019–)",
+            "birth_year_from": 2019,
+            "birth_year_to": null
+          },
+          {
+            "label": "Kinder (2011–2018)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2018
+          },
+          {
+            "label": "Jugend (2007–2010)",
+            "birth_year_from": 2007,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Erwachsene (1963–2006)",
+            "birth_year_from": 1963,
+            "birth_year_to": 2006,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          },
+          {
+            "label": "Senioren (1953–1962)",
+            "birth_year_from": 1953,
+            "birth_year_to": 1962
+          },
+          {
+            "label": "Senior Aktiv (–1952)",
+            "birth_year_from": null,
+            "birth_year_to": 1952
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Schneemann (2019–)",
+            "price_eur": 11,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter",
+              "checkedAt": "2026-09-25",
+              "snippet": "Schneemann ⁴ ⁵ € 11,00 Senior-Aktiv ⁴ € 237,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2018)",
+            "price_eur": 345,
+            "valid_until": "2026-12-10",
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter/vorverkauf-winter-26-27",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder (2011-2018) € 345,00"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2018)",
+            "price_eur": 733,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kind ⁴ ⁵ € 733,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2007–2010)",
+            "price_eur": 676,
+            "valid_until": "2026-12-10",
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter/vorverkauf-winter-26-27",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugend (2007-2010) / Senioren (1953-1962) € 676,00"
+            }
+          },
+          {
+            "bracket": "Jugend (2007–2010)",
+            "price_eur": 1086,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugend, Senioren ⁴ € 1.086,00 Schneemann ⁴ ⁵ € 11,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (1963–2006)",
+            "price_eur": 840,
+            "valid_until": "2026-12-10",
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter/vorverkauf-winter-26-27",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte Ski Arlberg Vorverkaufspreis Erwachsene € 840,00"
+            }
+          },
+          {
+            "bracket": "Erwachsene (1963–2006)",
+            "price_eur": 1272,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonskipass Erwachsene € 1.272,00"
+            }
+          },
+          {
+            "bracket": "Senioren (1953–1962)",
+            "price_eur": 676,
+            "valid_until": "2026-12-10",
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter/vorverkauf-winter-26-27",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugend (2007-2010) / Senioren (1953-1962) € 676,00"
+            }
+          },
+          {
+            "bracket": "Senioren (1953–1962)",
+            "price_eur": 1086,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugend, Senioren ⁴ € 1.086,00 Schneemann ⁴ ⁵ € 11,00"
+            }
+          },
+          {
+            "bracket": "Senior Aktiv (–1952)",
+            "price_eur": 237,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.skiarlberg.at/de/tickets-saisonzeiten/preise-tickets-winter",
+              "checkedAt": "2026-09-25",
+              "snippet": "Senior-Aktiv ⁴ € 237,00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "3taelerpass-saisonkarte",
+      "name": "3TälerPass-Saisonkarte",
+      "color": "#166534",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Family, weekday, and loyalty variants are not applied automatically. Proof-required tariffs (student, apprentice, disability, or a local youth card) are not selected from a birth year.",
+      "url": "https://www.3taeler.at/de/3taelerpass-saisonkarte.html",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.3taeler.at/de/3taelerpass-saisonkarte.html",
+        "checkedAt": "2026-09-25",
+        "snippet": "Gültig für die Wintersaison 2026/27"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Erwachsene (1963–2007)",
+            "birth_year_from": 1963,
+            "birth_year_to": 2007,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          },
+          {
+            "label": "Senioren (1948–1962)",
+            "birth_year_from": 1948,
+            "birth_year_to": 1962,
+            "note": "Birth-year range is implied by the neighbouring published brackets."
+          },
+          {
+            "label": "Jugendliche (2008–2010)",
+            "birth_year_from": 2008,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Schüler I (2011–2015)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2015
+          },
+          {
+            "label": "Schüler II (2016–2020)",
+            "birth_year_from": 2016,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Schneemann (2021–)",
+            "birth_year_from": 2021,
+            "birth_year_to": null
+          },
+          {
+            "label": "Senioren II (–1947)",
+            "birth_year_from": null,
+            "birth_year_to": 1947
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Erwachsene (1963–2007)",
+            "price_eur": 682,
+            "valid_until": "2026-12-13",
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 682,- 587,- 440,- 286,- 223,- 66,-"
+            }
+          },
+          {
+            "bracket": "Erwachsene (1963–2007)",
+            "price_eur": 775,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 775,- 666,- 500,- 325,- 253,- 66,-"
+            }
+          },
+          {
+            "bracket": "Senioren (1948–1962)",
+            "price_eur": 587,
+            "valid_until": "2026-12-13",
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 682,- 587,- 440,- 286,- 223,- 66,-"
+            }
+          },
+          {
+            "bracket": "Senioren (1948–1962)",
+            "price_eur": 666,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 775,- 666,- 500,- 325,- 253,- 66,-"
+            }
+          },
+          {
+            "bracket": "Jugendliche (2008–2010)",
+            "price_eur": 440,
+            "valid_until": "2026-12-13",
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 682,- 587,- 440,- 286,- 223,- 66,-"
+            }
+          },
+          {
+            "bracket": "Jugendliche (2008–2010)",
+            "price_eur": 500,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 775,- 666,- 500,- 325,- 253,- 66,-"
+            }
+          },
+          {
+            "bracket": "Schüler I (2011–2015)",
+            "price_eur": 286,
+            "valid_until": "2026-12-13",
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 682,- 587,- 440,- 286,- 223,- 66,-"
+            }
+          },
+          {
+            "bracket": "Schüler I (2011–2015)",
+            "price_eur": 325,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 775,- 666,- 500,- 325,- 253,- 66,-"
+            }
+          },
+          {
+            "bracket": "Schüler II (2016–2020)",
+            "price_eur": 223,
+            "valid_until": "2026-12-13",
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 682,- 587,- 440,- 286,- 223,- 66,-"
+            }
+          },
+          {
+            "bracket": "Schüler II (2016–2020)",
+            "price_eur": 253,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 775,- 666,- 500,- 325,- 253,- 66,-"
+            }
+          },
+          {
+            "bracket": "Schneemann (2021–)",
+            "price_eur": 66,
+            "valid_until": "2026-12-13",
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 682,- 587,- 440,- 286,- 223,- 66,-"
+            }
+          },
+          {
+            "bracket": "Schneemann (2021–)",
+            "price_eur": 66,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Saisonkarte 775,- 666,- 500,- 325,- 253,- 66,-"
+            }
+          },
+          {
+            "bracket": "Senioren II (–1947)",
+            "price_eur": 175,
+            "valid_until": "2026-12-13",
+            "source": {
+              "sourceUrl": "https://www.3taeler.at/media/3taelerpass-saisonkartenpreise-2026-27.pdf",
+              "checkedAt": "2026-09-25",
+              "snippet": "Senioren II (Jg. 1947 und älter) EUR 175,–."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "saisonkarte-oberstdorf-kleinwalsertal",
+      "name": "Saisonkarte Oberstdorf · Kleinwalsertal",
+      "color": "#7c3aed",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Proof-required tariffs (student, apprentice, disability, or a local youth card) are not selected from a birth year.",
+      "url": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+        "checkedAt": "2026-09-25",
+        "snippet": "Skifahrer aufgepasst - Die Saisonkarte Oberstdorf - Kleinwalsertal"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Erwachsener (1967–2008)",
+            "birth_year_from": 1967,
+            "birth_year_to": 2008
+          },
+          {
+            "label": "Senior (1947–1966)",
+            "birth_year_from": 1947,
+            "birth_year_to": 1966
+          },
+          {
+            "label": "Super-Senior (–1946)",
+            "birth_year_from": null,
+            "birth_year_to": 1946
+          },
+          {
+            "label": "Jugendlicher (2009–2010)",
+            "birth_year_from": 2009,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kind (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Murmele (2021–)",
+            "birth_year_from": 2021,
+            "birth_year_to": null
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Erwachsener (1967–2008)",
+            "price_eur": 636,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 15.12.2026 € 636,00 € 604,00 € 169,00 € 382,00 € 286,00 € 169,00 € 108,00"
+            }
+          },
+          {
+            "bracket": "Erwachsener (1967–2008)",
+            "price_eur": 668,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Standardpreis ab 16.12.2026 € 668,00 € 634,00 € 255,00 € 401,00 € 300,00 € 255,00 € 160,00"
+            }
+          },
+          {
+            "bracket": "Senior (1947–1966)",
+            "price_eur": 604,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 15.12.2026 € 636,00 € 604,00 € 169,00 € 382,00 € 286,00 € 169,00 € 108,00"
+            }
+          },
+          {
+            "bracket": "Senior (1947–1966)",
+            "price_eur": 634,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Standardpreis ab 16.12.2026 € 668,00 € 634,00 € 255,00 € 401,00 € 300,00 € 255,00 € 160,00"
+            }
+          },
+          {
+            "bracket": "Super-Senior (–1946)",
+            "price_eur": 169,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 15.12.2026 € 636,00 € 604,00 € 169,00 € 382,00 € 286,00 € 169,00 € 108,00"
+            }
+          },
+          {
+            "bracket": "Super-Senior (–1946)",
+            "price_eur": 255,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Standardpreis ab 16.12.2026 € 668,00 € 634,00 € 255,00 € 401,00 € 300,00 € 255,00 € 160,00"
+            }
+          },
+          {
+            "bracket": "Jugendlicher (2009–2010)",
+            "price_eur": 286,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 15.12.2026 € 636,00 € 604,00 € 169,00 € 382,00 € 286,00 € 169,00 € 108,00"
+            }
+          },
+          {
+            "bracket": "Jugendlicher (2009–2010)",
+            "price_eur": 300,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Standardpreis ab 16.12.2026 € 668,00 € 634,00 € 255,00 € 401,00 € 300,00 € 255,00 € 160,00"
+            }
+          },
+          {
+            "bracket": "Kind (2011–2020)",
+            "price_eur": 169,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 15.12.2026 € 636,00 € 604,00 € 169,00 € 382,00 € 286,00 € 169,00 € 108,00"
+            }
+          },
+          {
+            "bracket": "Kind (2011–2020)",
+            "price_eur": 255,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Standardpreis ab 16.12.2026 € 668,00 € 634,00 € 255,00 € 401,00 € 300,00 € 255,00 € 160,00"
+            }
+          },
+          {
+            "bracket": "Murmele (2021–)",
+            "price_eur": 108,
+            "valid_until": "2026-12-15",
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Vorverkauf bis 15.12.2026 € 636,00 € 604,00 € 169,00 € 382,00 € 286,00 € 169,00 € 108,00"
+            }
+          },
+          {
+            "bracket": "Murmele (2021–)",
+            "price_eur": 160,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.ok-bergbahnen.com/preisinformationen/saisonkarte-oberstdorf-kleinwalsertal.html",
+              "checkedAt": "2026-09-25",
+              "snippet": "Standardpreis ab 16.12.2026 € 668,00 € 634,00 € 255,00 € 401,00 € 300,00 € 255,00 € 160,00"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "superschnee-saisonkarte",
+      "name": "SUPERSCHNEE Saisonkarte",
+      "color": "#0f766e",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Family, weekday, and loyalty variants are not applied automatically. Proof-required tariffs (student, apprentice, disability, or a local youth card) are not selected from a birth year.",
+      "url": "https://www.superschnee.com/tarife/preise",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.superschnee.com/tarife/preise",
+        "checkedAt": "2026-09-25",
+        "snippet": "PREISE 2026/27 Saison- und Jahreskarten"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Erwachsene (–2008)",
+            "birth_year_from": null,
+            "birth_year_to": 2008
+          },
+          {
+            "label": "Jugendliche (2009–2010)",
+            "birth_year_from": 2009,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Murmele (2021–)",
+            "birth_year_from": 2021,
+            "birth_year_to": null
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Erwachsene (–2008)",
+            "price_eur": 707,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superschnee.com/tarife/preise",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene (Jg. 2008 und älter) 707,00 €"
+            }
+          },
+          {
+            "bracket": "Jugendliche (2009–2010)",
+            "price_eur": 318,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superschnee.com/tarife/preise",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugendliche (Jg. 2009–2010) 318,00 €"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 233,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superschnee.com/tarife/preise",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder (Jg. 2011-2020) 233,00 €"
+            }
+          },
+          {
+            "bracket": "Murmele (2021–)",
+            "price_eur": 153,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superschnee.com/tarife/preise",
+              "checkedAt": "2026-09-25",
+              "snippet": "Murmele ** (Jg. 2021 und jünger) 153,00 €"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "allgaeu-gletscher-card",
+      "name": "Allgäu Gletscher Card",
+      "color": "#9a3412",
+      "price_note": "Season 2026/27. Prices follow this pass's own birth-year brackets and the purchase date. Where this pass publishes no bracket for a birth year, the price is unavailable. Proof-required tariffs (student, apprentice, disability, or a local youth card) are not selected from a birth year.",
+      "url": "https://www.superschnee.com/tarife/preise",
+      "provisional": false,
+      "restricted": false,
+      "source": {
+        "sourceUrl": "https://www.superschnee.com/tarife/preise",
+        "checkedAt": "2026-09-25",
+        "snippet": "ALLGÄU GLETSCHER CARD 2026/27"
+      },
+      "pricing": {
+        "brackets": [
+          {
+            "label": "Erwachsene (–2008)",
+            "birth_year_from": null,
+            "birth_year_to": 2008
+          },
+          {
+            "label": "Jugendliche (2009–2010)",
+            "birth_year_from": 2009,
+            "birth_year_to": 2010
+          },
+          {
+            "label": "Kinder (2011–2020)",
+            "birth_year_from": 2011,
+            "birth_year_to": 2020
+          },
+          {
+            "label": "Murmele (2021–)",
+            "birth_year_from": 2021,
+            "birth_year_to": null
+          }
+        ],
+        "periods": [
+          {
+            "bracket": "Erwachsene (–2008)",
+            "price_eur": 879,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superschnee.com/tarife/preise",
+              "checkedAt": "2026-09-25",
+              "snippet": "Erwachsene (Jg. 2008 und älter) 879,00 €"
+            }
+          },
+          {
+            "bracket": "Jugendliche (2009–2010)",
+            "price_eur": 703,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superschnee.com/tarife/preise",
+              "checkedAt": "2026-09-25",
+              "snippet": "Jugendliche (Jg. 2009-2010) 703,00 €"
+            }
+          },
+          {
+            "bracket": "Kinder (2011–2020)",
+            "price_eur": 483,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superschnee.com/tarife/preise",
+              "checkedAt": "2026-09-25",
+              "snippet": "Kinder (2011-2020) 483,00 €"
+            }
+          },
+          {
+            "bracket": "Murmele (2021–)",
+            "price_eur": 191,
+            "valid_until": null,
+            "source": {
+              "sourceUrl": "https://www.superschnee.com/tarife/preise",
+              "checkedAt": "2026-09-25",
+              "snippet": "Murmele* (2021 und jünger) 191,00 €"
+            }
+          }
+        ]
       }
     }
   ]

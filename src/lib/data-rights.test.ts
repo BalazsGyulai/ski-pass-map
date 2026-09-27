@@ -42,7 +42,11 @@ describe("data rights", () => {
     const hidden = parsed.data.resorts.resorts.filter((resort) => resort.verification === "unverified");
     expect(hidden.length).toBeGreaterThan(0);
     for (const resort of hidden) {
-      expect(resort.dayTicket).toBeNull();
+      expect(resort.hiddenReason).toBeTruthy();
     }
+    expect(parsed.data.passes.passes.some((pass) => pass.id === "steiermark-joker" || pass.id === "wildpass-saisonkarte-winter")).toBe(
+      false,
+    );
+    expect(parsed.data.passes.passes.find((pass) => pass.id === "ski-arlberg-saisonkarte")?.provisional).toBe(true);
   });
 });

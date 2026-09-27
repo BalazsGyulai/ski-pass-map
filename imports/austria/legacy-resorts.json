@@ -1,0 +1,3052 @@
+{
+  "generated": "2026-09-25",
+  "resorts": [
+    {
+      "id": "semmering-hirschenkogel",
+      "name": "Semmering Hirschenkogel (Zauberberg)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.semmering.com/",
+        "sourceUrl": "https://www.semmering.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": {
+        "value": {
+          "eur": 56.5,
+          "season": "2025/26"
+        },
+        "sourceUrl": "https://www.semmering.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-14"
+      },
+      "publicTransport": "Train (Südbahn, VOR) to Semmering station; walking distance/local bus to the gondola not verified – check winter timetable",
+      "snowpark": {
+        "value": true,
+        "sourceUrl": "https://www.skiregion-ostalpen.at/",
+        "checkedAt": "2026-09-25",
+        "snippet": "Ostalpen: Split-Park"
+      },
+      "nightSkiing": {
+        "value": true,
+        "sourceUrl": "https://www.skiregion-ostalpen.at/",
+        "checkedAt": "2026-09-25",
+        "snippet": "Ostalpen: daily floodlight skiing"
+      },
+      "notes": "The area straddles the Lower Austria/Styria border. The OpenStreetMap centroid reverse-geocodes to Styria, but the gondola base (Semmering-Kurort) is in Lower Austria."
+    },
+    {
+      "id": "moenichkirchen-mariensee",
+      "name": "Mönichkirchen / Mariensee (Schischaukel)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.erlebnisalm.com/",
+        "sourceUrl": "https://www.erlebnisalm.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-14"
+      },
+      "publicTransport": "Train to Aspang, then VOR regional bus to Mönichkirchen – verify timetable",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "st-corona-wexl-arena",
+      "name": "Wexl Arena St. Corona am Wechsel",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.wexlarena.at/",
+        "sourceUrl": "https://www.wexlarena.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-07"
+      },
+      "publicTransport": "VOR regional bus via Kirchberg am Wechsel / Aspang – verify timetable",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "puchberg-schneeberg",
+      "name": "Puchberg am Schneeberg (Familien-Skipark & Schneeberg Sesselbahn)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.schneebergsesselbahn.at/",
+        "sourceUrl": "https://www.schneebergsesselbahn.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": "Direct regional train Wiener Neustadt – Puchberg am Schneeberg (VOR); short walk/bus to the lifts",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "hochkar",
+      "name": "Hochkar (Göstling)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.hochkar.com/",
+        "sourceUrl": "https://www.hochkar.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-04 - 2027-04-04"
+      },
+      "publicTransport": "Train to Waidhofen/Ybbs or Amstetten area, then VOR bus / ski bus via Göstling – long trip, verify timetable",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "oetscher-lackenhof",
+      "name": "Ötscher / Lackenhof (Gaming)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.oetscher.at/",
+        "sourceUrl": "https://www.oetscher.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": "Train to Scheibbs/Gaming area, then VOR bus to Lackenhof – verify timetable",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "annaberg",
+      "name": "Annaberg",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.annaberg.info/",
+        "sourceUrl": "https://www.annaberg.info/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-14"
+      },
+      "publicTransport": "Mariazellerbahn (St. Pölten – Mariazell, VOR) to Annaberg area, then short bus/walk – verify",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "gemeindealpe-mitterbach",
+      "name": "Gemeindealpe Mitterbach",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.gemeindealpe.at/",
+        "sourceUrl": "https://www.gemeindealpe.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-14"
+      },
+      "publicTransport": "Mariazellerbahn to Mitterbach station (Lower Austria side); distance to the valley station not verified",
+      "snowpark": {
+        "value": true,
+        "sourceUrl": "https://www.skiregion-ostalpen.at/",
+        "checkedAt": "2026-09-25",
+        "snippet": "Ostalpen: snowpark, funslope"
+      },
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "maiszinken-lunz",
+      "name": "Maiszinken (Lunz am See)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://lunz.at/skigebiet-maiszinken",
+        "sourceUrl": "https://lunz.at/skigebiet-maiszinken",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": "VOR bus to Lunz am See; distance from the stop to the lifts not verified",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "koenigsberg-hollenstein",
+      "name": "Königsberg (Hollenstein an der Ybbs)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.koenigsberg.at/",
+        "sourceUrl": "https://www.koenigsberg.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": "VOR bus to Hollenstein an der Ybbs, distance from the stop to the lifts not verified",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Listed as a Niederösterreichische Bergerlebnispass partner for 2026/27. Lifts were taken over by a new operator (reduced, natural-snow operation announced). Check before going."
+    },
+    {
+      "id": "unterberg",
+      "name": "Unterberg (Pernitz/Muggendorf)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.schigebiet-unterberg.at/",
+        "sourceUrl": "https://www.schigebiet-unterberg.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Permanent end of lift operation announced Sept 2026 (no operating days in 24/25 and 25/26)."
+    },
+    {
+      "id": "turmkogel-puchenstuben",
+      "name": "Turmkogel Lifte (Puchenstuben)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.puchenstuben.at/wintertourismus/turmkogellifte/",
+        "sourceUrl": "https://www.puchenstuben.at/wintertourismus/turmkogellifte/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-19 - 2027-03-07"
+      },
+      "publicTransport": "Mariazellerbahn stops at Puchenstuben (VOR) but walking distance to lifts not verified",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "aichelberg-karlstift",
+      "name": "Aichelberglifte Karlstift (Bad Großpertholz)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://karlstift.info/",
+        "sourceUrl": "https://karlstift.info/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "hochbaerneck",
+      "name": "Hochbärneck (St. Anton an der Jeßnitz)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://hochbaerneck.com/winter/",
+        "sourceUrl": "https://hochbaerneck.com/winter/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "arabichl-kirchberg",
+      "name": "Arabichl (Kirchberg am Wechsel)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "rohr-im-gebirge",
+      "name": "Furtnerlifte Rohr im Gebirge",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.furtnerhof.at/schilifte/",
+        "sourceUrl": "https://www.furtnerhof.at/schilifte/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "arralifte-harmanschlag",
+      "name": "Arralifte Harmanschlag (St. Martin)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "feistritzsattel",
+      "name": "Feistritzsattel (Trattenbach)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://feistritzsattel.at/",
+        "sourceUrl": "https://feistritzsattel.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "brenneralm",
+      "name": "Brenneralm (Breitenfurt bei Wien)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.skilift-breitenfurt.com/",
+        "sourceUrl": "https://www.skilift-breitenfurt.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": "VOR regional bus from Wien Liesing to Breitenfurt – verify stop distance/timetable",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "jauerling",
+      "name": "Jauerling (Maria Laach am Jauerling)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.jauerling.at/",
+        "sourceUrl": "https://www.jauerling.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "riedbach-neustadtl",
+      "name": "Riedbach (Neustadtl an der Donau)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "riesenlehen",
+      "name": "Riesenlehen (St. Georgen am Reith)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "brandlwiese-kaumberg",
+      "name": "Brandlwiese (Kaumberg)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "kalte-kuchl",
+      "name": "Kalte Kuchl (Rohr im Gebirge / Innerhalbach)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "kirchbach-rappottenstein",
+      "name": "Kirchbach (Rappottenstein)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "happylift-semmering",
+      "name": "Happylift Semmering",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.berghofsemmering.at/de/happylift/",
+        "sourceUrl": "https://www.berghofsemmering.at/de/happylift/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": "Near Semmering station / Semmering pass (VOR) – verify",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Sits on the Lower Austria/Styria border at Semmering. OpenStreetMap tags it in Styria."
+    },
+    {
+      "id": "markt-piesting",
+      "name": "Markt Piesting",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Exact lift location was not found in OpenStreetMap."
+    },
+    {
+      "id": "frauenstaffel-ulrichsberg",
+      "name": "Frauenstaffel / Ulrichsberg (Waidhofen an der Thaya)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "bonka-kirchbach",
+      "name": "Bonka (Kirchbach, St. Andrä-Wördern)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Tiny practice lift near Vienna; runs only with natural snow."
+    },
+    {
+      "id": "forsteralm",
+      "name": "Forsteralm (Waidhofen an der Ybbs / Gaflenz)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://forsteralm.com/",
+        "sourceUrl": "https://forsteralm.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "On the Lower Austria/Upper Austria border. OpenStreetMap places it in Lower Austria."
+    },
+    {
+      "id": "goass",
+      "name": "Goaß (Waldviertel, OSM only)",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Only found in OpenStreetMap (1 lift). Operation is unverified."
+    },
+    {
+      "id": "goellerlifte",
+      "name": "Göllerlifte (Kernhof) – defunct",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area"
+    },
+    {
+      "id": "josefsberg",
+      "name": "Josefsberg – defunct",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area"
+    },
+    {
+      "id": "wastl-am-wald",
+      "name": "Wastl am Wald – defunct",
+      "region": "Lower Austria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area"
+    },
+    {
+      "id": "dollwiese",
+      "name": "Dollwiese (Wien-Hietzing)",
+      "region": "Vienna",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": "Within Vienna city transport (Wiener Linien) – verify line/stop",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Tiny beginner lift; natural snow only"
+    },
+    {
+      "id": "hohe-wand-wiese",
+      "name": "Hohe-Wand-Wiese (Wien, dry slope)",
+      "region": "Vienna",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": "Within Vienna city transport (Mauerbachstraße, 14th district) – verify bus line",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OpenStreetMap tags the ski area as abandoned."
+    },
+    {
+      "id": "wiesen-gaisrueckleiten",
+      "name": "Gaisrückleiten (Wiesen)",
+      "region": "Burgenland",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": "Train to Wiesen-Sigleß (Mattersburger Bahn, VOR) – lift is in the village; verify walking distance",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "rettenbach-bernstein",
+      "name": "Schizentrum Rettenbach (Bernstein)",
+      "region": "Burgenland",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.sz-rettenbach.at/",
+        "sourceUrl": "https://www.sz-rettenbach.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "zellenberg-kukmirn",
+      "name": "Zellenberg (Kukmirn)",
+      "region": "Burgenland",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "siarena-epleny",
+      "name": "Síaréna Vibe Park Eplény",
+      "region": "Hungary",
+      "country": "HU",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://siarena.hu/",
+        "sourceUrl": "https://siarena.hu/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "The largest ski area in western Hungary."
+    },
+    {
+      "id": "koszeg-szabo-hegy",
+      "name": "Kőszeg – Szabó-hegy (Chernel István sípálya)",
+      "region": "Hungary",
+      "country": "HU",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Lift still standing but operation ended ~2012 (local press); OSM still tags it operating"
+    },
+    {
+      "id": "sopron-dalos-hegy",
+      "name": "Sopron – Dalos-hegy",
+      "region": "Hungary",
+      "country": "HU",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Lift last ran in 2010/11; slope used for sledging only (local press 2026)"
+    },
+    {
+      "id": "zalaegerszeg-asep",
+      "name": "Zalaegerszeg – Alsóerdei Sport- és Élménypark (dry slope)",
+      "region": "Hungary",
+      "country": "HU",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://asep.hu/attrakciok/oktato-sipalya/",
+        "sourceUrl": "https://asep.hu/attrakciok/oktato-sipalya/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "75 m plastic (Neveplast) teaching slope with a lift, not a full ski area."
+    },
+    {
+      "id": "stuhleck",
+      "name": "Stuhleck (Spital am Semmering)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.stuhleck.at/",
+        "sourceUrl": "https://www.stuhleck.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": {
+        "value": {
+          "eur": 64.5,
+          "season": "2025/26"
+        },
+        "sourceUrl": "https://www.stuhleck.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "seasonDates": null,
+      "publicTransport": "Train to Spital am Semmering or Mürzzuschlag is outside the VOR zone (Styria) – not KlimaTicket MetropolRegion",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "praebichl",
+      "name": "Präbichl (Vordernberg/Eisenerz)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.praebichl.at/",
+        "sourceUrl": "https://www.praebichl.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": {
+        "value": {
+          "eur": 53.5,
+          "season": "2025/26"
+        },
+        "sourceUrl": "https://www.praebichl.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-21"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "buergeralpe-mariazell",
+      "name": "Mariazeller Bürgeralpe",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "bergerlebnispass",
+          "sourceUrl": "https://www.bergerlebnispass.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.buergeralpe.at/",
+        "sourceUrl": "https://www.buergeralpe.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-19 - 2027-03-07"
+      },
+      "publicTransport": "Mariazellerbahn (NÖVOG) from St. Pölten ends in Mariazell (Styria); whether the Styrian terminus is covered by KlimaTicket MetropolRegion not verified",
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "hohe-veitsch-brunnalm",
+      "name": "Brunnalm / Hohe Veitsch",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.brunnalm-hoheveitsch.at/",
+        "sourceUrl": "https://www.brunnalm-hoheveitsch.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "niederalpl",
+      "name": "Niederalpl (Mürzsteg)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.niederalpl.at/",
+        "sourceUrl": "https://www.niederalpl.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-19 - 2027-03-07"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "turnau-schwabenbergarena",
+      "name": "Schwabenbergarena Turnau",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.schwabenbergarena.at/",
+        "sourceUrl": "https://www.schwabenbergarena.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-14"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "steirischer-seeberg",
+      "name": "Steirischer Seeberg / Seewiesen",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.wsv-au.at/",
+        "sourceUrl": "https://www.wsv-au.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "st-jakob-im-walde",
+      "name": "Familienschiberg St. Jakob im Walde",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.familienschiberg.at/",
+        "sourceUrl": "https://www.familienschiberg.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-07"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "hauereck",
+      "name": "Hauereck (St. Kathrein am Hauenstein)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "http://www.hauereck.com/",
+        "sourceUrl": "http://www.hauereck.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-07"
+      },
+      "publicTransport": null,
+      "snowpark": {
+        "value": true,
+        "sourceUrl": "https://www.skiregion-ostalpen.at/",
+        "checkedAt": "2026-09-25",
+        "snippet": "Ostalpen: small fun park"
+      },
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "wenigzell",
+      "name": "Schneeland Wenigzell",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://schneeland-wenigzell.at/",
+        "sourceUrl": "https://schneeland-wenigzell.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "schmoll-lifte",
+      "name": "Schmoll-Lifte (Steinhaus am Semmering)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "ostalpen",
+          "sourceUrl": "https://www.skiregion-ostalpen.at/tarife",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.schmoll-lifte.at/",
+        "sourceUrl": "https://www.schmoll-lifte.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "salzstiegl",
+      "name": "Salzstiegl (Hirschegg)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.salzstiegl.at/",
+        "sourceUrl": "https://www.salzstiegl.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-14"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "gaal",
+      "name": "Gaaler Lifte (Gaal)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.gaalerlifte.at/",
+        "sourceUrl": "https://www.gaalerlifte.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-11-28 - 2027-03-14"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "kleinlobming",
+      "name": "Schilifte Kleinlobming",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.kleinlobming.at/",
+        "sourceUrl": "https://www.kleinlobming.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "lachtal",
+      "name": "Lachtal",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.lachtal.at/",
+        "sourceUrl": "https://www.lachtal.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "kreischberg",
+      "name": "Kreischberg (Murau)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.kreischberg.at/",
+        "sourceUrl": "https://www.kreischberg.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-04-04"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "grebenzen",
+      "name": "Grebenzen (St. Lambrecht)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.grebenzen.at/",
+        "sourceUrl": "https://www.grebenzen.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-14"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "krakau-tockneralm",
+      "name": "Krakau – Tockneralmlift (Krakauebene)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.skisportfreundekrakau.at/de",
+        "sourceUrl": "https://www.skisportfreundekrakau.at/de",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "obdach",
+      "name": "Schilift Obdach",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.schilift-obdach.at/",
+        "sourceUrl": "https://www.schilift-obdach.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "turracher-hoehe",
+      "name": "Turracher Höhe",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "murmuerz",
+          "sourceUrl": "https://www.skiberge.at/saisonkarte",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.turracherhoehe.at/",
+        "sourceUrl": "https://www.turracherhoehe.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-11-21 - 2027-04-25"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Straddles the Styria/Carinthia border (village and many lifts on the Carinthian side); tagged Styria here because the Styrian passes include it."
+    },
+    {
+      "id": "schladming-planai",
+      "name": "Planai (Schladming)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.planai.at/",
+        "sourceUrl": "https://www.planai.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Part of the Schladming 4-Berge-Skischaukel (Planai, Hochwurzen, Hauser Kaibling, Reiteralm)."
+    },
+    {
+      "id": "hochwurzen",
+      "name": "Hochwurzen (Schladming/Rohrmoos)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.planai.at/",
+        "sourceUrl": "https://www.planai.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Part of the Schladming 4-Berge-Skischaukel (see Planai)."
+    },
+    {
+      "id": "hauser-kaibling",
+      "name": "Hauser Kaibling (Haus im Ennstal)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.hauser-kaibling.at/",
+        "sourceUrl": "https://www.hauser-kaibling.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Part of the Schladming 4-Berge-Skischaukel."
+    },
+    {
+      "id": "reiteralm",
+      "name": "Reiteralm (Pichl)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.reiteralm.at/",
+        "sourceUrl": "https://www.reiteralm.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Part of the Schladming 4-Berge-Skischaukel. Joker partner is listed as \"Reiteralm – Fageralm\" (Fageralm is in Salzburg)."
+    },
+    {
+      "id": "galsterberg",
+      "name": "Galsterberg (Pruggern)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.galsterberg.at/",
+        "sourceUrl": "https://www.galsterberg.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-04 - 2027-04-04"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "ramsau-rittisberg",
+      "name": "Ramsau am Dachstein – Rittisberg",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.skiregion-ramsau.at/",
+        "sourceUrl": "https://www.skiregion-ramsau.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-29"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "dachstein-gletscher",
+      "name": "Dachstein Gletscher",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.derdachstein.at/",
+        "sourceUrl": "https://www.derdachstein.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Glacier area reached by the Dachstein Südwandbahn (valley station ~1,700 m in Ramsau). Top station is on the Styria/Upper Austria border; the OSM area centroid used as coordinate reverse-geocodes to Upper Austria. Region kept as Styria (Ramsau access, Styrian passes)."
+    },
+    {
+      "id": "tauplitz",
+      "name": "Tauplitz (Bad Mitterndorf)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.dietauplitz.com/",
+        "sourceUrl": "https://www.dietauplitz.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-11-28 - 2027-04-04"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "riesneralm",
+      "name": "Riesneralm (Donnersbachwald)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.riesneralm.at/",
+        "sourceUrl": "https://www.riesneralm.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "planneralm",
+      "name": "Planneralm (Donnersbach)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.planneralm.at/",
+        "sourceUrl": "https://www.planneralm.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-11-27 - 2027-04-04"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "loser-altaussee",
+      "name": "Loser (Altaussee)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.loser.at/",
+        "sourceUrl": "https://www.loser.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-11-28 - 2027-04-04"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "kaiserau",
+      "name": "Kaiserau (Admont)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.kaiserau.at/",
+        "sourceUrl": "https://www.kaiserau.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-25 - 2027-03-14"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "hohentauern",
+      "name": "Hohentauern",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "joker",
+          "sourceUrl": "https://www.steiermarkjoker.at/partner",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.skihohentauern.at/",
+        "sourceUrl": "https://www.skihohentauern.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-12 - 2027-03-14"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "rieseralm-obdach",
+      "name": "Rieseralm (Obdach)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.rieseralm.at/",
+        "sourceUrl": "https://www.rieseralm.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-14"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "gaberl",
+      "name": "Gaberl (Salla)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://gaberl.at/",
+        "sourceUrl": "https://gaberl.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "stoderzinken",
+      "name": "Stoderzinken (Gröbming)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.stoderzinken.at/",
+        "sourceUrl": "https://www.stoderzinken.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OpenStreetMap tags the area as abandoned."
+    },
+    {
+      "id": "modriach-hoislifte",
+      "name": "Hoislifte Modriach-Winkel (Edelschrott)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.hoiswirt.at/",
+        "sourceUrl": "https://www.hoiswirt.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "teichalm",
+      "name": "Teichalm Lifte (Fladnitz)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.teichalmlifte.at/",
+        "sourceUrl": "https://www.teichalmlifte.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-07"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "moenichwald-hochwechsel",
+      "name": "Hochwechsellifte Mönichwald",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "tonnerhuette",
+      "name": "Tonnerhüttenlift (Zirbitzkogel, Mühlen)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "klug-lifte-hebalm",
+      "name": "Klug Lifte Hebalm / Freiländeralm",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.kluglifte.at/",
+        "sourceUrl": "https://www.kluglifte.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "eibisberg",
+      "name": "Eibisberg (St. Kathrein am Offenegg / Anger)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "strallegg-almblick",
+      "name": "Almblicklifte Strallegg",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.schiregion.at/strallegg/",
+        "sourceUrl": "https://www.schiregion.at/strallegg/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "spechtensee",
+      "name": "Spechtenseelift (Wörschachwald)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "sommeralm-holzmeister",
+      "name": "Holzmeisterlifte Sommeralm",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "pirstingerkogel",
+      "name": "Pirstingerkogellift Sommeralm",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-12 - 2027-03-21"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "zlaim",
+      "name": "Zlaim (Grundlsee)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "st-hemma",
+      "name": "St. Hemma (Edelschrott)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "buchsteinlift",
+      "name": "Buchsteinlift (St. Gallen)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "bacherleitn",
+      "name": "Bacherleitn (Weißenbach bei Liezen)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "johnsbach",
+      "name": "Johnsbach (Admont)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "miesenbach-wiesenhofer",
+      "name": "Wiesenhofer (Miesenbach bei Birkfeld)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "pusterwald",
+      "name": "Pusterwald",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "wildalpen-winterhoeh",
+      "name": "Winterhöh (Wildalpen)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "schanz-fischbach",
+      "name": "Schanz-Lift (Fischbach)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "katschwald",
+      "name": "Katschwald (Obdach)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "gams-kaiserlindenlift",
+      "name": "Kaiserlindenlift Gams bei Hieflau",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "rottenmann-stadtwaldlift",
+      "name": "Stadtwaldlift Rottenmann",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "krieglach-annerlbauer",
+      "name": "Annerlbauer Lift (Krieglach)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "turnau-eichfeldlift",
+      "name": "Eichfeldlift (Turnau)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "oberzeiring-haberinglift",
+      "name": "Haberinglift / Kinderschilift Oberzeiring (Pölstal)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "falkenstein-stadlhof",
+      "name": "Stadlhof / Schneidhofer (Falkenstein, Fischbach)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "moessna-stockerfeld",
+      "name": "Stockerfeldlift Mößna (St. Nikolai im Sölktal)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "schoeder-koarfeldlift",
+      "name": "Koarfeldlift Schöder",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "schaeffern",
+      "name": "Schäffern",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OpenStreetMap tags the lift as disused."
+    },
+    {
+      "id": "ratschendorf-schildhoflift",
+      "name": "Schildhoflift Ratschendorf",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "grossreifling-hammerbodenlift",
+      "name": "Hammerbodenlift Großreifling (Landl)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "rettenegg",
+      "name": "Rettenegg",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "markt-hartmannsdorf",
+      "name": "Hartmannsdorfer Skipiste (Markt Hartmannsdorf)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "altaussee-arzleiten",
+      "name": "Arzleiten (Altaussee)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "obersdorf-bad-mitterndorf",
+      "name": "Obersdorf (Bad Mitterndorf)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "landl-dorflift",
+      "name": "Dorflift Kirchenlandl (Landl)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "etmissl",
+      "name": "Etmißl (Thörl)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "schoeckl-scherbauerwiese",
+      "name": "Scherbauerwiese (Schöckl, St. Radegund bei Graz)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "unverified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Ski lift on the Schöckl."
+    },
+    {
+      "id": "gedersberg-seiersberg",
+      "name": "Gedersberg (Seiersberg, Graz)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "aflenzer-buergeralm",
+      "name": "Aflenzer Bürgeralm",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "https://www.aflenzer-buergeralm.at/",
+        "sourceUrl": "https://www.aflenzer-buergeralm.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Regular lift operation ended March 2025; chairlift being dismantled 2026. Operator plans to run the 6 surface lifts on the Almboden with natural snow (access by road/shuttle) – uncertain for 2026/27."
+    },
+    {
+      "id": "lammeralm",
+      "name": "Skiarena Lammeralm (Langenwang)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": {
+        "value": "http://www.skilammeralm.at",
+        "sourceUrl": "http://www.skilammeralm.at",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Closed since 2015/16 (lifts dismantled)."
+    },
+    {
+      "id": "preggrabenhoehe",
+      "name": "Preggrabenhöhe (OSM only)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Only found in OpenStreetMap (2 lifts). Operation is unverified."
+    },
+    {
+      "id": "wald-am-schoberpass",
+      "name": "Sonnberglifte Wald am Schoberpass (OSM only)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Only found in OpenStreetMap (3 lifts). Operation is unverified."
+    },
+    {
+      "id": "mureck-skiberg",
+      "name": "Skiberg Mureck (OSM only)",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "Only found in OpenStreetMap (1 lift). Operation is unverified."
+    },
+    {
+      "id": "defunct-alpl",
+      "name": "Alpl (Krieglach) – defunct",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area (historic)"
+    },
+    {
+      "id": "defunct-altes",
+      "name": "Altes Almhaus – defunct",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area (historic)"
+    },
+    {
+      "id": "defunct-maerchenwiese-plankogel",
+      "name": "Märchenwiese/Plankogel (Gaberl) – defunct",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area (historic)"
+    },
+    {
+      "id": "defunct-reitingerlift",
+      "name": "Reitingerlift (Weißkirchen) – defunct",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area (historic)"
+    },
+    {
+      "id": "defunct-stueblergut",
+      "name": "Stüblergut (Gaberl) – defunct",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area (historic)"
+    },
+    {
+      "id": "defunct-tribein",
+      "name": "Tribein (Mariazell) – defunct",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area (historic)"
+    },
+    {
+      "id": "defunct-wiedneralm",
+      "name": "Wiedneralm (Gaberl) – defunct",
+      "region": "Styria",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [],
+      "website": null,
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": "OSM tags as abandoned ski area (historic)"
+    },
+    {
+      "id": "stubaier-gletscher",
+      "name": "Stubaier Gletscher",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.stubaier-gletscher.com/",
+        "sourceUrl": "https://www.stubaier-gletscher.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-10-09 - 2027-05-17"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "mayrhofen",
+      "name": "Mayrhofen – Penken/Ahorn (Mountopolis)",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.zillertal.at/en/winter/holidays/ski-areas/ski-und-gletscherwelt-3000.html",
+        "sourceUrl": "https://www.zillertal.at/en/winter/holidays/ski-areas/ski-und-gletscherwelt-3000.html",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-04 - 2027-04-11"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "hintertux",
+      "name": "Hintertuxer Gletscher",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.hintertuxergletscher.at/",
+        "sourceUrl": "https://www.hintertuxergletscher.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "kitzski",
+      "name": "KitzSki (Kitzbühel/Kirchberg)",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.kitzski.at/",
+        "sourceUrl": "https://www.kitzski.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-11-06 - 2027-04-04"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "skiwelt",
+      "name": "SkiWelt Wilder Kaiser – Brixental",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.skiwelt.at/",
+        "sourceUrl": "https://www.skiwelt.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-05 - 2027-03-29"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "ski-juwel",
+      "name": "Ski Juwel Alpbachtal Wildschönau",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        },
+        {
+          "id": "superskicard",
+          "sourceUrl": "https://www.superskicard.com/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://skijuwel.com/",
+        "sourceUrl": "https://skijuwel.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-04 - 2027-04-04"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "ischgl",
+      "name": "Ischgl / Samnaun – Silvretta Arena",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.ischgl.com/",
+        "sourceUrl": "https://www.ischgl.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-11-26 - 2027-05-02"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "soelden",
+      "name": "Sölden",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.soelden.com/",
+        "sourceUrl": "https://www.soelden.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-10-02 - 2027-05-02"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "axamer-lizum",
+      "name": "Axamer Lizum",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.axamer-lizum.at/",
+        "sourceUrl": "https://www.axamer-lizum.at/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": null,
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    },
+    {
+      "id": "nordkette",
+      "name": "Nordkette / Nordpark (Innsbruck)",
+      "region": "Tirol",
+      "country": "AT",
+      "verification": "verified",
+      "passes": [
+        {
+          "id": "snowcardtirol",
+          "sourceUrl": "https://www.snowcard.tirol.at/",
+          "checkedAt": "2026-09-25"
+        }
+      ],
+      "website": {
+        "value": "https://www.nordkette.com/",
+        "sourceUrl": "https://www.nordkette.com/",
+        "checkedAt": "2026-09-25"
+      },
+      "dayTicket": null,
+      "seasonDates": {
+        "value": "2026-12-19 - 2027-04-25"
+      },
+      "publicTransport": null,
+      "snowpark": null,
+      "nightSkiing": null,
+      "notes": null
+    }
+  ]
+}
