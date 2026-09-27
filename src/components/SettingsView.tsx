@@ -6,7 +6,7 @@ import { getMapConsent, setMapConsent } from "@/lib/map-consent";
 import { showDevTodo } from "@/lib/show-todo";
 import { BirthYearField } from "./BirthYearField";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { legalLinks } from "./MenuDrawer";
+import { legalLinks } from "./legal-links";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 import { mapboxShowingStatusKey } from "@/lib/settings-map-status";

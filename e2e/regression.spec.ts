@@ -10,8 +10,13 @@ import {
   shotPart10Viewport,
   waitForMapMarkers,
 } from "./helpers";
+import { installMapStub, mapStubEnabled } from "./map-stub";
 
 test.describe.configure({ mode: "serial" });
+
+test.beforeEach(async ({ context }) => {
+  if (mapStubEnabled()) await installMapStub(context);
+});
 
 test("language redirect and switcher (hu, en, de)", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);

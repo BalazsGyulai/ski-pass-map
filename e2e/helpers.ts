@@ -29,7 +29,10 @@ export function attachOriginGuards(page: Page, origin: string): string[] {
     const url = req.url();
     if (!url.startsWith(origin)) return;
     if (url.includes("mapbox") || url.includes("openfreemap") || url.includes("opensnowmap")) return;
-    problems.push(`requestfailed: ${url} ${req.failure()?.errorText ?? ""}`);
+    const reason = req.failure()?.errorText ?? "";
+    // A navigation cancels requests that are still in flight. That is the browser, not the server.
+    if (reason.includes("ERR_ABORTED")) return;
+    problems.push(`requestfailed: ${url} ${reason}`);
   });
   page.on("response", (res) => {
     const url = res.url();

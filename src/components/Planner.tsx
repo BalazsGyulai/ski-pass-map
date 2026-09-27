@@ -147,7 +147,7 @@ export function Planner() {
                   return (
                     <li key={id}>
                       <div>
-                        <Link href={`/?resort=${encodeURIComponent(id)}`}>{resort.name}</Link>
+                        <Link href={`${pathWithLang(lang, "/")}?resort=${encodeURIComponent(id)}`}>{resort.name}</Link>
                         <span className="pass-dots">
                           {resort.passes.slice(0, 3).map((passId) => (
                             <span key={passId} className="pass-dot" style={{ background: passById.get(passId)?.color ?? "#94A3B8" }} title={passById.get(passId)?.name ?? passId} />

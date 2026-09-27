@@ -5,12 +5,16 @@ import { META_CONTENT_SECURITY_POLICY, REFERRER_POLICY } from "@/lib/security";
 import { BASE_PATH, SITE_NAME, SITE_ORIGIN } from "@/lib/site";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin", "latin-ext"], display: "swap" });
+// The optical-size axis gives headings Inter Display's tighter cut and keeps small text open.
+const inter = Inter({ subsets: ["latin", "latin-ext"], axes: ["opsz"], display: "swap" });
 
 export const documentViewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0F1B2D",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f5f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0e17" },
+  ],
 };
 
 export const documentMetadataBase = new URL(SITE_ORIGIN);

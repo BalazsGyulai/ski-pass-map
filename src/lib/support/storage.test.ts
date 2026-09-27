@@ -11,8 +11,10 @@ describe("support prompt storage", () => {
   const storage = new Map<string, string>();
   const mock = {
     getItem: (k: string) => storage.get(k) ?? null,
-    setItem: (k: string, v: string) => storage.set(k, v),
-  } as Storage;
+    setItem: (k: string, v: string) => {
+      storage.set(k, v);
+    },
+  } as unknown as Storage;
 
   it("blocks until first visit is marked", () => {
     storage.clear();
