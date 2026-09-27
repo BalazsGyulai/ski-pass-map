@@ -12,6 +12,7 @@ export function mapFitPadding(options: {
         : options.sheet === "full"
           ? Math.max(80, options.height - 96)
           : Math.round(options.height * 0.5);
-  const left = options.narrow ? 28 : 420;
+  /** The list/resort dock sits outside the map canvas on desktop; only bottom sheet padding applies on mobile. */
+  const left = 28;
   return { paddingTopLeft: [left, 72], paddingBottomRight: [28, bottom] };
 }

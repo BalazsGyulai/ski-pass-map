@@ -14,10 +14,12 @@ import { BirthYearField } from "./BirthYearField";
 import { CompareView } from "./CompareView";
 import { PlacePicker } from "./PlacePicker";
 import { useApp } from "./AppState";
+import { AffiliateLinksBlock } from "./AffiliateLinks";
+import { markFirstVisitDone } from "@/lib/support/storage";
 
 export function Planner() {
   const app = useApp();
-  const { t, lang, birthYear, setPurchaseDate, effectiveDate, resortDays, setResortDaysCount, clearResortDays, ready, copyMessage } = app;
+  const { t, lang, birthYear, setPurchaseDate, effectiveDate, resortDays, setResortDaysCount, clearResortDays, ready, copyMessage, bumpSupportPrompt } = app;
   const [tab, setTab] = useState<"plan" | "prices">("plan");
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -81,6 +83,8 @@ export function Planner() {
     if (navigator.clipboard?.writeText) {
       void navigator.clipboard.writeText(url).then(() => {
         setCopied(true);
+        markFirstVisitDone(window.localStorage);
+        bumpSupportPrompt();
         window.setTimeout(() => setCopied(false), 2000);
       });
     }
@@ -226,6 +230,7 @@ export function Planner() {
           </section>
         </div>
       ) : null}
+      <AffiliateLinksBlock />
     </div>
   );
 }

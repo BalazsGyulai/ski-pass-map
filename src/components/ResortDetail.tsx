@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { nextSheetSnap, snapFromKey, type SheetSnap } from "@/lib/sheet";
 import Link from "next/link";
 import { passById, passes, resortById, resorts } from "@/lib/data";
+import { formatAttributionLine } from "@/lib/portal/attribution";
+import { mergeResortWithOverrides } from "@/lib/portal/overrides";
+import { useRuntimeOverrides } from "@/lib/runtime-overrides-client";
 import { distanceKm } from "@/lib/distance";
 import { filterResorts } from "@/lib/filter";
 import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm } from "@/lib/format";
@@ -14,6 +17,7 @@ import type { FactRef, Resort } from "@/lib/schema";
 import type { Lang } from "@/i18n/languages";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
+import { AffiliateLinksBlock } from "./AffiliateLinks";
 
 export function ResortDetail() {
   const {
@@ -31,14 +35,18 @@ export function ResortDetail() {
     messages,
   } = useApp();
   const href = useLocalizedPath();
-  const resort = share.resort ? resortById.get(share.resort) : undefined;
+  const overrides = useRuntimeOverrides();
+  const baseResort = share.resort ? resortById.get(share.resort) : undefined;
+  const resort = baseResort ? mergeResortWithOverrides(baseResort, baseResort.id, overrides) : undefined;
   const closeRef = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
   const [snap, setSnap] = useState<SheetSnap>("half");
+  const [detailTab, setDetailTab] = useState<"overview" | "links">("overview");
 
   useEffect(() => {
     closeRef.current?.focus();
     setSnap("half");
+    setDetailTab("overview");
   }, [resort?.id]);
 
   useEffect(() => {
@@ -132,8 +140,44 @@ export function ResortDetail() {
           {t("close")}
         </button>
       </header>
+      <div className="detail-tabs" data-testid="resort-detail-tabs" role="tablist" aria-label={t("resortSheetTabs")}>
+        <button type="button" role="tab" aria-selected={detailTab === "overview"} className={detailTab === "overview" ? "active" : ""} onClick={() => setDetailTab("overview")}>
+          {t("resortTabOverview")}
+        </button>
+        <button type="button" role="tab" aria-selected={detailTab === "links"} className={detailTab === "links" ? "active" : ""} onClick={() => setDetailTab("links")}>
+          {t("resortTabLinks")}
+        </button>
+      </div>
       <div className="detail-body">
         {!visible ? <p className="hint warn">{t("hiddenByFilters")}</p> : null}
+        {detailTab === "links" ? (
+          <div role="tabpanel">
+            <div className="link-buttons">
+              <LinkButton href={resort.website} label={t("openWebsite")} />
+              <LinkButton href={resort.snow_report} label={t("snowReport")} />
+              <LinkButton href={resort.webcam} label={t("webcams")} />
+            </div>
+            <AffiliateLinksBlock />
+          </div>
+        ) : null}
+        {detailTab === "overview" ? (
+        <>
+        {resort.portalAttribution ? (
+          <p className="portal-attribution hint" data-testid="portal-attribution">
+            {formatAttributionLine(resort.portalAttribution, lang === "de" ? "de" : "en")}
+          </p>
+        ) : null}
+        {resort.portalPromo ? (
+          <aside className="portal-promo" data-testid="portal-promo" aria-label="Resort promotion">
+            <p className="badge">{lang === "de" ? `Anzeige · vom ${resort.portalPromo.resortName}` : `Ad · From ${resort.portalPromo.resortName}`}</p>
+            <p>{resort.portalPromo.text}</p>
+            {resort.portalPromo.linkUrl ? (
+              <a href={resort.portalPromo.linkUrl} rel="noopener noreferrer">
+                {resort.portalPromo.linkUrl}
+              </a>
+            ) : null}
+          </aside>
+        ) : null}
         <h3>{t("passes")}</h3>
         {resort.passes.length === 0 ? <p>{t("noPasses")}</p> : null}
         <ul className="pass-lines">
@@ -210,13 +254,10 @@ export function ResortDetail() {
           </>
         ) : null}
 
-        <div className="link-buttons">
-          <LinkButton href={resort.website} label={t("openWebsite")} />
-          <LinkButton href={resort.snow_report} label={t("snowReport")} />
-          <LinkButton href={resort.webcam} label={t("webcams")} />
-        </div>
         {resort.website ? <SourceLine source={resort.sources.website} t={t} lang={lang} tourism={resort.via_tourism_site} /> : null}
         {resort.season_dates ? <SourceLine source={resort.sources.season} t={t} lang={lang} /> : null}
+        </>
+        ) : null}
       </div>
       <footer className="sheet-actions">
         <button type="button" className={fav ? "primary" : "ghost"} aria-pressed={fav} onClick={() => toggleFavourite(resort.id)}>

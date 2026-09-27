@@ -9,10 +9,12 @@ import { isLang, persistLangChoice } from "@/i18n/languages";
 import { isMapPath } from "@/i18n/routing";
 import { translate, type MessageKey, type Messages } from "@/lib/i18n";
 import { cityPlaceId, sanitizeActivePlaceId, sanitizePlaces, type ReferenceCity, type SavedPlace } from "@/lib/places";
+import type { DistanceUnits, ExportedUserData } from "@/lib/storage";
 import { readStorage, writeStorage } from "@/lib/storage";
 import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
 import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type ShareState } from "@/lib/url-state";
+import { markFirstVisitDone, resetSupportReminders as clearSupportReminders } from "@/lib/support/storage";
 
 type ThemeChoice = "system" | "light" | "dark";
 
@@ -69,6 +71,19 @@ interface AppContextValue {
   searchAsMove: boolean;
   setSearchAsMove: (on: boolean) => void;
   mapApi: React.MutableRefObject<SkiMapApi>;
+  supportPromptSignal: number;
+  bumpSupportPrompt: () => void;
+  resetSupportReminders: () => void;
+  openCookieSettings: () => void;
+  distanceUnits: DistanceUnits;
+  setDistanceUnits: (units: DistanceUnits) => void;
+  pisteOverlayDefault: boolean;
+  setPisteOverlayDefault: (on: boolean) => void;
+  exportSavedData: () => boolean;
+  importSavedData: (json: string) => boolean;
+  clearAllSavedData: () => void;
+  toast: string | null;
+  showToast: (message: string) => void;
 }
 
 export interface SkiMapApi {
@@ -99,6 +114,9 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
   const [areaBounds, setAreaBounds] = useState<MapBounds | null>(null);
   const [areaStale, setAreaStale] = useState(false);
   const [searchAsMove, setSearchAsMoveState] = useState(false);
+  const [distanceUnits, setDistanceUnitsState] = useState<DistanceUnits>("km");
+  const [pisteOverlayDefault, setPisteOverlayDefaultState] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const areaRef = useRef<MapBounds | null>(null);
   const liveRef = useRef<MapBounds | null>(null);
   const moveRef = useRef(false);
@@ -106,6 +124,32 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     zoomOut() {},
     fitAll() {},
   });
+  const [supportPromptSignal, setSupportPromptSignal] = useState(0);
+  const resortForPrompt = useRef<string | null>(null);
+
+  const bumpSupportPrompt = useCallback(() => {
+    setSupportPromptSignal((n) => n + 1);
+  }, []);
+
+  const resetSupportReminders = useCallback(() => {
+    if (typeof window !== "undefined") clearSupportReminders(window.localStorage);
+  }, []);
+
+  function openCookieSettings() {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("skimap-open-cookie-settings"));
+    }
+  }
+
+  useEffect(() => {
+    if (!ready) return;
+    const id = share.resort;
+    if (resortForPrompt.current && !id) {
+      markFirstVisitDone(window.localStorage);
+      bumpSupportPrompt();
+    }
+    resortForPrompt.current = id;
+  }, [share.resort, ready, bumpSupportPrompt]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -129,13 +173,17 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
         }
         setResortDays(days);
       }
+      if (stored.distanceUnits === "km" || stored.distanceUnits === "mi") setDistanceUnitsState(stored.distanceUnits);
+      if (stored.pisteOverlayDefault) setPisteOverlayDefaultState(true);
     }
     const fromUrl = parsePlan(params.get("plan"));
     if (Object.keys(fromUrl).length > 0) setResortDays(fromUrl);
     const bought = params.get("on");
     if (bought && /^\d{4}-\d{2}-\d{2}$/.test(bought)) setPurchaseDate(bought);
     setToday(todayISO());
-    setShare(parsed);
+    const initialShare =
+      stored?.pisteOverlayDefault && !params.get("pistes") ? { ...parsed, showPistes: true } : parsed;
+    setShare(initialShare);
     setReady(true);
   }, []);
 
@@ -157,9 +205,11 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       resortDays,
       places,
       activePlaceId,
-      version: 3,
+      distanceUnits,
+      pisteOverlayDefault,
+      version: 4,
     });
-  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId]);
+  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault]);
 
   const onMap = isMapPath(pathname, lang);
   const pushedResort = useRef(false);
@@ -314,8 +364,85 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     setShare((current) => ({ ...current, resort: id, ...(id && narrow ? { view: "map" as const } : {}) }));
   }, []);
 
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast(null), 2000);
+  }, []);
+
   function toggleFavourite(id: string) {
-    setFavourites((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+    setFavourites((current) => {
+      const adding = !current.includes(id);
+      const next = adding ? [...current, id] : current.filter((item) => item !== id);
+      if (adding) showToast(translate(messages, "toastSaved"));
+      return next;
+    });
+  }
+
+  function setDistanceUnits(units: DistanceUnits) {
+    setDistanceUnitsState(units);
+  }
+
+  function setPisteOverlayDefault(on: boolean) {
+    setPisteOverlayDefaultState(on);
+  }
+
+  function exportSavedData(): boolean {
+    if (typeof window === "undefined") return false;
+    const payload: ExportedUserData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      favourites,
+      resortDays,
+      places,
+      activePlaceId,
+      birthYear,
+      purchaseDate,
+      theme,
+      distanceUnits,
+      pisteOverlayDefault,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "skimap-export.json";
+    anchor.click();
+    URL.revokeObjectURL(url);
+    return true;
+  }
+
+  function importSavedData(json: string): boolean {
+    try {
+      const parsed = JSON.parse(json) as Partial<ExportedUserData>;
+      if (!parsed || parsed.version !== 1) return false;
+      if (Array.isArray(parsed.favourites)) setFavourites(parsed.favourites.filter((id) => typeof id === "string"));
+      if (parsed.resortDays && typeof parsed.resortDays === "object") setResortDays(parsed.resortDays);
+      if (Array.isArray(parsed.places)) {
+        const savedPlaces = sanitizePlaces(parsed.places);
+        setPlaces(savedPlaces);
+        setActivePlaceId(sanitizeActivePlaceId(parsed.activePlaceId ?? null, savedPlaces));
+      }
+      if (typeof parsed.birthYear === "number" || parsed.birthYear === null) setBirthYearState(parsed.birthYear ?? null);
+      if (typeof parsed.purchaseDate === "string" || parsed.purchaseDate === null) setPurchaseDate(parsed.purchaseDate ?? null);
+      if (parsed.theme === "light" || parsed.theme === "dark" || parsed.theme === "system") setTheme(parsed.theme);
+      if (parsed.distanceUnits === "km" || parsed.distanceUnits === "mi") setDistanceUnitsState(parsed.distanceUnits);
+      if (typeof parsed.pisteOverlayDefault === "boolean") {
+        setPisteOverlayDefaultState(parsed.pisteOverlayDefault);
+        if (parsed.pisteOverlayDefault) setShare((current) => ({ ...current, showPistes: true }));
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function clearAllSavedData() {
+    setFavourites([]);
+    setResortDays({});
+    setPlaces([]);
+    setActivePlaceId(null);
+    setBirthYearState(null);
+    setPurchaseDate(null);
   }
 
   function setResortDaysCount(id: string, days: number) {
@@ -474,6 +601,19 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     searchAsMove,
     setSearchAsMove,
     mapApi,
+    supportPromptSignal,
+    bumpSupportPrompt,
+    resetSupportReminders,
+    openCookieSettings,
+    distanceUnits,
+    setDistanceUnits,
+    pisteOverlayDefault,
+    setPisteOverlayDefault,
+    exportSavedData,
+    importSavedData,
+    clearAllSavedData,
+    toast,
+    showToast,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

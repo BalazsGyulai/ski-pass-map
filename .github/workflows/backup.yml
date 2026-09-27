@@ -1,0 +1,37 @@
+name: D1 backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 0"
+
+jobs:
+  export:
+    if: vars.BACKUP_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Export D1 databases
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          mkdir -p backup-out
+          npx wrangler d1 export skimap-map-loads --remote --output=backup-out/map-loads.sql
+          npx wrangler d1 export skimap-app --remote --output=backup-out/skimap-app.sql
+      - name: Push to private backup repo
+        env:
+          BACKUP_REPO_TOKEN: ${{ secrets.BACKUP_REPO_TOKEN }}
+          BACKUP_REPO: ${{ vars.BACKUP_REPO }}
+        run: |
+          git clone "https://x-access-token:${BACKUP_REPO_TOKEN}@github.com/${BACKUP_REPO}.git" backup-repo
+          cp backup-out/*.sql backup-repo/
+          cd backup-repo
+          git add .
+          git commit -m "D1 backup $(date -u +%Y-%m-%dT%H:%MZ)" || true
+          git push
