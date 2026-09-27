@@ -101,7 +101,7 @@ try {
   await page.waitForFunction(
     () => {
       const bg = getComputedStyle(document.body).backgroundColor;
-      return bg === "rgb(238, 242, 244)" || bg === "rgb(14, 20, 24)";
+      return bg === "rgb(245, 248, 251)" || bg === "rgb(11, 19, 32)";
     },
     null,
     { timeout: 20000 },
@@ -147,7 +147,7 @@ try {
   await page.waitForFunction(
     () => {
       const bg = getComputedStyle(document.body).backgroundColor;
-      return bg === "rgb(238, 242, 244)" || bg === "rgb(14, 20, 24)";
+      return bg === "rgb(245, 248, 251)" || bg === "rgb(11, 19, 32)";
     },
     null,
     { timeout: 20000 },

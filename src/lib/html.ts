@@ -1,4 +1,4 @@
-/** Escape text that Leaflet will assign with innerHTML (tooltips and marker icons). */
+/** Escape text assigned with innerHTML on map markers. */
 export function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")

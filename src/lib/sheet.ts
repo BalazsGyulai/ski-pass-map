@@ -12,6 +12,12 @@ export function snapFromKey(current: SheetSnap, key: string): SheetSnap | "close
   return null;
 }
 
+/** List sheet never dismisses. Down from peek stays at peek. */
+export function nextListSnap(current: SheetSnap, direction: "up" | "down"): SheetSnap {
+  const next = nextSheetSnap(current, direction);
+  return next === "close" ? "peek" : next;
+}
+
 /** Next snap after a vertical drag. Down from the peek state closes the resort. */
 export function nextSheetSnap(current: SheetSnap, direction: "up" | "down"): SheetSnap | "close" {
   if (direction === "up") {

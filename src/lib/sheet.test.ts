@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextSheetSnap, snapFromKey } from "./sheet";
+import { nextListSnap, nextSheetSnap, snapFromKey } from "./sheet";
 
 describe("nextSheetSnap", () => {
   it("expands peek to half to full", () => {
@@ -12,6 +12,14 @@ describe("nextSheetSnap", () => {
     expect(nextSheetSnap("full", "down")).toBe("half");
     expect(nextSheetSnap("half", "down")).toBe("peek");
     expect(nextSheetSnap("peek", "down")).toBe("close");
+  });
+});
+
+describe("nextListSnap", () => {
+  it("stops at peek instead of closing the list", () => {
+    expect(nextListSnap("peek", "down")).toBe("peek");
+    expect(nextListSnap("half", "down")).toBe("peek");
+    expect(nextListSnap("peek", "up")).toBe("half");
   });
 });
 

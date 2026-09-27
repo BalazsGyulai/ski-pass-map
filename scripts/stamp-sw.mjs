@@ -25,7 +25,7 @@ if (!source.includes("__BUILD_ID__")) {
 
 const site = JSON.parse(readFileSync(new URL("../config/site.json", import.meta.url), "utf8"));
 const configured = process.env.NEXT_PUBLIC_BASE_PATH;
-const basePath = configured === undefined ? site.basePath : configured;
+const basePath = configured === undefined ? (process.env.CF_PAGES === "1" ? "" : site.basePath) : configured;
 const prefix = basePath === "" ? "" : basePath;
 const stamped = source.replaceAll("__BUILD_ID__", id).replaceAll("/ski-pass-map", prefix);
 const manifestFile = new URL("../out/manifest.webmanifest", import.meta.url);

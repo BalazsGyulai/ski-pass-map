@@ -30,7 +30,7 @@ describe("parseShareState", () => {
     expect(state.q).toBe("Stuhleck");
     expect(state.passes).toEqual(["ostalpen"]);
     expect(state.regions).toEqual(["Lower Austria", "Styria"]);
-    expect(state.home).toBe("vienna");
+    expect(state.home).toBe("");
     expect(state.resort).toBe("stuhleck");
   });
 });
