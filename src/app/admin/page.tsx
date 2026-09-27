@@ -22,7 +22,17 @@ type Edit = {
   checker_result_json: string | null;
 };
 
-type Tab = "inbox" | "edits" | "audit";
+type Tab = "inbox" | "edits" | "portal" | "audit" | "stats";
+
+type StatRow = { day_utc: string; path: string; hits: number };
+type SupportCodeRow = { kofi_transaction_id: string; code_plain: string; created_at: number; expires_at: number };
+
+type PortalQueue = {
+  postModeration: Edit[];
+  reviewB: Edit[];
+  reviewC: Edit[];
+  promos: unknown[];
+};
 
 async function api(path: string, init?: RequestInit) {
   const headers = new Headers(init?.headers);
@@ -39,7 +49,12 @@ export default function AdminPage() {
   const [edits, setEdits] = useState<Edit[]>([]);
   const [audit, setAudit] = useState<unknown[]>([]);
   const [checkerPreview, setCheckerPreview] = useState<string>("");
+  const [portalQueue, setPortalQueue] = useState<PortalQueue | null>(null);
+  const [inviteLink, setInviteLink] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [statsRows, setStatsRows] = useState<StatRow[]>([]);
+  const [supportCodes, setSupportCodes] = useState<SupportCodeRow[]>([]);
+  const [statsEnabled, setStatsEnabled] = useState(false);
 
   const loadInbox = useCallback(async () => {
     const res = await api("/api/admin/messages");
@@ -60,11 +75,34 @@ export default function AdminPage() {
     if (json.ok && json.audit) setAudit(json.audit);
   }, []);
 
+  const loadStats = useCallback(async () => {
+    const res = await api("/api/admin/stats");
+    const json = (await res.json()) as {
+      ok?: boolean;
+      stats?: StatRow[];
+      supportCodes?: SupportCodeRow[];
+      statsEnabled?: boolean;
+    };
+    if (json.ok) {
+      setStatsRows(json.stats ?? []);
+      setSupportCodes(json.supportCodes ?? []);
+      setStatsEnabled(Boolean(json.statsEnabled));
+    }
+  }, []);
+
+  const loadPortal = useCallback(async () => {
+    const res = await api("/api/admin/portal/queue");
+    const json = (await res.json()) as { ok?: boolean } & PortalQueue;
+    if (json.ok) setPortalQueue(json);
+  }, []);
+
   useEffect(() => {
     if (tab === "inbox") loadInbox();
     if (tab === "edits") loadEdits();
+    if (tab === "portal") loadPortal();
     if (tab === "audit") loadAudit();
-  }, [tab, loadInbox, loadEdits, loadAudit]);
+    if (tab === "stats") loadStats();
+  }, [tab, loadInbox, loadEdits, loadPortal, loadAudit, loadStats]);
 
   async function setStatus(id: string, status: string) {
     await api("/api/admin/messages", { method: "PATCH", body: JSON.stringify({ id, status }) });
@@ -102,6 +140,22 @@ export default function AdminPage() {
     await loadEdits();
   }
 
+  async function createInvite() {
+    const res = await api("/api/admin/portal/invites", {
+      method: "POST",
+      body: JSON.stringify({ email: "info@example.com", resortIds: ["skimap-12357"] }),
+    });
+    const json = (await res.json()) as { inviteUrl?: string; warnings?: string[] };
+    if (json.inviteUrl) setInviteLink(json.inviteUrl);
+    await loadPortal();
+  }
+
+  async function rollbackEdit(editId: string) {
+    const reason = "Rollback after post-moderation review: source mismatch.";
+    await api("/api/admin/portal/rollback", { method: "POST", body: JSON.stringify({ editId, reason }) });
+    await loadPortal();
+  }
+
   return (
     <main className="admin-page">
       <header className="admin-header">
@@ -110,7 +164,9 @@ export default function AdminPage() {
         <nav className="admin-tabs" aria-label="Admin sections">
           <button type="button" className={tab === "inbox" ? "active" : ""} onClick={() => setTab("inbox")}>Inbox</button>
           <button type="button" className={tab === "edits" ? "active" : ""} onClick={() => setTab("edits")}>Edit queue</button>
+          <button type="button" className={tab === "portal" ? "active" : ""} onClick={() => setTab("portal")}>Portal</button>
           <button type="button" className={tab === "audit" ? "active" : ""} onClick={() => setTab("audit")}>Audit log</button>
+          <button type="button" className={tab === "stats" ? "active" : ""} onClick={() => setTab("stats")}>Stats &amp; support</button>
         </nav>
       </header>
       {error ? <p role="alert">{error}</p> : null}
@@ -156,9 +212,75 @@ export default function AdminPage() {
           {checkerPreview ? <pre className="checker-result">{checkerPreview}</pre> : null}
         </section>
       ) : null}
+      {tab === "portal" ? (
+        <section className="admin-portal">
+          <button type="button" className="btn-primary" onClick={createInvite}>Create sample invite</button>
+          {inviteLink ? <p className="hint">Invite path: {inviteLink}</p> : null}
+          <h2>Tier A post-moderation</h2>
+          <ul>
+            {(portalQueue?.postModeration ?? []).map((e) => (
+              <li key={e.id}>
+                {e.entity_id} — {e.status}
+                <button type="button" onClick={() => rollbackEdit(e.id)}>Rollback</button>
+              </li>
+            ))}
+          </ul>
+          <h2>Tier B / C review</h2>
+          <pre>{JSON.stringify({ b: portalQueue?.reviewB, c: portalQueue?.reviewC, promos: portalQueue?.promos }, null, 2)}</pre>
+        </section>
+      ) : null}
       {tab === "audit" ? (
         <section>
           <pre>{JSON.stringify(audit, null, 2)}</pre>
+        </section>
+      ) : null}
+      {tab === "stats" ? (
+        <section className="admin-stats">
+          <p className="hint">
+            Aggregate page views (path + UTC day only, no IP). Enabled when <code>STATS_ENABLED=1</code> on Pages.
+            Status: {statsEnabled ? "on" : "off"}.
+          </p>
+          <h2>Page views (last 14 days)</h2>
+          <table className="admin-stats-table">
+            <thead>
+              <tr>
+                <th>Day (UTC)</th>
+                <th>Path</th>
+                <th>Hits</th>
+              </tr>
+            </thead>
+            <tbody>
+              {statsRows.map((row) => (
+                <tr key={`${row.day_utc}-${row.path}`}>
+                  <td>{row.day_utc}</td>
+                  <td>{row.path}</td>
+                  <td>{row.hits}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <h2>Ko-fi perk codes</h2>
+          <p className="hint">
+            Email is not sent from this app. Copy each code and send it to the donor yourself. Only code hash and expiry are stored long term; plaintext is listed here for manual delivery.
+          </p>
+          <table className="admin-stats-table">
+            <thead>
+              <tr>
+                <th>Transaction</th>
+                <th>Code</th>
+                <th>Expires</th>
+              </tr>
+            </thead>
+            <tbody>
+              {supportCodes.map((row) => (
+                <tr key={row.kofi_transaction_id}>
+                  <td>{row.kofi_transaction_id}</td>
+                  <td><code>{row.code_plain}</code></td>
+                  <td>{new Date(row.expires_at).toISOString().slice(0, 10)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </section>
       ) : null}
     </main>

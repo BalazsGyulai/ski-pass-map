@@ -7,9 +7,11 @@ describe("admin auth", () => {
     expect(parseAdminEmails("a@x.com, B@y.com ")).toEqual(["a@x.com", "b@y.com"]);
   });
 
-  it("never enables dev bypass in production", () => {
-    expect(devBypassActive({ ADMIN_DEV_BYPASS: "1", NODE_ENV: "production" })).toBe(false);
-    expect(devBypassActive({ ADMIN_DEV_BYPASS: "1", NODE_ENV: "development" })).toBe(true);
+  it("never enables dev bypass on pages.dev or without localhost", () => {
+    const env = { ADMIN_DEV_BYPASS: "1", ADMIN_EMAILS: "dev@skimap.test" };
+    expect(devBypassActive(new Request("https://skimap.pages.dev/api/admin/messages"), env)).toBe(false);
+    expect(devBypassActive(new Request("http://127.0.0.1:8788/api/admin/messages"), env)).toBe(true);
+    expect(devBypassActive(new Request("http://evil.test/api/admin/messages"), env)).toBe(false);
   });
 
   it("verifies a JWT against a locally generated JWKS", async () => {
@@ -32,12 +34,11 @@ describe("admin auth", () => {
     expect(parseAdminEmails("admin@skimap.test")).toContain("admin@skimap.test");
   });
 
-  it("allows dev bypass only outside production", async () => {
-    const request = new Request("https://skimap.test/api/admin/messages");
+  it("allows dev bypass only on localhost", async () => {
+    const request = new Request("http://127.0.0.1:8788/api/admin/messages");
     const identity = await verifyAdminRequest(request, {
       ADMIN_DEV_BYPASS: "1",
       ADMIN_EMAILS: "dev@skimap.test",
-      NODE_ENV: "development",
     });
     expect(identity?.bypass).toBe(true);
   });

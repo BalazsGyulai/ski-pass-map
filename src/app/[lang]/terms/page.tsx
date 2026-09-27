@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LegalStub } from "@/components/LegalStub";
+import { TermsContent } from "./TermsContent";
 import type { Lang } from "@/i18n/languages";
 import { isLang } from "@/i18n/languages";
 import { buildPageMetadata } from "@/i18n/metadata";
@@ -11,5 +11,5 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 export default function TermsPage() {
-  return <LegalStub titleKey="terms" />;
+  return <TermsContent />;
 }

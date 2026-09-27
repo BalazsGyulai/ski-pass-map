@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
-import { CONTENT_SECURITY_POLICY, REFERRER_POLICY } from "@/lib/security";
+import { META_CONTENT_SECURITY_POLICY, REFERRER_POLICY } from "@/lib/security";
 import { BASE_PATH, SITE_NAME, SITE_ORIGIN } from "@/lib/site";
 import "./globals.css";
 
@@ -33,7 +33,7 @@ export function DocumentShell({ lang, children }: { lang: string; children: Reac
   return (
     <html lang={lang} suppressHydrationWarning>
       <head>
-        <meta httpEquiv="Content-Security-Policy" content={CONTENT_SECURITY_POLICY} />
+        <meta httpEquiv="Content-Security-Policy" content={META_CONTENT_SECURITY_POLICY} />
       </head>
       <body className={inter.className}>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { generated, passById, resortById } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
-import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm } from "@/lib/format";
+import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm, slopeKmDisplay } from "@/lib/format";
 import { countryLabel, priceReasonText, regionLabel, type MessageKey } from "@/lib/i18n";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { adultBracket, dayTicketIsEstimate, nextPriceChange, pricesOnDate, resolveForViewer } from "@/lib/pricing";
@@ -14,22 +14,30 @@ import { IconClose } from "./icons";
 import { PlacePicker } from "./PlacePicker";
 import { SourceLine } from "./SourceLine";
 import { startSheetDrag } from "./sheet-drag";
+import Link from "next/link";
+import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
+import { formatAttributionLine } from "@/lib/portal/attribution";
+import { mergeResortWithOverrides } from "@/lib/portal/overrides";
+import { useRuntimeOverrides } from "@/lib/runtime-overrides-client";
 import { useResortLists } from "./useResorts";
+import { AffiliateLinksBlock } from "./AffiliateLinks";
 
 const pages = ["prices", "pistes", "snow", "travel", "links"] as const;
 const pageKey: Record<(typeof pages)[number], MessageKey> = {
   prices: "tabPrices",
   pistes: "tabPistes",
   snow: "tabSnow",
-  travel: "tabTravel",
+  travel: "tabTravelShort",
   links: "tabLinks",
 };
 
 export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: SheetSnap) => void }) {
   const app = useApp();
   const { share, selectResort, t, lang, home, resortDays, setResortDaysCount, messages } = app;
-  const resort = share.resort ? resortById.get(share.resort) : undefined;
+  const overrides = useRuntimeOverrides();
+  const baseResort = share.resort ? resortById.get(share.resort) : undefined;
+  const resort = baseResort ? mergeResortWithOverrides(baseResort, baseResort.id, overrides) : undefined;
   const { sortedAll, filtered } = useResortLists();
   const sheetRef = useRef<HTMLElement>(null);
   const pagerRef = useRef<HTMLDivElement>(null);
@@ -39,7 +47,6 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   useEffect(() => {
     setPage(0);
     pagerRef.current?.scrollTo({ left: 0 });
-    titleRef.current?.focus();
   }, [resort?.id]);
 
   if (!resort) return null;
@@ -87,7 +94,9 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
 
   const stats = [
     finiteOrBlank(resort.top_elevation_m) != null ? t("keyStatElev", { n: resort.top_elevation_m ?? 0 }) : null,
-    finiteOrBlank(resort.slope_km) != null ? t("keyStatKm", { n: resort.slope_km ?? 0 }) : null,
+    slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) != null
+      ? t("keyStatKm", { n: slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) ?? 0 })
+      : null,
     finiteOrBlank(resort.lifts) != null ? t("keyStatLifts", { n: resort.lifts ?? 0 }) : null,
   ].filter(Boolean);
 
@@ -116,7 +125,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
           {regionLabel(messages, resort.region)} · {countryLabel(messages, resort.country)}
           {distance != null && formatKm(lang, distance) ? ` · ${t("kmAway", { n: formatKm(lang, distance) })}` : ""}
         </p>
-        <h2 id="resort-title" ref={titleRef} tabIndex={-1}>
+        <h2 id="resort-title" className="resort-title" ref={titleRef} tabIndex={-1}>
           {resort.name}
         </h2>
         <p className="meta">
@@ -130,6 +139,24 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         </button>
       </header>
       {!visible ? <p className="hint warn sheet-note">{t("hiddenByFilters")}</p> : null}
+      {resort.portalAttribution ? (
+        <p className="portal-attribution hint sheet-note" data-testid="portal-attribution">
+          {formatAttributionLine(resort.portalAttribution, lang === "de" ? "de" : "en")}
+        </p>
+      ) : null}
+      {resort.portalPromo ? (
+        <aside className="portal-promo sheet-note" data-testid="portal-promo" aria-label="Resort promotion">
+          <p className="badge">
+            {lang === "de" ? `Anzeige · vom ${resort.portalPromo.resortName}` : `Ad · From ${resort.portalPromo.resortName}`}
+          </p>
+          <p>{resort.portalPromo.text}</p>
+          {resort.portalPromo.linkUrl ? (
+            <a href={resort.portalPromo.linkUrl} rel="noopener noreferrer">
+              {resort.portalPromo.linkUrl}
+            </a>
+          ) : null}
+        </aside>
+      ) : null}
       <div className="card-tabs" role="tablist" aria-label={t("cardTabs")} onKeyDown={onTabsKey}>
         {pages.map((id, tabIndex) => (
           <button
@@ -203,13 +230,25 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   );
 }
 
+function BirthYearHint() {
+  const { t, birthYear } = useApp();
+  const href = useLocalizedPath();
+  if (birthYear != null) return <p className="hint">{t("birthYearExact")}</p>;
+  return (
+    <p className="hint">
+      {t("setBirthYearHintPrefix")}{" "}
+      <Link href={href("/settings")}>{t("navSettings")}</Link>.
+    </p>
+  );
+}
+
 function PricesPage({ resort }: { resort: Resort }) {
-  const { t, lang, birthYear, effectiveDate } = useApp();
+  const { t, lang, effectiveDate } = useApp();
   const day = finiteOrBlank(resort.day_ticket_eur);
   return (
     <div>
-      <p className="hint">{birthYear == null ? t("setBirthYearHint") : t("birthYearExact")}</p>
-      {resort.passes.length === 0 ? <p>{t("noPasses")}</p> : null}
+      <BirthYearHint />
+      {resort.passes.length === 0 ? <NoPassPrices resort={resort} day={day} /> : null}
       <ul className="price-list">
         {resort.passes.map((id) => {
           const pass = passById.get(id);
@@ -234,6 +273,31 @@ function PricesPage({ resort }: { resort: Resort }) {
         </div>
       ) : null}
       <p className="disclaimer">{t("globalDisclaimer")}</p>
+    </div>
+  );
+}
+
+function NoPassPrices({ resort, day }: { resort: Resort; day: number | null }) {
+  const { t, lang } = useApp();
+  return (
+    <div className="no-pass-block">
+      <p className="hint">{t("noPasses")}</p>
+      <div className="stat-tiles">
+        <Tile label={t("elevation")} value={finiteOrBlank(resort.top_elevation_m) != null ? `${resort.top_elevation_m} m` : t("dash")} />
+        <Tile label={t("slopeKm")} value={slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) != null ? `${slopeKmDisplay(resort.slope_km_display ?? resort.slope_km)} km` : t("dash")} />
+        <Tile label={t("lifts")} value={finiteOrBlank(resort.lifts_display) != null ? String(resort.lifts_display) : t("dash")} />
+      </div>
+      {day != null ? (
+        <div className="day-tile">
+          <p className="hint">{t("dayTicket")}</p>
+          <p className="price-lg num">{formatEur(lang, day)}</p>
+        </div>
+      ) : null}
+      {resort.website ? (
+        <a className="primary wide" href={resort.website} target="_blank" rel="noopener noreferrer">
+          {t("openWebsite")}
+        </a>
+      ) : null}
     </div>
   );
 }
@@ -288,7 +352,7 @@ function PistesPage({ resort }: { resort: Resort }) {
   return (
     <div>
       <div className="stat-tiles">
-        <Tile label={t("slopeKm")} value={finiteOrBlank(resort.slope_km_display) != null ? `${resort.slope_km_display} km` : t("dash")} />
+        <Tile label={t("slopeKm")} value={slopeKmDisplay(resort.slope_km_display ?? resort.slope_km) != null ? `${slopeKmDisplay(resort.slope_km_display ?? resort.slope_km)} km` : t("dash")} />
         <Tile label={t("lifts")} value={finiteOrBlank(resort.lifts_display) != null ? String(resort.lifts_display) : t("dash")} />
         <Tile label={t("snowpark")} value={resort.snowpark === true ? t("yes") : t("dash")} />
         <Tile label={t("nightSkiing")} value={resort.night_skiing === true ? t("yes") : t("dash")} />
@@ -431,6 +495,7 @@ function LinksPage({ resort }: { resort: Resort }) {
           </ul>
         </>
       ) : null}
+      <AffiliateLinksBlock />
       <div className="row-actions">
         <button type="button" className="ghost" onClick={copyLink}>
           {copyMessage ?? t("share")}
