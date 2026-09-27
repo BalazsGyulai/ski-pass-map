@@ -426,6 +426,7 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   bottom: calc(var(--sheet-visible, 252px) + 40px);
   max-width: min(420px, calc(100% - 24px));
   transition: bottom var(--dur-slow) var(--ease-sheet), scale var(--dur-fast) var(--ease-out);
+  animation: float-in var(--dur-slow) var(--ease-out);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -876,7 +877,7 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
 @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
 
 .scrim { position: fixed; inset: 0; z-index: 70; }
-.scrim-hit { position: absolute; inset: 0; border: 0; background: var(--scrim); padding: 0; cursor: default; }
+.scrim-hit { position: absolute; inset: 0; border: 0; background: var(--scrim); padding: 0; cursor: default; animation: fade-in var(--dur) var(--ease-out); }
 .menu-drawer, .filter-sheet {
   position: absolute;
   background: var(--surface);
@@ -892,7 +893,7 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
   overflow: auto;
   box-shadow: var(--shadow);
 }
-.filter-sheet { inset: 0; z-index: 1; }
+.filter-sheet { inset: 0; z-index: 1; animation: float-in var(--dur-slow) var(--ease-sheet); }
 .filter-sheet .drawer-head { padding: 4px 8px 0 16px; }
 .filter-body { flex: 1; overflow: auto; padding: 0 16px 16px; }
 .filter-footer {
@@ -975,6 +976,8 @@ legend { padding: 0 4px; font-weight: 600; }
   border-radius: 20px;
   box-shadow: var(--shadow-float);
   padding: 8px 16px 16px;
+  animation: pop-in var(--dur) var(--ease-out);
+  transform-origin: top right;
 }
 .piste-legend { list-style: none; margin: 0; padding: 0; }
 .piste-legend li { display: flex; align-items: center; gap: 8px; min-height: 28px; font-size: 14px; }
@@ -1014,7 +1017,7 @@ legend { padding: 0 4px; font-weight: 600; }
 .chip-row { display: flex; gap: 8px; }
 .chip-field { flex: 1; }
 .plan-layout { display: grid; gap: 12px; }
-.page { padding: 24px 16px 40px; }
+.page { padding: 24px 16px 40px; animation: fade-in var(--dur) var(--ease-out); }
 .page h1 { margin: 0 0 8px; font-size: var(--text-3xl); line-height: 1.1; font-weight: 700; letter-spacing: -0.03em; }
 .page-narrow { max-width: 1040px; margin: 0 auto; width: 100%; }
 .card-block {
@@ -1220,6 +1223,8 @@ legend { padding: 0 4px; font-weight: 600; }
   .explorer[data-snap="full"] .piste-float { display: flex; }
   .explorer :is(.maplibregl-ctrl-top-right, .mapboxgl-ctrl-top-right) { top: 128px; }
   .filter-sheet {
+    animation: pop-in var(--dur) var(--ease-out);
+    transform-origin: top left;
     inset: auto;
     top: 72px;
     left: 132px;
@@ -1569,12 +1574,11 @@ button.toggle-switch {
   background: var(--line);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.2s ease;
+  transition: background-color var(--dur) var(--ease-out);
   justify-content: flex-start;
 }
 button.toggle-switch.is-on {
   background: var(--save);
-  justify-content: flex-end;
 }
 .toggle-knob {
   display: block;
@@ -1584,8 +1588,10 @@ button.toggle-switch.is-on {
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
-  transition: transform 0.2s ease;
+  transition: translate var(--dur) var(--ease-out);
 }
+/* The knob slides the width of the track: 51px minus the padding and the knob. */
+button.toggle-switch.is-on .toggle-knob { translate: 20px 0; }
 .seg-control {
   display: inline-flex;
   padding: 2px;
@@ -1766,6 +1772,8 @@ button.toggle-switch.is-on {
   .site-tabs :is(.consent-banner-card, .support-prompt-card) { padding-bottom: 16px; }
 }
 @keyframes float-in { from { opacity: 0; translate: 0 12px; } }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes pop-in { from { opacity: 0; scale: 0.97; } }
 .consent-banner-text {
   margin: 0;
   font-size: var(--text-sm);
@@ -1884,6 +1892,11 @@ button.toggle-switch.is-on {
 .footer-cookie { border: none; background: none; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline; }
 .admin-stats-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .admin-stats-table th, .admin-stats-table td { border: 1px solid var(--line); padding: 0.35rem; }
+
+/* Until the app has applied the stored settings (see AppState), nothing transitions. */
+:root:not([data-ready]) *,
+:root:not([data-ready]) *::before,
+:root:not([data-ready]) *::after { transition: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

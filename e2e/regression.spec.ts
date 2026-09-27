@@ -10,6 +10,7 @@ import {
   shotPart10Viewport,
   waitForMapMarkers,
   mapboxStubBuild,
+  settleAnimations,
 } from "./helpers";
 import { installMapboxStub, installMapStub, mapStubEnabled } from "./map-stub";
 import { LANGS } from "../src/i18n/languages";
@@ -438,6 +439,36 @@ test("lifts move uphill on an open resort and stand still for reduced motion", a
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
+test("motion: panels ease in, the switch knob slides, and reduced motion keeps everything still", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  const sheetAnimation = () => page.locator(".filter-sheet").evaluate((el) => getComputedStyle(el).animationName);
+  const knob = page.getByRole("switch", { name: "3D terrain" }).locator(".toggle-knob");
+
+  await page.goto("/en/");
+  await page.getByRole("button", { name: /open filters/i }).click();
+  await expect(page.locator(".filter-sheet")).toBeVisible();
+  expect(await sheetAnimation()).not.toBe("none");
+  await page.keyboard.press("Escape");
+
+  await page.goto("/en/settings/");
+  // Transitions start once the stored settings are painted, so nothing slides into place on load.
+  await expect(page.locator("html")).toHaveAttribute("data-ready", "true");
+  expect(await knob.evaluate((el) => getComputedStyle(el).translate)).toBe("none");
+  await knob.click();
+  await expect.poll(() => knob.evaluate((el) => getComputedStyle(el).translate)).toBe("20px");
+  expect(await knob.evaluate((el) => getComputedStyle(el).transitionDuration)).not.toBe("0s");
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await knob.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe("0s");
+  await page.goto("/en/");
+  await page.getByRole("button", { name: /open filters/i }).click();
+  await expect(page.locator(".filter-sheet")).toBeVisible();
+  expect(await sheetAnimation()).toBe("none");
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
 test("contact form with Turnstile test keys", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);
@@ -583,6 +614,8 @@ test("accessibility: no serious axe violations on main pages", async ({ page }) 
   for (const path of ["/en/", "/en/plan/"]) {
     await page.goto(path);
     await page.waitForTimeout(800);
+    // Contrast is measured on the settled page, not halfway through a fade.
+    await settleAnimations(page);
     const results = await new AxeBuilder({ page })
       .exclude(".cf-turnstile, iframe")
       .withTags(["wcag2a", "wcag2aa"])

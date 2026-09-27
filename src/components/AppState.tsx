@@ -193,6 +193,18 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     setReady(true);
   }, []);
 
+  // Transitions switch on only after the stored settings have been painted, so a switch or a
+  // theme that differs from the default does not animate into place on every page load.
+  useEffect(() => {
+    if (!ready) return;
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => {
+        document.documentElement.dataset.ready = "true";
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [ready]);
+
   useEffect(() => {
     if (!ready) return;
     document.documentElement.lang = lang;
