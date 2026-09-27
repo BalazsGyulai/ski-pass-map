@@ -9,8 +9,12 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
+      const replaced = keys.filter((key) => key !== CACHE);
+      await Promise.all(replaced.map((key) => caches.delete(key)));
       await self.clients.claim();
+      // First install: the open page already came from the network. Reloading it would only
+      // interrupt the visitor. Refresh open pages only when an older version is replaced.
+      if (replaced.length === 0) return;
       const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       for (const client of windows) {
         if (!client.url.includes(BASE)) continue;
