@@ -1,12 +1,15 @@
+import { clientIpFromRequest } from "@/lib/client-ip";
+import { hashIp, saltFromEnv } from "@/lib/ip-hash";
 import type { D1Like } from "@/lib/db/types";
 
 export interface StatEnv {
   STATS_ENABLED?: string;
   DB?: D1Like;
+  MAP_LOAD_HASH_SALT?: string;
 }
 
-const RATE_BUCKET = "stat:global";
-const RATE_MAX = 120;
+const RATE_MAX_PER_IP = 60;
+const RATE_MAX_GLOBAL = 500;
 const RATE_WINDOW_MS = 60_000;
 
 export async function handleStatPost(
@@ -28,8 +31,13 @@ export async function handleStatPost(
   const path = normalizePath(body.path);
   if (!path) return json({ ok: false }, 400);
 
-  const bucketHits = await bumpRate(sql, RATE_BUCKET, now, RATE_WINDOW_MS);
-  if (bucketHits > RATE_MAX) return json({ ok: false, error: "rate_limited" }, 429);
+  const salt = saltFromEnv(env.MAP_LOAD_HASH_SALT, "stat-dev-salt");
+  const ip = clientIpFromRequest(request);
+  const ipBucket = `stat:ip:${await hashIp(salt, "stat", ip)}`;
+  const ipHits = await bumpRate(sql, ipBucket, now, RATE_WINDOW_MS);
+  if (ipHits > RATE_MAX_PER_IP) return json({ ok: false, error: "rate_limited" }, 429);
+  const globalHits = await bumpRate(sql, "stat:global", now, RATE_WINDOW_MS);
+  if (globalHits > RATE_MAX_GLOBAL) return json({ ok: false, error: "rate_limited" }, 429);
 
   const day = new Date(now).toISOString().slice(0, 10);
   await sql

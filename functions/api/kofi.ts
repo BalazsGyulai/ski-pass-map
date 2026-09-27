@@ -1,11 +1,15 @@
+import { createAppStore } from "../../src/lib/db/app-store";
+import { createSqlExecutor, type D1Like } from "../../src/lib/db/types";
 import { generateSupportCode, hashSupportCode } from "../../src/lib/support/kofi-crypto";
+import { checkKofiWebhookRate } from "../../src/lib/support/kofi-rate";
 import { parseKofiBody } from "../../src/lib/support/kofi-parse";
-import type { D1Like } from "../../src/lib/db/types";
+import { timingSafeEqualString } from "../../src/lib/timing-safe";
 
 interface Env {
   DB?: D1Like;
   KOFI_VERIFICATION_TOKEN?: string;
   SUPPORT_CODE_SALT?: string;
+  MAP_LOAD_HASH_SALT?: string;
 }
 
 const CODE_VALID_DAYS = 30;
@@ -24,12 +28,19 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     return new Response(JSON.stringify({ ok: false, error: "not_configured" }), { status: 503, headers: jsonHeaders() });
   }
 
+  const store = createAppStore(createSqlExecutor(context.env.DB));
+  const rate = await checkKofiWebhookRate(store, context.request, context.env);
+  if (!rate.ok) {
+    return new Response(JSON.stringify({ ok: false, error: "rate_limited" }), { status: rate.status, headers: jsonHeaders() });
+  }
+
   const body = await context.request.text();
   const payload = parseKofiBody(body);
-  if (!payload?.verification_token || payload.verification_token !== token) {
+  const submitted = payload?.verification_token ?? "";
+  if (!submitted || !timingSafeEqualString(submitted, token)) {
     return new Response(JSON.stringify({ ok: false, error: "unauthorized" }), { status: 401, headers: jsonHeaders() });
   }
-  const txId = payload.kofi_transaction_id ?? payload.message_id;
+  const txId = payload?.kofi_transaction_id ?? payload?.message_id;
   if (!txId) {
     return new Response(JSON.stringify({ ok: false, error: "bad_payload" }), { status: 400, headers: jsonHeaders() });
   }

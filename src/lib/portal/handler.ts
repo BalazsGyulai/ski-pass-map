@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { AppStore } from "@/lib/db/app-store";
 import type { PortalStore } from "@/lib/db/portal-store";
 import { jsonResponse, readJsonBody } from "@/lib/http-json";
+import { portalDevBypassAllowed } from "@/lib/dev-bypass";
 import { readPortalConfig } from "./config";
 import {
   createPortalSession,
@@ -75,10 +76,17 @@ export async function handlePortalInviteGet(token: string, env: PortalEnv, porta
   });
 }
 
-export async function handlePortalRegisterOptions(request: Request, env: PortalEnv, portal: PortalStore): Promise<Response> {
+export async function handlePortalRegisterOptions(
+  request: Request,
+  env: PortalEnv,
+  portal: PortalStore,
+  app: AppStore,
+): Promise<Response> {
   const disabled = portalDisabledResponse(env);
   if (disabled) return disabled;
   if (request.method !== "POST") return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
+  const rate = await checkPortalLoginRate(app, request, env);
+  if (!rate.ok) return jsonResponse({ ok: false, error: "rate_limit" }, rate.status);
   const raw = await readJsonBody(request);
   const schema = z.object({
     inviteToken: z.string().min(20),
@@ -341,7 +349,7 @@ export async function handlePortalEdits(request: Request, env: PortalEnv, portal
   const auth = await requirePortalPost(request, env, portal);
   if ("error" in auth) return auth.error;
   const result = await submitPortalEdit(
-    { body: await readJsonBody(request), userId: auth.identity.userId, userEmail: auth.identity.email },
+    { body: await readJsonBody(request), userId: auth.identity.userId, userEmail: auth.identity.email, request },
     portal,
     app,
     env,
@@ -353,16 +361,18 @@ export async function handlePortalEdits(request: Request, env: PortalEnv, portal
 export async function handlePortalLogout(request: Request, env: PortalEnv, portal: PortalStore): Promise<Response> {
   const disabled = portalDisabledResponse(env);
   if (disabled) return disabled;
-  const identity = await resolvePortalIdentity(request, env, portal);
-  if (identity?.sessionId && identity.sessionId !== "dev") {
-    await portal.deleteSession(identity.sessionId);
+  if (request.method !== "POST") return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
+  const auth = await requirePortalPost(request, env, portal);
+  if ("error" in auth) return auth.error;
+  if (auth.identity.sessionId !== "dev") {
+    await portal.deleteSession(auth.identity.sessionId);
   }
   const secure = new URL(request.url).protocol === "https:";
   return logoutResponse(secure);
 }
 
 export async function handlePortalDevLogin(request: Request, env: PortalEnv, portal: PortalStore): Promise<Response> {
-  if (env.NODE_ENV === "production" || env.PORTAL_DEV_BYPASS !== "1") {
+  if (!portalDevBypassAllowed(request, env)) {
     return jsonResponse({ ok: false, error: "forbidden" }, 403);
   }
   const email = (request.headers.get("x-portal-dev-email") ?? env.PORTAL_DEV_EMAIL ?? "portal-dev@skimap.test").toLowerCase();
