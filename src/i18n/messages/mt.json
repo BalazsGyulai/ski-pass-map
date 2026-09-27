@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} jiem ta' ski",
   "dayTicketsCheaper": "Il-biljetti ta' ġurnata jiswew {amount} inqas",
   "dayTicketAdultNote": "Il-biljetti ta' ġurnata jużaw il-prezz tal-adulti ta' kull resort.",
+  "anyPrice": "Kwalunkwe prezz",
+  "upToPrice": "Sa {price}",
   "priceAfter": "{price}wara {date}",
   "showRuns": "Ara l-irċievi u l-lifti fuq il-pjattaforma",
   "verticalDrop": "Vertikal",

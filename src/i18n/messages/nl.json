@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} skidagen",
   "dayTicketsCheaper": "Dagpassen kosten {amount} minder",
   "dayTicketAdultNote": "Dagpassen tegen de volwassenenprijs van elk skigebied.",
+  "anyPrice": "Elke prijs",
+  "upToPrice": "Tot {price}",
   "priceAfter": "{price}na{date}",
   "showRuns": "Starten en liften op de kaart tonen",
   "verticalDrop": "Verticaal",

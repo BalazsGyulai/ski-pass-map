@@ -53,7 +53,7 @@ export default function MapView() {
   const libRef = useRef<MapLib | null>(null);
   const appliedStyle = useRef<string | null>(null);
   const pisteData = useRef<unknown>(null);
-  const { share, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, offline } = useApp();
+  const { share, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, offline, searchThisArea } = useApp();
   const { filtered } = useResortLists();
   const [choice, setChoice] = useState<MapProviderId | null>(null);
   const [override, setOverride] = useState<MapProviderId | null>(null);
@@ -376,6 +376,21 @@ export default function MapView() {
       },
     };
   }, [ready, mapApi, filtered]);
+
+  // Picking a pass (chips or filters) frames the resorts it covers.
+  const passKey = share.passes.join(",");
+  // Starts empty so a link that arrives with ?passes= is framed too.
+  const lastPassKey = useRef("");
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    if (lastPassKey.current === passKey) return;
+    lastPassKey.current = passKey;
+    if (share.resort || !passKey) return;
+    // We moved the camera, not the visitor, so the list follows without a "Search this area" step.
+    map.once("moveend", () => searchThisArea());
+    mapApi.current.fitAll();
+  }, [ready, passKey, share.resort, mapApi, searchThisArea]);
 
   useEffect(() => {
     const map = mapRef.current;

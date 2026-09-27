@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} días de esquí",
   "dayTicketsCheaper": "Los forfaits de día cuestan {amount} menos",
   "dayTicketAdultNote": "Forfaits de día al precio de adulto de cada estación.",
+  "anyPrice": "Cualquier precio",
+  "upToPrice": "Hasta {price}",
   "priceAfter": "{price}después{date}",
   "showRuns": "Mostrar carreras y ascensores en el mapa",
   "verticalDrop": "Vertical",

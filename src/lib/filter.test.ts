@@ -25,6 +25,7 @@ describe("filterResorts", () => {
       maxKm: null,
       favouritesOnly: false,
       showAbandoned: false,
+      maxPassPrice: null,
     };
     const uncovered = filterResorts(resorts, { ...empty, noPass: true }, base);
     expect(uncovered.length).toBeGreaterThan(0);
@@ -82,6 +83,7 @@ describe("filterResorts", () => {
         maxKm: 30,
         favouritesOnly: false,
         showAbandoned: false,
+        maxPassPrice: null,
       },
       { home: vienna, favourites: new Set(), passNames: names },
     );
@@ -120,3 +122,25 @@ describe("share url", () => {
     expect(again).toEqual(state);
   });
 });
+
+describe("pass price filter", () => {
+  const base = parseShareState(new URLSearchParams());
+  const context = { home: null, favourites: new Set<string>(), passNames: names };
+  const cheapPass = passes[0].id;
+  const priceOf = (id: string) => (id === cheapPass ? 300 : 900);
+
+  it("keeps resorts that a pass within the price covers", () => {
+    const kept = filterResorts(resorts, { ...base, maxPassPrice: 400 }, { ...context, passPriceOf: priceOf });
+    expect(kept.length).toBeGreaterThan(0);
+    expect(kept.every((resort) => resort.passes.includes(cheapPass))).toBe(true);
+    expect(filterResorts(resorts, { ...base, maxPassPrice: 1000 }, { ...context, passPriceOf: priceOf }).every((resort) => resort.passes.length > 0)).toBe(true);
+  });
+
+  it("drops everything when prices are unknown, and round-trips in the URL", () => {
+    expect(filterResorts(resorts, { ...base, maxPassPrice: 400 }, context)).toEqual([]);
+    const state = parseShareState(new URLSearchParams("maxPrice=650"));
+    expect(state.maxPassPrice).toBe(650);
+    expect(serializeShareState(state)).toBe("maxPrice=650");
+  });
+});
+

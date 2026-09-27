@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} ημέρες σκι",
   "dayTicketsCheaper": "Οι ημερήσιες κάρτες κοστίζουν {amount} λιγότερο",
   "dayTicketAdultNote": "Οι ημερήσιες κάρτες υπολογίζονται με την τιμή ενηλίκων κάθε χιονοδρομικού.",
+  "anyPrice": "Οποιαδήποτε τιμή",
+  "upToPrice": "Έως {price}",
   "priceAfter": "{price}μετά{date}",
   "showRuns": "Εμφάνιση δρομών και ανελκυστήρων στο χάρτη",
   "verticalDrop": "Κατακόρυφα",

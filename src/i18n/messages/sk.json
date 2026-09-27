@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} lyžiarskych dní",
   "dayTicketsCheaper": "Denné permanentky vyjdú o {amount} lacnejšie",
   "dayTicketAdultNote": "Denné permanentky za cenu pre dospelých v každom stredisku.",
+  "anyPrice": "Ľubovoľná cena",
+  "upToPrice": "Do {price}",
   "priceAfter": "{price}po{date}",
   "showRuns": "Zobraziť chody a výťahy na mape",
   "verticalDrop": "Vertikálne",

@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} slidinėjimo dienos",
   "dayTicketsCheaper": "Dienos bilietai kainuoja {amount} mažiau",
   "dayTicketAdultNote": "Dienos bilietai skaičiuojami pagal kiekvieno centro suaugusiųjų kainą.",
+  "anyPrice": "Bet kokia kaina",
+  "upToPrice": "Iki {price}",
   "priceAfter": "{price}po{date}",
   "showRuns": "Rodyti važiavimus ir liftus žemėlapyje",
   "verticalDrop": "Vertikalus",

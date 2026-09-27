@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} skiddagar",
   "dayTicketsCheaper": "Dagkort kostar {amount} mindre",
   "dayTicketAdultNote": "Dagkort räknas med varje skidorts vuxenpris.",
+  "anyPrice": "Alla priser",
+  "upToPrice": "Upp till {price}",
   "priceAfter": "{price}Efter{date}",
   "showRuns": "Show runs och liftar på kartan",
   "verticalDrop": "Vertikal",

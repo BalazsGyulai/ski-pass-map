@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} ски дни",
   "dayTicketsCheaper": "Дневните карти струват с {amount} по-малко",
   "dayTicketAdultNote": "Дневните карти са по цената за възрастни на всеки курорт.",
+  "anyPrice": "Всяка цена",
+  "upToPrice": "До {price}",
   "priceAfter": "{price}след{date}",
   "showRuns": "Показване на пробега и асансьорите на картата",
   "verticalDrop": "Вертикално",

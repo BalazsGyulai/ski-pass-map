@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} síelési nap",
   "dayTicketsCheaper": "Napijegyekkel {amount} olcsóbb",
   "dayTicketAdultNote": "A napijegyek az egyes síterepek felnőtt árával számolnak.",
+  "anyPrice": "Bármilyen ár",
+  "upToPrice": "Legfeljebb {price}",
   "priceAfter": "{price} {date} után",
   "showRuns": "Pályák és felvonók a térképen",
   "verticalDrop": "Szintkülönbség",

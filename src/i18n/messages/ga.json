@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} lá sciála",
   "dayTicketsCheaper": "Cosnaíonn ticéid lae {amount} níos lú",
   "dayTicketAdultNote": "Úsáideann ticéid lae praghas aosaigh gach ionaid.",
+  "anyPrice": "Aon phraghas",
+  "upToPrice": "Suas le {price}",
   "priceAfter": "{price}tar éis{date}",
   "showRuns": "Taispeáin ritheann agus ardaitheoirí ar léarscáil",
   "verticalDrop": "Ingearach",

@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} skijaških dana",
   "dayTicketsCheaper": "Dnevne karte koštaju {amount} manje",
   "dayTicketAdultNote": "Dnevne karte po cijeni za odrasle na svakom skijalištu.",
+  "anyPrice": "Bilo koja cijena",
+  "upToPrice": "Do {price}",
   "priceAfter": "{price}Nakon{date}",
   "showRuns": "Pokaži trke i lifte na mapi",
   "verticalDrop": "Vrtni",

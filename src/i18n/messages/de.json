@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} Skitage",
   "dayTicketsCheaper": "Tageskarten kosten {amount} weniger",
   "dayTicketAdultNote": "Tageskarten zum Erwachsenenpreis des jeweiligen Skigebiets.",
+  "anyPrice": "Jeder Preis",
+  "upToPrice": "Bis {price}",
   "priceAfter": "{price} ab {date}",
   "showRuns": "Pisten und Lifte auf der Karte",
   "verticalDrop": "Höhendifferenz",

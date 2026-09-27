@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} smučarskih dni",
   "dayTicketsCheaper": "Dnevne vozovnice stanejo {amount} manj",
   "dayTicketAdultNote": "Dnevne vozovnice po ceni za odrasle na posameznem smučišču.",
+  "anyPrice": "Katera koli cena",
+  "upToPrice": "Do {price}",
   "priceAfter": "{price}po{date}",
   "showRuns": "Prikaži zagone in dvigala na zemljevidu",
   "verticalDrop": "Navpično",

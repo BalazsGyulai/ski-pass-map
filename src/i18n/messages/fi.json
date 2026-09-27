@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} laskettelupäivää",
   "dayTicketsCheaper": "Päiväliput maksavat {amount} vähemmän",
   "dayTicketAdultNote": "Päiväliput lasketaan kunkin hiihtokeskuksen aikuisten hinnalla.",
+  "anyPrice": "Mikä tahansa hinta",
+  "upToPrice": "Enintään {price}",
   "priceAfter": "{price}jälkeen{date}",
   "showRuns": "voimakkaampia juoksuja ja nostoja",
   "verticalDrop": "Pystysuunnassa",

@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} skidage",
   "dayTicketsCheaper": "Dagskort koster {amount} mindre",
   "dayTicketAdultNote": "Dagskort regnes med hvert skisportssteds voksenpris.",
+  "anyPrice": "Alle priser",
+  "upToPrice": "Op til {price}",
   "priceAfter": "{price}efter{date}",
   "showRuns": "Vis Vis kørsler og elevatorer på kortet",
   "verticalDrop": "Lodret",

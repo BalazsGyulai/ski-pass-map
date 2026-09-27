@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} ski days",
   "dayTicketsCheaper": "Day tickets cost {amount} less",
   "dayTicketAdultNote": "Day tickets use each resort's adult price.",
+  "anyPrice": "Any price",
+  "upToPrice": "Up to {price}",
   "priceAfter": "{price} after {date}",
   "showRuns": "Show runs and lifts on map",
   "verticalDrop": "Vertical",

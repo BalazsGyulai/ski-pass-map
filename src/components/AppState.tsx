@@ -359,6 +359,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       maxKm: null,
       favouritesOnly: false,
       showAbandoned: false,
+      maxPassPrice: null,
     });
   }
 

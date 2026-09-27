@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} zile de schi",
   "dayTicketsCheaper": "Abonamentele de o zi costă cu {amount} mai puțin",
   "dayTicketAdultNote": "Abonamentele de o zi folosesc prețul pentru adulți al fiecărui domeniu.",
+  "anyPrice": "Orice preț",
+  "upToPrice": "Până la {price}",
   "priceAfter": "{price}după{date}",
   "showRuns": "Arată rulează și ridică pe hartă",
   "verticalDrop": "Vertical",

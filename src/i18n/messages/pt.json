@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} dias de esqui",
   "dayTicketsCheaper": "Os bilhetes diários custam menos {amount}",
   "dayTicketAdultNote": "Os bilhetes diários usam o preço de adulto de cada estância.",
+  "anyPrice": "Qualquer preço",
+  "upToPrice": "Até {price}",
   "priceAfter": "{price}após{date}",
   "showRuns": "Mostrar corridas e elevadores no mapa",
   "verticalDrop": "Vertical",

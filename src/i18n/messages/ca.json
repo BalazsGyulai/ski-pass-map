@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} dies d'esquí",
   "dayTicketsCheaper": "Els forfets de dia costen {amount} menys",
   "dayTicketAdultNote": "Els forfets de dia fan servir el preu d'adult de cada estació.",
+  "anyPrice": "Qualsevol preu",
+  "upToPrice": "Fins a {price}",
   "priceAfter": "{price}després{date}",
   "showRuns": "Mostra les sortides i puja en el mapa",
   "verticalDrop": "Vertical",

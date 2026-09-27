@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} dni jazdy",
   "dayTicketsCheaper": "Karnety dzienne kosztują {amount} mniej",
   "dayTicketAdultNote": "Karnety dzienne według ceny dla dorosłych w każdym ośrodku.",
+  "anyPrice": "Dowolna cena",
+  "upToPrice": "Do {price}",
   "priceAfter": "{price}po Przygotowywaniu{date}",
   "showRuns": "Pokaż biegi i windy na mapie",
   "verticalDrop": "Pionowe",

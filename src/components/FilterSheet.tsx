@@ -10,9 +10,14 @@ import { IconClose } from "./icons";
 import { PlacePicker } from "./PlacePicker";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
+import { formatEur } from "@/lib/format";
+
+/** The pass-price slider. The top end means any price. */
+const MIN_PASS_PRICE = 300;
+const MAX_PASS_PRICE = 1300;
 
 export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { share, updateShare, resetFilters, selectResort, saveCity, home, t, messages } = useApp();
+  const { share, updateShare, resetFilters, selectResort, saveCity, home, t, messages, lang } = useApp();
   const { filtered } = useResortLists();
   const searchRef = useRef<HTMLInputElement>(null);
   const query = fold(share.q.trim());
@@ -171,6 +176,25 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
                 <option value="all">{t("passMatchAll")}</option>
               </select>
             </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>{t("passPrice")}</legend>
+            <label className="days-slider">
+              <span className="num">{share.maxPassPrice == null ? t("anyPrice") : t("upToPrice", { price: formatEur(lang, share.maxPassPrice) })}</span>
+              <input
+                type="range"
+                min={MIN_PASS_PRICE}
+                max={MAX_PASS_PRICE}
+                step={50}
+                value={share.maxPassPrice ?? MAX_PASS_PRICE}
+                onChange={(event) => {
+                  const value = Number(event.target.value);
+                  updateShare({ maxPassPrice: value >= MAX_PASS_PRICE ? null : value });
+                }}
+              />
+            </label>
+            <p className="hint">{t("birthYearExact")}</p>
           </fieldset>
 
           <PlacePicker />

@@ -9,6 +9,7 @@ import { FilterSheet } from "./FilterSheet";
 import { LayersPanel, MapTools } from "./MapTools";
 import { ListSheet } from "./ListSheet";
 import { LanguageSwitcher, useLocalizedPath } from "./LanguageSwitcher";
+import { PassChips } from "./PassChips";
 import { PlanPill } from "./PlanPill";
 import { ResortCard } from "./ResortCard";
 import { SearchPill } from "./SearchPill";
@@ -95,6 +96,7 @@ export function ExplorerFrame() {
       </header>
       <div className="stage">
         <SkiMap />
+        <PassChips />
         <MapTools layersOpen={layersOpen} onLayers={() => setLayersOpen((open) => !open)} />
         <LayersPanel open={layersOpen} onClose={() => setLayersOpen(false)} />
         {areaStale && !resort ? (

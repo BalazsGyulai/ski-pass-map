@@ -199,6 +199,27 @@ test("plan: days added on the map drive the answer pill and My plan", async ({ p
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
+test("pass chips and the price filter narrow the map", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  await page.goto("/en/");
+  await waitForMapMarkers(page);
+  const chip = page.locator(".pass-chips .chip", { hasText: "Kärntner Skipass" });
+  await chip.click();
+  await expect(page).toHaveURL(/passes=kaerntner-skipass/);
+  await expect(chip).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".search-pill .pill-summary")).toContainText("Kärntner Skipass");
+  await page.locator(".pass-chips .chip").first().click();
+  await expect(page).not.toHaveURL(/passes=/);
+  await page.getByRole("button", { name: /open filters/i }).click();
+  await page.locator('.filter-sheet input[type="range"]').fill("500");
+  await expect(page).toHaveURL(/maxPrice=500/);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".search-pill .pill-summary")).toContainText("Up to €500");
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
 test("planner, compare, birth-year prices, favourites persistence", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);

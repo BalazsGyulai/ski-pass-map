@@ -362,6 +362,8 @@
   "skiDaysValue": "{n} slēpošanas dienas",
   "dayTicketsCheaper": "Dienas biļetes maksā par {amount} mazāk",
   "dayTicketAdultNote": "Dienas biļetes rēķinātas pēc katra kūrorta pieaugušo cenas.",
+  "anyPrice": "Jebkura cena",
+  "upToPrice": "Līdz {price}",
   "priceAfter": "{price}pēc{date}",
   "showRuns": "Rādīt skrējienus un liftus uz kartes",
   "verticalDrop": "Vertikāli",
