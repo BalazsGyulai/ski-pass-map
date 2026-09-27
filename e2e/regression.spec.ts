@@ -144,6 +144,42 @@ test("resort card lists the cheapest pass first and reports a mistake with the r
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
+test("passes tab: cards, sorting, the days slider and open on map", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  await page.goto("/en/passes/");
+  const cards = page.locator(".pass-card");
+  await expect(cards.first()).toBeVisible();
+  expect(await cards.count()).toBeGreaterThan(10);
+  await page.getByRole("radio", { name: "Resorts" }).click();
+  const first = cards.first();
+  await expect(first.locator("h2")).toHaveText(/Snow Card Tirol/);
+  const calc = first.locator(".days-calc");
+  const slider = calc.locator('input[type="range"]');
+  await slider.fill("40");
+  await expect(calc).toContainText(/You save/);
+  await slider.fill("1");
+  await expect(calc).toContainText(/Day tickets cost/);
+  await first.getByRole("link", { name: /open on map/i }).click();
+  await expect(page).toHaveURL(/passes=snow-card-tirol/);
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
+test("links from other pages open the map on the right resort", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  await page.goto(`/en/?resort=${RESORT_ID}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await page.getByRole("button", { name: /add favourite/i }).click();
+  await page.goto("/en/plan/");
+  await page.locator("#saved a").first().click();
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await expect(page).toHaveURL(new RegExp(`resort=${RESORT_ID}`));
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
 test("planner, compare, birth-year prices, favourites persistence", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);

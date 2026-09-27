@@ -250,8 +250,20 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     return () => window.removeEventListener("popstate", onPop);
   }, [onMap]);
 
+  const wasOnMap = useRef(onMap);
   useEffect(() => {
     if (!ready) return;
+    // Links from other pages (Open on map, a saved resort) arrive with their own query. The state
+    // lives in the layout and outlives the page, so read that query instead of overwriting it.
+    const entering = onMap && !wasOnMap.current;
+    wasOnMap.current = onMap;
+    if (entering && window.location.search.length > 1) {
+      const incoming = parseShareState(new URLSearchParams(window.location.search));
+      if (serializeShareState(incoming) !== serializeShareState(share)) {
+        setShare(incoming);
+        return;
+      }
+    }
     const path = window.location.pathname;
     let next = path;
     if (onMap) {

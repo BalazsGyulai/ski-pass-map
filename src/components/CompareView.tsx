@@ -6,6 +6,7 @@ import { deadlineLabel, priceReasonText } from "@/lib/i18n";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { deadlinesFor, pricesOnDate, resolveForViewer } from "@/lib/pricing";
 import { useApp } from "./AppState";
+import { countdownText } from "./countdown";
 
 export function CompareView({ embedded = false }: { embedded?: boolean }) {
   const { t, lang, birthYear, effectiveDate, today, messages } = useApp();
@@ -134,22 +135,4 @@ export function CompareView({ embedded = false }: { embedded?: boolean }) {
       </ol>
     </div>
   );
-}
-
-function countdownText(
-  t: (
-    key: "endsIn" | "endsInOne" | "startsIn" | "startsInOne" | "ended" | "endsToday" | "startsToday" | "started",
-    vars?: Record<string, string | number>,
-  ) => string,
-  kind: "starts" | "ends",
-  days: number,
-): string {
-  if (kind === "ends" && days === 1) return t("endsInOne");
-  if (kind === "ends" && days > 0) return t("endsIn", { n: days });
-  if (kind === "ends" && days === 0) return t("endsToday");
-  if (kind === "ends") return t("ended");
-  if (days === 1) return t("startsInOne");
-  if (days > 0) return t("startsIn", { n: days });
-  if (days === 0) return t("startsToday");
-  return t("started");
 }

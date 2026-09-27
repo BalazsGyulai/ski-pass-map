@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CompareView } from "@/components/CompareView";
+import { PassesView } from "@/components/PassesView";
 import type { Lang } from "@/i18n/languages";
 import { isLang } from "@/i18n/languages";
 import { buildPageMetadata } from "@/i18n/metadata";
@@ -11,5 +11,5 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 export default function PassesPage() {
-  return <CompareView />;
+  return <PassesView />;
 }
