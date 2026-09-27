@@ -63,7 +63,7 @@ export function flyToResort(
   map: VectorMap,
   lon: number,
   lat: number,
-  options: { duration: number; padding: { top: number; bottom: number; left: number; right: number } },
+  options: { duration: number; padding: { top: number; bottom: number; left: number; right: number }; pitch?: number },
 ): void {
   if (!hasMapSize(map) || !Number.isFinite(lon) || !Number.isFinite(lat)) return;
   const zoom = Math.min(RESORT_MAX_ZOOM, Math.max(map.getZoom(), 10));
@@ -73,6 +73,7 @@ export function flyToResort(
     zoom,
     duration: options.duration,
     padding,
+    ...(options.pitch != null ? { pitch: options.pitch } : {}),
   });
 }
 

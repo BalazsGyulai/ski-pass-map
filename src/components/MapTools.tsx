@@ -18,7 +18,7 @@ export function MapTools({ onLayers, layersOpen }: { onLayers: () => void; layer
 }
 
 export function LayersPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t, share, updateShare } = useApp();
+  const { t, share, updateShare, terrain3d, setTerrain3d } = useApp();
   if (!open) return null;
   return (
     <div id="map-layers" className="layers-panel" role="dialog" aria-label={t("layersTitle")}>
@@ -28,6 +28,11 @@ export function LayersPanel({ open, onClose }: { open: boolean; onClose: () => v
           {t("close")}
         </button>
       </div>
+      <label className="check">
+        <input type="checkbox" checked={terrain3d} onChange={() => setTerrain3d(!terrain3d)} />
+        <span>{t("terrain3d")}</span>
+      </label>
+      <p className="hint">{t("terrain3dHint")}</p>
       <label className="check">
         <input type="checkbox" checked={share.showPistes} onChange={() => updateShare({ showPistes: !share.showPistes })} />
         <span>{t("showAllPistes")}</span>

@@ -37,8 +37,16 @@ export interface VectorMap {
     zoom: number;
     duration?: number;
     padding?: { top: number; bottom: number; left: number; right: number };
+    pitch?: number;
+    bearing?: number;
   }): void;
-  easeTo(options: { center?: [number, number]; zoom?: number; duration?: number }): void;
+  easeTo(options: { center?: [number, number]; zoom?: number; duration?: number; pitch?: number; bearing?: number }): void;
+  getPitch(): number;
+  getBearing(): number;
+  /** Both libraries have these; the terrain module calls them. */
+  setTerrain?(terrain: { source: string; exaggeration: number } | null): unknown;
+  setSky?(sky: Record<string, unknown>): unknown;
+  setFog?(fog: Record<string, unknown> | null): unknown;
   project(lngLat: [number, number]): { x: number; y: number };
   addSource(id: string, source: unknown): void;
   getSource(id: string): VectorGeoJsonSource | undefined;
@@ -47,7 +55,7 @@ export interface VectorMap {
   getLayer(id: string): unknown;
   removeLayer(id: string): void;
   setPaintProperty(layer: string, name: string, value: unknown): void;
-  getStyle(): { layers?: Array<{ id: string; type: string }> } | null | undefined;
+  getStyle(): { layers?: Array<{ id: string; type: string; "source-layer"?: string }> } | null | undefined;
   isStyleLoaded(): boolean;
   setStyle(style: string, options?: { diff?: boolean }): void;
   queryRenderedFeatures(

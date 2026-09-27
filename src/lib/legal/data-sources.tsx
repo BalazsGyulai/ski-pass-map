@@ -25,10 +25,18 @@ export function DataSourcesEn() {
         <p>Default vector basemap. © OpenFreeMap © OpenMapTiles Data from OpenStreetMap.</p>
       </Block>
       <Block title="Mapbox">
-        <p>Optional basemap after consent and within monthly load budget. © Mapbox © OpenStreetMap.</p>
+        <p>Optional basemap for the first 3 visits and for supporters, after consent and within the monthly load budget. © Mapbox © OpenStreetMap.</p>
       </Block>
       <Block title="OpenSnowMap">
         <p>Optional piste overlay tiles © www.opensnowmap.org (CC BY-SA), data © OpenStreetMap.</p>
+      </Block>
+      <Block title="Terrain Tiles (elevation)">
+        <p>
+          Relief shading and 3D terrain use the Terrain Tiles on AWS Open Data (Mapzen / Tilezen). Austria: © offene Daten Österreichs – Digitales
+          Geländemodell (DGM) Österreich (CC BY 4.0). Europe: produced using Copernicus data and information funded by the European Union – EU-DEM layers.
+          Elsewhere: SRTM and GMTED2010, courtesy of the U.S. Geological Survey.{" "}
+          <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Full attribution</a>.
+        </p>
       </Block>
       <Block title="Pass and resort facts">
         <p>Compiled from official operator websites with per-field source URLs and check dates shown in the app.</p>
@@ -45,6 +53,13 @@ export function DataSourcesHu() {
       </Block>
       <Block title="OpenSkiMap, OpenFreeMap, Mapbox, OpenSnowMap">
         <p>Ugyanazok a licencek, mint az angol szövegben; részletek az angol változatban.</p>
+      </Block>
+      <Block title="Domborzat (Terrain Tiles)">
+        <p>
+          A domborzatárnyékolás és a 3D terep az AWS Open Data Terrain Tiles adatait használja. Ausztria: © offene Daten Österreichs – Digitales
+          Geländemodell (DGM) Österreich (CC BY 4.0); Európa: Copernicus EU-DEM; máshol: USGS SRTM.{" "}
+          <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md">Teljes forrásmegjelölés</a>.
+        </p>
       </Block>
       <Block title="Bérlet- és síterep-adatok">
         <p>Hivatalos weboldalak, forrásmegjelöléssel.</p>

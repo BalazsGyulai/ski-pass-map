@@ -42,6 +42,7 @@ import {
 } from "@/lib/vector-map";
 import { attachMapProbe } from "@/lib/map-canvas-probe";
 import { flyToResort, readSheetVisible, resortCameraPadding } from "@/lib/map-camera";
+import { RESORT_PITCH, applyTerrain } from "@/lib/terrain";
 import { SHEET_EVENT } from "@/lib/sheet";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
@@ -55,7 +56,7 @@ export default function MapView() {
   const libRef = useRef<MapLib | null>(null);
   const appliedStyle = useRef<string | null>(null);
   const pisteData = useRef<unknown>(null);
-  const { share, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, offline, searchThisArea } = useApp();
+  const { share, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, offline, searchThisArea, terrain3d } = useApp();
   const { filtered } = useResortLists();
   const [choice, setChoice] = useState<MapProviderId | null>(null);
   const [override, setOverride] = useState<MapProviderId | null>(null);
@@ -211,6 +212,26 @@ export default function MapView() {
     };
   }, [ready, provider]);
 
+  // Relief shading always; the 3D surface and horizon when 3D is on. Style swaps drop both.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !provider) return;
+    const apply = () => {
+      try {
+        applyTerrain(map, { provider, appearance: appearanceRef.current, threeD: terrain3d });
+      } catch (error) {
+        // Mid style swap. style.load runs this again.
+        console.warn("Terrain not ready yet", error);
+      }
+    };
+    apply();
+    map.on("style.load", apply);
+    if (!terrain3d && hasMapSize(map) && map.getPitch() > 0) map.easeTo({ pitch: 0, bearing: 0, duration: motionDuration(400) });
+    return () => {
+      map.off("style.load", apply);
+    };
+  }, [ready, provider, terrain3d]);
+
   useEffect(() => {
     if (!ready) return;
     mapRef.current?.getSource(RESORT_SOURCE)?.setData?.(resortData);
@@ -333,7 +354,8 @@ export default function MapView() {
         return;
       }
       if (control) return;
-      control = new lib.NavigationControl({ showCompass: false, showZoom: true, visualizePitch: false });
+      // The compass shows tilt and turns, and a click levels the map again.
+      control = new lib.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: true });
       map.addControl(control, "top-right");
     };
     sync();
@@ -509,6 +531,9 @@ export default function MapView() {
     return () => observer.disconnect();
   }, [ready]);
 
+  const terrainRef = useRef(terrain3d);
+  terrainRef.current = terrain3d;
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready || !share.resort) return;
@@ -519,7 +544,8 @@ export default function MapView() {
       const narrow = window.matchMedia("(max-width: 899px)").matches;
       const height = map.getContainer().clientHeight;
       const padding = resortCameraPadding({ narrow, sheetPx: readSheetVisible(), height });
-      flyToResort(map, resort.lon, resort.lat, { duration, padding });
+      // In 3D the camera tilts so the mountain and its runs stand up.
+      flyToResort(map, resort.lon, resort.lat, { duration, padding, pitch: terrainRef.current ? RESORT_PITCH : undefined });
     };
     // One frame lets the sheet publish its height. The camera moves at once; tiles fill in on the way.
     const frame = requestAnimationFrame(() => fly(motionDuration(700)));
@@ -532,8 +558,19 @@ export default function MapView() {
     };
   }, [ready, share.resort]);
 
+  // Closing a resort levels the camera again for the overview.
+  const hadResort = useRef(false);
+  useEffect(() => {
+    const map = mapRef.current;
+    const open = Boolean(share.resort);
+    const closed = hadResort.current && !open;
+    hadResort.current = open;
+    if (!map || !ready || !closed || !hasMapSize(map)) return;
+    if (map.getPitch() > 0 || map.getBearing() !== 0) map.easeTo({ pitch: 0, bearing: 0, duration: motionDuration(500) });
+  }, [ready, share.resort]);
+
   return (
-    <div className="map-root" data-map-provider={provider ?? "pending"}>
+    <div className="map-root" data-map-provider={provider ?? "pending"} data-terrain={terrain3d ? "3d" : "flat"}>
       <div ref={containerRef} className="map-canvas" />
       {!ready && !bootError ? <div className="map-skeleton" role="status" aria-label={t("loadingMap")} /> : null}
       {bootError ? (

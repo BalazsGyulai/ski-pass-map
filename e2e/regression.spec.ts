@@ -21,6 +21,20 @@ test.describe.configure({ mode: "serial" });
 test.beforeEach(async ({ context }) => {
   if (mapStubEnabled()) await installMapStub(context);
   await installMapboxStub(context);
+  // 3D terrain in a software-rendered browser costs about a second a frame, so tests use the flat
+  // map unless they ask for 3D (see the 3D test). Real devices draw it on the GPU.
+  await context.addInitScript(() => {
+    try {
+      const raw = localStorage.getItem("ski-pass-map-v1");
+      const prefs = raw ? JSON.parse(raw) : {};
+      if (prefs.terrain3d === undefined) {
+        prefs.terrain3d = false;
+        localStorage.setItem("ski-pass-map-v1", JSON.stringify(prefs));
+      }
+    } catch {
+      // Storage blocked: the app falls back to its own default.
+    }
+  });
 });
 
 test("language redirect and switcher (hu, en, de)", async ({ page, baseURL }) => {
@@ -349,6 +363,46 @@ test.describe("Mapbox access", () => {
     await page.goto("/en/settings/");
     await expect(page.getByText("Mapbox map is on. Free visits left after this one: 2.")).toBeVisible();
   });
+});
+
+test("3D: a resort tilts the map over the terrain, closing levels it, and the switch turns it off", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  // A visitor with 3D on (the default outside tests); only the first page sets it.
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem("e2e-3d")) return;
+    sessionStorage.setItem("e2e-3d", "1");
+    const prefs = JSON.parse(localStorage.getItem("ski-pass-map-v1") ?? "{}");
+    localStorage.setItem("ski-pass-map-v1", JSON.stringify({ ...prefs, terrain3d: true }));
+  });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  type Probe = { getPitch?: () => number; getTerrain?: () => unknown; getLayer?: (id: string) => unknown };
+  const camera = () =>
+    page.evaluate(() => {
+      const map = (window as unknown as { __skiMapProbe?: Probe }).__skiMapProbe;
+      return { pitch: Math.round(map?.getPitch?.() ?? -1), terrain: Boolean(map?.getTerrain?.()), relief: Boolean(map?.getLayer?.("terrain-hillshade")) };
+    });
+
+  await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await expect.poll(async () => (await camera()).pitch, { timeout: 20_000 }).toBeGreaterThan(40);
+  expect(await camera()).toMatchObject({ terrain: true, relief: true });
+
+  await page.locator(".resort-card .close-card").click();
+  await expect.poll(async () => (await camera()).pitch, { timeout: 10_000 }).toBe(0);
+
+  await page.getByRole("button", { name: "Layers", exact: true }).click();
+  await page.getByLabel("3D terrain").uncheck();
+  await expect.poll(async () => (await camera()).terrain).toBe(false);
+  expect((await camera()).relief).toBe(true);
+
+  // The choice is remembered, and a resort then opens flat.
+  await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await page.waitForTimeout(1500);
+  expect(await camera()).toMatchObject({ pitch: 0, terrain: false, relief: true });
+  expect(problems, problems.join("\n")).toEqual([]);
 });
 
 test("contact form with Turnstile test keys", async ({ page, baseURL }) => {

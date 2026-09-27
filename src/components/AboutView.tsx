@@ -62,6 +62,7 @@ export function AboutView() {
         <p>{t("creditsOpenFreeMap")}</p>
         <p>{t("creditsMapbox")}</p>
         <p>{t("creditsOpenSnowMap")}</p>
+        <p>{t("creditsTerrain")}</p>
         <p>{t("creditsPasses")}</p>
         <p>
           <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">

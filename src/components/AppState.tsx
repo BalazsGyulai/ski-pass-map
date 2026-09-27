@@ -15,6 +15,7 @@ import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
 import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type ShareState } from "@/lib/url-state";
 import { markFirstVisitDone, resetSupportReminders as clearSupportReminders } from "@/lib/support/storage";
+import { defaultTerrain3d } from "@/lib/terrain";
 
 type ThemeChoice = "system" | "light" | "dark";
 
@@ -79,6 +80,8 @@ interface AppContextValue {
   setDistanceUnits: (units: DistanceUnits) => void;
   pisteOverlayDefault: boolean;
   setPisteOverlayDefault: (on: boolean) => void;
+  terrain3d: boolean;
+  setTerrain3d: (on: boolean) => void;
   exportSavedData: () => boolean;
   importSavedData: (json: string) => boolean;
   clearAllSavedData: () => void;
@@ -116,6 +119,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
   const [searchAsMove, setSearchAsMoveState] = useState(false);
   const [distanceUnits, setDistanceUnitsState] = useState<DistanceUnits>("km");
   const [pisteOverlayDefault, setPisteOverlayDefaultState] = useState(false);
+  const [terrain3d, setTerrain3d] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const areaRef = useRef<MapBounds | null>(null);
   const liveRef = useRef<MapBounds | null>(null);
@@ -175,7 +179,9 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       }
       if (stored.distanceUnits === "km" || stored.distanceUnits === "mi") setDistanceUnitsState(stored.distanceUnits);
       if (stored.pisteOverlayDefault) setPisteOverlayDefaultState(true);
+      if (stored.terrain3d === false) setTerrain3d(false);
     }
+    if (stored?.terrain3d == null && !defaultTerrain3d(deviceHints())) setTerrain3d(false);
     const fromUrl = parsePlan(params.get("plan"));
     if (Object.keys(fromUrl).length > 0) setResortDays(fromUrl);
     const bought = params.get("on");
@@ -207,9 +213,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       activePlaceId,
       distanceUnits,
       pisteOverlayDefault,
+      terrain3d,
       version: 4,
     });
-  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault]);
+  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault, terrain3d]);
 
   const onMap = isMapPath(pathname, lang);
   const pushedResort = useRef(false);
@@ -413,6 +420,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       theme,
       distanceUnits,
       pisteOverlayDefault,
+      terrain3d,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -443,6 +451,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
         setPisteOverlayDefaultState(parsed.pisteOverlayDefault);
         if (parsed.pisteOverlayDefault) setShare((current) => ({ ...current, showPistes: true }));
       }
+      if (typeof parsed.terrain3d === "boolean") setTerrain3d(parsed.terrain3d);
       return true;
     } catch {
       return false;
@@ -622,6 +631,8 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     setDistanceUnits,
     pisteOverlayDefault,
     setPisteOverlayDefault,
+    terrain3d,
+    setTerrain3d,
     exportSavedData,
     importSavedData,
     clearAllSavedData,
@@ -649,4 +660,14 @@ function shareableHref(href: string): string {
   const params = shareableSearch(url.searchParams);
   const qs = params.toString();
   return `${url.origin}${url.pathname}${qs ? `?${qs}` : ""}${url.hash}`;
+}
+
+/** What the browser says about memory and data saving, for the 3D default. */
+function deviceHints(): { deviceMemory?: number; saveData?: boolean; reducedData?: boolean } {
+  const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+  return {
+    deviceMemory: nav.deviceMemory,
+    saveData: nav.connection?.saveData === true,
+    reducedData: window.matchMedia("(prefers-reduced-data: reduce)").matches,
+  };
 }

@@ -1084,8 +1084,17 @@ legend { padding: 0 4px; font-weight: 600; }
 .mapboxgl-ctrl-attrib:not(.mapboxgl-compact) {
   max-width: min(280px, 46vw);
 }
-/* The map libraries' own CSS loads after this file, so these need the extra .map-root to win. */
+/* The map libraries' own CSS loads after this file (and its compact style sets black text), so
+   these need the extra .map-root .map-canvas to win. */
+.map-root .map-canvas :is(.maplibregl-ctrl-attrib, .mapboxgl-ctrl-attrib) { color: var(--ink-2); }
 .map-root :is(.maplibregl-ctrl-attrib, .mapboxgl-ctrl-attrib) a { color: inherit; }
+/* Keep the info button at its own 24px: the touch-size rule for buttons made Mapbox's icon repeat. */
+.map-root :is(.maplibregl-ctrl-attrib-button, .mapboxgl-ctrl-attrib-button) {
+  min-height: 0;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
 :root[data-theme="dark"] .map-root :is(.maplibregl-ctrl-attrib-button, .mapboxgl-ctrl-attrib-button) { filter: invert(1); }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .map-root :is(.maplibregl-ctrl-attrib-button, .mapboxgl-ctrl-attrib-button) { filter: invert(1); }

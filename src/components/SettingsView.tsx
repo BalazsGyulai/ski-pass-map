@@ -30,6 +30,8 @@ export function SettingsView() {
     setDistanceUnits,
     pisteOverlayDefault,
     setPisteOverlayDefault,
+    terrain3d,
+    setTerrain3d,
     exportSavedData,
     importSavedData,
     clearAllSavedData,
@@ -112,6 +114,9 @@ export function SettingsView() {
           {t("mapboxMapHelper", { n: MAPBOX_TRIAL_VISITS })}
           {hasMapboxToken && canSupport ? ` ${t("mapboxSupporterPerk")}` : ""}
         </p>
+        <SettingsRow label={t("terrain3d")} hint={t("terrain3dHint")}>
+          <ToggleSwitch label={t("terrain3d")} checked={terrain3d} onChange={setTerrain3d} />
+        </SettingsRow>
         <SettingsRow label={t("pisteOverlayDefault")}>
           <ToggleSwitch
             label={t("pisteOverlayDefault")}

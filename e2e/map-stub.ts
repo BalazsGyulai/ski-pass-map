@@ -5,41 +5,28 @@ import zlib from "node:zlib";
 
 /**
  * Offline stand-in for the OpenFreeMap basemap, for machines that cannot reach the tile host.
- * Turn it on with E2E_MAP_STUB=1. The stub style draws a plain background plus hillshade from the
- * public AWS terrain tiles, proxied through the OpenFreeMap host so the page's CSP still applies.
+ * Turn it on with E2E_MAP_STUB=1. The stub style is a plain background; the app's own relief and
+ * 3D terrain come from the public AWS terrain tiles, which the stub fetches from Node.
  * Glyphs come from E2E_GLYPHS_DIR (a folder of `<start>-<end>.pbf` or `.pbf.gz` files) when set.
  */
 export function mapStubEnabled(): boolean {
   return process.env.E2E_MAP_STUB === "1";
 }
 
-const DEM_PREFIX = "https://tiles.openfreemap.org/__e2e-dem/";
-const MAPBOX_DEM_PREFIX = "https://api.mapbox.com/__e2e-dem/";
+const TERRARIUM_HOST = "https://elevation-tiles-prod.s3.amazonaws.com/";
 const TERRARIUM = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/";
 
+/**
+ * A plain background, like the real styles' land colour. The app adds its own relief shading and
+ * 3D terrain from the terrain tiles, which the stub serves below.
+ */
 function stubStyle(dark: boolean, host: "openfreemap" | "mapbox" = "openfreemap") {
-  const dem = host === "mapbox" ? MAPBOX_DEM_PREFIX : DEM_PREFIX;
   return {
     version: 8,
     name: dark ? "e2e-dark" : "e2e-light",
     glyphs: host === "mapbox" ? "mapbox://fonts/mapbox/{fontstack}/{range}.pbf" : "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
-    sources: {
-      dem: { type: "raster-dem", tiles: [`${dem}{z}/{x}/{y}.png`], tileSize: 256, encoding: "terrarium", maxzoom: 12 },
-    },
-    layers: [
-      { id: "background", type: "background", paint: { "background-color": dark ? "#0d1320" : "#eef1f4" } },
-      {
-        id: "hillshade",
-        type: "hillshade",
-        source: "dem",
-        paint: {
-          "hillshade-exaggeration": 0.45,
-          "hillshade-shadow-color": dark ? "#000000" : "#5b6778",
-          "hillshade-highlight-color": dark ? "#2a3446" : "#ffffff",
-          "hillshade-accent-color": dark ? "#111827" : "#94a3b8",
-        },
-      },
-    ],
+    sources: {},
+    layers: [{ id: "background", type: "background", paint: { "background-color": dark ? "#0d1320" : "#eef1f4" } }],
   };
 }
 
@@ -69,10 +56,6 @@ async function handle(route: Route): Promise<void> {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(stubStyle(url.includes("/dark"))) });
     return;
   }
-  if (url.startsWith(DEM_PREFIX)) {
-    await fulfillDem(route, url.slice(DEM_PREFIX.length));
-    return;
-  }
   if (url.startsWith("https://tiles.openfreemap.org/fonts/")) {
     const range = decodeURIComponent(url.split("/").pop() ?? "").replace(/\.pbf$/, "");
     const glyph = readGlyph(range);
@@ -94,10 +77,6 @@ async function handleMapbox(route: Route): Promise<void> {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(stubStyle(url.pathname.includes("dark"), "mapbox")) });
     return;
   }
-  if (url.pathname.startsWith("/__e2e-dem/")) {
-    await fulfillDem(route, url.pathname.slice("/__e2e-dem/".length));
-    return;
-  }
   if (url.pathname.startsWith("/fonts/v1/")) {
     const range = decodeURIComponent(url.pathname.split("/").pop() ?? "").replace(/\.pbf$/, "");
     const glyph = readGlyph(range);
@@ -115,6 +94,8 @@ export async function installMapboxStub(context: BrowserContext): Promise<void> 
 
 export async function installMapStub(context: BrowserContext): Promise<void> {
   await context.route("https://tiles.openfreemap.org/**", handle);
+  // The terrain tiles, fetched from Node (sandboxed browsers cannot reach AWS).
+  await context.route(`${TERRARIUM_HOST}**`, (route) => fulfillDem(route, route.request().url().slice(`${TERRARIUM_HOST}terrarium/`.length)));
   await context.route("https://tiles.opensnowmap.org/**", (route) => route.fulfill({ status: 404, body: "" }));
   // Offline sandboxes cannot reach Cloudflare either. An empty script keeps the page quiet.
   await context.route("https://challenges.cloudflare.com/**", (route) =>
