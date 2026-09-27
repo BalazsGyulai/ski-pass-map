@@ -5,3 +5,10 @@ out
 *.log
 tsconfig.tsbuildinfo
 .vercel
+.env
+.env.local
+.env.*.local
+.dev.vars
+.wrangler/
+public/vendor/
+test-results/

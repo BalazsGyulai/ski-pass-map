@@ -1,7 +1,8 @@
+import type { Lang } from "@/i18n/languages";
 import type { ResortFilters, SortDir, SortKey } from "./filter";
 
+export type { Lang };
 export type MobileView = "map" | "list" | "filters";
-export type Lang = "en" | "hu";
 
 export interface ShareState extends ResortFilters {
   home: string;
@@ -9,10 +10,11 @@ export interface ShareState extends ResortFilters {
   geoLon: number | null;
   resort: string | null;
   view: MobileView;
-  lang: Lang;
   sort: SortKey;
   dir: SortDir;
   showPistes: boolean;
+  /** Hide the selected resort's own piste lines. The OpenSnowMap overlay is showPistes. */
+  hideRuns: boolean;
 }
 
 export function defaultShareState(): ShareState {
@@ -22,23 +24,23 @@ export function defaultShareState(): ShareState {
     passMatch: "any",
     noPass: false,
     regions: [],
-    klima: false,
+    transit: false,
     park: false,
     night: false,
     minElev: null,
     minSlope: null,
     maxKm: null,
     favouritesOnly: false,
-    showClosed: false,
-    home: "sopron",
+    showAbandoned: false,
+    home: "",
     geoLat: null,
     geoLon: null,
     resort: null,
     view: "map",
-    lang: "en",
     sort: "distance",
     dir: "asc",
     showPistes: false,
+    hideRuns: false,
   };
 }
 
@@ -50,28 +52,26 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.passMatch = match === "all" ? "all" : "any";
   state.noPass = params.get("nopass") === "1";
   state.regions = labelList(params.get("regions"), "|", 24);
-  state.klima = params.get("klima") === "1";
+  state.transit = params.get("transit") === "1" || params.get("klima") === "1";
   state.park = params.get("park") === "1";
   state.night = params.get("night") === "1";
   state.minElev = positiveOrNull(params.get("minElev"));
   state.minSlope = positiveOrNull(params.get("minSlope"));
   state.maxKm = positiveOrNull(params.get("maxKm"));
   state.favouritesOnly = params.get("fav") === "1";
-  state.showClosed = params.get("closed") === "1";
-  const home = params.get("home") || "sopron";
-  state.home = safeId(home, 64) ?? "sopron";
-  const lat = finiteOrNull(params.get("lat"));
-  const lon = finiteOrNull(params.get("lon"));
-  state.geoLat = lat != null && lat >= -90 && lat <= 90 ? lat : null;
-  state.geoLon = lon != null && lon >= -180 && lon <= 180 ? lon : null;
+  state.showAbandoned = params.get("abandoned") === "1" || params.get("closed") === "1";
+  // Reference places stay in localStorage. A shared link never sets a city or a device location.
+  state.home = "";
+  state.geoLat = null;
+  state.geoLon = null;
   state.resort = safeId(params.get("resort"), 80);
   const view = params.get("view");
   state.view = view === "list" || view === "filters" ? view : "map";
-  state.lang = params.get("lang") === "hu" ? "hu" : "en";
   const sort = params.get("sort");
   state.sort = sort === "day" || sort === "elevation" || sort === "slope" || sort === "name" ? sort : "distance";
   state.dir = params.get("dir") === "desc" ? "desc" : "asc";
   state.showPistes = params.get("pistes") === "1";
+  state.hideRuns = params.get("runs") === "0";
   return state;
 }
 
@@ -83,25 +83,20 @@ export function serializeShareState(state: ShareState): string {
   if (state.passMatch !== defaults.passMatch) params.set("match", state.passMatch);
   if (state.noPass) params.set("nopass", "1");
   if (state.regions.length > 0) params.set("regions", state.regions.join("|"));
-  if (state.klima) params.set("klima", "1");
+  if (state.transit) params.set("transit", "1");
   if (state.park) params.set("park", "1");
   if (state.night) params.set("night", "1");
   if (state.minElev != null) params.set("minElev", String(state.minElev));
   if (state.minSlope != null) params.set("minSlope", String(state.minSlope));
   if (state.maxKm != null) params.set("maxKm", String(state.maxKm));
   if (state.favouritesOnly) params.set("fav", "1");
-  if (state.showClosed) params.set("closed", "1");
-  if (state.home !== defaults.home) params.set("home", state.home);
-  if (state.home === "geo" && state.geoLat != null && state.geoLon != null) {
-    params.set("lat", state.geoLat.toFixed(5));
-    params.set("lon", state.geoLon.toFixed(5));
-  }
+  if (state.showAbandoned) params.set("abandoned", "1");
   if (state.resort) params.set("resort", state.resort);
   if (state.view !== "map") params.set("view", state.view);
-  if (state.lang !== "en") params.set("lang", state.lang);
   if (state.sort !== "distance") params.set("sort", state.sort);
   if (state.dir !== "asc") params.set("dir", state.dir);
   if (state.showPistes) params.set("pistes", "1");
+  if (state.hideRuns) params.set("runs", "0");
   return params.toString();
 }
 
@@ -138,6 +133,38 @@ function safeId(value: string | null, max: number): string | null {
 
 function cleanText(value: string, max: number): string {
   return value.replace(/[\u0000-\u001F\u007F]/g, "").slice(0, max);
+}
+
+/** Plan rows encoded as id:days,id:days. Ids stay in the existing safe-id alphabet. */
+export function serializePlan(days: Record<string, number>): string {
+  return Object.entries(days)
+    .filter((entry): entry is [string, number] => entry[1] > 0 && /^[a-z0-9-]+$/i.test(entry[0]))
+    .map(([id, count]) => `${id}:${Math.min(80, Math.round(count))}`)
+    .join(",");
+}
+
+export function parsePlan(value: string | null): Record<string, number> {
+  const days: Record<string, number> = {};
+  if (!value) return days;
+  for (const part of value.split(",").slice(0, 40)) {
+    const [id, raw] = part.split(":");
+    if (!id || !/^[a-z0-9-]+$/i.test(id)) continue;
+    const count = Number(raw);
+    if (!Number.isInteger(count) || count <= 0 || count > 80) continue;
+    days[id] = count;
+  }
+  return days;
+}
+
+/** Query string safe to put in the address bar or a copied link. Places and birth year stay off the URL. */
+export function shareableSearch(params: URLSearchParams): URLSearchParams {
+  const next = new URLSearchParams(params);
+  next.delete("lat");
+  next.delete("lon");
+  next.delete("home");
+  next.delete("age");
+  next.delete("lang");
+  return next;
 }
 
 export function bareResortUrl(path: string, state: ShareState): string {

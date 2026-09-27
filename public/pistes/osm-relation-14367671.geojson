@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":"Anlaglift","aerialway":"rope_tow","osm":"way/549184235"},"geometry":{"type":"LineString","coordinates":[[10.60394,47.28488],[10.60584,47.28503]]}}]}

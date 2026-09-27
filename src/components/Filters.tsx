@@ -1,12 +1,14 @@
 "use client";
 
-import { cities, passes, resorts } from "@/lib/data";
-import { cityNoteLabel, regionLabel } from "@/lib/i18n";
+import { passes, resorts } from "@/lib/data";
+import { regionLabel } from "@/lib/i18n";
+import { passHasShortName, passShortName } from "@/lib/pass-label";
+import { PlacePicker } from "./PlacePicker";
 import { useApp } from "./AppState";
 import type { SortKey } from "@/lib/filter";
 
 export function Filters({ onClose }: { onClose?: () => void }) {
-  const { share, updateShare, resetFilters, activeFilterCount, t, lang, home, locate, locating, geoError } = useApp();
+  const { share, updateShare, resetFilters, activeFilterCount, t, home, messages } = useApp();
   const regions = [...new Set(resorts.map((resort) => resort.region))];
   const strictFilter = share.park || share.night || share.minElev != null || share.minSlope != null;
 
@@ -35,31 +37,7 @@ export function Filters({ onClose }: { onClose?: () => void }) {
         />
       </label>
 
-      <label className="field">
-        <span>{t("homeBase")}</span>
-        <select
-          value={share.home}
-          onChange={(event) => updateShare({ home: event.target.value })}
-        >
-          {cities.map((city) => {
-            const note = cityNoteLabel(lang, city.id);
-            return (
-              <option key={city.id} value={city.id}>
-                {city.name}
-                {note ? ` · ${note}` : ""}
-              </option>
-            );
-          })}
-          <option value="geo">{t("homeGeo")}</option>
-        </select>
-      </label>
-      <button type="button" className="ghost wide" onClick={locate} disabled={locating}>
-        {locating ? t("locating") : t("useMyLocation")}
-      </button>
-      {share.home === "geo" && !home ? <p className="hint">{t("useMyLocation")}</p> : null}
-      {geoError === "denied" ? <p className="hint warn">{t("geoDenied")}</p> : null}
-      {geoError === "unsupported" ? <p className="hint warn">{t("geoUnsupported")}</p> : null}
-      <p className="hint">{t("straightLine")}</p>
+      <PlacePicker />
 
       <fieldset>
         <legend>{t("passFilter")}</legend>
@@ -76,7 +54,10 @@ export function Filters({ onClose }: { onClose?: () => void }) {
               }}
             />
             <span className="swatch" style={{ background: pass.color }} />
-            <span>{pass.name}</span>
+            <span>
+              <strong className="pass-short">{passShortName(pass)}</strong>
+              {passHasShortName(pass) ? <span className="pass-official">{pass.name}</span> : null}
+            </span>
           </label>
         ))}
         <label className="check">
@@ -125,18 +106,18 @@ export function Filters({ onClose }: { onClose?: () => void }) {
                 updateShare({ regions: next });
               }}
             />
-            <span>{regionLabel(lang, region)}</span>
+            <span>{regionLabel(messages, region)}</span>
           </label>
         ))}
       </fieldset>
 
       <label className="check">
-        <input type="checkbox" checked={share.showClosed} onChange={(event) => updateShare({ showClosed: event.target.checked })} />
+        <input type="checkbox" checked={share.showAbandoned} onChange={(event) => updateShare({ showAbandoned: event.target.checked })} />
         <span>{t("showClosed")}</span>
       </label>
       <p className="hint">{t("showClosedHint")}</p>
       <label className="check">
-        <input type="checkbox" checked={share.klima} onChange={(event) => updateShare({ klima: event.target.checked })} />
+        <input type="checkbox" checked={share.transit} onChange={(event) => updateShare({ transit: event.target.checked })} />
         <span>{t("klima")}</span>
       </label>
       <p className="hint">{t("klimaHint")}</p>
@@ -179,18 +160,20 @@ export function Filters({ onClose }: { onClose?: () => void }) {
           onChange={(event) => updateShare({ minSlope: numberOrNull(event.target.value) })}
         />
       </label>
-      <label className="field">
-        <span>{t("maxDistance")}</span>
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          step={5}
-          value={share.maxKm ?? ""}
-          onChange={(event) => updateShare({ maxKm: numberOrNull(event.target.value) })}
-        />
-      </label>
-      <p className="hint">{t("maxDistanceHelp")}</p>
+      {home ? (
+        <label className="field">
+          <span>{t("maxDistance")}</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={5}
+            value={share.maxKm ?? ""}
+            onChange={(event) => updateShare({ maxKm: numberOrNull(event.target.value) })}
+          />
+        </label>
+      ) : null}
+      {home ? <p className="hint">{t("maxDistanceHelp")}</p> : null}
       {strictFilter ? <p className="hint warn">{t("unknownHidden")}</p> : null}
 
       <div className="sort-row">
@@ -216,7 +199,6 @@ export function Filters({ onClose }: { onClose?: () => void }) {
       <div className="legend">
         <p>{t("legendPie")}</p>
         <p>{t("legendGrey")}</p>
-        <p>{t("legendKlima")}</p>
         <p>{t("legendCluster")}</p>
         <p>{t("legendClosed")}</p>
       </div>

@@ -1,0 +1,1 @@
+{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"kind":"lift","difficulty":null,"name":null,"aerialway":"drag_lift","osm":"way/372000427"},"geometry":{"type":"LineString","coordinates":[[13.31921,46.8673],[13.32042,46.86365]]}}]}

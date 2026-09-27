@@ -1,0 +1,101 @@
+{
+  "resortsInSource": 396,
+  "shown": 292,
+  "hidden": {
+    "unnamed": 65,
+    "outside-austria": 10,
+    "tiny-point": 14,
+    "duplicate": 8,
+    "not-a-resort": 5,
+    "sub-feature": 1,
+    "grass-ski": 1
+  },
+  "hiddenExamples": {
+    "unnamed": [
+      "osd:01277cf8-63c9-4bae-85b5-a86064224577",
+      "osd:035ba283-6a99-4ed5-a54c-270392d5625b",
+      "osd:037164ba-ebe5-4d14-886b-638d691bab98",
+      "osd:040cc29b-0f15-48dd-955b-59f299420933",
+      "osd:0721637b-7b07-4990-8ae7-4533833385e0",
+      "osd:09db0a7e-41ed-4183-af1d-2eeeaad84072",
+      "osd:0e1d1170-df1c-4516-af08-a3f7484ff67d",
+      "osd:1374d70d-f87b-49b9-82b0-e14e473b5fea"
+    ],
+    "outside-austria": [
+      "Gletscher-Skigebiet Zugspitze, Ski resort Zugspitze",
+      "Skigebiet Fellhorn/Kanzelwand",
+      "Scheidegg",
+      "Rossfeld",
+      "Skigebiet Söllereck",
+      "Skigebiet Ifen",
+      "Drei Zinnen - Tre Cime, Drei Zinnen, Tre Cime",
+      "Schnalstal"
+    ],
+    "tiny-point": [
+      "Sonnenlift Axams",
+      "Kienleiten - Brandenberg",
+      "Hinterfeldlift Mösern",
+      "Virgen",
+      "Schießstandlift Flirsch",
+      "Skilift Zirkitzen",
+      "Schmiedhornlift",
+      "Lanalift Anras"
+    ],
+    "duplicate": [
+      "Ski Arlberg",
+      "Sonnenbergbahn",
+      "Forsteralm",
+      "Salzstiegl",
+      "Bad Kleinkirchheim",
+      "Turracher Höhe",
+      "Hochkar",
+      "Lachtal"
+    ],
+    "not-a-resort": [
+      "Schollenwiesenlift Höfen",
+      "Furx",
+      "Untersberg",
+      "Piller",
+      "Kaunertal"
+    ],
+    "sub-feature": [
+      "Horsefeathers Superpark Planai"
+    ],
+    "grass-ski": [
+      "Schizentrum Rettenbach"
+    ]
+  },
+  "passesInSource": 21,
+  "passesIncluded": [
+    "noe-bergerlebnispass",
+    "schneebaeren-card",
+    "mur-muerz-top-skipass",
+    "lieblings-steirer-kreischberg-lachtal",
+    "kaerntner-skipass",
+    "lungo-wintercard",
+    "sunnycard",
+    "dachstein-west-saisonkarte",
+    "snow-and-fun-card",
+    "traunsee-card",
+    "superskicard-premium",
+    "ski-amade-all-in-card-white",
+    "snow-card-tirol",
+    "freizeitticket-tirol",
+    "ski-arlberg-saisonkarte",
+    "3taelerpass-saisonkarte",
+    "saisonkarte-oberstdorf-kleinwalsertal",
+    "superschnee-saisonkarte",
+    "allgaeu-gletscher-card"
+  ],
+  "passesExcluded": [
+    "steiermark-joker",
+    "wildpass-saisonkarte-winter"
+  ],
+  "aggregateAreas": 12,
+  "dynamicPricing": 8,
+  "networkPrices": 11,
+  "needsRecheck": 15,
+  "viaTourismSite": 5,
+  "legacyFieldsFilled": 13,
+  "passResortLinks": 362
+}
