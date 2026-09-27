@@ -4,10 +4,10 @@ import { useMemo, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { passes, resorts } from "@/lib/data";
 import { daysUntil, formatDate, formatEur } from "@/lib/format";
-import { deadlineLabel, priceReasonText, regionLabel } from "@/lib/i18n";
+import { priceReasonText, regionLabel, type MessageKey } from "@/lib/i18n";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { averageDayTicket, breakEvenDays, passSavings, sortPasses, type PassSort } from "@/lib/pass-economics";
-import { adultBracket, deadlinesFor, nextPriceChange, pricesOnDate, resolveForViewer, type ResolvedPrice } from "@/lib/pricing";
+import { adultBracket, deadlinesFor, nextPriceChange, pricesOnDate, resolveForViewer, type Deadline, type ResolvedPrice } from "@/lib/pricing";
 import type { Pass } from "@/lib/schema";
 import { SourceLine } from "./SourceLine";
 import { useLocalizedPath } from "./LanguageSwitcher";
@@ -20,7 +20,7 @@ import { countdownText } from "./countdown";
  * pass with buying day tickets.
  */
 export function PassesView() {
-  const { t, lang, birthYear, setBirthYear, effectiveDate, setPurchaseDate, today, messages } = useApp();
+  const { t, lang, birthYear, setBirthYear, effectiveDate, setPurchaseDate, today } = useApp();
   const [sort, setSort] = useState<PassSort>("price");
 
   const cards = useMemo(() => {
@@ -42,7 +42,7 @@ export function PassesView() {
   const events = passes
     .flatMap((pass) => deadlinesFor(pass).map((deadline) => ({ ...deadline, pass })))
     .filter((event) => !today || daysUntil(today, event.date) >= 0)
-    .sort((a, b) => a.date.localeCompare(b.date) || a.pass.name.localeCompare(b.pass.name));
+    .sort((a, b) => a.date.localeCompare(b.date) || a.pass.name.localeCompare(b.pass.name, "de"));
 
   return (
     <div className="page page-narrow passes-page">
@@ -102,8 +102,11 @@ export function PassesView() {
                 <li key={`${event.pass.id}-${event.id}`} className="timeline-item">
                   <span className="swatch" style={{ background: event.pass.color }} />
                   <div>
-                    <strong>{deadlineLabel(messages, event.id, event.label)}</strong>
-                    <p>{passShortName(event.pass)}</p>
+                    <strong>{t(DEADLINE_TITLE[event.event])}</strong>
+                    <p>
+                      {passShortName(event.pass)}
+                      {deadlineChange(event, t, lang)}
+                    </p>
                     <p className="hint">
                       {formatDate(lang, event.date)}
                       {days != null ? ` · ${countdownText(t, event.kind, days)}` : ""}
@@ -118,6 +121,23 @@ export function PassesView() {
       <p className="disclaimer">{t("globalDisclaimer")}</p>
     </div>
   );
+}
+
+const DEADLINE_TITLE: Record<Deadline["event"], MessageKey> = {
+  presale: "timelinePresale",
+  ends: "timelinePriceEnds",
+  opens: "timelinePriceOpens",
+};
+
+/** The adult price change (or the opening tariff) after the pass name; every tariff is on the card. */
+function deadlineChange(event: Deadline, t: ReturnType<typeof useApp>["t"], lang: ReturnType<typeof useApp>["lang"]): string {
+  if (event.adult) {
+    // The price range stays on one line; the break may fall before it.
+    const to = event.adult.toEur != null ? `\u00a0→\u00a0${formatEur(lang, event.adult.toEur)}` : "";
+    return ` · ${t("bracketAdult")} ${formatEur(lang, event.adult.fromEur)}${to}`;
+  }
+  if (event.bracket) return ` · ${event.bracket}${event.priceEur != null ? ` ${formatEur(lang, event.priceEur)}` : ""}`;
+  return "";
 }
 
 function PassCard({

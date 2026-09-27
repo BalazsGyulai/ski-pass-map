@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { getMapConsent, setMapConsent } from "@/lib/map-consent";
-import { showDevTodo } from "@/lib/show-todo";
 import { BirthYearField } from "./BirthYearField";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { legalLinks } from "./legal-links";
@@ -202,10 +201,6 @@ export function SettingsView() {
       <SettingsGroup title={t("settingsSectionAbout")}>
         <nav className="settings-links" aria-label={t("settingsSectionAbout")}>
           <Link href={href("/about")}>{t("navAboutSources")}</Link>
-          <Link href={href("/contact")}>{t("contact")}</Link>
-          <Link href={href("/support")}>
-            {t("supportSkimap")} {showDevTodo() ? <span className="todo-tag">{t("todoMark")}</span> : null}
-          </Link>
           {legalLinks.map((link) => (
             <Link key={link.rest} href={href(link.rest)}>
               {t(link.key)}

@@ -1,5 +1,5 @@
+import { LOCALE_FORMATS } from "@/i18n/formats";
 import type { Lang } from "@/i18n/languages";
-import { intlLocale } from "@/i18n/languages";
 
 export function todayISO(date = new Date()): string {
   const year = date.getFullYear();
@@ -14,30 +14,58 @@ export function daysUntil(today: string, date: string): number {
   return Math.round((end - start) / 86_400_000);
 }
 
+/**
+ * Digits with the language's separators, rounded half up to `maxFraction` places. Hand-rolled
+ * instead of Intl so the pre-rendered page and every browser print the same (see i18n/formats).
+ */
+function digits(value: number, minFraction: number, maxFraction: number, group: string, decimal: string, minGroup: number): string {
+  const scale = 10 ** maxFraction;
+  const scaled = Math.round(Math.abs(value) * scale);
+  let whole = String(Math.floor(scaled / scale));
+  let fraction = maxFraction > 0 ? String(scaled % scale).padStart(maxFraction, "0") : "";
+  while (fraction.length > minFraction && fraction.endsWith("0")) fraction = fraction.slice(0, -1);
+  if (whole.length > 2 + minGroup) whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, group);
+  return fraction ? `${whole}${decimal}${fraction}` : whole;
+}
+
+/** The minus sign in front, unless the amount rounds to zero. */
+function signed(lang: Lang, value: number, text: string, places: number): string {
+  return value < 0 && Math.round(Math.abs(value) * 10 ** places) > 0 ? `${LOCALE_FORMATS[lang].minus ?? "-"}${text}` : text;
+}
+
 export function formatEur(lang: Lang, value: number): string {
   if (!Number.isFinite(value)) return "";
-  const cents = Math.abs(value - Math.round(value)) > 0.001;
-  return new Intl.NumberFormat(intlLocale(lang), {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: cents ? 2 : 0,
-    maximumFractionDigits: cents ? 2 : 0,
-  }).format(value);
+  const spec = LOCALE_FORMATS[lang];
+  const places = Math.abs(value - Math.round(value)) > 0.001 ? 2 : 0;
+  const amount = digits(value, places, places, spec.euroGroup ?? spec.group, spec.decimal, spec.minGroup ?? 1);
+  return signed(lang, value, spec.euro.replace("#", amount), places);
 }
 
+/** A calendar date (YYYY-MM-DD, day or month optional) with a short month, as each language writes it. */
 export function formatDate(lang: Lang, iso: string): string {
-  const [year, month, day] = iso.split("-").map(Number);
-  return new Intl.DateTimeFormat(intlLocale(lang), {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, (month ?? 1) - 1, day ?? 1)));
+  const match = /^(\d{4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?/.exec(iso);
+  if (!match) return iso;
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2] ?? 1) - 1, Number(match[3] ?? 1)));
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const spec = LOCALE_FORMATS[lang];
+  return spec.date.replace(/\{(dd|d|MMM|MM|M|y)\}/g, (_, token: string) => {
+    if (token === "dd") return String(day).padStart(2, "0");
+    if (token === "d") return String(day);
+    if (token === "MMM") return spec.months?.[month - 1] ?? String(month);
+    if (token === "MM") return String(month).padStart(2, "0");
+    if (token === "M") return String(month);
+    return String(year);
+  });
 }
 
-export function formatNumber(lang: Lang, value: number, options?: Intl.NumberFormatOptions): string {
+export function formatNumber(lang: Lang, value: number, options: { minimumFractionDigits?: number; maximumFractionDigits?: number } = {}): string {
   if (!Number.isFinite(value)) return "";
-  return new Intl.NumberFormat(intlLocale(lang), options).format(value);
+  const spec = LOCALE_FORMATS[lang];
+  const min = options.minimumFractionDigits ?? 0;
+  const max = Math.max(min, options.maximumFractionDigits ?? 3);
+  return signed(lang, value, digits(value, min, max, spec.group, spec.decimal, spec.minGroup ?? 1), max);
 }
 
 export function formatKm(lang: Lang, km: number): string {

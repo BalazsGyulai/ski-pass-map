@@ -58,47 +58,14 @@ export const LANG_NATIVE: Record<Lang, string> = {
   pl: "Polski",
   pt: "Português",
   ro: "Română",
-  sk: "Sločina",
+  sk: "Slovenčina",
   sl: "Slovenščina",
   sv: "Svenska",
   ca: "Català",
 };
 
-const INTL_LOCALE: Record<Lang, string> = {
-  bg: "bg-BG",
-  cs: "cs-CZ",
-  da: "da-DK",
-  de: "de-AT",
-  el: "el-GR",
-  en: "en-GB",
-  es: "es-ES",
-  et: "et-EE",
-  fi: "fi-FI",
-  fr: "fr-FR",
-  ga: "ga-IE",
-  hr: "hr-HR",
-  hu: "hu-HU",
-  it: "it-IT",
-  lt: "lt-LT",
-  lv: "lv-LV",
-  mt: "mt-MT",
-  nb: "nb-NO",
-  nl: "nl-NL",
-  pl: "pl-PL",
-  pt: "pt-PT",
-  ro: "ro-RO",
-  sk: "sk-SK",
-  sl: "sl-SI",
-  sv: "sv-SE",
-  ca: "ca-ES",
-};
-
 export function isLang(value: string): value is Lang {
   return (LANGS as readonly string[]).includes(value);
-}
-
-export function intlLocale(lang: Lang): string {
-  return INTL_LOCALE[lang];
 }
 
 /** Map a BCP 47 tag from the browser to a supported Lang, or null. */

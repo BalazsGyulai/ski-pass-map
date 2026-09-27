@@ -29,16 +29,6 @@ const bracketKeys: Record<string, MessageKey> = {
   standard: "bracketStandard",
 };
 
-const deadlineKeys: Record<string, MessageKey> = {
-  "bep-early": "deadlineBepEarly",
-  "bep-november": "deadlineBepNovember",
-  "tsc-start": "deadlineTscStart",
-  "tsc-end": "deadlineTscEnd",
-  "sj-early": "deadlineSjEarly",
-  "ssc-early": "deadlineSscEarly",
-  "mmt-u28": "deadlineMmtU28",
-};
-
 export function translate(messages: Messages, key: MessageKey, vars?: Record<string, string | number>): string {
   let text = messages[key];
   if (vars) {
@@ -75,11 +65,6 @@ export function regionLabel(messages: Messages, region: string): string {
 
 export function bracketLabel(messages: Messages, id: string, fallback: string): string {
   const key = bracketKeys[id] ?? bracketKeys[id.toLowerCase()];
-  return key ? translate(messages, key) : fallback;
-}
-
-export function deadlineLabel(messages: Messages, id: string, fallback: string): string {
-  const key = deadlineKeys[id];
   return key ? translate(messages, key) : fallback;
 }
 

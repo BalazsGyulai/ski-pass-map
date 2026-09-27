@@ -248,5 +248,6 @@ export function useBottomSheet(options: {
         } as CSSProperties)
       : undefined;
 
+  // Metrics exist only after the drag listeners are attached, so they also mark the sheet as live.
   return { ref, style, metrics: metrics as SheetMetrics | null };
 }

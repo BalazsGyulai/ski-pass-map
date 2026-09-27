@@ -25,6 +25,8 @@ export function attachOriginGuards(page: Page, origin: string): string[] {
       problems.push(`console: ${text}`);
     }
   });
+  // Uncaught errors, including React's hydration mismatches (#418), which only show up here.
+  page.on("pageerror", (error) => problems.push(`pageerror: ${error.message}`));
   page.on("requestfailed", (req) => {
     const url = req.url();
     if (!url.startsWith(origin)) return;

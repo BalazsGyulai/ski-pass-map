@@ -122,11 +122,15 @@ describe("savingsVsDayTickets", () => {
 describe("deadlinesFor", () => {
   it("includes the Snow Card presale start and the shared cut-off dates", () => {
     const snow = deadlinesFor(pass("snow-card-tirol"));
-    expect(snow.find((event) => event.date === "2026-09-26")?.kind).toBe("starts");
-    expect(snow.find((event) => event.date === "2026-10-31")?.kind).toBe("ends");
+    expect(snow.find((event) => event.date === "2026-09-26")).toMatchObject({ event: "presale", kind: "starts" });
+    expect(snow.find((event) => event.date === "2026-10-31")).toMatchObject({ event: "ends", kind: "ends", adult: { fromEur: 1080, toEur: 1227 } });
     const card = deadlinesFor(pass("superskicard-premium"));
-    expect(card.find((event) => event.date === "2026-12-03")?.kind).toBe("ends");
-    expect(card.find((event) => event.date === "2026-12-03")?.label).toContain("890");
+    expect(card.filter((event) => event.date === "2026-12-03")).toHaveLength(1);
+    expect(card.find((event) => event.date === "2026-12-03")).toMatchObject({ event: "ends", adult: { fromEur: 1049, toEur: 1190 } });
+  });
+
+  it("carries numbers, not English text, so every language can word it", () => {
+    for (const event of passes.flatMap((item) => deadlinesFor(item))) expect(event).not.toHaveProperty("label");
   });
 });
 

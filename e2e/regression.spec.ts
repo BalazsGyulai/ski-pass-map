@@ -12,6 +12,7 @@ import {
   mapboxStubBuild,
 } from "./helpers";
 import { installMapboxStub, installMapStub, mapStubEnabled } from "./map-stub";
+import { LANGS } from "../src/i18n/languages";
 
 /** Obertauern: covered by two passes. */
 const MULTI_PASS_RESORT = "osm-relation-3165847";
@@ -469,6 +470,19 @@ test("legal pages, sitemap, hreflang, 404, dark mode, service worker", async ({ 
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
+test("every language hydrates the pre-rendered passes page without a mismatch", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  for (const lang of LANGS) {
+    await page.goto(`/${lang}/passes/`);
+    // The purchase date fills in from today only once React has taken over the page.
+    await expect(page.locator('.passes-page input[type="date"]'), lang).not.toHaveValue("");
+    await expect(page.locator(".passes-page .pass-card").first(), lang).toBeVisible();
+  }
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
 test("affiliate block hidden when config empty", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);
@@ -556,6 +570,8 @@ test.describe("phone bottom sheet", () => {
     await page.goto("/en/");
     const list = page.locator(".list-sheet");
     await expect(list).toHaveAttribute("data-snap", "peek");
+    // The pre-rendered page already says "peek"; wait until the sheet is measured and listening.
+    await expect(list).toHaveAttribute("data-sheet-live", "true");
     const client = await context.newCDPSession(page);
     const drag = async (selector: string, distance: number) => {
       const box = await page.locator(selector).first().boundingBox();
@@ -577,6 +593,7 @@ test.describe("phone bottom sheet", () => {
     await page.waitForSelector("#resort-title", { timeout: 30_000 });
     const card = page.locator(".resort-card");
     await expect(card).toHaveAttribute("data-snap", "half");
+    await expect(card).toHaveAttribute("data-sheet-live", "true");
     await drag(".resort-card .resort-head", 700);
     await expect(page.locator("#resort-title")).toHaveCount(0, { timeout: 10_000 });
     await expect(page).not.toHaveURL(/resort=/);

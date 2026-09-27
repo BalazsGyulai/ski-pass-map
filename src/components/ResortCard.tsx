@@ -73,7 +73,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   ].filter(Boolean);
 
   return (
-    <article ref={sheet.ref} className={`resort-card snap-${snap}`} data-snap={snap} style={sheet.style} aria-labelledby="resort-title">
+    <article ref={sheet.ref} className={`resort-card snap-${snap}`} data-snap={snap} data-sheet-live={sheet.metrics ? "true" : undefined} style={sheet.style} aria-labelledby="resort-title">
       <div
         className="sheet-grab"
         data-sheet-handle
