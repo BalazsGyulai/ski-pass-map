@@ -5,10 +5,12 @@ import { passes, resorts } from "@/lib/data";
 import { formatEur } from "@/lib/format";
 import { dayTicketIsEstimate, quotePlan } from "@/lib/pricing";
 import { useMemo } from "react";
+import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 
 export function PlanPill() {
   const { t, lang, resortDays, birthYear, effectiveDate } = useApp();
+  const href = useLocalizedPath();
   const total = Object.values(resortDays).reduce((sum, days) => sum + days, 0);
   const best = useMemo(() => {
     if (!effectiveDate || total < 1) return null;
@@ -35,7 +37,7 @@ export function PlanPill() {
   const label =
     best?.totalEur != null ? t("myPlanPill", { days: total, price: formatEur(lang, best.totalEur) }) : t("myPlanPillPlain", { days: total });
   return (
-    <Link className="plan-pill" href="/plan">
+    <Link className="plan-pill" href={href("/plan")}>
       {label}
     </Link>
   );

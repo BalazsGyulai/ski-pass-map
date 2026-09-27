@@ -8,7 +8,7 @@ import type { SheetSnap } from "@/lib/sheet";
 import { FilterSheet } from "./FilterSheet";
 import { LayersPanel, MapTools } from "./MapTools";
 import { ListSheet } from "./ListSheet";
-import { MenuDrawer } from "./MenuDrawer";
+import { LanguageSwitcher, useLocalizedPath } from "./LanguageSwitcher";
 import { PlanPill } from "./PlanPill";
 import { ResortCard } from "./ResortCard";
 import { SearchPill } from "./SearchPill";
@@ -18,8 +18,8 @@ import { useNarrow } from "./useNarrow";
 
 export function ExplorerFrame() {
   const { share, selectResort, t, offline, searchAsMove, setSearchAsMove, areaStale, searchThisArea, resortDays, copyLink } = useApp();
+  const href = useLocalizedPath();
   const narrow = useNarrow();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
   const [listSnap, setListSnap] = useState<SheetSnap>("peek");
@@ -35,10 +35,12 @@ export function ExplorerFrame() {
 
   useEffect(() => {
     document.documentElement.dataset.sheet = snap;
+    document.documentElement.dataset.panel = resort ? "resort" : "list";
     return () => {
       delete document.documentElement.dataset.sheet;
+      delete document.documentElement.dataset.panel;
     };
-  }, [snap]);
+  }, [snap, resort]);
 
   useEffect(() => {
     const previous = previousResort.current;
@@ -55,7 +57,6 @@ export function ExplorerFrame() {
       const typing = Boolean(target?.closest("input, textarea, select"));
       if (event.key === "Escape") {
         if (layersOpen) setLayersOpen(false);
-        else if (menuOpen) setMenuOpen(false);
         else if (filtersOpen) setFiltersOpen(false);
         else if (share.resort) selectResort(null);
         else if (listSnap === "full") setListSnap("half");
@@ -68,7 +69,7 @@ export function ExplorerFrame() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [filtersOpen, layersOpen, listSnap, menuOpen, selectResort, share.resort]);
+  }, [filtersOpen, layersOpen, listSnap, selectResort, share.resort]);
 
   const compact = narrow && resort && cardSnap === "full" ? { name: resort.name, onBack: () => setCardSnap("half") } : null;
 
@@ -79,26 +80,15 @@ export function ExplorerFrame() {
       </a>
       {offline ? <p className="offline-banner">{t("offline")}</p> : null}
       <header className="topbar">
-        <Link href="/" className="brand desk-brand">
+        <Link href={href("/")} className="brand desk-brand">
           <span>{SITE_NAME}</span>
         </Link>
-        <SearchPill
-          onMenu={() => setMenuOpen(true)}
-          onOpen={() => setFiltersOpen(true)}
-          menuOpen={menuOpen}
-          compact={compact}
-          onShare={copyLink}
-        />
+        <SearchPill onOpen={() => setFiltersOpen(true)} compact={compact} onShare={copyLink} />
         <nav className="topbar-links" aria-label={t("title")}>
-          <Link href="/plan">{days > 0 ? t("myPlanPillPlain", { days }) : t("myPlanLink")}</Link>
-          <Link href="/compare">{t("navCompare")}</Link>
-          <Link href="/about">{t("navAbout")}</Link>
-          <Link href="/support">
-            {t("supportSkimap")} <span className="todo-tag">{t("todoMark")}</span>
-          </Link>
-          <span className="lang-toggle" role="group" aria-label={t("langLabel")}>
-            <LangButtons />
-          </span>
+          <Link href={href("/plan")}>{days > 0 ? t("myPlanPillPlain", { days }) : t("myPlanLink")}</Link>
+          <Link href={href("/saved")}>{t("navSaved")}</Link>
+          <Link href={href("/settings")}>{t("navSettings")}</Link>
+          <LanguageSwitcher compact />
         </nav>
       </header>
       <div className="stage">
@@ -119,22 +109,7 @@ export function ExplorerFrame() {
       <div className="sheet-host" id="sheet-host">
         {resort ? <ResortCard snap={cardSnap} setSnap={setCardSnap} /> : <ListSheet snap={listSnap} setSnap={setListSnap} />}
       </div>
-      <MenuDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
       <FilterSheet open={filtersOpen} onClose={() => setFiltersOpen(false)} />
     </div>
-  );
-}
-
-function LangButtons() {
-  const { t, share, updateShare } = useApp();
-  return (
-    <>
-      <button type="button" aria-pressed={share.lang === "en"} onClick={() => updateShare({ lang: "en" })}>
-        {t("langEn")}
-      </button>
-      <button type="button" aria-pressed={share.lang === "hu"} onClick={() => updateShare({ lang: "hu" })}>
-        {t("langHu")}
-      </button>
-    </>
   );
 }

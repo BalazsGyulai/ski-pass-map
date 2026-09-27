@@ -22,6 +22,7 @@ export interface MapEvent {
 
 export interface VectorMap {
   on(type: string, listener: (event: MapEvent) => void): void;
+  once(type: string, listener: (event: MapEvent) => void): void;
   off(type: string, listener: (event: MapEvent) => void): void;
   remove(): void;
   getZoom(): number;
@@ -94,6 +95,7 @@ export function createVectorMap(lib: MapLib, options: CreateMapOptions): VectorM
   const customAttribution =
     options.provider === "mapbox" ? OPENSKIMAP_ATTRIBUTION : [MAPLIBRE_ATTRIBUTION, OPENSKIMAP_ATTRIBUTION];
 
+  const probe = process.env.NEXT_PUBLIC_MAP_CANVAS_PROBE === "1";
   const map = new lib.Map({
     container: options.container,
     style: styleFor(options.provider, options.theme),
@@ -104,9 +106,14 @@ export function createVectorMap(lib: MapLib, options: CreateMapOptions): VectorM
     hash: false,
     fadeDuration: options.reducedMotion ? 0 : 300,
     failIfMajorPerformanceCaveat: false,
+    preserveDrawingBuffer: probe,
     ...(options.provider === "mapbox"
-      ? { accessToken: token, logoPosition: "bottom-left", attributionControl: true, customAttribution }
-      : { attributionControl: { customAttribution } }),
+      ? {
+          accessToken: token,
+          logoPosition: "bottom-left",
+          attributionControl: { compact: true, customAttribution },
+        }
+      : { attributionControl: { compact: true, customAttribution } }),
   });
 
   let loaded = false;

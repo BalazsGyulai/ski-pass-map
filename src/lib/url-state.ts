@@ -1,7 +1,8 @@
+import type { Lang } from "@/i18n/languages";
 import type { ResortFilters, SortDir, SortKey } from "./filter";
 
+export type { Lang };
 export type MobileView = "map" | "list" | "filters";
-export type Lang = "en" | "hu";
 
 export interface ShareState extends ResortFilters {
   home: string;
@@ -9,7 +10,6 @@ export interface ShareState extends ResortFilters {
   geoLon: number | null;
   resort: string | null;
   view: MobileView;
-  lang: Lang;
   sort: SortKey;
   dir: SortDir;
   showPistes: boolean;
@@ -37,7 +37,6 @@ export function defaultShareState(): ShareState {
     geoLon: null,
     resort: null,
     view: "map",
-    lang: "en",
     sort: "distance",
     dir: "asc",
     showPistes: false,
@@ -68,7 +67,6 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.resort = safeId(params.get("resort"), 80);
   const view = params.get("view");
   state.view = view === "list" || view === "filters" ? view : "map";
-  state.lang = params.get("lang") === "hu" ? "hu" : "en";
   const sort = params.get("sort");
   state.sort = sort === "day" || sort === "elevation" || sort === "slope" || sort === "name" ? sort : "distance";
   state.dir = params.get("dir") === "desc" ? "desc" : "asc";
@@ -95,7 +93,6 @@ export function serializeShareState(state: ShareState): string {
   if (state.showAbandoned) params.set("abandoned", "1");
   if (state.resort) params.set("resort", state.resort);
   if (state.view !== "map") params.set("view", state.view);
-  if (state.lang !== "en") params.set("lang", state.lang);
   if (state.sort !== "distance") params.set("sort", state.sort);
   if (state.dir !== "asc") params.set("dir", state.dir);
   if (state.showPistes) params.set("pistes", "1");
@@ -160,16 +157,13 @@ export function parsePlan(value: string | null): Record<string, number> {
 }
 
 /** Query string safe to put in the address bar or a copied link. Places and birth year stay off the URL. */
-export function shareableSearch(params: URLSearchParams, share?: Pick<ShareState, "lang">): URLSearchParams {
+export function shareableSearch(params: URLSearchParams): URLSearchParams {
   const next = new URLSearchParams(params);
   next.delete("lat");
   next.delete("lon");
   next.delete("home");
   next.delete("age");
-  if (share) {
-    if (share.lang === "en") next.delete("lang");
-    else next.set("lang", share.lang);
-  }
+  next.delete("lang");
   return next;
 }
 

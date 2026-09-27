@@ -8,7 +8,7 @@ import { deadlinesFor, pricesOnDate, resolveForViewer } from "@/lib/pricing";
 import { useApp } from "./AppState";
 
 export function CompareView({ embedded = false }: { embedded?: boolean }) {
-  const { t, lang, birthYear, effectiveDate, today } = useApp();
+  const { t, lang, birthYear, effectiveDate, today, messages } = useApp();
   const events = passes
     .flatMap((pass) => deadlinesFor(pass).map((deadline) => ({ ...deadline, pass })))
     .sort((a, b) => a.date.localeCompare(b.date) || a.pass.name.localeCompare(b.pass.name));
@@ -66,7 +66,7 @@ export function CompareView({ embedded = false }: { embedded?: boolean }) {
                         {yours.bracketLabel ? ` · ${yours.bracketLabel}` : ""}
                       </>
                     ) : yours ? (
-                      priceReasonText(lang, yours.reason, yours.bracketId, yours.nextPeriodStart)
+                      priceReasonText(messages, lang, yours.reason, yours.bracketId, yours.nextPeriodStart)
                     ) : (
                       t("unknown")
                     )}
@@ -80,7 +80,7 @@ export function CompareView({ embedded = false }: { embedded?: boolean }) {
                             {tariff.bracketLabel}:{" "}
                             {tariff.amountEur != null
                               ? formatEur(lang, tariff.amountEur)
-                              : priceReasonText(lang, tariff.reason, tariff.bracketId, tariff.nextPeriodStart)}
+                              : priceReasonText(messages, lang, tariff.reason, tariff.bracketId, tariff.nextPeriodStart)}
                           </li>
                         );
                       })}
@@ -99,7 +99,7 @@ export function CompareView({ embedded = false }: { embedded?: boolean }) {
                   <td data-label={t("deadlineColumn")}>
                     {next ? (
                       <>
-                        {formatDate(lang, next.date)} · {deadlineLabel(lang, next.id, next.label)} · {countdownText(t, next.kind, next.days)}
+                        {formatDate(lang, next.date)} · {deadlineLabel(messages, next.id, next.label)} · {countdownText(t, next.kind, next.days)}
                       </>
                     ) : (
                       t("noDeadline")
@@ -121,7 +121,7 @@ export function CompareView({ embedded = false }: { embedded?: boolean }) {
             <li key={event.id} className={`timeline-item ${state}`}>
               <span className="swatch" style={{ background: event.pass.color }} />
               <div>
-                <strong>{deadlineLabel(lang, event.id, event.label)}</strong>
+                <strong>{deadlineLabel(messages, event.id, event.label)}</strong>
                 <p>{event.pass.name}</p>
                 <p className="hint">
                   {formatDate(lang, event.date)}

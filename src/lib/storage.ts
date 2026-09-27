@@ -1,7 +1,9 @@
 import type { SavedPlace } from "./places";
-import type { Lang } from "./url-state";
+import type { Lang } from "@/i18n/languages";
 
 const KEY = "ski-pass-map-v1";
+
+export type DistanceUnits = "km" | "mi";
 
 export interface StoredPrefs {
   version?: number;
@@ -11,9 +13,25 @@ export interface StoredPrefs {
   purchaseDate?: string | null;
   resortDays?: Record<string, number>;
   lang?: Lang;
+  distanceUnits?: DistanceUnits;
+  pisteOverlayDefault?: boolean;
   /** Reference places. Never copied into the URL. */
   places?: SavedPlace[];
   activePlaceId?: string | null;
+}
+
+export interface ExportedUserData {
+  version: 1;
+  exportedAt: string;
+  favourites: string[];
+  resortDays: Record<string, number>;
+  places: SavedPlace[];
+  activePlaceId: string | null;
+  birthYear: number | null;
+  purchaseDate: string | null;
+  theme: StoredPrefs["theme"];
+  distanceUnits: DistanceUnits;
+  pisteOverlayDefault: boolean;
 }
 
 export function readStorage(): StoredPrefs | null {
