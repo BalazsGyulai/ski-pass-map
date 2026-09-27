@@ -1,12 +1,24 @@
 import osmFile from "../../data/osm.json";
 import passesFile from "../../data/passes.json";
 import resortsFile from "../../data/resorts.json";
+import passColors from "../../config/pass-colors.json";
 import { catalogSchema, type City, type Pass, type Resort } from "./schema";
 
 const catalog = catalogSchema.parse({ passes: passesFile, resorts: resortsFile, osm: osmFile });
 
+/**
+ * Map colours are a design choice, not catalog data: config/pass-colors.json picks them so that
+ * passes that sit next to each other on the map contrast most. A pass missing there keeps the
+ * imported colour.
+ */
+const curatedColors: Record<string, string> = passColors;
+export function passColor(pass: { id: string; color: string }): string {
+  const curated = curatedColors[pass.id];
+  return curated && /^#[0-9a-fA-F]{6}$/.test(curated) ? curated : pass.color;
+}
+
 export const generated = catalog.resorts.generated;
-export const passes: Pass[] = catalog.passes.passes;
+export const passes: Pass[] = catalog.passes.passes.map((pass) => ({ ...pass, color: passColor(pass) }));
 export const cities: City[] = catalog.osm.places.map((place) => ({
   id: place.id,
   name: place.name,
