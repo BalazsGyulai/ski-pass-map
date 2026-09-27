@@ -33,6 +33,7 @@ import {
   loadMapLibrary,
   motionDuration,
   padLngLatBounds,
+  pisteLayer,
   pisteLayerIds,
   pisteLayerSpecs,
   pisteTip,
@@ -44,8 +45,10 @@ import { attachMapProbe } from "@/lib/map-canvas-probe";
 import { flyToResort, readSheetVisible, resortCameraPadding } from "@/lib/map-camera";
 import { RESORT_PITCH, applyTerrain } from "@/lib/terrain";
 import { SHEET_EVENT } from "@/lib/sheet";
+import { startLiftMotion } from "@/lib/lift-motion";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
+import { prefersReducedMotion } from "./useNarrow";
 
 const SNOW_SOURCE = "opensnow-pistes";
 const SNOW_LAYER = "opensnow-pistes";
@@ -254,19 +257,7 @@ export default function MapView() {
         map.addSource(PISTE_SOURCE_ID, { type: "geojson", data });
         const before = firstLabelLayer(map);
         for (const spec of pisteLayerSpecs(darkRef.current)) {
-          const layer = {
-            id: spec.id,
-            type: "line",
-            source: PISTE_SOURCE_ID,
-            filter: spec.filter,
-            layout: { "line-cap": "round", "line-join": "round" },
-            paint: {
-              "line-color": spec.color,
-              "line-width": spec.width,
-              "line-opacity": 0.95,
-              ...(spec.dash ? { "line-dasharray": spec.dash } : {}),
-            },
-          };
+          const layer = pisteLayer(spec);
           if (before) map.addLayer(layer, before);
           else map.addLayer(layer);
         }
@@ -312,6 +303,13 @@ export default function MapView() {
       map.off("style.load", onStyle);
     };
   }, [ready, share.resort, share.hideRuns]);
+
+  // Lifts run while a resort's runs are on the map, unless the visitor asks for less motion.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || pisteNote !== "ready" || prefersReducedMotion()) return;
+    return startLiftMotion(map);
+  }, [ready, pisteNote]);
 
   useEffect(() => {
     const map = mapRef.current;

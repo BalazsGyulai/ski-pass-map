@@ -406,6 +406,38 @@ test("3D: a resort tilts the map over the terrain, closing levels it, and the sw
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
+test("lifts move uphill on an open resort and stand still for reduced motion", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  const chairPattern = () =>
+    page.evaluate(() => {
+      const map = window.__skiMapProbe as { getLayer(id: string): unknown; getPaintProperty(id: string, name: string): unknown } | undefined;
+      return map?.getLayer("lift-chair") ? JSON.stringify(map.getPaintProperty("lift-chair", "line-dasharray")) : null;
+    });
+  // Opening a resort keeps the regional view; the lifts come alive once you zoom in.
+  const zoomIn = () => page.evaluate(() => (window.__skiMapProbe as { jumpTo(options: { zoom: number }): void } | undefined)?.jumpTo({ zoom: 13 }));
+
+  await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await expect.poll(chairPattern, { timeout: 30_000 }).not.toBeNull();
+  const first = await chairPattern();
+  await page.waitForTimeout(1000);
+  expect(await chairPattern(), "no motion in the regional view").toBe(first);
+  await zoomIn();
+  await expect.poll(chairPattern, { timeout: 15_000 }).not.toBe(first);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
+  await page.waitForSelector("#resort-title", { timeout: 30_000 });
+  await expect.poll(chairPattern, { timeout: 30_000 }).not.toBeNull();
+  await zoomIn();
+  const still = await chairPattern();
+  await page.waitForTimeout(1500);
+  expect(await chairPattern()).toBe(still);
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
 test("contact form with Turnstile test keys", async ({ page, baseURL }) => {
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);
