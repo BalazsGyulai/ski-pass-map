@@ -6,7 +6,8 @@
  * the theme bootstrap and Next hydration scripts.
  * MapLibre starts a same-origin module worker. Mapbox GL starts a blob worker.
  * Vector tiles, glyphs, and sprites come from OpenFreeMap, and from Mapbox only
- * when that provider is chosen.
+ * when that provider is chosen. Elevation for relief and 3D comes from the Terrain
+ * Tiles bucket on AWS Open Data.
  */
 export const REFERRER_POLICY = "strict-origin-when-cross-origin";
 
@@ -18,8 +19,8 @@ const CSP_PARTS = [
   "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
   "form-action 'self'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://tiles.openfreemap.org https://tiles.opensnowmap.org https://api.mapbox.com https://*.tiles.mapbox.com",
-  "connect-src 'self' https://tiles.openfreemap.org https://tiles.opensnowmap.org https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com https://challenges.cloudflare.com https://cloudflareinsights.com",
+  "img-src 'self' data: blob: https://tiles.openfreemap.org https://tiles.opensnowmap.org https://elevation-tiles-prod.s3.amazonaws.com https://api.mapbox.com https://*.tiles.mapbox.com",
+  "connect-src 'self' https://tiles.openfreemap.org https://tiles.opensnowmap.org https://elevation-tiles-prod.s3.amazonaws.com https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com https://challenges.cloudflare.com https://cloudflareinsights.com",
   "font-src 'self' data: https://tiles.openfreemap.org https://api.mapbox.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'",

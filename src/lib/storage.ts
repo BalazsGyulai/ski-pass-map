@@ -15,6 +15,8 @@ export interface StoredPrefs {
   lang?: Lang;
   distanceUnits?: DistanceUnits;
   pisteOverlayDefault?: boolean;
+  /** 3D terrain and a tilted camera on resorts. On unless turned off. */
+  terrain3d?: boolean;
   /** Reference places. Never copied into the URL. */
   places?: SavedPlace[];
   activePlaceId?: string | null;
@@ -32,6 +34,7 @@ export interface ExportedUserData {
   theme: StoredPrefs["theme"];
   distanceUnits: DistanceUnits;
   pisteOverlayDefault: boolean;
+  terrain3d?: boolean;
 }
 
 export function readStorage(): StoredPrefs | null {

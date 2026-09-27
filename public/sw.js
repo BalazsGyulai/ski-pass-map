@@ -9,8 +9,12 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)));
+      const replaced = keys.filter((key) => key !== CACHE);
+      await Promise.all(replaced.map((key) => caches.delete(key)));
       await self.clients.claim();
+      // First install: the open page already came from the network. Reloading it would only
+      // interrupt the visitor. Refresh open pages only when an older version is replaced.
+      if (replaced.length === 0) return;
       const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       for (const client of windows) {
         if (!client.url.includes(BASE)) continue;
@@ -27,6 +31,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   // Vector tiles, glyphs, and sprites stay online. The app shell is cached below.
   if (isMapTileHost(url.hostname)) return;
+  // Map worker scripts (and anything they import) go straight to the network. Answering them from
+  // here while this worker takes control of a fresh page can leave the map without its workers,
+  // and the map needs the network for tiles anyway.
+  if (request.destination === "worker" || request.destination === "sharedworker" || url.pathname.includes("/vendor/")) return;
   if (url.origin !== self.location.origin) return;
 
   if (url.pathname.endsWith("/sw.js")) {

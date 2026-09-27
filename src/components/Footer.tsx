@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { showDevTodo } from "@/lib/show-todo";
-import { legalLinks } from "./MenuDrawer";
+import { legalLinks } from "./legal-links";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 

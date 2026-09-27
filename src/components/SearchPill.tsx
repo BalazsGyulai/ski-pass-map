@@ -1,6 +1,7 @@
 "use client";
 
 import { passById } from "@/lib/data";
+import { formatEur } from "@/lib/format";
 import { passShortName } from "@/lib/pass-label";
 import { regionLabel } from "@/lib/i18n";
 import { IconClose, IconFilter } from "./icons";
@@ -15,7 +16,7 @@ export function SearchPill({
   compact?: { name: string; onBack: () => void } | null;
   onShare?: () => void;
 }) {
-  const { t, share, activeFilterCount, home, messages } = useApp();
+  const { t, share, activeFilterCount, home, messages, lang } = useApp();
 
   if (compact) {
     return (
@@ -55,6 +56,7 @@ export function SearchPill({
     }
     else if (share.passes.length > 1) parts.push(t("passesSelected", { n: share.passes.length }));
     else parts.push(t("anyPass"));
+    if (share.maxPassPrice != null) parts.push(t("upToPrice", { price: formatEur(lang, share.maxPassPrice) }));
     if (share.night) parts.push(t("nightSkiing"));
     if (share.park) parts.push(t("snowpark"));
     if (share.transit) parts.push(t("transportNote"));

@@ -5,17 +5,25 @@ import { distanceKm } from "@/lib/distance";
 import { filterResorts, sortResorts, type ResortFilters } from "@/lib/filter";
 import { filterResortsForListing } from "@/lib/portal/overrides";
 import { normalizeListingMode } from "@/lib/portal/listing";
+import { resolveForViewer } from "@/lib/pricing";
 import type { Resort } from "@/lib/schema";
 import { useRuntimeOverrides } from "@/lib/runtime-overrides-client";
 import { useApp } from "./AppState";
 
 export function useResortLists() {
-  const { share, favourites, home, areaBounds } = useApp();
+  const { share, favourites, home, areaBounds, birthYear, effectiveDate } = useApp();
   const overrides = useRuntimeOverrides();
   const passNames = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.name])), []);
+  // The viewer's price per pass (adult until a birth year is set), for the pass-price filter.
+  const passPrices = useMemo(() => {
+    const prices = new Map<string, number | null>();
+    if (!effectiveDate) return prices;
+    for (const pass of passes) prices.set(pass.id, resolveForViewer(pass, birthYear, effectiveDate).amountEur);
+    return prices;
+  }, [birthYear, effectiveDate]);
   const context = useMemo(
-    () => ({ home, favourites: new Set(favourites), passNames }),
-    [home, favourites, passNames],
+    () => ({ home, favourites: new Set(favourites), passNames, passPriceOf: (id: string) => passPrices.get(id) ?? null }),
+    [home, favourites, passNames, passPrices],
   );
   const visibleResorts = useMemo(() => {
     const staticListing = Object.fromEntries(resorts.map((r) => [r.id, normalizeListingMode(r.listing)]));
@@ -44,6 +52,7 @@ export function useResortLists() {
       minSlope: null,
       maxKm: null,
       favouritesOnly: false,
+      maxPassPrice: null,
     };
     return sortResorts(filterResorts(visibleResorts, loose, context), "distance", "asc", distanceOf).slice(0, 3);
   }, [filtered.length, share, context, distanceOf, visibleResorts]);

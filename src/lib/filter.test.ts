@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { clusterPoints } from "./cluster";
 import { cities, passes, resorts } from "./data";
 import { distanceKm } from "./distance";
 import { filterResorts, sortResorts } from "./filter";
-import { pieSvg } from "./marker";
-import type { Resort } from "./schema";
 import { parseShareState, serializeShareState } from "./url-state";
 
 const names = new Map(passes.map((pass) => [pass.id, pass.name]));
@@ -28,6 +25,7 @@ describe("filterResorts", () => {
       maxKm: null,
       favouritesOnly: false,
       showAbandoned: false,
+      maxPassPrice: null,
     };
     const uncovered = filterResorts(resorts, { ...empty, noPass: true }, base);
     expect(uncovered.length).toBeGreaterThan(0);
@@ -85,6 +83,7 @@ describe("filterResorts", () => {
         maxKm: 30,
         favouritesOnly: false,
         showAbandoned: false,
+        maxPassPrice: null,
       },
       { home: vienna, favourites: new Set(), passNames: names },
     );
@@ -99,23 +98,6 @@ describe("filterResorts", () => {
     } else {
       expect(sorted.slice(firstMissing).every((resort) => resort.top_elevation_m == null)).toBe(true);
     }
-  });
-});
-
-describe("clusterPoints", () => {
-  it("groups nearby resorts at low zoom and separates them when labels would show", () => {
-    const grouped = clusterPoints(
-      resorts.filter((resort) => !resort.abandoned),
-      8,
-    ).find((cluster) => cluster.items.length >= 2);
-    if (!grouped) throw new Error("expected a cluster");
-    const pair = grouped.items.slice(0, 2);
-    expect(clusterPoints(pair, 8)).toHaveLength(1);
-    expect(clusterPoints(pair, 11)).toHaveLength(2);
-    const east = resorts.find((resort) => resort.region === "Lower Austria");
-    const west = resorts.find((resort) => resort.region === "Vorarlberg");
-    expect(east && west).toBeTruthy();
-    expect(clusterPoints([east as Resort, west as Resort], 8)).toHaveLength(2);
   });
 });
 
@@ -141,11 +123,24 @@ describe("share url", () => {
   });
 });
 
-describe("pieSvg", () => {
-  it("draws one wedge per pass and a grey dot when nothing covers the resort", () => {
-    expect(pieSvg([], { selected: false, closed: false })).toContain('fill="#8b938e"');
-    const pie = pieSvg(["#1f5fd1", "#1a9a3a"], { selected: true, closed: false });
-    expect(pie.match(/<path /g)).toHaveLength(2);
-    expect(pie).toContain("#ffbf47");
+describe("pass price filter", () => {
+  const base = parseShareState(new URLSearchParams());
+  const context = { home: null, favourites: new Set<string>(), passNames: names };
+  const cheapPass = passes[0].id;
+  const priceOf = (id: string) => (id === cheapPass ? 300 : 900);
+
+  it("keeps resorts that a pass within the price covers", () => {
+    const kept = filterResorts(resorts, { ...base, maxPassPrice: 400 }, { ...context, passPriceOf: priceOf });
+    expect(kept.length).toBeGreaterThan(0);
+    expect(kept.every((resort) => resort.passes.includes(cheapPass))).toBe(true);
+    expect(filterResorts(resorts, { ...base, maxPassPrice: 1000 }, { ...context, passPriceOf: priceOf }).every((resort) => resort.passes.length > 0)).toBe(true);
+  });
+
+  it("drops everything when prices are unknown, and round-trips in the URL", () => {
+    expect(filterResorts(resorts, { ...base, maxPassPrice: 400 }, context)).toEqual([]);
+    const state = parseShareState(new URLSearchParams("maxPrice=650"));
+    expect(state.maxPassPrice).toBe(650);
+    expect(serializeShareState(state)).toBe("maxPrice=650");
   });
 });
+

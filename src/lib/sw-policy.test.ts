@@ -32,4 +32,15 @@ describe("service worker update policy", () => {
     expect(sw).toContain("self.clients.claim()");
     expect(sw).toContain("client.navigate(client.url)");
   });
+
+  it("leaves map worker scripts to the network", () => {
+    expect(sw).toContain('request.destination === "worker"');
+    expect(sw).toContain('url.pathname.includes("/vendor/")');
+    expect(sw.indexOf('url.pathname.includes("/vendor/")')).toBeLessThan(sw.indexOf("event.respondWith"));
+  });
+
+  it("does not reload a first-time visitor when the worker first installs", () => {
+    expect(sw).toContain("if (replaced.length === 0) return;");
+    expect(sw.indexOf("if (replaced.length === 0) return;")).toBeLessThan(sw.indexOf("client.navigate(client.url)"));
+  });
 });

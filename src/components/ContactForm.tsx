@@ -59,6 +59,15 @@ export function ContactForm() {
     if (window.turnstile) renderWidget();
   }, [renderWidget]);
 
+  // "Report a map issue" on a resort card opens this form with the resort and category filled in.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const wanted = params.get("category");
+    if (wanted && CATEGORIES.some((item) => item.value === wanted)) setCategory(wanted);
+    const resort = params.get("resort");
+    if (resort && /^[A-Za-z0-9-]{1,80}$/.test(resort)) setResortId(resort);
+  }, []);
+
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!privacyAccepted) {

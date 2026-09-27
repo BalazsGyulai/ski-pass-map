@@ -6,15 +6,19 @@ import { getMapConsent, setMapConsent } from "@/lib/map-consent";
 import { showDevTodo } from "@/lib/show-todo";
 import { BirthYearField } from "./BirthYearField";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { legalLinks } from "./MenuDrawer";
+import { legalLinks } from "./legal-links";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
-import { mapboxShowingStatusKey } from "@/lib/settings-map-status";
+import { mapStatusText } from "@/lib/settings-map-status";
+import { MAPBOX_TRIAL_VISITS, mapboxAccess, type MapboxAccess } from "@/lib/map-access";
+import { SUPPORT_CONFIG } from "@/lib/config/support";
+import { formatDate } from "@/lib/format";
 import { SegmentedControl, SettingsGroup, SettingsRow, StyledSelect, ToggleSwitch } from "./ui/SettingsControls";
 
 export function SettingsView() {
   const {
     t,
+    lang,
     theme,
     setTheme,
     purchaseDate,
@@ -26,6 +30,8 @@ export function SettingsView() {
     setDistanceUnits,
     pisteOverlayDefault,
     setPisteOverlayDefault,
+    terrain3d,
+    setTerrain3d,
     exportSavedData,
     importSavedData,
     clearAllSavedData,
@@ -37,13 +43,27 @@ export function SettingsView() {
   const href = useLocalizedPath();
   const fileRef = useRef<HTMLInputElement>(null);
   const [mapConsent, setMapConsentLocal] = useState(false);
+  const [mapAccess, setMapAccess] = useState<MapboxAccess>({ allowed: true, reason: "trial", newVisit: true, visitsLeft: MAPBOX_TRIAL_VISITS - 1 });
   const hasMapboxToken = Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim());
+  const canSupport = Boolean(SUPPORT_CONFIG.kofiUrl?.trim()) || SUPPORT_CONFIG.rewardedAdsEnabled;
 
   useEffect(() => {
     setMapConsentLocal(getMapConsent());
+    try {
+      setMapAccess(mapboxAccess(window.localStorage));
+    } catch {
+      // Storage blocked: keep the first-visit status.
+    }
   }, []);
 
-  const mapStatusHint = t(mapboxShowingStatusKey(mapConsent, hasMapboxToken));
+  const mapStatus = mapStatusText({
+    consent: mapConsent,
+    hasToken: hasMapboxToken,
+    access: mapAccess,
+    trialVisits: MAPBOX_TRIAL_VISITS,
+    formatDate: (ms) => formatDate(lang, new Date(ms).toISOString().slice(0, 10)),
+  });
+  const mapStatusHint = t(mapStatus.key, mapStatus.vars);
 
   function onImportFile(file: File) {
     void file.text().then((text) => {
@@ -90,7 +110,13 @@ export function SettingsView() {
             }}
           />
         </SettingsRow>
-        <p className="settings-inline-hint">{t("mapboxMapHelper")}</p>
+        <p className="settings-inline-hint">
+          {t("mapboxMapHelper", { n: MAPBOX_TRIAL_VISITS })}
+          {hasMapboxToken && canSupport ? ` ${t("mapboxSupporterPerk")}` : ""}
+        </p>
+        <SettingsRow label={t("terrain3d")} hint={t("terrain3dHint")}>
+          <ToggleSwitch label={t("terrain3d")} checked={terrain3d} onChange={setTerrain3d} />
+        </SettingsRow>
         <SettingsRow label={t("pisteOverlayDefault")}>
           <ToggleSwitch
             label={t("pisteOverlayDefault")}

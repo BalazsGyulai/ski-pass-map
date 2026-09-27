@@ -76,6 +76,8 @@ export interface SupportPromptInput {
   search: string;
   forceDevParam?: boolean;
   allowForceParam?: boolean;
+  /** False when there is nothing to offer (no Ko-fi link, no ads): only a forced prompt shows then. */
+  canOffer?: boolean;
 }
 
 export function shouldShowSupportPrompt(input: SupportPromptInput): boolean {
@@ -83,6 +85,7 @@ export function shouldShowSupportPrompt(input: SupportPromptInput): boolean {
   if (input.forceDevParam && params.get(SUPPORT_DEV_FORCE_PARAM) === "1") {
     if (input.dev || input.allowForceParam) return true;
   }
+  if (input.canOffer === false) return false;
   if (!hasCompletedFirstVisit(input.storage)) return false;
   if (isInQuietPeriod(input.storage, input.now)) return false;
   const daily = readSupportDaily(input.storage, input.now);

@@ -29,7 +29,10 @@ export function attachOriginGuards(page: Page, origin: string): string[] {
     const url = req.url();
     if (!url.startsWith(origin)) return;
     if (url.includes("mapbox") || url.includes("openfreemap") || url.includes("opensnowmap")) return;
-    problems.push(`requestfailed: ${url} ${req.failure()?.errorText ?? ""}`);
+    const reason = req.failure()?.errorText ?? "";
+    // A navigation cancels requests that are still in flight. That is the browser, not the server.
+    if (reason.includes("ERR_ABORTED")) return;
+    problems.push(`requestfailed: ${url} ${reason}`);
   });
   page.on("response", (res) => {
     const url = res.url();
@@ -54,29 +57,56 @@ export async function shotPart10Viewport(page: Page, name: string): Promise<void
   await shotPart10(page, name, { fullPage: false });
 }
 
+/**
+ * Answers the cookie banner before the page loads. An accepting visitor here has already used their
+ * free Mapbox visits, so the suite stays on the free map (and spends no map loads); the Mapbox
+ * tests set up their own visitor.
+ */
 export async function dismissConsent(page: Page, choice: "accepted" | "rejected"): Promise<void> {
   await page.addInitScript((c) => {
     localStorage.setItem("skimap-cookie-banner", c);
-    if (c === "accepted") localStorage.setItem("skimap-map-consent", "1");
-    else localStorage.setItem("skimap-map-consent", "0");
+    if (c === "accepted") {
+      localStorage.setItem("skimap-map-consent", "1");
+      localStorage.setItem("skimap-mapbox-trial", JSON.stringify({ visits: 99, lastSeen: 1 }));
+    } else localStorage.setItem("skimap-map-consent", "0");
   }, choice);
 }
 
+/** The e2e build carries a stub Mapbox token only when the runner says so (see scripts/run-e2e.mjs). */
+export function mapboxStubBuild(): boolean {
+  return process.env.E2E_MAPBOX_STUB_TOKEN === "1";
+}
+
+/** Resort dots and clusters are map layers. Requires NEXT_PUBLIC_MAP_CANVAS_PROBE=1 at build time. */
+export async function countRenderedResorts(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const map = window.__skiMapProbe as
+      | { getLayer?: (id: string) => unknown; queryRenderedFeatures?: (options: { layers: string[] }) => unknown[] }
+      | undefined;
+    if (!map?.queryRenderedFeatures || !map.getLayer) return 0;
+    const layers = ["resorts-dot", "resorts-cluster", "resort-focus-dot"].filter((id) => map.getLayer?.(id));
+    if (layers.length === 0) return 0;
+    try {
+      return map.queryRenderedFeatures({ layers }).length;
+    } catch {
+      return 0;
+    }
+  });
+}
+
 export async function waitForMapMarkers(page: Page): Promise<number> {
-  await page.waitForSelector(".maplibregl-canvas", { timeout: 45_000 });
-  for (let i = 0; i < 12; i++) {
-    const n = await page.locator(".maplibregl-marker").count();
+  await page.waitForSelector(".maplibregl-canvas, .mapboxgl-canvas", { timeout: 45_000 });
+  for (let i = 0; i < 40; i++) {
+    const n = await countRenderedResorts(page);
     if (n > 0) return n;
     await page.waitForTimeout(500);
   }
-  const listRows = await page.locator(".list-sheet .resort-card, .list-sheet li").count();
-  if (listRows > 0) return listRows;
-  return page.locator(".maplibregl-marker").count();
+  return countRenderedResorts(page);
 }
 
 /** Requires NEXT_PUBLIC_MAP_CANVAS_PROBE=1 at build time (preserveDrawingBuffer). */
 export async function assertMapCanvasNotFlat(page: Page, label: string): Promise<void> {
-  await page.waitForSelector(".maplibregl-canvas", { timeout: 45_000 });
+  await page.waitForSelector(".maplibregl-canvas, .mapboxgl-canvas", { timeout: 45_000 });
   await page.waitForFunction(() => typeof window.__skiMapCanvasVariance === "function", { timeout: 45_000 });
   await page.evaluate(async () => {
     const map = window.__skiMapProbe;
@@ -117,7 +147,14 @@ export async function assertMapCanvasNotFlat(page: Page, label: string): Promise
           }
         }
       }
-      const markers = document.querySelectorAll(".maplibregl-marker").length;
+      let markers = 0;
+      try {
+        const probe = map as unknown as { getLayer?: (id: string) => unknown; queryRenderedFeatures?: (options: { layers: string[] }) => unknown[] };
+        const layers = ["resorts-dot", "resorts-cluster", "resort-focus-dot"].filter((id) => probe.getLayer?.(id));
+        markers = layers.length > 0 ? (probe.queryRenderedFeatures?.({ layers }).length ?? 0) : 0;
+      } catch {
+        markers = 0;
+      }
       const ok =
         styleLoaded &&
         w > 16 &&
@@ -148,7 +185,15 @@ export async function assertMapCanvasNotFlat(page: Page, label: string): Promise
     return {
       variance: window.__skiMapCanvasVariance?.() ?? 0,
       featureHits,
-      markers: document.querySelectorAll(".maplibregl-marker").length,
+      markers: (() => {
+        try {
+          const probe = map as unknown as { getLayer?: (id: string) => unknown; queryRenderedFeatures?: (options: { layers: string[] }) => unknown[] };
+          const layers = ["resorts-dot", "resorts-cluster", "resort-focus-dot"].filter((id) => probe.getLayer?.(id));
+          return layers.length > 0 ? (probe.queryRenderedFeatures?.({ layers }).length ?? 0) : 0;
+        } catch {
+          return 0;
+        }
+      })(),
       styleLoaded: Boolean(map?.isStyleLoaded?.()),
       size: [w, h],
       minVariance,

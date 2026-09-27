@@ -20,26 +20,29 @@ export function clampMapPadding(
   };
 }
 
+/**
+ * Camera padding that keeps the selected resort in the part of the map you can see.
+ * On phones `sheetPx` is the visible height of the bottom sheet. A full sheet leaves only a strip,
+ * so the padding is capped at half the map.
+ */
 export function resortCameraPadding(options: {
   narrow: boolean;
-  sheet: string | null;
+  sheetPx: number | null;
   height: number;
 }): { top: number; bottom: number; left: number; right: number } {
   if (!options.narrow) {
     return { top: 72, bottom: 48, left: 32, right: 32 };
   }
-  const bottom =
-    options.sheet === "peek"
-      ? 200
-      : options.sheet === "full"
-        ? Math.min(280, Math.round(options.height * 0.5))
-        : Math.round(options.height * 0.55);
+  const sheet = options.sheetPx ?? Math.round(options.height * 0.5);
+  const bottom = Math.min(Math.round(options.height * 0.5), sheet + 16);
   return { top: 88, bottom, left: 24, right: 24 };
 }
 
-export function readSheetSnap(): string | null {
+/** Visible height of the mobile sheet in px, published by useBottomSheet. */
+export function readSheetVisible(): number | null {
   if (typeof document === "undefined") return null;
-  return document.documentElement.dataset.sheet ?? null;
+  const raw = Number(document.documentElement.dataset.sheetPx);
+  return Number.isFinite(raw) && raw > 0 ? raw : null;
 }
 
 export function whenMapIdle(map: VectorMap): Promise<void> {
@@ -60,7 +63,7 @@ export function flyToResort(
   map: VectorMap,
   lon: number,
   lat: number,
-  options: { duration: number; padding: { top: number; bottom: number; left: number; right: number } },
+  options: { duration: number; padding: { top: number; bottom: number; left: number; right: number }; pitch?: number },
 ): void {
   if (!hasMapSize(map) || !Number.isFinite(lon) || !Number.isFinite(lat)) return;
   const zoom = Math.min(RESORT_MAX_ZOOM, Math.max(map.getZoom(), 10));
@@ -70,6 +73,7 @@ export function flyToResort(
     zoom,
     duration: options.duration,
     padding,
+    ...(options.pitch != null ? { pitch: options.pitch } : {}),
   });
 }
 

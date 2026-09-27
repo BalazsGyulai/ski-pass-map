@@ -67,14 +67,33 @@ export function IconHeart() {
 export function IconSettings() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" width="22" height="22">
-      <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M10.11 4.95 L10.50 2.52 L13.50 2.52 L13.89 4.95 L15.65 5.68 L17.64 4.23 L19.77 6.36 L18.32 8.35 L19.05 10.11 L21.48 10.50 L21.48 13.50 L19.05 13.89 L18.32 15.65 L19.77 17.64 L17.64 19.77 L15.65 18.32 L13.89 19.05 L13.50 21.48 L10.50 21.48 L10.11 19.05 L8.35 18.32 L6.36 19.77 L4.23 17.64 L5.68 15.65 L4.95 13.89 L2.52 13.50 L2.52 10.50 L4.95 10.11 L5.68 8.35 L4.23 6.36 L6.36 4.23 L8.35 5.68 Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+export function IconTicket() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" width="22" height="22">
       <path
-        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+        d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2.5a2.5 2.5 0 0 0 0 5V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2.5a2.5 2.5 0 0 0 0-5V7Z"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
-        strokeLinecap="round"
+        strokeLinejoin="round"
       />
+      <path d="M14 5.5v13" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="2 2.5" />
+    </svg>
+  );
+}
+
+export function IconCalendar() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" width="22" height="22">
+      <rect x="4" y="5" width="16" height="15" rx="3" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M4 10h16M9 3v4M15 3v4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="m9.5 14.5 2 2 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

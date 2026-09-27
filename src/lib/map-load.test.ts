@@ -32,10 +32,11 @@ function openDb() {
   return { db, store: createSqlStore(executor) };
 }
 
+/** Like Cloudflare D1: exec() runs each line as its own statement. */
 function d1Of(db: DatabaseSync): D1Like {
   return {
     exec: async (sql) => {
-      db.exec(sql);
+      for (const line of sql.split("\n")) if (line.trim()) db.exec(line);
     },
     prepare: (sql) => ({
       bind: (...args) => ({

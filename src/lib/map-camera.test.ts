@@ -8,15 +8,17 @@ function mockMap(width: number, height: number): VectorMap {
 }
 
 describe("resortCameraPadding", () => {
-  it("uses sheet bottom inset on narrow viewports", () => {
-    const peek = resortCameraPadding({ narrow: true, sheet: "peek", height: 800 });
-    expect(peek.bottom).toBe(200);
-    const half = resortCameraPadding({ narrow: true, sheet: "half", height: 800 });
-    expect(half.bottom).toBe(440);
+  it("keeps the resort above the visible sheet on narrow viewports", () => {
+    const peek = resortCameraPadding({ narrow: true, sheetPx: 196, height: 800 });
+    expect(peek.bottom).toBe(212);
+    const full = resortCameraPadding({ narrow: true, sheetPx: 716, height: 800 });
+    expect(full.bottom).toBe(400);
+    const unknown = resortCameraPadding({ narrow: true, sheetPx: null, height: 800 });
+    expect(unknown.bottom).toBe(400);
   });
 
   it("keeps modest padding on desktop", () => {
-    const pad = resortCameraPadding({ narrow: false, sheet: "half", height: 900 });
+    const pad = resortCameraPadding({ narrow: false, sheetPx: 400, height: 900 });
     expect(pad.left).toBe(32);
     expect(pad.bottom).toBe(48);
   });

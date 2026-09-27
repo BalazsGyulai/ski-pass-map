@@ -1,18 +1,31 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { passById, passes, resorts } from "@/lib/data";
+import { passes, resortById, resorts } from "@/lib/data";
 import { passShortName } from "@/lib/pass-label";
-import { clusterPoints } from "@/lib/cluster";
-import { filterResorts } from "@/lib/filter";
-import { formatEur } from "@/lib/format";
-import { clusterRingHtml, passShares, pricePillHtml } from "@/lib/marker";
+import {
+  FOCUS_SOURCE,
+  RESORT_HIT_LAYERS,
+  RESORT_LAYERS,
+  RESORT_SOURCE,
+  CLUSTER_RADIUS,
+  UNCLUSTER_ZOOM,
+  resortFeature,
+  resortFeatureCollection,
+  resortLayerSpecs,
+  type ResortFeature,
+  type ResortFeatureCollection,
+  type ResortFeatureContext,
+} from "@/lib/resort-layers";
 import { BASE_PATH } from "@/lib/site";
 import { OPENSNOWMAP_ATTRIBUTION, OPENSNOWMAP_TILES, mapAppearance, styleFor } from "@/lib/map-styles";
 import { providerAfterFailure, resolveMapProvider } from "@/lib/map-provider";
-import type { MapProviderId } from "@/lib/map-styles";
+import { mapboxAccess, recordMapboxUse, touchMapboxVisit } from "@/lib/map-access";
+import { onMapConsentChange } from "@/lib/map-consent";
+import type { MapAppearance, MapProviderId } from "@/lib/map-styles";
 import {
   PISTE_SOURCE_ID,
+  clusterExpansionZoom,
   createVectorMap,
   firstLabelLayer,
   glFitPadding,
@@ -24,12 +37,15 @@ import {
   pisteLayerSpecs,
   pisteTip,
   type MapLib,
+  type RenderedFeature,
   type VectorMap,
-  type VectorMarker,
 } from "@/lib/vector-map";
 import { attachMapProbe } from "@/lib/map-canvas-probe";
-import { flyToResort, readSheetSnap, resortCameraPadding, whenMapIdle } from "@/lib/map-camera";
+import { flyToResort, readSheetVisible, resortCameraPadding } from "@/lib/map-camera";
+import { RESORT_PITCH, applyTerrain } from "@/lib/terrain";
+import { SHEET_EVENT } from "@/lib/sheet";
 import { useApp } from "./AppState";
+import { useResortLists } from "./useResorts";
 
 const SNOW_SOURCE = "opensnow-pistes";
 const SNOW_LAYER = "opensnow-pistes";
@@ -40,13 +56,15 @@ export default function MapView() {
   const libRef = useRef<MapLib | null>(null);
   const appliedStyle = useRef<string | null>(null);
   const pisteData = useRef<unknown>(null);
-  const { share, home, favourites, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, lang, offline } = useApp();
+  const { share, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, offline, searchThisArea, terrain3d } = useApp();
+  const { filtered } = useResortLists();
   const [choice, setChoice] = useState<MapProviderId | null>(null);
   const [override, setOverride] = useState<MapProviderId | null>(null);
   const [ready, setReady] = useState(false);
   const [bootError, setBootError] = useState(false);
   const [pisteNote, setPisteNote] = useState<"idle" | "loading" | "empty" | "ready">("idle");
-  const [systemDark, setSystemDark] = useState(false);
+  // Read the system theme up front so the map starts in the right style instead of swapping on boot.
+  const [systemDark, setSystemDark] = useState(() => typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   const provider = override ?? choice;
   const appearance = mapAppearance(theme, systemDark);
   const appearanceRef = useRef(appearance);
@@ -54,12 +72,28 @@ export default function MapView() {
   const darkRef = useRef(appearance === "dark");
   darkRef.current = appearance === "dark";
 
-  const passNames = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.name])), []);
   const colors = useMemo(() => new Map(passes.map((pass) => [pass.id, pass.color])), []);
-  const filtered = useMemo(
-    () => filterResorts(resorts, share, { home, favourites: new Set(favourites), passNames }),
-    [share, home, favourites, passNames],
+  const shortNames = useMemo(() => new Map(passes.map((pass) => [pass.id, passShortName(pass)])), []);
+  const featureContext = useMemo<ResortFeatureContext>(
+    () => ({ colorOf: (id) => colors.get(id), shortNameOf: (id) => shortNames.get(id), plannedDays: resortDays }),
+    [colors, shortNames, resortDays],
   );
+  const resortData = useMemo(
+    () => resortFeatureCollection(filtered.filter((resort) => resort.id !== share.resort), featureContext),
+    [filtered, share.resort, featureContext],
+  );
+  const focusData = useMemo<ResortFeatureCollection>(() => {
+    const features: ResortFeature[] = [];
+    const selected = share.resort ? resortById.get(share.resort) : undefined;
+    const picked = selected ? resortFeature(selected, featureContext, "selected") : null;
+    if (picked) features.push(picked);
+    const hot = highlightId && highlightId !== share.resort ? resortById.get(highlightId) : undefined;
+    const lit = hot ? resortFeature(hot, featureContext, "hot") : null;
+    if (lit) features.push(lit);
+    return { type: "FeatureCollection", features };
+  }, [share.resort, highlightId, featureContext]);
+  const dataRef = useRef({ resorts: resortData, focus: focusData });
+  dataRef.current = { resorts: resortData, focus: focusData };
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -72,13 +106,25 @@ export default function MapView() {
   useEffect(() => {
     if (choice || offline) return;
     let cancelled = false;
-    void resolveMapProvider().then((next) => {
+    void resolveMapProvider({ allowed: mapboxAllowedNow() }).then((next) => {
       if (!cancelled) setChoice(next);
     });
     return () => {
       cancelled = true;
     };
   }, [choice, offline]);
+
+  // Saying yes (or no) to Mapbox applies right away, not on the next visit.
+  useEffect(
+    () =>
+      onMapConsentChange(() => {
+        void resolveMapProvider({ allowed: mapboxAllowedNow() }).then((next) => {
+          setOverride(null);
+          setChoice(next);
+        });
+      }),
+    [],
+  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -111,9 +157,20 @@ export default function MapView() {
           if (!cancelled && map) {
             attachMapProbe(map);
             compactMapAttribution(map.getContainer());
+            if (provider === "mapbox") withStorage((storage) => recordMapboxUse(storage));
             setReady(true);
           }
         });
+        if (provider === "mapbox") {
+          // Using the map keeps the visit open, so a long session is one visit.
+          let touched = 0;
+          map.on("moveend", () => {
+            const now = Date.now();
+            if (now - touched < 60_000) return;
+            touched = now;
+            withStorage((storage) => touchMapboxVisit(storage, now));
+          });
+        }
       } catch (error) {
         console.error("Map failed to start", error);
         fail();
@@ -135,7 +192,9 @@ export default function MapView() {
     const next = styleFor(provider, appearance);
     if (appliedStyle.current === next) return;
     appliedStyle.current = next;
-    map.setStyle(next);
+    // A diffed style swap keeps the map but silently drops our own sources and layers without
+    // firing style.load. Rebuild instead, so resorts and pistes are added back.
+    map.setStyle(next, { diff: false });
     map.once("idle", () => {
       map.resize();
       compactMapAttribution(map.getContainer());
@@ -144,129 +203,80 @@ export default function MapView() {
 
   useEffect(() => {
     const map = mapRef.current;
-    const lib = libRef.current;
-    if (!map || !lib || !ready) return;
-    let markers: VectorMarker[] = [];
-    const draw = () => {
-      for (const marker of markers) marker.remove();
-      markers = [];
-      if (!hasMapSize(map)) return;
-      const zoom = map.getZoom();
-      const pool = filtered.filter((resort) => resort.id !== share.resort);
-      const clusters = clusterPoints(pool, zoom, { unclusterZoom: 9 });
-      const addResort = (resort: (typeof filtered)[number], selected: boolean) => {
-        const price = resort.day_ticket_eur != null ? formatEur(lang, resort.day_ticket_eur) : t("dash");
-        const covered = resort.passes.map((id) => passById.get(id)).filter((pass) => pass != null);
-        const shorts = covered.map((pass) => passShortName(pass));
-        const fullNames = covered.map((pass) => pass.name);
-        const noPass = resort.passes.length === 0 || shorts.length === 0;
-        const dotOnly = noPass && !selected && zoom < 11;
-        const label = noPass
-          ? dotOnly
-            ? ""
-            : resort.name
-          : shorts.length === 1
-            ? shorts[0]
-            : `${shorts[0]} +${shorts.length - 1}`;
-        const accessible = [resort.name, fullNames.length > 0 ? fullNames.join(", ") : t("noPass"), price].join(", ");
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `resort-marker${highlightId === resort.id && !selected ? " is-hot" : ""}${selected ? " is-selected" : ""}`;
-        button.innerHTML = pricePillHtml({
-          label,
-          accessibleName: accessible,
-          colors: resort.passes.map((id) => colors.get(id) ?? "#94A3B8"),
-          selected,
-          name: resort.name,
-          plannedDays: resortDays[resort.id] ?? 0,
-          closed: resort.abandoned,
-          noPass,
-          dotOnly,
-        });
-        button.setAttribute("aria-label", accessible);
-        button.title = accessible;
-        button.addEventListener("click", (event) => {
-          event.stopPropagation();
-          selectResort(resort.id);
-        });
-        const marker = new lib.Marker({ element: button, anchor: selected ? "bottom" : "center" }).setLngLat([resort.lon, resort.lat]).addTo(map);
-        marker.getElement().style.zIndex = selected ? "4" : highlightId === resort.id ? "3" : "1";
-        markers.push(marker);
-      };
-      clusters.forEach((cluster) => {
-        if (cluster.items.length === 1) {
-          addResort(cluster.items[0], false);
-          return;
-        }
-        const shares = passShares(cluster.items, (id) => colors.get(id) ?? "#94A3B8");
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "resort-marker";
-        button.innerHTML = clusterRingHtml(cluster.items.length, shares);
-        const accessible = t("clusterLabel", { n: cluster.items.length });
-        button.setAttribute("aria-label", accessible);
-        button.title = accessible;
-        button.addEventListener("click", (event) => {
-          event.stopPropagation();
-          if (!hasMapSize(map)) return;
-          const bounds = padLngLatBounds(
-            cluster.items.map((item) => [item.lon, item.lat]),
-            0.2,
-          );
-          if (!bounds) return;
-          map.fitBounds(bounds, { padding: 32, maxZoom: 12, duration: motionDuration(500) });
-        });
-        const marker = new lib.Marker({ element: button, anchor: "center" }).setLngLat([cluster.lon, cluster.lat]).addTo(map);
-        markers.push(marker);
-      });
-      const selected =
-        share.resort != null ? resorts.find((resort) => resort.id === share.resort) ?? filtered.find((r) => r.id === share.resort) : undefined;
-      if (selected) addResort(selected, true);
-    };
-    draw();
-    map.on("zoomend", draw);
-    map.on("resize", draw);
-    map.on("style.load", draw);
-    map.on("idle", draw);
+    if (!map || !ready || !provider) return;
+    const install = () => installResortLayers(map, provider, appearanceRef.current, dataRef.current);
+    install();
+    map.on("style.load", install);
     return () => {
-      map.off("zoomend", draw);
-      map.off("resize", draw);
-      map.off("style.load", draw);
-      map.off("idle", draw);
-      for (const marker of markers) marker.remove();
+      map.off("style.load", install);
     };
-  }, [ready, filtered, share.resort, highlightId, colors, selectResort, t, lang, resortDays]);
+  }, [ready, provider]);
+
+  // Relief shading always; the 3D surface and horizon when 3D is on. Style swaps drop both.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !provider) return;
+    const apply = () => {
+      try {
+        applyTerrain(map, { provider, appearance: appearanceRef.current, threeD: terrain3d });
+      } catch (error) {
+        // Mid style swap. style.load runs this again.
+        console.warn("Terrain not ready yet", error);
+      }
+    };
+    apply();
+    map.on("style.load", apply);
+    if (!terrain3d && hasMapSize(map) && map.getPitch() > 0) map.easeTo({ pitch: 0, bearing: 0, duration: motionDuration(400) });
+    return () => {
+      map.off("style.load", apply);
+    };
+  }, [ready, provider, terrain3d]);
+
+  useEffect(() => {
+    if (!ready) return;
+    mapRef.current?.getSource(RESORT_SOURCE)?.setData?.(resortData);
+  }, [ready, resortData]);
+
+  useEffect(() => {
+    if (!ready) return;
+    mapRef.current?.getSource(FOCUS_SOURCE)?.setData?.(focusData);
+  }, [ready, focusData]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
     let cancelled = false;
-    const apply = (data: unknown) => {
-      if (!map.isStyleLoaded()) return;
-      clearPistes(map);
-      if (!data) return;
-      map.addSource(PISTE_SOURCE_ID, { type: "geojson", data });
-      const before = firstLabelLayer(map);
-      for (const spec of pisteLayerSpecs(darkRef.current)) {
-        const layer = {
-          id: spec.id,
-          type: "line",
-          source: PISTE_SOURCE_ID,
-          filter: spec.filter,
-          layout: { "line-cap": "round", "line-join": "round" },
-          paint: {
-            "line-color": spec.color,
-            "line-width": spec.width,
-            "line-opacity": 0.95,
-            ...(spec.dash ? { "line-dasharray": spec.dash } : {}),
-          },
-        };
-        if (before) map.addLayer(layer, before);
-        else map.addLayer(layer);
+    /** False while a style swap is in flight. style.load then applies the data again. */
+    const apply = (data: unknown): boolean => {
+      try {
+        clearPistes(map);
+        if (!data) return true;
+        map.addSource(PISTE_SOURCE_ID, { type: "geojson", data });
+        const before = firstLabelLayer(map);
+        for (const spec of pisteLayerSpecs(darkRef.current)) {
+          const layer = {
+            id: spec.id,
+            type: "line",
+            source: PISTE_SOURCE_ID,
+            filter: spec.filter,
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: {
+              "line-color": spec.color,
+              "line-width": spec.width,
+              "line-opacity": 0.95,
+              ...(spec.dash ? { "line-dasharray": spec.dash } : {}),
+            },
+          };
+          if (before) map.addLayer(layer, before);
+          else map.addLayer(layer);
+        }
+        return true;
+      } catch {
+        return false;
       }
     };
     pisteData.current = null;
-    if (map.isStyleLoaded()) clearPistes(map);
+    apply(null);
     const load = () => {
       if (!share.resort || share.hideRuns) {
         setPisteNote("idle");
@@ -282,16 +292,7 @@ export default function MapView() {
           const count = data?.features?.length ?? 0;
           if (data && count > 0) {
             pisteData.current = data;
-            void whenMapIdle(map).then(() => {
-              if (cancelled || !map.isStyleLoaded()) return;
-              try {
-                apply(data);
-                setPisteNote("ready");
-              } catch {
-                pisteData.current = null;
-                setPisteNote("empty");
-              }
-            });
+            if (apply(data)) setPisteNote("ready");
             return;
           }
           pisteData.current = null;
@@ -302,7 +303,7 @@ export default function MapView() {
         });
     };
     const onStyle = () => {
-      if (pisteData.current) apply(pisteData.current);
+      if (pisteData.current && apply(pisteData.current) && !cancelled) setPisteNote("ready");
     };
     load();
     map.on("style.load", onStyle);
@@ -316,8 +317,11 @@ export default function MapView() {
     const map = mapRef.current;
     if (!map || !ready) return;
     const apply = () => {
-      if (!map.isStyleLoaded()) return;
-      syncSnow(map, share.showPistes);
+      try {
+        syncSnow(map, share.showPistes);
+      } catch {
+        // Mid style swap. style.load runs this again.
+      }
     };
     apply();
     map.on("style.load", apply);
@@ -350,7 +354,8 @@ export default function MapView() {
         return;
       }
       if (control) return;
-      control = new lib.NavigationControl({ showCompass: false, showZoom: true, visualizePitch: false });
+      // The compass shows tilt and turns, and a click levels the map again.
+      control = new lib.NavigationControl({ showCompass: true, showZoom: true, visualizePitch: true });
       map.addControl(control, "top-right");
     };
     sync();
@@ -363,7 +368,15 @@ export default function MapView() {
       map.off("resize", sync);
       coarseMedia.removeEventListener("change", sync);
       narrowMedia.removeEventListener("change", sync);
-      if (control) map.removeControl(control);
+      // Leaving the page removes the map first (the map effect cleans up before this one), and a
+      // removed map has already dropped its controls. Removing again throws and takes the page down.
+      if (control && mapRef.current === map) {
+        try {
+          map.removeControl(control);
+        } catch {
+          // The map is already gone.
+        }
+      }
     };
   }, [ready, provider]);
 
@@ -371,7 +384,7 @@ export default function MapView() {
     const map = mapRef.current;
     if (!map || !ready) return;
     const report = () => {
-      if (!hasMapSize(map) || !map.isStyleLoaded()) return;
+      if (!hasMapSize(map)) return;
       const bounds = map.getBounds();
       reportMapBounds({ south: bounds.getSouth(), west: bounds.getWest(), north: bounds.getNorth(), east: bounds.getEast() });
     };
@@ -411,6 +424,21 @@ export default function MapView() {
     };
   }, [ready, mapApi, filtered]);
 
+  // Picking a pass (chips or filters) frames the resorts it covers.
+  const passKey = share.passes.join(",");
+  // Starts empty so a link that arrives with ?passes= is framed too.
+  const lastPassKey = useRef("");
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    if (lastPassKey.current === passKey) return;
+    lastPassKey.current = passKey;
+    if (share.resort || !passKey) return;
+    // We moved the camera, not the visitor, so the list follows without a "Search this area" step.
+    map.once("moveend", () => searchThisArea());
+    mapApi.current.fitAll();
+  }, [ready, passKey, share.resort, mapApi, searchThisArea]);
+
   useEffect(() => {
     const map = mapRef.current;
     const lib = libRef.current;
@@ -433,43 +461,53 @@ export default function MapView() {
       }
       popup.setLngLat(lngLat).setText(text).addTo(map);
     };
-    const onMove = (event: { point?: { x: number; y: number }; lngLat?: { lng: number; lat: number } }) => {
-      if (!event.point || !event.lngLat || !map.isStyleLoaded()) return;
+    const pisteAt = (point: { x: number; y: number }): RenderedFeature | null => {
       const layers = pisteLayerIds().filter((id) => map.getLayer(id));
-      if (layers.length === 0) {
-        popup.remove();
-        map.getCanvas().style.cursor = "";
+      if (layers.length === 0) return null;
+      try {
+        return map.queryRenderedFeatures([point.x, point.y], { layers })[0] ?? null;
+      } catch {
+        return null;
+      }
+    };
+    const onMove = (event: { point?: { x: number; y: number }; lngLat?: { lng: number; lat: number } }) => {
+      if (!event.point || !event.lngLat) return;
+      const hit = resortAt(map, event.point, 8);
+      if (hit) {
+        map.getCanvas().style.cursor = "pointer";
+        if (hit.kind === "resort") popup.setLngLat(hit.lngLat).setText(hit.pass ? `${hit.name} · ${hit.pass}` : hit.name).addTo(map);
+        else popup.remove();
         return;
       }
-      let features: Array<{ properties?: Record<string, unknown> | null }> = [];
-      try {
-        features = map.queryRenderedFeatures([event.point.x, event.point.y], { layers });
-      } catch {
-        features = [];
-      }
-      if (features.length === 0) {
+      const piste = pisteAt(event.point);
+      if (!piste) {
         popup.remove();
         map.getCanvas().style.cursor = "";
         return;
       }
       map.getCanvas().style.cursor = "pointer";
-      showTip(features[0].properties ?? null, event.lngLat);
+      showTip(piste.properties ?? null, event.lngLat);
     };
     const onClick = (event: { point?: { x: number; y: number }; lngLat?: { lng: number; lat: number }; originalEvent?: Event }) => {
       const target = event.originalEvent?.target;
-      if (target instanceof Element && target.closest(".resort-marker, .maplibregl-ctrl, .mapboxgl-ctrl, .maplibregl-popup, .mapboxgl-popup, .layers")) return;
-      if (event.point && map.isStyleLoaded()) {
-        const layers = pisteLayerIds().filter((id) => map.getLayer(id));
-        if (layers.length > 0 && event.lngLat) {
-          try {
-            const features = map.queryRenderedFeatures([event.point.x, event.point.y], { layers });
-            if (features.length > 0) {
-              showTip(features[0].properties ?? null, event.lngLat);
-              return;
-            }
-          } catch {
-            // A missing layer should not close the resort card.
-          }
+      if (target instanceof Element && target.closest(".maplibregl-ctrl, .mapboxgl-ctrl, .maplibregl-popup, .mapboxgl-popup, .layers")) return;
+      if (event.point) {
+        const coarse = window.matchMedia("(pointer: coarse)").matches;
+        const hit = resortAt(map, event.point, coarse ? 18 : 10);
+        if (hit?.kind === "resort") {
+          popup.remove();
+          selectResort(hit.id);
+          return;
+        }
+        if (hit?.kind === "cluster") {
+          popup.remove();
+          void expandCluster(map, hit);
+          return;
+        }
+        const piste = pisteAt(event.point);
+        if (piste && event.lngLat) {
+          showTip(piste.properties ?? null, event.lngLat);
+          return;
         }
       }
       popup.remove();
@@ -493,50 +531,46 @@ export default function MapView() {
     return () => observer.disconnect();
   }, [ready]);
 
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready) return;
-    const resize = () => {
-      requestAnimationFrame(() => map.resize());
-    };
-    resize();
-    const observer = new MutationObserver(resize);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-sheet", "data-panel"] });
-    window.addEventListener("resize", resize);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", resize);
-    };
-  }, [ready, share.resort]);
+  const terrainRef = useRef(terrain3d);
+  terrainRef.current = terrain3d;
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready || !share.resort) return;
-    const resort = resorts.find((item) => item.id === share.resort);
+    const resort = resortById.get(share.resort);
     if (!resort) return;
-    let cancelled = false;
     const fly = (duration: number) => {
-      if (cancelled || !hasMapSize(map)) return;
+      if (!hasMapSize(map)) return;
       const narrow = window.matchMedia("(max-width: 899px)").matches;
       const height = map.getContainer().clientHeight;
-      const padding = resortCameraPadding({ narrow, sheet: readSheetSnap(), height });
-      flyToResort(map, resort.lon, resort.lat, { duration, padding });
-      map.once("idle", () => map.resize());
+      const padding = resortCameraPadding({ narrow, sheetPx: readSheetVisible(), height });
+      // In 3D the camera tilts so the mountain and its runs stand up.
+      flyToResort(map, resort.lon, resort.lat, { duration, padding, pitch: terrainRef.current ? RESORT_PITCH : undefined });
     };
-    const schedule = (duration: number) => {
-      void whenMapIdle(map).then(() => fly(duration));
-    };
-    schedule(motionDuration(500));
-    const observer = new MutationObserver(() => schedule(motionDuration(200)));
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-sheet"] });
+    // One frame lets the sheet publish its height. The camera moves at once; tiles fill in on the way.
+    const frame = requestAnimationFrame(() => fly(motionDuration(700)));
+    // When the sheet settles at another height, keep the resort in the visible part of the map.
+    const onSheet = () => fly(motionDuration(320));
+    window.addEventListener(SHEET_EVENT, onSheet);
     return () => {
-      cancelled = true;
-      observer.disconnect();
+      cancelAnimationFrame(frame);
+      window.removeEventListener(SHEET_EVENT, onSheet);
     };
   }, [ready, share.resort]);
 
+  // Closing a resort levels the camera again for the overview.
+  const hadResort = useRef(false);
+  useEffect(() => {
+    const map = mapRef.current;
+    const open = Boolean(share.resort);
+    const closed = hadResort.current && !open;
+    hadResort.current = open;
+    if (!map || !ready || !closed || !hasMapSize(map)) return;
+    if (map.getPitch() > 0 || map.getBearing() !== 0) map.easeTo({ pitch: 0, bearing: 0, duration: motionDuration(500) });
+  }, [ready, share.resort]);
+
   return (
-    <div className="map-root" data-map-provider={provider ?? "pending"}>
+    <div className="map-root" data-map-provider={provider ?? "pending"} data-terrain={terrain3d ? "3d" : "flat"}>
       <div ref={containerRef} className="map-canvas" />
       {!ready && !bootError ? <div className="map-skeleton" role="status" aria-label={t("loadingMap")} /> : null}
       {bootError ? (
@@ -553,6 +587,23 @@ export default function MapView() {
   );
 }
 
+function withStorage(run: (storage: Storage) => void): void {
+  try {
+    run(window.localStorage);
+  } catch {
+    // Storage blocked (private mode): the visit just is not remembered.
+  }
+}
+
+/** Free visits left or a supporter period running. Blocked storage counts as a first visit. */
+function mapboxAllowedNow(): boolean {
+  try {
+    return mapboxAccess(window.localStorage).allowed;
+  } catch {
+    return true;
+  }
+}
+
 function compactMapAttribution(container: HTMLElement): void {
   container.querySelectorAll(".maplibregl-ctrl-attrib, .mapboxgl-ctrl-attrib").forEach((el) => {
     el.classList.add("maplibregl-compact", "mapboxgl-compact");
@@ -560,7 +611,6 @@ function compactMapAttribution(container: HTMLElement): void {
 }
 
 function clearPistes(map: VectorMap) {
-  if (!map.isStyleLoaded()) return;
   for (const id of pisteLayerIds()) {
     if (map.getLayer(id)) map.removeLayer(id);
   }
@@ -568,7 +618,6 @@ function clearPistes(map: VectorMap) {
 }
 
 function syncSnow(map: VectorMap, show: boolean) {
-  if (!map.isStyleLoaded()) return;
   const exists = Boolean(map.getLayer(SNOW_LAYER));
   if (!show) {
     if (exists) map.removeLayer(SNOW_LAYER);
@@ -587,3 +636,78 @@ function syncSnow(map: VectorMap, show: boolean) {
   if (before) map.addLayer(layer, before);
   else map.addLayer(layer);
 }
+
+type ResortHit =
+  | { kind: "resort"; id: string; name: string; pass: string; lngLat: [number, number] }
+  | { kind: "cluster"; clusterId: number; lngLat: [number, number] };
+
+/** Nearest resort dot or cluster within `pad` pixels of the pointer. */
+function resortAt(map: VectorMap, point: { x: number; y: number }, pad: number): ResortHit | null {
+  const layers = RESORT_HIT_LAYERS.filter((id) => map.getLayer(id));
+  if (layers.length === 0) return null;
+  let features: RenderedFeature[] = [];
+  try {
+    features = map.queryRenderedFeatures(
+      [
+        [point.x - pad, point.y - pad],
+        [point.x + pad, point.y + pad],
+      ],
+      { layers: [...layers] },
+    );
+  } catch {
+    return null;
+  }
+  let best: ResortHit | null = null;
+  let bestScore = Infinity;
+  for (const feature of features) {
+    const coords = feature.geometry?.coordinates;
+    if (!Array.isArray(coords) || typeof coords[0] !== "number" || typeof coords[1] !== "number") continue;
+    const lngLat: [number, number] = [coords[0], coords[1]];
+    const at = map.project(lngLat);
+    // The selected resort sits on top, so it wins a near tie.
+    const score = Math.hypot(at.x - point.x, at.y - point.y) - (feature.layer?.id === RESORT_LAYERS.focusDot ? 4 : 0);
+    if (score >= bestScore) continue;
+    const props = feature.properties ?? {};
+    if (typeof props.cluster_id === "number") best = { kind: "cluster", clusterId: props.cluster_id, lngLat };
+    else if (typeof props.id === "string") best = { kind: "resort", id: props.id, name: String(props.name ?? ""), pass: String(props.pass ?? ""), lngLat };
+    else continue;
+    bestScore = score;
+  }
+  return best;
+}
+
+async function expandCluster(map: VectorMap, hit: Extract<ResortHit, { kind: "cluster" }>): Promise<void> {
+  const current = map.getZoom();
+  const zoom = await clusterExpansionZoom(map.getSource(RESORT_SOURCE), hit.clusterId);
+  const target = Math.min(14, Math.max(current + 1, (zoom ?? current + 2) + 0.25));
+  map.easeTo({ center: hit.lngLat, zoom: target, duration: motionDuration(550) });
+}
+
+/** Adds the resort sources and layers once per style. Later updates only swap the data. */
+function installResortLayers(
+  map: VectorMap,
+  provider: MapProviderId,
+  appearance: MapAppearance,
+  data: { resorts: ResortFeatureCollection; focus: ResortFeatureCollection },
+): void {
+  try {
+    if (map.getSource(RESORT_SOURCE)) {
+      map.getSource(RESORT_SOURCE)?.setData?.(data.resorts);
+      map.getSource(FOCUS_SOURCE)?.setData?.(data.focus);
+      return;
+    }
+    map.addSource(RESORT_SOURCE, {
+      type: "geojson",
+      data: data.resorts,
+      cluster: true,
+      clusterRadius: CLUSTER_RADIUS,
+      clusterMaxZoom: UNCLUSTER_ZOOM - 1,
+    });
+    map.addSource(FOCUS_SOURCE, { type: "geojson", data: data.focus });
+    for (const layer of resortLayerSpecs({ provider, appearance })) map.addLayer(layer);
+  } catch (error) {
+    // The style is still swapping. style.load calls this again.
+    console.warn("Resort layers not ready yet", error);
+  }
+}
+

@@ -37,21 +37,77 @@ export interface VectorMap {
     zoom: number;
     duration?: number;
     padding?: { top: number; bottom: number; left: number; right: number };
+    pitch?: number;
+    bearing?: number;
   }): void;
+  easeTo(options: { center?: [number, number]; zoom?: number; duration?: number; pitch?: number; bearing?: number }): void;
+  getPitch(): number;
+  getBearing(): number;
+  /** Both libraries have these; the terrain module calls them. */
+  setTerrain?(terrain: { source: string; exaggeration: number } | null): unknown;
+  setSky?(sky: Record<string, unknown>): unknown;
+  setFog?(fog: Record<string, unknown> | null): unknown;
+  project(lngLat: [number, number]): { x: number; y: number };
   addSource(id: string, source: unknown): void;
-  getSource(id: string): { setData?: (data: unknown) => void } | undefined;
+  getSource(id: string): VectorGeoJsonSource | undefined;
   removeSource(id: string): void;
   addLayer(layer: unknown, before?: string): void;
   getLayer(id: string): unknown;
   removeLayer(id: string): void;
   setPaintProperty(layer: string, name: string, value: unknown): void;
-  getStyle(): { layers?: Array<{ id: string; type: string }> } | null | undefined;
+  getStyle(): { layers?: Array<{ id: string; type: string; "source-layer"?: string }> } | null | undefined;
   isStyleLoaded(): boolean;
-  setStyle(style: string): void;
-  queryRenderedFeatures(point: [number, number], options: { layers: string[] }): Array<{ properties?: Record<string, unknown> | null }>;
+  setStyle(style: string, options?: { diff?: boolean }): void;
+  queryRenderedFeatures(
+    geometry: [number, number] | [[number, number], [number, number]],
+    options: { layers: string[] },
+  ): RenderedFeature[];
   addControl(control: unknown, position?: string): void;
   removeControl(control: unknown): void;
   loaded(): boolean;
+}
+
+export interface RenderedFeature {
+  properties?: Record<string, unknown> | null;
+  geometry?: { type?: string; coordinates?: unknown };
+  layer?: { id?: string };
+}
+
+/**
+ * GeoJSON source methods used here. MapLibre returns a promise from getClusterExpansionZoom;
+ * Mapbox GL takes a callback. See clusterExpansionZoom.
+ */
+export interface VectorGeoJsonSource {
+  setData?: (data: unknown) => void;
+  getClusterExpansionZoom?: (clusterId: number, callback?: (error: unknown, zoom?: number) => void) => unknown;
+}
+
+/** Zoom at which a cluster falls apart, for either library. Null when it cannot be read. */
+export function clusterExpansionZoom(source: VectorGeoJsonSource | undefined, clusterId: number): Promise<number | null> {
+  return new Promise((resolve) => {
+    const read = source?.getClusterExpansionZoom;
+    if (!read) {
+      resolve(null);
+      return;
+    }
+    let settled = false;
+    const done = (zoom: number | null) => {
+      if (settled) return;
+      settled = true;
+      resolve(zoom != null && Number.isFinite(zoom) ? zoom : null);
+    };
+    try {
+      const result = read.call(source, clusterId, (error, zoom) => done(error ? null : (zoom ?? null)));
+      if (result && typeof (result as Promise<number>).then === "function") {
+        (result as Promise<number>).then(
+          (zoom) => done(zoom),
+          () => done(null),
+        );
+      }
+    } catch {
+      done(null);
+    }
+  });
 }
 
 export interface VectorMarker {
@@ -107,11 +163,14 @@ export function createVectorMap(lib: MapLib, options: CreateMapOptions): VectorM
     fadeDuration: options.reducedMotion ? 0 : 300,
     failIfMajorPerformanceCaveat: false,
     preserveDrawingBuffer: probe,
+    // Mapbox GL takes a boolean attributionControl and a top-level customAttribution; MapLibre
+    // takes the options object. Either way the OpenSkiMap / ODbL credit must show.
     ...(options.provider === "mapbox"
       ? {
           accessToken: token,
           logoPosition: "bottom-left",
-          attributionControl: { compact: true, customAttribution },
+          attributionControl: true,
+          customAttribution,
         }
       : { attributionControl: { compact: true, customAttribution } }),
   });
@@ -161,8 +220,9 @@ export function hasMapSize(map: { getContainer(): HTMLElement }): boolean {
 
 export function glFitPadding(height: number): { top: number; bottom: number; left: number; right: number } {
   const narrow = typeof window !== "undefined" && window.matchMedia("(max-width: 899px)").matches;
-  const sheet = typeof document !== "undefined" ? (document.documentElement.dataset.sheet ?? null) : null;
-  const pad = mapFitPadding({ narrow, sheet, height });
+  const raw = typeof document !== "undefined" ? Number(document.documentElement.dataset.sheetPx) : Number.NaN;
+  const sheetPx = Number.isFinite(raw) && raw > 0 ? raw : null;
+  const pad = mapFitPadding({ narrow, sheetPx, height });
   return {
     left: pad.paddingTopLeft[0],
     top: pad.paddingTopLeft[1],

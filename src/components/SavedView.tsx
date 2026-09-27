@@ -5,16 +5,17 @@ import { resortById } from "@/lib/data";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 
+/** Favourite resorts. Shown inside My plan; /saved redirects there. */
 export function SavedView() {
   const { favourites, t, toggleFavourite } = useApp();
   const href = useLocalizedPath();
   const resorts = favourites.map((id) => resortById.get(id)).filter((resort) => resort != null);
 
   return (
-    <div className="page-shell saved-page">
-      <h1>{t("savedPageTitle")}</h1>
+    <section id="saved" className="card-block saved-block" aria-labelledby="saved-title">
+      <h2 id="saved-title">{t("savedPageTitle")}</h2>
       {resorts.length === 0 ? (
-        <p className="empty-state">{t("savedEmpty")}</p>
+        <p className="hint">{t("savedEmpty")}</p>
       ) : (
         <ul className="saved-list">
           {resorts.map((resort) => (
@@ -30,6 +31,6 @@ export function SavedView() {
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }

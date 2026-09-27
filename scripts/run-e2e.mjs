@@ -25,6 +25,12 @@ async function main() {
   execSync('npx wrangler d1 execute skimap-app --local --command "DELETE FROM rate_limits;" -y', {
     stdio: "inherit",
   });
+  // The Mapbox tests spend a few map loads; start each run with a fresh per-visitor window.
+  try {
+    execSync('npx wrangler d1 execute skimap-map-loads --local --command "DELETE FROM rate_buckets;" -y', { stdio: "ignore" });
+  } catch {
+    /* The table appears on the first map load. */
+  }
   execSync(
     [
       "CF_PAGES=1",
@@ -37,6 +43,8 @@ async function main() {
       "NEXT_PUBLIC_STATS_ENABLED=1",
       "NEXT_PUBLIC_SUPPORT_PROMPT_FORCE=1",
       "NEXT_PUBLIC_MAP_CANVAS_PROBE=1",
+      // Fake token: the Mapbox API is stubbed in e2e/map-stub.ts, so the Mapbox path runs offline.
+      "NEXT_PUBLIC_MAPBOX_TOKEN=pk.e2e-stub",
       "npm run build",
     ].join(" "),
     { stdio: "inherit" },
@@ -96,7 +104,7 @@ async function main() {
   try {
     execSync("npx playwright test e2e/regression.spec.ts", {
       stdio: "inherit",
-      env: { ...process.env, E2E_ORIGIN: ORIGIN },
+      env: { ...process.env, E2E_ORIGIN: ORIGIN, E2E_MAPBOX_STUB_TOKEN: "1" },
     });
   } finally {
     shutdown();

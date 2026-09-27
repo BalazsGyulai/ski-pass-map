@@ -18,6 +18,15 @@ describe("map provider selection", () => {
     }
   });
 
+  it("keeps the free map once the free visits are used, without counting a load", async () => {
+    expect(selectMapProvider({ token: "pk.dummy", consented: true, counter: "mapbox", allowed: false })).toBe("openfreemap");
+    expect(selectMapProvider({ token: "pk.dummy", consented: true, counter: "mapbox", allowed: true })).toBe("mapbox");
+    const fetchImpl = (() => {
+      throw new Error("counter should not be called");
+    }) as typeof fetch;
+    await expect(resolveMapProvider({ token: "pk.dummy", consented: true, allowed: false, countLoads: true, fetchImpl })).resolves.toBe("openfreemap");
+  });
+
   it("falls back from a Mapbox init failure and stops there", () => {
     expect(providerAfterFailure("mapbox")).toBe("openfreemap");
     expect(providerAfterFailure("openfreemap")).toBe("error");

@@ -9,9 +9,11 @@ import { FilterSheet } from "./FilterSheet";
 import { LayersPanel, MapTools } from "./MapTools";
 import { ListSheet } from "./ListSheet";
 import { LanguageSwitcher, useLocalizedPath } from "./LanguageSwitcher";
+import { PassChips } from "./PassChips";
 import { PlanPill } from "./PlanPill";
 import { ResortCard } from "./ResortCard";
 import { SearchPill } from "./SearchPill";
+import { SettingsLink } from "./SettingsLink";
 import { SkiMap } from "./map/SkiMap";
 import { useApp } from "./AppState";
 import { useNarrow } from "./useNarrow";
@@ -85,14 +87,16 @@ export function ExplorerFrame() {
         </Link>
         <SearchPill onOpen={() => setFiltersOpen(true)} compact={compact} onShare={copyLink} />
         <nav className="topbar-links" aria-label={t("title")}>
+          <Link href={href("/passes")}>{t("passes")}</Link>
           <Link href={href("/plan")}>{days > 0 ? t("myPlanPillPlain", { days }) : t("myPlanLink")}</Link>
-          <Link href={href("/saved")}>{t("navSaved")}</Link>
-          <Link href={href("/settings")}>{t("navSettings")}</Link>
           <LanguageSwitcher compact />
+          <SettingsLink className="icon-btn" />
         </nav>
+        <SettingsLink className="tool-btn topbar-gear" />
       </header>
       <div className="stage">
         <SkiMap />
+        <PassChips />
         <MapTools layersOpen={layersOpen} onLayers={() => setLayersOpen((open) => !open)} />
         <LayersPanel open={layersOpen} onClose={() => setLayersOpen(false)} />
         {areaStale && !resort ? (

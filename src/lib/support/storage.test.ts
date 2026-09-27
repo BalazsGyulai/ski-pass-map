@@ -11,8 +11,10 @@ describe("support prompt storage", () => {
   const storage = new Map<string, string>();
   const mock = {
     getItem: (k: string) => storage.get(k) ?? null,
-    setItem: (k: string, v: string) => storage.set(k, v),
-  } as Storage;
+    setItem: (k: string, v: string) => {
+      storage.set(k, v);
+    },
+  } as unknown as Storage;
 
   it("blocks until first visit is marked", () => {
     storage.clear();
@@ -20,6 +22,15 @@ describe("support prompt storage", () => {
     markFirstVisitDone(mock);
     expect(hasCompletedFirstVisit(mock)).toBe(true);
     expect(shouldShowSupportPrompt({ storage: mock, now: Date.now(), dev: false, search: "" })).toBe(true);
+  });
+
+  it("stays hidden when there is nothing to offer, unless forced", () => {
+    storage.clear();
+    markFirstVisitDone(mock);
+    expect(shouldShowSupportPrompt({ storage: mock, now: Date.now(), dev: false, search: "", canOffer: false })).toBe(false);
+    expect(
+      shouldShowSupportPrompt({ storage: mock, now: Date.now(), dev: false, search: "?supportPrompt=1", forceDevParam: true, allowForceParam: true, canOffer: false }),
+    ).toBe(true);
   });
 
   it("caps at four prompts per utc day", () => {

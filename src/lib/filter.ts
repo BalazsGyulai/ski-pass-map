@@ -18,6 +18,8 @@ export interface ResortFilters {
   maxKm: number | null;
   favouritesOnly: boolean;
   showAbandoned: boolean;
+  /** Keep resorts that a pass costing at most this much (for the viewer) covers. */
+  maxPassPrice: number | null;
 }
 
 export function countActiveFilters(filters: ResortFilters): number {
@@ -34,13 +36,20 @@ export function countActiveFilters(filters: ResortFilters): number {
   if (filters.maxKm != null) count += 1;
   if (filters.favouritesOnly) count += 1;
   if (filters.showAbandoned) count += 1;
+  if (filters.maxPassPrice != null) count += 1;
   return count;
 }
 
 export function filterResorts(
   resorts: Resort[],
   filters: ResortFilters,
-  context: { home: LatLon | null; favourites: ReadonlySet<string>; passNames: ReadonlyMap<string, string> },
+  context: {
+    home: LatLon | null;
+    favourites: ReadonlySet<string>;
+    passNames: ReadonlyMap<string, string>;
+    /** The viewer's price for a pass. Needed for maxPassPrice. */
+    passPriceOf?: (passId: string) => number | null;
+  },
 ): Resort[] {
   const query = fold(filters.q.trim());
   return resorts.filter((resort) => {
@@ -71,6 +80,15 @@ export function filterResorts(
     if (filters.minSlope != null && (resort.slope_km == null || resort.slope_km < filters.minSlope)) return false;
     if (filters.maxKm != null && context.home && distanceKm(context.home, resort) > filters.maxKm) return false;
     if (filters.favouritesOnly && !context.favourites.has(resort.id)) return false;
+    if (filters.maxPassPrice != null) {
+      const limit = filters.maxPassPrice;
+      const candidates = filters.passes.length > 0 ? resort.passes.filter((id) => filters.passes.includes(id)) : resort.passes;
+      const affordable = candidates.some((id) => {
+        const price = context.passPriceOf?.(id);
+        return price != null && price <= limit;
+      });
+      if (!affordable) return false;
+    }
     return true;
   });
 }
