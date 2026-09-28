@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, type CSSProperties } from "react";
 import Link from "next/link";
 import { generated, passById, resortById, resorts as allResorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
-import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm, slopeKmDisplay } from "@/lib/format";
+import { finiteOrBlank, formatBreakEven, formatDate, formatEur, formatKm, formatSeasonLabel, formatSeasonRange, slopeKmDisplay } from "@/lib/format";
 import { countryLabel, priceReasonText, regionLabel } from "@/lib/i18n";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { adultBracket, dayTicketIsEstimate, nextPriceChange, pricesOnDate, resolveForViewer, type ResolvedPrice } from "@/lib/pricing";
@@ -118,7 +118,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         </h2>
         <p className="meta">
           {resort.abandoned ? <span className="badge warn">{t("statusClosed")}</span> : null}
-          {!resort.abandoned && resort.season_dates ? <span className="badge badge-open">{t("openSeason", { dates: resort.season_dates })}</span> : null}
+          {!resort.abandoned && resort.season_dates ? <span className="badge badge-open">{t("openSeason", { dates: formatSeasonLabel(lang, resort.season_dates) })}</span> : null}
           {resort.needs_recheck ? <span className="badge warn">{t("needsRecheck")}</span> : null}
           {stats.length > 0 ? <span>{stats.join(" · ")}</span> : null}
         </p>
@@ -359,7 +359,7 @@ function FactGrid({ resort, day }: { resort: Resort; day: number | null }) {
         <span>{t("showRuns")}</span>
       </label>
       {!share.hideRuns ? (
-        <label className="check">
+        <label className="check check-nested">
           <input type="checkbox" checked={liftMotion} onChange={() => setLiftMotion(!liftMotion)} />
           <span>{t("liftMotion")}</span>
         </label>
@@ -399,6 +399,20 @@ function SourceRow({ sources }: { sources: Array<FactRef | undefined> }) {
   );
 }
 
+function SeasonRange({ value }: { value: string }) {
+  const { lang } = useApp();
+  const range = formatSeasonRange(lang, value);
+  if (!range) return <span className="fact-value">{value}</span>;
+  if (!range.end) return <span className="fact-value">{range.start}</span>;
+  return (
+    <span className="season-range fact-value">
+      <span>{range.start}</span>
+      <span aria-hidden="true">–</span>
+      <span>{range.end}</span>
+    </span>
+  );
+}
+
 function SnowSection({ resort }: { resort: Resort }) {
   const { t, lang } = useApp();
   if (!resort.season_dates && !resort.snow_report && !resort.webcam && !resort.notes) return null;
@@ -406,11 +420,11 @@ function SnowSection({ resort }: { resort: Resort }) {
     <section className="resort-section" aria-labelledby="resort-snow">
       <h3 id="resort-snow">{t("tabSnow")}</h3>
       {resort.season_dates ? (
-        <p>
-          <strong>{t("seasonDates")}: </strong>
-          {resort.season_dates}
+        <div className="fact fact-wide">
+          <span className="fact-label">{t("seasonDates")}</span>
+          <SeasonRange value={resort.season_dates} />
           <SourceLine source={resort.sources.season} t={t} lang={lang} />
-        </p>
+        </div>
       ) : null}
       {resort.snow_report || resort.webcam ? (
         <div className="link-buttons">

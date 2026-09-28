@@ -47,13 +47,13 @@ export default function PortalInvitePage() {
             <Link href="/en/resort-terms/">Resort Terms (DRAFT)</Link> and{" "}
             <Link href="/de/resort-terms/">Portal-Bedingungen (ENTWURF)</Link>.
           </p>
-          <label>
+          <label className="check">
             <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
-            I accept the Resort Terms ({info.termsVersion})
+            <span>I accept the Resort Terms ({info.termsVersion})</span>
           </label>
-          <label>
+          <label className="check">
             <input type="checkbox" checked={liability} onChange={(e) => setLiability(e.target.checked)} />
-            I separately accept clause 14 (liability) and clause 6 (irrevocable data licence)
+            <span>I separately accept clause 14 (liability) and clause 6 (irrevocable data licence)</span>
           </label>
           <p className="hint">After accepting, register a passkey using the buttons on this page (WebAuthn).</p>
           <button type="button" className="btn-primary" disabled={!accepted || !liability}>

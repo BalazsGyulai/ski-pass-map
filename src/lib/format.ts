@@ -60,6 +60,28 @@ export function formatDate(lang: Lang, iso: string): string {
   });
 }
 
+export interface SeasonRange {
+  start: string;
+  end: string | null;
+}
+
+/** ISO dates inside a season string, written the way this language writes a date. Other text is left alone. */
+export function formatSeasonRange(lang: Lang, value: string): SeasonRange | null {
+  const dates = value.match(/\d{4}-\d{2}-\d{2}/g);
+  if (!dates || dates.length === 0) return null;
+  return {
+    start: formatDate(lang, dates[0]),
+    end: dates.length > 1 ? formatDate(lang, dates[1]) : null,
+  };
+}
+
+/** One line for a badge. A range that cannot be read stays as it was stored. */
+export function formatSeasonLabel(lang: Lang, value: string): string {
+  const range = formatSeasonRange(lang, value);
+  if (!range) return value;
+  return range.end ? `${range.start} – ${range.end}` : range.start;
+}
+
 export function formatNumber(lang: Lang, value: number, options: { minimumFractionDigits?: number; maximumFractionDigits?: number } = {}): string {
   if (!Number.isFinite(value)) return "";
   const spec = LOCALE_FORMATS[lang];

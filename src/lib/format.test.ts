@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LOCALE_FORMATS } from "@/i18n/formats";
 import { LANGS } from "@/i18n/languages";
-import { formatDate, formatEur, formatKm, formatNumber } from "./format";
+import { formatDate, formatEur, formatKm, formatNumber, formatSeasonLabel, formatSeasonRange } from "./format";
 
 const NBSP = " ";
 const NNBSP = " ";
@@ -60,6 +60,17 @@ describe("formatDate", () => {
     expect(formatDate("en", "2026-12")).toBe("1 Dec 2026");
     expect(formatDate("en", "2026")).toBe("1 Jan 2026");
     expect(formatDate("en", "soon")).toBe("soon");
+  });
+});
+
+describe("formatSeasonRange", () => {
+  it("formats a range, a single day, and leaves prose alone", () => {
+    expect(formatSeasonRange("en", "2026-12-04 – 2027-03-07")).toEqual({ start: "4 Dec 2026", end: "7 Mar 2027" });
+    expect(formatSeasonRange("de", "2026-12-04 – 2027-03-07")).toEqual({ start: "4. Dez. 2026", end: "7. März 2027" });
+    expect(formatSeasonRange("en", "2026-12-05")).toEqual({ start: "5 Dec 2026", end: null });
+    expect(formatSeasonRange("en", "varies by resort")).toBeNull();
+    expect(formatSeasonLabel("en", "2026-12-04 – 2027-03-07")).toBe("4 Dec 2026 – 7 Mar 2027");
+    expect(formatSeasonLabel("en", "varies by resort")).toBe("varies by resort");
   });
 });
 

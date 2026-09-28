@@ -740,6 +740,7 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
 .fact-wide { grid-column: 1 / -1; }
 .fact-label { color: var(--ink-3); font-size: var(--text-xs); font-weight: 500; }
 .fact-value { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
+.season-range { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35em; }
 .fact-sub { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; color: var(--ink-2); font-size: var(--text-sm); }
 .source-row { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 10px 0 4px; }
 .source-row .fact-source { margin: 0; }
@@ -1007,6 +1008,42 @@ fieldset { border: 1px solid var(--line); border-radius: var(--radius-md); margi
 legend { padding: 0 4px; font-weight: 600; }
 .check { display: flex; align-items: flex-start; gap: var(--space-2); min-height: 44px; max-width: 100%; }
 .check span { flex: 1; min-width: 0; }
+.check-nested { padding-left: 24px; }
+/* One ink box everywhere. The browser default is blue, and accent-color still looks like the OS control. */
+:is(.check, .move-toggle, .contact-checkbox, .field) > input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  flex: none;
+  margin: 3px 0 0;
+  padding: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 5px;
+  background: var(--surface);
+  box-shadow: none;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+:is(.check, .move-toggle, .contact-checkbox, .field) > input[type="checkbox"]::before {
+  content: "";
+  width: 4px;
+  height: 8px;
+  border: solid var(--on-accent);
+  border-width: 0 2px 2px 0;
+  rotate: 45deg;
+  translate: 0 -1px;
+  opacity: 0;
+}
+:is(.check, .move-toggle, .contact-checkbox, .field) > input[type="checkbox"]:checked {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+:is(.check, .move-toggle, .contact-checkbox, .field) > input[type="checkbox"]:checked::before { opacity: 1; }
+:is(.move-toggle, .contact-checkbox) > input[type="checkbox"] { margin-top: 0; }
+:is(.field, .contact-form) > input[type="checkbox"]:focus { box-shadow: none; background: var(--surface); }
+:is(.field, .contact-form) > input[type="checkbox"]:checked:focus { background: var(--ink); }
 .seg { display: flex; flex-wrap: wrap; gap: 8px; }
 .seg button {
   min-height: 40px;
@@ -1293,7 +1330,9 @@ legend { padding: 0 4px; font-weight: 600; }
     font-weight: 600;
     cursor: pointer;
   }
-  .move-toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--ink); cursor: pointer; }
+  .move-toggle input { margin-top: 0; }
+  .sheet-host .check { min-height: 32px; align-items: center; }
+  .sheet-host .check > input[type="checkbox"] { margin-top: 0; }
   .explorer :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
   .explorer[data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
   .explorer[data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
