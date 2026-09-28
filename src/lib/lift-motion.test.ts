@@ -199,4 +199,20 @@ describe("startLiftMotion", () => {
     expect(setData).toHaveBeenCalledTimes(1);
     stop();
   });
+
+  it("does not throw when the map has already dropped its style", () => {
+    const map = {
+      getZoom: () => 14,
+      getCenter: () => ({ lat: 47 }),
+      getSource: () => {
+        throw new TypeError("Cannot read properties of undefined (reading 'getOwnSource')");
+      },
+    };
+    let stop: () => void = () => {};
+    expect(() => {
+      stop = startLiftMotion(map, paths, { hidden: () => false, now: () => 0 });
+    }).not.toThrow();
+    expect(() => stop()).not.toThrow();
+    vi.advanceTimersByTime(LIFT_TICK_MS * 3);
+  });
 });

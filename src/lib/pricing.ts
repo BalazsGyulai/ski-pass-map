@@ -13,6 +13,8 @@ export interface ResolvedPrice {
   periodEnd: string | null;
   reason: PriceReason;
   nextPeriodStart: string | null;
+  /** The euro amount was chosen from age on the purchase date, not a birth-year bracket. */
+  ageAtPurchase?: boolean;
 }
 
 export interface PricedResort {
@@ -218,10 +220,15 @@ export function deadlinesFor(pass: Pass): Deadline[] {
 
 /**
  * Adult price when no birth year is set. A birth year uses that pass's own bracket
- * and does not fall back to another age group.
+ * and does not fall back to another age group. A pass priced by age on the purchase
+ * date uses the birth year only when both possible ages that year land in one tariff.
  */
 export function resolveForViewer(pass: Pass, birthYear: number | null, purchaseDate: string): ResolvedPrice {
-  if (birthYear != null && Number.isInteger(birthYear)) return resolvePrice(pass, birthYear, purchaseDate);
+  if (birthYear != null && Number.isInteger(birthYear)) {
+    const exact = resolvePrice(pass, birthYear, purchaseDate);
+    if (exact.reason !== "age-not-birth-year") return exact;
+    return resolveAgeAtPurchase(pass, birthYear, purchaseDate) ?? exact;
+  }
   const bracket = adultBracket(pass);
   if (!bracket) return { ...EMPTY_PRICE, reason: "no-bracket" };
   const period = periodOnDate(pass, bracket, purchaseDate);
@@ -467,6 +474,48 @@ function nextStart(pass: Pass, bracket: AgeBracket, date: string): string | null
     .filter((end): end is string => Boolean(end && end >= date))
     .sort()[0];
   return next ? addDays(next, 1) : null;
+}
+
+/**
+ * Ages the viewer could be on the purchase date. A birth year has no month or day, so the
+ * birthday may still be ahead (`younger`) or may already have passed (`older`).
+ */
+function agesOnPurchaseDate(birthYear: number, purchaseDate: string): { younger: number; older: number } | null {
+  const year = Number(purchaseDate.slice(0, 4));
+  if (!Number.isInteger(year)) return null;
+  return { younger: year - birthYear - 1, older: year - birthYear };
+}
+
+function ageFits(age: number, bracket: AgeBracket): boolean {
+  if (bracket.age_min == null && bracket.age_max == null) return false;
+  if (bracket.age_min != null && age < bracket.age_min) return false;
+  if (bracket.age_max != null && age > bracket.age_max) return false;
+  return true;
+}
+
+function resolveAgeAtPurchase(pass: Pass, birthYear: number, purchaseDate: string): ResolvedPrice | null {
+  const ages = agesOnPurchaseDate(birthYear, purchaseDate);
+  if (!ages) return null;
+  const open = pass.pricing.brackets.filter((bracket) => isOpenBracket(bracket));
+  const match = (age: number) => {
+    const hits = open.filter((bracket) => ageFits(age, bracket));
+    return hits.length === 1 ? hits[0] : null;
+  };
+  const low = match(ages.younger);
+  const high = match(ages.older);
+  if (!low || low !== high) return null;
+  const period = periodOnDate(pass, low, purchaseDate);
+  if (!period) {
+    return {
+      ...EMPTY_PRICE,
+      bracketId: low.label,
+      bracketLabel: low.label,
+      reason: "no-period",
+      nextPeriodStart: nextStart(pass, low, purchaseDate),
+      ageAtPurchase: true,
+    };
+  }
+  return { ...priceFrom(low, period), ageAtPurchase: true };
 }
 
 function priceFrom(bracket: AgeBracket, period: PricePeriod): ResolvedPrice {

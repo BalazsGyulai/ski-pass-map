@@ -40,6 +40,9 @@ const bracketSchema = z
     label: z.string().min(1),
     birth_year_from: z.number().int().nullable(),
     birth_year_to: z.number().int().nullable(),
+    /** Completed years on the purchase date, when this tariff is not a birth-year range. */
+    age_min: z.number().nonnegative().optional(),
+    age_max: z.number().nonnegative().optional(),
     note: z.string().min(1).optional(),
   })
   .superRefine((bracket, ctx) => {

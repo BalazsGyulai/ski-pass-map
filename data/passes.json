@@ -19,12 +19,14 @@
           {
             "label": "child (age at purchase)",
             "birth_year_from": null,
-            "birth_year_to": null
+            "birth_year_to": null,
+            "age_max": 15.99
           },
           {
             "label": "adult (age at purchase)",
             "birth_year_from": null,
-            "birth_year_to": null
+            "birth_year_to": null,
+            "age_min": 16
           }
         ],
         "periods": [

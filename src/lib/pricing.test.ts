@@ -78,7 +78,14 @@ describe("resolveForViewer", () => {
     expect(resolveForViewer(bep, null, "2026-11-15").amountEur).toBe(500);
     expect(resolveForViewer(bep, null, "2026-10-01").bracketLabel?.startsWith("adult")).toBe(true);
     expect(pricesOnDate(bep, "2026-10-01").find((row) => row.bracketLabel.startsWith("child"))?.amountEur).toBe(170);
-    expect(resolveForViewer(bep, 2003, "2026-10-01").reason).toBe("age-not-birth-year");
+    expect(resolveForViewer(bep, 2003, "2026-10-01")).toMatchObject({
+      amountEur: 429,
+      ageAtPurchase: true,
+      reason: "ok",
+    });
+    expect(resolveForViewer(bep, 1990, "2026-10-01").bracketLabel?.startsWith("adult")).toBe(true);
+    expect(resolveForViewer(bep, 2011, "2026-10-01")).toMatchObject({ amountEur: 170, ageAtPurchase: true });
+    expect(resolveForViewer(bep, 2010, "2026-10-01").reason).toBe("age-not-birth-year");
 
     const snow = pass("snow-card-tirol");
     expect(resolveForViewer(snow, null, "2026-10-01").amountEur).toBe(1080);
@@ -106,7 +113,12 @@ describe("nextPriceChange", () => {
       fromEur: 429,
       toEur: 500,
     });
-    expect(nextPriceChange(bep, 1990, "2026-10-01")).toBeNull();
+    expect(nextPriceChange(bep, 1990, "2026-10-01")).toMatchObject({
+      date: "2026-10-31",
+      fromEur: 429,
+      toEur: 500,
+    });
+    expect(nextPriceChange(bep, 2010, "2026-10-01")).toBeNull();
   });
 });
 
@@ -163,7 +175,10 @@ describe("quotePlan", () => {
     });
     expect(quotes.find((quote) => quote.id === `pass:${snowId}`)?.coveredDays).toBe(7);
     expect(quotes.find((quote) => quote.id === `pass:${amadeId}`)?.coveredDays).toBe(4);
-    expect(quotes.find((quote) => quote.id === "pass:noe-bergerlebnispass")?.priceReason).toBe("age-not-birth-year");
+    expect(quotes.find((quote) => quote.id === "pass:noe-bergerlebnispass")).toMatchObject({
+      passPriceEur: 429,
+      priceReason: null,
+    });
     expect(quotes.find((quote) => quote.id === "day-tickets")?.totalEur).toBeNull();
   });
 

@@ -178,12 +178,16 @@ function PassCard({
           </span>
         </div>
         <div className="pass-row-price">
-          <span className="price-lg num">
-            {price.amountEur != null ? formatEur(lang, price.amountEur) : priceReasonText(messages, lang, price.reason, price.bracketId, price.nextPeriodStart)}
-          </span>
+          {price.amountEur != null ? (
+            <span className="price-lg num">{formatEur(lang, price.amountEur)}</span>
+          ) : price.reason === "age-not-birth-year" ? null : (
+            <span className="price-lg">{priceReasonText(messages, lang, price.reason, price.bracketId, price.nextPeriodStart)}</span>
+          )}
+          {price.ageAtPurchase && price.bracketLabel ? <span className="pass-meta">{price.bracketLabel}</span> : null}
           {price.amountEur != null && price.periodEnd ? <span className="until-chip">{t("periodUntil", { date: formatDate(lang, price.periodEnd) })}</span> : null}
         </div>
       </div>
+      {price.ageAtPurchase || price.reason === "age-not-birth-year" ? <p className="hint pass-note">{t("ageNotBirthYear")}</p> : null}
       {change ? <p className="hint warn pass-note">{t("priceAfter", { price: formatEur(lang, change.toEur), date: formatDate(lang, change.date) })}</p> : null}
       {price.amountEur != null ? <DaysCalculator passEur={price.amountEur} day={day} /> : null}
       {listed.length > 0 ? (

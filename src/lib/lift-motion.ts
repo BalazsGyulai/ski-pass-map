@@ -154,6 +154,15 @@ export interface LiftMotionMap {
 
 const EMPTY = { type: "FeatureCollection", features: [] };
 
+/** Mapbox throws from getSource once style is gone (`style.getOwnSource`). A removed map is already clear. */
+function carsSource(map: LiftMotionMap): { setData?: (data: unknown) => void } | undefined {
+  try {
+    return map.getSource(LIFT_CARS_SOURCE);
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Moves the cars on a timer and returns a stop function that clears them. The source is looked up
  * every tick, so a style swap in the middle is harmless: it comes back with the pistes.
@@ -167,12 +176,12 @@ export function startLiftMotion(
     const zoom = map.getZoom();
     if (env.hidden() || zoom < LIFT_MOTION_MINZOOM) return;
     const features = liftCars(paths, env.now() / 1000, metresPerPixel(zoom, map.getCenter().lat));
-    map.getSource(LIFT_CARS_SOURCE)?.setData?.({ type: "FeatureCollection", features });
+    carsSource(map)?.setData?.({ type: "FeatureCollection", features });
   };
   tick();
   const timer = setInterval(tick, LIFT_TICK_MS);
   return () => {
     clearInterval(timer);
-    map.getSource(LIFT_CARS_SOURCE)?.setData?.(EMPTY);
+    carsSource(map)?.setData?.(EMPTY);
   };
 }

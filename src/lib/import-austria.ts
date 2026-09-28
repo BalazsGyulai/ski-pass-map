@@ -153,6 +153,9 @@ interface DraftBracket {
   label: string;
   from: number | null;
   to: number | null;
+  /** Completed years on the purchase date. Set only for tariffs that are not a birth-year range. */
+  ageMin: number | null;
+  ageMax: number | null;
   open: boolean;
   derived: boolean;
   overlay: boolean;
@@ -499,6 +502,8 @@ function toPass(pass: RawPass, color: string): Pass {
     label: draft.label,
     birth_year_from: draft.open ? null : draft.from,
     birth_year_to: draft.open ? null : draft.to,
+    ...(draft.ageMin != null ? { age_min: draft.ageMin } : {}),
+    ...(draft.ageMax != null ? { age_max: draft.ageMax } : {}),
     ...(draft.derived ? { note: "Birth-year range is implied by the neighbouring published brackets." } : {}),
   }));
   const periods = kept.flatMap((draft) =>
@@ -587,6 +592,8 @@ function pushBracket(
       label: `${labelBase} (age at purchase)`,
       from: null,
       to: null,
+      ageMin: finiteAge(value.minAge),
+      ageMax: finiteAge(value.maxAge),
       open: true,
       derived,
       overlay,
@@ -603,6 +610,8 @@ function pushBracket(
     label: `${labelBase} (${span})`,
     from: years.from,
     to: years.to,
+    ageMin: null,
+    ageMax: null,
     open: false,
     derived,
     overlay,
@@ -723,6 +732,10 @@ function birthSpan(value: Record<string, unknown>): { from: number | null; to: n
   }
   if (typeof value.bornFrom === "number") return { from: value.bornFrom, to: null };
   return null;
+}
+
+function finiteAge(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
 }
 
 function formatSpan(from: number | null, to: number | null): string {
