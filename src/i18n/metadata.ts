@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { Lang } from "@/i18n/languages";
 import { LANGS } from "@/i18n/languages";
 import { loadMessages } from "@/i18n/load-messages";
-import { pathWithLang } from "@/i18n/routing";
+import { langPath } from "@/i18n/routing";
 import type { MessageKey } from "@/lib/i18n";
 import { translate } from "@/lib/i18n";
 import { BASE_PATH, SITE_NAME, SITE_ORIGIN } from "@/lib/site";
@@ -15,10 +15,10 @@ function absolute(path: string): string {
 export function buildAlternates(rest: string, lang: Lang = "en"): Metadata["alternates"] {
   const languages: Record<string, string> = {};
   for (const code of LANGS) {
-    languages[code] = absolute(pathWithLang(code, rest));
+    languages[code] = absolute(langPath(code, rest));
   }
-  languages["x-default"] = absolute(pathWithLang("en", rest));
-  return { languages, canonical: absolute(pathWithLang(lang, rest)) };
+  languages["x-default"] = absolute(langPath("en", rest));
+  return { languages, canonical: absolute(langPath(lang, rest)) };
 }
 
 export async function buildPageMetadata(lang: Lang, rest: string, titleKey: MessageKey): Promise<Metadata> {

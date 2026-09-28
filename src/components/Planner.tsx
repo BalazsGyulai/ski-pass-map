@@ -10,7 +10,7 @@ import { passShortName } from "@/lib/pass-label";
 import { cheapestFullCoverage, nextPriceChange, savingsVsDayTickets, type PriceQuote } from "@/lib/pricing";
 import { planQuotes, quoteTitle } from "@/lib/plan-quotes";
 import type { Lang } from "@/i18n/languages";
-import { pathWithLang } from "@/i18n/routing";
+import { langPath, pathWithLang } from "@/i18n/routing";
 import { serializePlan } from "@/lib/url-state";
 import { SavedView } from "./SavedView";
 import { useLocalizedPath } from "./LanguageSwitcher";
@@ -179,7 +179,7 @@ export function Planner() {
                 return (
                   <li key={id}>
                     <div>
-                      <Link href={`${pathWithLang(lang, "/")}?resort=${encodeURIComponent(id)}`}>{resort.name}</Link>
+                      <Link href={`${langPath(lang, "/")}?resort=${encodeURIComponent(id)}`}>{resort.name}</Link>
                       <span className="pass-dots">
                         {resort.passes.slice(0, 3).map((passId) => (
                           <span key={passId} className="pass-dot" style={{ background: passById.get(passId)?.color ?? "#98a2b3" }} title={passById.get(passId)?.name ?? passId} />

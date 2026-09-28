@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { LANGS, LANG_NATIVE } from "@/i18n/languages";
-import { pathWithLang, switchLangHref } from "@/i18n/routing";
+import { langPath, switchLangHref } from "@/i18n/routing";
 import { useApp } from "./AppState";
 
 export function LanguageSwitcher({ compact }: { compact?: boolean }) {
@@ -54,7 +54,8 @@ export function LanguageSwitcher({ compact }: { compact?: boolean }) {
   );
 }
 
+/** Paths for next/link and the router. Plain anchors need pathWithLang, which adds the base path. */
 export function useLocalizedPath() {
   const { lang } = useApp();
-  return useCallback((rest: string) => pathWithLang(lang, rest), [lang]);
+  return useCallback((rest: string) => langPath(lang, rest), [lang]);
 }

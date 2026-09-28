@@ -3,13 +3,13 @@
 import { LegalShell, pickLegalLocale } from "@/components/legal/LegalShell";
 import { ImprintEn, ImprintHu } from "@/lib/legal/imprint";
 import { useApp } from "@/components/AppState";
-import { useLocalizedPath } from "@/components/LanguageSwitcher";
+import { pathWithLang } from "@/i18n/routing";
 
 export function ImprintContent() {
   const { lang } = useApp();
-  const href = useLocalizedPath();
   const locale = pickLegalLocale(lang);
-  const contactPath = href("/contact");
+  // The legal text links with a plain anchor, so the path carries the base path.
+  const contactPath = pathWithLang(lang, "/contact");
   const body = locale === "hu" ? <ImprintHu contactPath={contactPath} /> : <ImprintEn contactPath={contactPath} />;
   return (
     <LegalShell titleKey="imprint" locale={locale}>

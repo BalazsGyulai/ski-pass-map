@@ -3,13 +3,13 @@
 import { LegalShell, pickLegalLocale } from "@/components/legal/LegalShell";
 import { TermsEn, TermsHu } from "@/lib/legal/terms";
 import { useApp } from "@/components/AppState";
-import { useLocalizedPath } from "@/components/LanguageSwitcher";
+import { pathWithLang } from "@/i18n/routing";
 
 export function TermsContent() {
   const { lang } = useApp();
-  const href = useLocalizedPath();
   const locale = pickLegalLocale(lang);
-  const rankingPath = href("/resort-ranking");
+  // The legal text links with a plain anchor, so the path carries the base path.
+  const rankingPath = pathWithLang(lang, "/resort-ranking");
   const body = locale === "hu" ? <TermsHu rankingPath={rankingPath} /> : <TermsEn rankingPath={rankingPath} />;
   return (
     <LegalShell titleKey="terms" locale={locale}>
