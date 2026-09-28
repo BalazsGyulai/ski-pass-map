@@ -33,7 +33,7 @@
   "favouritesOnly": "Samo priljubljena",
   "useMyLocation": "Uporabi mojo lokacijo",
   "locating": "Iskanje lokacije…",
-  "geoDenied": "Brskalnik ni delil vaše lokacije.",
+  "geoDenied": "Lokacija je blokirana. Dovolite jo s ključavnico v naslovni vrstici in poskusite znova.",
   "geoUnsupported": "Ta brskalnik nima storitve za določanje lokacije.",
   "straightLine": "Razdalje so zračne, ne čas vožnje ali vozni red.",
   "sort": "Razvrsti",

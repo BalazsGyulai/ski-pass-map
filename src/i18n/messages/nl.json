@@ -33,7 +33,7 @@
   "favouritesOnly": "Alleen favorieten",
   "useMyLocation": "Mijn locatie gebruiken",
   "locating": "Locatie bepalen…",
-  "geoDenied": "De browser heeft je locatie niet gedeeld.",
+  "geoDenied": "Locatie is geblokkeerd. Sta toe via het slot in de adresbalk en probeer opnieuw.",
   "geoUnsupported": "Deze browser heeft geen locatievoorziening.",
   "straightLine": "Afstanden zijn hemelsbreed, geen reistijd of dienstregeling.",
   "sort": "Sorteren",

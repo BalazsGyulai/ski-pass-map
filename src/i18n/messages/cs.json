@@ -33,7 +33,7 @@
   "favouritesOnly": "Jen oblíbené",
   "useMyLocation": "Použít moji polohu",
   "locating": "Zjišťuji polohu…",
-  "geoDenied": "Prohlížeč nesdílel vaši polohu.",
+  "geoDenied": "Poloha je zablokovaná. Povolte ji zámkem v adresním řádku a zkuste to znovu.",
   "geoUnsupported": "Tento prohlížeč nemá službu určování polohy.",
   "straightLine": "Vzdálenosti jsou vzdušnou čarou, ne doba jízdy ani jízdní řád.",
   "sort": "Řadit",

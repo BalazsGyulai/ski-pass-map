@@ -33,7 +33,7 @@
   "favouritesOnly": "Només preferits",
   "useMyLocation": "Utilitza la meva ubicació",
   "locating": "S'està localitzant…",
-  "geoDenied": "El navegador no ha compartit la vostra ubicació.",
+  "geoDenied": "La ubicació està bloquejada. Permeteu-la des del cadenat de la barra d'adreces i torneu-ho a provar.",
   "geoUnsupported": "Aquest navegador no té servei d'ubicació.",
   "straightLine": "Les distàncies són en línia recta, no temps de viatge ni horaris.",
   "sort": "Ordena",

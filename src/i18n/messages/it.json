@@ -33,7 +33,7 @@
   "favouritesOnly": "Solo preferiti",
   "useMyLocation": "Usa la mia posizione",
   "locating": "Ricerca posizione…",
-  "geoDenied": "Il browser non ha condiviso la tua posizione.",
+  "geoDenied": "La posizione è bloccata. Consenti dal lucchetto nella barra degli indirizzi, poi riprova.",
   "geoUnsupported": "Questo browser non ha un servizio di localizzazione.",
   "straightLine": "Le distanze sono in linea d'aria, non tempi di viaggio né orari.",
   "sort": "Ordina",

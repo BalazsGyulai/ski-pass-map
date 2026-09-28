@@ -39,7 +39,7 @@ export function DocumentShell({ lang, children }: { lang: string; children: Reac
       <head>
         <meta httpEquiv="Content-Security-Policy" content={META_CONTENT_SECURITY_POLICY} />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {children}
       </body>

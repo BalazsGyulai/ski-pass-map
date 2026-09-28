@@ -33,7 +33,7 @@
   "favouritesOnly": "Kun favoritter",
   "useMyLocation": "Brug min placering",
   "locating": "Finder placering…",
-  "geoDenied": "Browseren delte ikke din placering.",
+  "geoDenied": "Placering er blokeret. Tillad den via låsen i adresselinjen, og prøv igen.",
   "geoUnsupported": "Denne browser har ingen placeringstjeneste.",
   "straightLine": "Afstande er i luftlinje, ikke køretid eller køreplan.",
   "sort": "Sortér",

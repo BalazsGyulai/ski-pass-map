@@ -2,6 +2,8 @@ import type { VectorMap } from "./vector-map";
 import { hasMapSize } from "./vector-map";
 
 export const RESORT_MAX_ZOOM = 13;
+/** Close enough to see the device dot against streets, without diving past a zoom the visitor already chose. */
+export const USER_LOCATION_ZOOM = 12;
 
 type Padding = { top: number; bottom: number; left: number; right: number };
 
@@ -100,6 +102,22 @@ export function flyToResort(
     duration: options.duration,
     padding,
     ...(options.pitch != null ? { pitch: options.pitch } : {}),
+  });
+}
+
+export function flyToUser(
+  map: VectorMap,
+  lon: number,
+  lat: number,
+  options: { duration: number; padding: Padding; panelPx?: number },
+): void {
+  if (!hasMapSize(map) || !Number.isFinite(lon) || !Number.isFinite(lat)) return;
+  const padding = clampMapPadding(map, options.padding, options.panelPx ?? 0);
+  map.flyTo({
+    center: [lon, lat],
+    zoom: Math.max(map.getZoom(), USER_LOCATION_ZOOM),
+    duration: options.duration,
+    padding,
   });
 }
 

@@ -33,7 +33,7 @@
   "favouritesOnly": "Favoriti biss",
   "useMyLocation": "Uża l-post tiegħi",
   "locating": "Qed insibu l-post…",
-  "geoDenied": "Il-browser ma qasamx il-post tiegħek.",
+  "geoDenied": "Il-post huwa mblukkat. Ħallih mill-katnazz tal-bar tal-indirizz, imbagħad erġa' pprova.",
   "geoUnsupported": "Dan il-browser m'għandux servizz tal-post.",
   "straightLine": "Id-distanzi huma f'linja dritta, mhux ħin tas-sewqan jew skeda.",
   "sort": "Issortja",

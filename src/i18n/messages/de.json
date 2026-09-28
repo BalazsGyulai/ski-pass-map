@@ -33,7 +33,7 @@
   "favouritesOnly": "Nur Favoriten",
   "useMyLocation": "Meinen Standort verwenden",
   "locating": "Standort wird ermittelt…",
-  "geoDenied": "Der Browser hat deinen Standort nicht freigegeben.",
+  "geoDenied": "Standort blockiert. Erlaube ihn über das Schloss in der Adressleiste und versuche es erneut.",
   "geoUnsupported": "Dieser Browser hat keine Standortfunktion.",
   "straightLine": "Entfernungen sind Luftlinie, keine Fahrzeit und kein Fahrplan.",
   "sort": "Sortierung",

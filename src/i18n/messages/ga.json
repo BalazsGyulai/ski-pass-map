@@ -33,7 +33,7 @@
   "favouritesOnly": "Ceanáin amháin",
   "useMyLocation": "Úsáid mo shuíomh",
   "locating": "Do shuíomh á aimsiú…",
-  "geoDenied": "Níor roinn an brabhsálaí do shuíomh.",
+  "geoDenied": "Tá an suíomh blocáilte. Ceadaigh é ón nglas sa bharra seolta, ansin bain triail eile as.",
   "geoUnsupported": "Níl seirbhís suímh ag an mbrabhsálaí seo.",
   "straightLine": "Is fad díreach iad na faid, ní am taistil ná amchlár.",
   "sort": "Sórtáil",

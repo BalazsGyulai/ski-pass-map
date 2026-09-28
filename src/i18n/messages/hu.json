@@ -33,7 +33,7 @@
   "favouritesOnly": "Csak kedvencek",
   "useMyLocation": "Saját helyzetem használata",
   "locating": "Helymeghatározás…",
-  "geoDenied": "A böngésző nem osztotta meg a helyzetedet.",
+  "geoDenied": "A helymeghatározás le van tiltva. Engedélyezd a címsor lakatjánál, majd próbáld újra.",
   "geoUnsupported": "Ebben a böngészőben nincs helymeghatározás.",
   "straightLine": "A távolság légvonal, nem autóút és nem menetrend.",
   "sort": "Rendezés",

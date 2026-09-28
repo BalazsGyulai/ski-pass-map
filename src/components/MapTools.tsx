@@ -1,20 +1,52 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { LIFT_KINDS, LIFT_KIND_LABEL } from "@/lib/lift-icons";
 import { IconLayers, IconLocate } from "./icons";
 import { LiftSign } from "./LiftSign";
 import { useApp } from "./AppState";
 
 export function MapTools({ onLayers, layersOpen }: { onLayers: () => void; layersOpen: boolean }) {
-  const { t, locate, locating } = useApp();
+  const { t, locate, locating, geoError, home } = useApp();
+  const located = home?.kind === "geo";
+  const [note, setNote] = useState<"denied" | "unsupported" | null>(geoError);
+  const [leaving, setLeaving] = useState(false);
+
+  useEffect(() => {
+    if (geoError) {
+      setNote(geoError);
+      setLeaving(false);
+      return;
+    }
+    setLeaving(true);
+    const timer = window.setTimeout(() => {
+      setNote(null);
+      setLeaving(false);
+    }, 220);
+    return () => window.clearTimeout(timer);
+  }, [geoError]);
+
   return (
     <div className="map-tools">
       <button type="button" className="tool-btn" aria-expanded={layersOpen} aria-controls="map-layers" onClick={onLayers} aria-label={t("layers")}>
         <IconLayers />
       </button>
-      <button type="button" className="tool-btn" onClick={locate} disabled={locating} aria-label={t("myLocation")}>
+      <button
+        type="button"
+        className={located ? "tool-btn is-on" : "tool-btn"}
+        onClick={locate}
+        disabled={locating}
+        aria-busy={locating}
+        aria-pressed={located}
+        aria-label={t("myLocation")}
+      >
         <IconLocate />
       </button>
+      {note ? (
+        <p className={leaving ? "map-tool-note is-leaving" : "map-tool-note"} role="status">
+          {t(note === "unsupported" ? "geoUnsupported" : "geoDenied")}
+        </p>
+      ) : null}
     </div>
   );
 }

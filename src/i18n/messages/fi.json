@@ -33,7 +33,7 @@
   "favouritesOnly": "Vain suosikit",
   "useMyLocation": "Käytä sijaintiani",
   "locating": "Haetaan sijaintia…",
-  "geoDenied": "Selain ei jakanut sijaintiasi.",
+  "geoDenied": "Sijainti on estetty. Salli se osoitepalkin lukosta ja yritä uudelleen.",
   "geoUnsupported": "Tässä selaimessa ei ole sijaintipalvelua.",
   "straightLine": "Etäisyydet ovat linnuntietä, eivät ajoaikaa tai aikataulua.",
   "sort": "Järjestä",

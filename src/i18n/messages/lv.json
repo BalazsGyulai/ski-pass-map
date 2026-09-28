@@ -33,7 +33,7 @@
   "favouritesOnly": "Tikai izlase",
   "useMyLocation": "Izmantot manu atrašanās vietu",
   "locating": "Nosaka atrašanās vietu…",
-  "geoDenied": "Pārlūks nekopīgoja jūsu atrašanās vietu.",
+  "geoDenied": "Atrašanās vieta ir bloķēta. Atļaujiet to adreses joslas slēdzenē un mēģiniet vēlreiz.",
   "geoUnsupported": "Šim pārlūkam nav atrašanās vietas pakalpojuma.",
   "straightLine": "Attālumi ir taisnā līnijā, nevis brauciena laiks vai saraksts.",
   "sort": "Kārtot",

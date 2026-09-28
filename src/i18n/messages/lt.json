@@ -33,7 +33,7 @@
   "favouritesOnly": "Tik mėgstami",
   "useMyLocation": "Naudoti mano vietą",
   "locating": "Nustatoma vieta…",
-  "geoDenied": "Naršyklė nepasidalijo jūsų vieta.",
+  "geoDenied": "Vieta užblokuota. Leiskite ją adreso juostos spyna ir bandykite dar kartą.",
   "geoUnsupported": "Ši naršyklė neturi vietos nustatymo paslaugos.",
   "straightLine": "Atstumai – tiesia linija, o ne kelionės laikas ar tvarkaraštis.",
   "sort": "Rikiuoti",

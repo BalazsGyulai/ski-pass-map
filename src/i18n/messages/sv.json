@@ -33,7 +33,7 @@
   "favouritesOnly": "Bara favoriter",
   "useMyLocation": "Använd min plats",
   "locating": "Hämtar plats…",
-  "geoDenied": "Webbläsaren delade inte din plats.",
+  "geoDenied": "Platsen är blockerad. Tillåt den via hänglåset i adressfältet och försök igen.",
   "geoUnsupported": "Den här webbläsaren saknar platstjänst.",
   "straightLine": "Avstånden är fågelvägen, inte restid eller tidtabell.",
   "sort": "Sortera",

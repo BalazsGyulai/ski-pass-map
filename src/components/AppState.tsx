@@ -8,6 +8,7 @@ import type { Lang } from "@/i18n/languages";
 import { isLang, persistLangChoice } from "@/i18n/languages";
 import { isMapPath } from "@/i18n/routing";
 import { translate, type MessageKey, type Messages } from "@/lib/i18n";
+import { GEO_PLACE_ID, GeoLocateError, dropDevicePlaces, followDeviceLocation, isDevicePlaceId, shouldStoreFix, upsertDevicePlace, watchGeoPermission, type GeoFix } from "@/lib/geolocate";
 import { cityPlaceId, sanitizeActivePlaceId, sanitizePlaces, type ReferenceCity, type SavedPlace } from "@/lib/places";
 import type { DistanceUnits, ExportedUserData } from "@/lib/storage";
 import { readStorage, writeStorage } from "@/lib/storage";
@@ -24,6 +25,7 @@ interface HomePoint {
   lat: number;
   lon: number;
   label: string;
+  kind: SavedPlace["kind"];
 }
 
 interface AppContextValue {
@@ -56,6 +58,13 @@ interface AppContextValue {
   geoError: "denied" | "unsupported" | null;
   locating: boolean;
   locate: () => void;
+  /** Increments each time the visitor asks for a device fix, so the map flies only then. */
+  locationSeq: number;
+  /** Live reading while the watch is open. The saved place stays a single point. */
+  deviceFix: GeoFix | null;
+  /** The camera eases with the dot until a drag or an open resort. */
+  following: boolean;
+  stopFollowing: () => void;
   home: HomePoint | null;
   t: (key: MessageKey, vars?: Record<string, string | number>) => string;
   messages: Messages;
@@ -119,6 +128,9 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [geoError, setGeoError] = useState<"denied" | "unsupported" | null>(null);
   const [locating, setLocating] = useState(false);
+  const [locationSeq, setLocationSeq] = useState(0);
+  const [deviceFix, setDeviceFix] = useState<GeoFix | null>(null);
+  const [following, setFollowing] = useState(false);
   const [offline, setOffline] = useState(false);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
   const [areaBounds, setAreaBounds] = useState<MapBounds | null>(null);
@@ -137,6 +149,8 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     zoomOut() {},
     fitAll() {},
   });
+  const watchStop = useRef<(() => void) | null>(null);
+  const storedFix = useRef<{ lat: number; lon: number; at: number } | null>(null);
   const [supportPromptSignal, setSupportPromptSignal] = useState(0);
   const resortForPrompt = useRef<string | null>(null);
 
@@ -531,33 +545,81 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     setActivePlaceId((current) => (current === id ? null : current));
   }
 
+  const clearDeviceLocation = useCallback(() => {
+    watchStop.current?.();
+    watchStop.current = null;
+    storedFix.current = null;
+    setFollowing(false);
+    setDeviceFix(null);
+    setPlaces((current) => dropDevicePlaces(current));
+    setActivePlaceId((current) => (isDevicePlaceId(current) ? null : current));
+  }, []);
+
+  const stopFollowing = useCallback(() => setFollowing(false), []);
+
+  useEffect(() => () => watchStop.current?.(), []);
+
+  useEffect(() => {
+    if (share.resort) setFollowing(false);
+  }, [share.resort]);
+
+  // The first reading is whatever the browser already decided. A later Block removes the dot.
+  useEffect(() => {
+    let saw = false;
+    return watchGeoPermission(navigator.permissions, (state) => {
+      const first = !saw;
+      saw = true;
+      if (state !== "denied") return;
+      clearDeviceLocation();
+      if (!first) setGeoError("denied");
+    });
+  }, [clearDeviceLocation]);
+
+  useEffect(() => {
+    if (!geoError) return;
+    const timer = window.setTimeout(() => setGeoError(null), 6_000);
+    return () => window.clearTimeout(timer);
+  }, [geoError]);
+
   function locate() {
     if (!navigator.geolocation) {
       setGeoError("unsupported");
       return;
     }
+    watchStop.current?.();
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
+    setGeoError(null);
+    let jumped = false;
+    const label = translate(messages, "myLocation");
+    watchStop.current = followDeviceLocation(navigator.geolocation, { permissions: navigator.permissions }, {
+      onFix(fix) {
+        const jump = !jumped;
+        jumped = true;
         setLocating(false);
         setGeoError(null);
-        const id = `geo-${Date.now().toString(36)}`;
-        const place: SavedPlace = {
-          id,
-          label: translate(messages, "myLocation"),
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-          kind: "geo",
-        };
-        setPlaces((current) => [...current, place].slice(-12));
-        setActivePlaceId(id);
+        setDeviceFix(fix);
+        const now = Date.now();
+        if (shouldStoreFix(storedFix.current, fix, now)) {
+          storedFix.current = { lat: fix.lat, lon: fix.lon, at: now };
+          const place: SavedPlace = { id: GEO_PLACE_ID, label, lat: fix.lat, lon: fix.lon, kind: "geo" };
+          setPlaces((current) => upsertDevicePlace(current, place));
+          setActivePlaceId(GEO_PLACE_ID);
+        }
+        if (jump) {
+          setFollowing(true);
+          setLocationSeq((current) => current + 1);
+        }
       },
-      () => {
+      onError(error) {
         setLocating(false);
+        if (error instanceof GeoLocateError && error.reason === "unsupported") {
+          setGeoError("unsupported");
+          return;
+        }
         setGeoError("denied");
+        if (error.reason === "denied") clearDeviceLocation();
       },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
-    );
+    });
   }
 
   const reportMapBounds = useCallback((bounds: MapBounds) => {
@@ -633,6 +695,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     geoError,
     locating,
     locate,
+    locationSeq,
+    deviceFix,
+    following,
+    stopFollowing,
     home,
     t,
     messages,
@@ -683,7 +749,7 @@ export function useApp(): AppContextValue {
 function homePoint(places: SavedPlace[], activePlaceId: string | null): HomePoint | null {
   const place = places.find((item) => item.id === activePlaceId);
   if (!place) return null;
-  return { lat: place.lat, lon: place.lon, label: place.label };
+  return { lat: place.lat, lon: place.lon, label: place.label, kind: place.kind };
 }
 
 function shareableHref(href: string): string {

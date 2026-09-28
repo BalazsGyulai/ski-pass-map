@@ -33,7 +33,7 @@
   "favouritesOnly": "Ainult lemmikud",
   "useMyLocation": "Kasuta minu asukohta",
   "locating": "Asukoha määramine…",
-  "geoDenied": "Brauser ei jaganud sinu asukohta.",
+  "geoDenied": "Asukoht on blokeeritud. Luba see aadressiriba lukust ja proovi uuesti.",
   "geoUnsupported": "Selles brauseris pole asukohateenust.",
   "straightLine": "Kaugused on linnulennult, mitte sõiduaeg ega sõiduplaan.",
   "sort": "Järjesta",

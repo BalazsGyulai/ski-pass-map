@@ -33,7 +33,7 @@
   "favouritesOnly": "Tylko ulubione",
   "useMyLocation": "Użyj mojej lokalizacji",
   "locating": "Ustalanie lokalizacji…",
-  "geoDenied": "Przeglądarka nie udostępniła Twojej lokalizacji.",
+  "geoDenied": "Lokalizacja jest zablokowana. Zezwól przez kłódkę na pasku adresu i spróbuj ponownie.",
   "geoUnsupported": "Ta przeglądarka nie obsługuje lokalizacji.",
   "straightLine": "Odległości są w linii prostej, to nie czas dojazdu ani rozkład.",
   "sort": "Sortuj",

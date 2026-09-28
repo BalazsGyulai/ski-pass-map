@@ -33,7 +33,7 @@
   "favouritesOnly": "Favourites only",
   "useMyLocation": "Use my location",
   "locating": "Locating…",
-  "geoDenied": "The browser did not share your location.",
+  "geoDenied": "Location is blocked. Allow it from the address-bar lock, then try again.",
   "geoUnsupported": "This browser has no location service.",
   "straightLine": "Distances are straight-line, not drive time or a timetable.",
   "sort": "Sort",

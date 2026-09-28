@@ -44,9 +44,11 @@ import {
   type MapLib,
   type RenderedFeature,
   type VectorMap,
+  type VectorMarker,
 } from "@/lib/vector-map";
 import { attachMapProbe } from "@/lib/map-canvas-probe";
-import { flyToResort, readPanelInset, readSheetVisible, resortCameraPadding, visibleBounds } from "@/lib/map-camera";
+import { accuracyCircle, type GeoFix } from "@/lib/geolocate";
+import { flyToResort, flyToUser, readPanelInset, readSheetVisible, resortCameraPadding, visibleBounds } from "@/lib/map-camera";
 import { RESORT_PITCH, applyTerrain } from "@/lib/terrain";
 import { SHEET_EVENT } from "@/lib/sheet";
 import { LIFT_CARS_SOURCE, liftPaths, startLiftMotion } from "@/lib/lift-motion";
@@ -56,6 +58,8 @@ import { useResortLists } from "./useResorts";
 
 const SNOW_SOURCE = "opensnow-pistes";
 const SNOW_LAYER = "opensnow-pistes";
+const ACCURACY_SOURCE = "user-accuracy";
+const ACCURACY_LAYER = "user-accuracy";
 
 export default function MapView() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,7 +67,7 @@ export default function MapView() {
   const libRef = useRef<MapLib | null>(null);
   const appliedStyle = useRef<string | null>(null);
   const pisteData = useRef<unknown>(null);
-  const { share, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, offline, searchThisArea, terrain3d, liftMotion, setLiftKinds } =
+  const { share, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, offline, searchThisArea, terrain3d, liftMotion, setLiftKinds, home, locationSeq, deviceFix, following, stopFollowing } =
     useApp();
   const { filtered } = useResortLists();
   const [choice, setChoice] = useState<MapProviderId | null>(null);
@@ -564,6 +568,109 @@ export default function MapView() {
 
   const terrainRef = useRef(terrain3d);
   terrainRef.current = terrain3d;
+  const markerRef = useRef<VectorMarker | null>(null);
+  const shownFix = useMemo<GeoFix | null>(() => {
+    if (deviceFix) return deviceFix;
+    if (home?.kind === "geo") return { lat: home.lat, lon: home.lon, accuracy: null, heading: null };
+    return null;
+  }, [deviceFix, home]);
+  const shownRef = useRef(shownFix);
+  shownRef.current = shownFix;
+  const followedSeq = useRef(0);
+
+  useEffect(() => {
+    if (ready && shownFix) return;
+    try {
+      markerRef.current?.remove();
+    } catch {
+      // The map is already gone.
+    }
+    markerRef.current = null;
+  }, [ready, shownFix]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const lib = libRef.current;
+    if (!map || !lib || !ready || !shownFix) return;
+    let marker = markerRef.current;
+    if (!marker) {
+      const element = document.createElement("div");
+      element.className = "user-location";
+      element.setAttribute("role", "img");
+      element.setAttribute("aria-label", home?.label ?? "");
+      const cone = document.createElement("div");
+      cone.className = "user-location-heading";
+      cone.hidden = true;
+      const dot = document.createElement("div");
+      dot.className = "user-location-dot";
+      element.append(cone, dot);
+      try {
+        marker = new lib.Marker({ element, anchor: "center" }).setLngLat([shownFix.lon, shownFix.lat]).addTo(map);
+      } catch {
+        return;
+      }
+      markerRef.current = marker;
+    }
+    marker.setLngLat([shownFix.lon, shownFix.lat]);
+    const cone = marker.getElement().querySelector(".user-location-heading");
+    if (cone instanceof HTMLElement) {
+      if (shownFix.heading == null) cone.hidden = true;
+      else {
+        cone.hidden = false;
+        cone.style.transform = `translateX(-50%) rotate(${shownFix.heading}deg)`;
+      }
+    }
+  }, [ready, shownFix, home?.label]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    const apply = () => {
+      try {
+        syncAccuracy(map, shownRef.current);
+      } catch {
+        // The style is still swapping. style.load calls this again.
+      }
+    };
+    apply();
+    map.on("style.load", apply);
+    return () => map.off("style.load", apply);
+  }, [ready, shownFix]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    const onDrag = () => stopFollowing();
+    map.on("dragstart", onDrag);
+    return () => map.off("dragstart", onDrag);
+  }, [ready, stopFollowing]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const fix = shownRef.current;
+    if (!map || !ready || locationSeq === 0 || !fix) return;
+    const fly = () => {
+      if (!hasMapSize(map)) return;
+      const narrow = window.matchMedia("(max-width: 899px)").matches;
+      const height = map.getContainer().clientHeight;
+      const padding = resortCameraPadding({ narrow, sheetPx: readSheetVisible(), height });
+      const panelPx = readPanelInset(map.getContainer());
+      flyToUser(map, fix.lon, fix.lat, { duration: motionDuration(700), padding, panelPx });
+    };
+    const frame = requestAnimationFrame(fly);
+    return () => cancelAnimationFrame(frame);
+  }, [ready, locationSeq]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !following || !deviceFix || locationSeq === 0) return;
+    if (followedSeq.current !== locationSeq) {
+      followedSeq.current = locationSeq;
+      return;
+    }
+    if (!hasMapSize(map)) return;
+    map.easeTo({ center: [deviceFix.lon, deviceFix.lat], duration: motionDuration(450) });
+  }, [ready, following, deviceFix, locationSeq]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -753,5 +860,28 @@ function installResortLayers(
     // The style is still swapping. style.load calls this again.
     console.warn("Resort layers not ready yet", error);
   }
+}
+
+function syncAccuracy(map: VectorMap, fix: GeoFix | null): void {
+  const ring = fix?.accuracy != null && fix.accuracy > 0 ? accuracyCircle(fix.lon, fix.lat, fix.accuracy) : null;
+  const data = ring
+    ? { type: "Feature", geometry: { type: "Polygon", coordinates: [ring] }, properties: {} }
+    : { type: "FeatureCollection", features: [] };
+  const existing = map.getSource(ACCURACY_SOURCE);
+  if (existing?.setData) {
+    existing.setData(data);
+    return;
+  }
+  if (!ring) return;
+  map.addSource(ACCURACY_SOURCE, { type: "geojson", data });
+  const layer = {
+    id: ACCURACY_LAYER,
+    type: "fill",
+    source: ACCURACY_SOURCE,
+    paint: { "fill-color": "#2563eb", "fill-opacity": 0.18 },
+  };
+  const before = map.getLayer(RESORT_LAYERS.dot) ? RESORT_LAYERS.dot : undefined;
+  if (before) map.addLayer(layer, before);
+  else map.addLayer(layer);
 }
 

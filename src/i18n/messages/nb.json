@@ -33,7 +33,7 @@
   "favouritesOnly": "Bare favoritter",
   "useMyLocation": "Bruk min posisjon",
   "locating": "Finner posisjon…",
-  "geoDenied": "Nettleseren delte ikke posisjonen din.",
+  "geoDenied": "Posisjon er blokkert. Tillat den via hengelåsen i adressefeltet, og prøv igjen.",
   "geoUnsupported": "Denne nettleseren har ingen posisjonstjeneste.",
   "straightLine": "Avstandene er i luftlinje, ikke kjøretid eller rutetabell.",
   "sort": "Sorter",

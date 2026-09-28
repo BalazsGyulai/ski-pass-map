@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { RESORT_MAX_ZOOM, clampMapPadding, resortCameraPadding, visibleBounds } from "./map-camera";
+import { describe, expect, it, vi } from "vitest";
+import { RESORT_MAX_ZOOM, USER_LOCATION_ZOOM, clampMapPadding, flyToUser, resortCameraPadding, visibleBounds } from "./map-camera";
 import type { VectorMap } from "./vector-map";
 
 function mockMap(width: number, height: number): VectorMap {
@@ -67,5 +67,33 @@ describe("visibleBounds", () => {
 describe("RESORT_MAX_ZOOM", () => {
   it("caps resort fly-to zoom for sandbox tile reach", () => {
     expect(RESORT_MAX_ZOOM).toBe(13);
+  });
+});
+
+describe("flyToUser", () => {
+  function camera(zoom: number) {
+    const flyTo = vi.fn();
+    const map = {
+      getContainer: () => ({ clientWidth: 800, clientHeight: 600 }),
+      getZoom: () => zoom,
+      flyTo,
+    } as unknown as VectorMap;
+    return { map, flyTo };
+  }
+
+  it("frames the device from an overview and leaves a closer zoom alone", () => {
+    const overview = camera(5);
+    flyToUser(overview.map, 16.37, 48.2, { duration: 0, padding: { top: 8, bottom: 8, left: 8, right: 8 } });
+    expect(overview.flyTo).toHaveBeenCalledWith(expect.objectContaining({ center: [16.37, 48.2], zoom: USER_LOCATION_ZOOM }));
+
+    const close = camera(14);
+    flyToUser(close.map, 16.37, 48.2, { duration: 0, padding: { top: 8, bottom: 8, left: 8, right: 8 } });
+    expect(close.flyTo).toHaveBeenCalledWith(expect.objectContaining({ zoom: 14 }));
+  });
+
+  it("ignores a fix that is not a coordinate", () => {
+    const { map, flyTo } = camera(6);
+    flyToUser(map, Number.NaN, 48, { duration: 0, padding: { top: 0, bottom: 0, left: 0, right: 0 } });
+    expect(flyTo).not.toHaveBeenCalled();
   });
 });

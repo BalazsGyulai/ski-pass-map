@@ -33,7 +33,7 @@
   "favouritesOnly": "Favoris uniquement",
   "useMyLocation": "Utiliser ma position",
   "locating": "Localisation…",
-  "geoDenied": "Le navigateur n'a pas partagé votre position.",
+  "geoDenied": "La position est bloquée. Autorisez-la via le cadenas de la barre d'adresse, puis réessayez.",
   "geoUnsupported": "Ce navigateur ne propose pas de localisation.",
   "straightLine": "Les distances sont à vol d'oiseau, pas en temps de trajet ni selon un horaire.",
   "sort": "Trier",

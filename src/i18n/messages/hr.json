@@ -33,7 +33,7 @@
   "favouritesOnly": "Samo favoriti",
   "useMyLocation": "Upotrijebi moju lokaciju",
   "locating": "Određivanje lokacije…",
-  "geoDenied": "Preglednik nije podijelio vašu lokaciju.",
+  "geoDenied": "Lokacija je blokirana. Dopustite je lokotom u adresnoj traci i pokušajte ponovno.",
   "geoUnsupported": "Ovaj preglednik nema uslugu lokacije.",
   "straightLine": "Udaljenosti su zračne, a ne vrijeme vožnje ili vozni red.",
   "sort": "Poredaj",
