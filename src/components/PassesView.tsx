@@ -9,6 +9,7 @@ import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { averageDayTicket, breakEvenDays, passSavings, sortPasses, type PassSort } from "@/lib/pass-economics";
 import { adultBracket, deadlinesFor, nextPriceChange, pricesOnDate, resolveForViewer, type Deadline, type ResolvedPrice } from "@/lib/pricing";
 import type { Pass } from "@/lib/schema";
+import { BirthYearInput } from "./BirthYearField";
 import { SourceLine } from "./SourceLine";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
@@ -20,7 +21,7 @@ import { countdownText } from "./countdown";
  * pass with buying day tickets.
  */
 export function PassesView() {
-  const { t, lang, birthYear, setBirthYear, effectiveDate, setPurchaseDate, today } = useApp();
+  const { t, lang, birthYear, effectiveDate, setPurchaseDate, today } = useApp();
   const [sort, setSort] = useState<PassSort>("price");
 
   const cards = useMemo(() => {
@@ -54,14 +55,7 @@ export function PassesView() {
       <section className="passes-controls" aria-label={t("pricesFor")}>
         <label className="field compact-field">
           <span>{t("birthYearOptional")}</span>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={1920}
-            max={2026}
-            value={birthYear ?? ""}
-            onChange={(event) => setBirthYear(event.target.value === "" ? null : Number(event.target.value))}
-          />
+          <BirthYearInput />
         </label>
         <label className="field compact-field">
           <span>{t("purchaseDate")}</span>

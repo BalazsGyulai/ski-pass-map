@@ -12,6 +12,7 @@ import { planQuotes, quoteTitle } from "@/lib/plan-quotes";
 import type { Lang } from "@/i18n/languages";
 import { langPath, pathWithLang } from "@/i18n/routing";
 import { serializePlan } from "@/lib/url-state";
+import { BirthYearInput } from "./BirthYearField";
 import { SavedView } from "./SavedView";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
@@ -24,7 +25,7 @@ import { markFirstVisitDone } from "@/lib/support/storage";
  */
 export function Planner() {
   const app = useApp();
-  const { t, lang, birthYear, setBirthYear, setPurchaseDate, effectiveDate, resortDays, setResortDaysCount, clearResortDays, ready, copyMessage, bumpSupportPrompt } = app;
+  const { t, lang, birthYear, setPurchaseDate, effectiveDate, resortDays, setResortDaysCount, clearResortDays, ready, copyMessage, bumpSupportPrompt } = app;
   const href = useLocalizedPath();
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState(false);
@@ -216,14 +217,7 @@ export function Planner() {
           <div className="plan-inputs">
             <label className="field compact-field">
               <span>{t("birthYearOptional")}</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min={1920}
-                max={2026}
-                value={birthYear ?? ""}
-                onChange={(event) => setBirthYear(event.target.value === "" ? null : Number(event.target.value))}
-              />
+              <BirthYearInput />
             </label>
             <label className="field compact-field">
               <span>{t("purchaseDate")}</span>

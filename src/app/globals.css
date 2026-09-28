@@ -766,17 +766,21 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
 .compact-field { margin: 0; min-width: 0; }
 .compact-field > span { color: var(--ink-3); font-size: var(--text-xs); font-weight: 600; }
 .compact-field input { min-height: 40px; }
-.compact-field input[type="number"] { width: 9rem; }
+.compact-field .birth-year-input { width: 9rem; }
 .pass-cards { list-style: none; margin: 16px 0; padding: 0; display: grid; gap: 12px; }
-@media (min-width: 900px) { .pass-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
+@media (min-width: 900px) { .pass-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .pass-card {
   --pass: var(--ink-3);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: 18px 18px 14px;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: var(--surface);
   box-shadow: var(--shadow-1);
 }
+.pass-card .pass-actions { margin-top: auto; padding-top: 10px; }
 .pass-card h2.pass-short { margin: 0; font-size: var(--text-xl); line-height: 1.2; }
 .pass-card .pass-mark { min-height: 44px; }
 .pass-note { margin: 10px 0 0 18px; font-size: var(--text-sm); }
@@ -791,6 +795,14 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
 .compare-bar .meter { height: 8px; border-radius: var(--radius-pill); background: var(--surface-3); overflow: hidden; }
 .compare-bar .meter > span { display: block; height: 100%; border-radius: inherit; background: var(--ink-3); transition: width var(--dur) var(--ease-out); }
 .pass-actions { margin-top: 10px; }
+.passes-controls .compact-field input,
+.passes-controls .seg-control {
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+}
+.passes-controls .seg-control { display: flex; align-items: stretch; }
+.passes-controls .seg-control button { min-height: 0; height: auto; }
 .pass-chips {
   position: absolute;
   z-index: 32;
