@@ -1,6 +1,8 @@
 "use client";
 
+import { LIFT_KINDS, LIFT_KIND_LABEL } from "@/lib/lift-icons";
 import { IconLayers, IconLocate } from "./icons";
+import { LiftSign } from "./LiftSign";
 import { useApp } from "./AppState";
 
 export function MapTools({ onLayers, layersOpen }: { onLayers: () => void; layersOpen: boolean }) {
@@ -18,7 +20,7 @@ export function MapTools({ onLayers, layersOpen }: { onLayers: () => void; layer
 }
 
 export function LayersPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t, share, updateShare, terrain3d, setTerrain3d } = useApp();
+  const { t, share, updateShare, terrain3d, setTerrain3d, liftMotion, setLiftMotion } = useApp();
   if (!open) return null;
   return (
     <div id="map-layers" className="layers-panel" role="dialog" aria-label={t("layersTitle")}>
@@ -34,6 +36,11 @@ export function LayersPanel({ open, onClose }: { open: boolean; onClose: () => v
       </label>
       <p className="hint">{t("terrain3dHint")}</p>
       <label className="check">
+        <input type="checkbox" checked={liftMotion} onChange={() => setLiftMotion(!liftMotion)} />
+        <span>{t("liftMotion")}</span>
+      </label>
+      <p className="hint">{t("liftMotionHint")}</p>
+      <label className="check">
         <input type="checkbox" checked={share.showPistes} onChange={() => updateShare({ showPistes: !share.showPistes })} />
         <span>{t("showAllPistes")}</span>
       </label>
@@ -46,6 +53,15 @@ export function LayersPanel({ open, onClose }: { open: boolean; onClose: () => v
         <li><span className="piste-swatch" style={{ background: "#111827" }} />{t("pisteAdvanced")}</li>
         <li><span className="piste-swatch dashed" />{t("pisteFreeride")}</li>
         <li><span className="piste-swatch lift" />{t("pisteLift")}</li>
+      </ul>
+      <h3>{t("liftLegend")}</h3>
+      <ul className="lift-legend">
+        {LIFT_KINDS.map((kind) => (
+          <li key={kind}>
+            <LiftSign kind={kind} />
+            {t(LIFT_KIND_LABEL[kind])}
+          </li>
+        ))}
       </ul>
       <h3>{t("legendTitle")}</h3>
       <p className="hint">{t("legendPill")}</p>

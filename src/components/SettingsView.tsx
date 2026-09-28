@@ -31,6 +31,8 @@ export function SettingsView() {
     setPisteOverlayDefault,
     terrain3d,
     setTerrain3d,
+    liftMotion,
+    setLiftMotion,
     exportSavedData,
     importSavedData,
     clearAllSavedData,
@@ -115,6 +117,9 @@ export function SettingsView() {
         </p>
         <SettingsRow label={t("terrain3d")} hint={t("terrain3dHint")}>
           <ToggleSwitch label={t("terrain3d")} checked={terrain3d} onChange={setTerrain3d} />
+        </SettingsRow>
+        <SettingsRow label={t("liftMotion")} hint={t("liftMotionHint")}>
+          <ToggleSwitch label={t("liftMotion")} checked={liftMotion} onChange={setLiftMotion} />
         </SettingsRow>
         <SettingsRow label={t("pisteOverlayDefault")}>
           <ToggleSwitch

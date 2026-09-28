@@ -1,100 +1,178 @@
 /**
- * Lifts move on the map: cabins, chairs and drag hangers run uphill along each lift line (OSM
- * draws lifts from the valley station up), each type at its own calm pace. The motion is a dash
- * pattern stepped through a fixed cycle, so the GPU draws it from a few cached patterns and no
- * data changes. It pauses in background tabs and when zoomed out, and never runs for visitors
- * who ask for reduced motion (the lifts then show their cabins standing still).
+ * Lifts move on the map. Cars run uphill along each lift line (OSM draws lifts from the valley
+ * station up): gondola cabins, chairs, T-bar hangers, platters and rope-tow grips, each type at its
+ * own calm pace. Chevrons roll along magic carpets, and a cable car's two cabins shuttle past each
+ * other. The cars are symbols on a small point source that moves every tick. Their spacing is in
+ * screen pixels, so a lift reads the same at every zoom. Motion rests in background tabs and when
+ * zoomed out. It is a setting, and the lift signs stay on the map either way.
  */
+import { liftKind, type CarKind, type LiftKind } from "./lift-icons";
 
-export type LiftClass = "cabin" | "chair" | "surface" | "carpet";
-
-export const LIFT_CLASSES: readonly LiftClass[] = ["cabin", "chair", "surface", "carpet"];
-
-/** OSM aerialway values per class. Zip lines and untyped lifts keep the plain cable line. */
-export const LIFT_TYPES: Record<LiftClass, readonly string[]> = {
-  cabin: ["gondola", "cable_car", "mixed_lift"],
-  chair: ["chair_lift"],
-  surface: ["t-bar", "j-bar", "platter", "drag_lift", "rope_tow"],
-  carpet: ["magic_carpet"],
-};
-
-export function liftClass(aerialway: string | null | undefined): LiftClass | null {
-  if (!aerialway) return null;
-  return LIFT_CLASSES.find((cls) => LIFT_TYPES[cls].includes(aerialway)) ?? null;
-}
-
-export interface LiftMotionStyle {
-  /** Line width in pixels. Dash and gap are in line widths, as the style spec measures them. */
-  width: number;
-  dash: number;
-  gap: number;
-  /** Steps per pattern period. */
-  steps: number;
-  /** Advance one step every this many ticks: gondolas run faster than a magic carpet. */
-  every: number;
-}
-
-export const LIFT_MOTION: Record<LiftClass, LiftMotionStyle> = {
-  cabin: { width: 4.5, dash: 1.1, gap: 4.9, steps: 16, every: 1 },
-  chair: { width: 3, dash: 1, gap: 4, steps: 12, every: 1 },
-  surface: { width: 2, dash: 1, gap: 2.5, steps: 10, every: 1 },
-  carpet: { width: 2, dash: 1, gap: 2, steps: 8, every: 2 },
-};
-
+export const LIFT_CARS_SOURCE = "lift-cars";
 export const LIFT_TICK_MS = 80;
-/** Below this zoom the cabins would blur into the line, so they are not drawn at all. */
+/** Below this zoom the cars would blur into the line, so they are not drawn at all. */
 export const LIFT_MOTION_MINZOOM = 12;
 
-export function liftLayerId(cls: LiftClass): string {
-  return `lift-${cls}`;
+interface Flow {
+  /** Cars in the order they hang on the rope; mixed lifts alternate cabins and chairs. */
+  cars: CarKind[];
+  spacingPx: number;
+  speedPx: number;
 }
 
-/** The dash pattern moved `shift` along the line (0 ≤ shift < dash + gap), as a line-dasharray. */
-export function shiftedDash(dash: number, gap: number, shift: number): number[] {
-  const period = dash + gap;
-  const s = ((shift % period) + period) % period;
-  if (s === 0) return [dash, gap];
-  // The dash starts inside the gap: an empty dash, the gap before it, the dash, the rest.
-  if (s <= gap) return [0, round(s), dash, round(gap - s)];
-  // The dash wraps past the end of the period: its tail opens the pattern.
-  return [round(s - gap), gap, round(period - s), 0];
+/** Continuous lifts. A gondola runs faster and wider spaced than a chair; a magic carpet crawls. */
+export const LIFT_FLOW: Partial<Record<LiftKind, Flow>> = {
+  gondola: { cars: ["cabin"], spacingPx: 46, speedPx: 20 },
+  mixed: { cars: ["cabin", "chair"], spacingPx: 30, speedPx: 18 },
+  chair: { cars: ["chair"], spacingPx: 26, speedPx: 16 },
+  drag: { cars: ["tbar"], spacingPx: 22, speedPx: 11 },
+  platter: { cars: ["platter"], spacingPx: 22, speedPx: 11 },
+  rope_tow: { cars: ["grip"], spacingPx: 16, speedPx: 9 },
+  carpet: { cars: ["chevron"], spacingPx: 12, speedPx: 6 },
+};
+
+/** A cable car's cabins take this long to go up and come back down. */
+export const SHUTTLE_SECONDS = 24;
+/** Enough for the busiest resort in the data at close zoom. */
+const MAX_CARS = 2000;
+
+export interface LiftPath {
+  kind: LiftKind;
+  coords: Array<[number, number]>;
+  /** Metres from the valley station to each vertex. */
+  along: number[];
+  length: number;
 }
 
-/** The patterns one class steps through, in order. Precomputed, so the map caches each once. */
-export function dashCycle(style: LiftMotionStyle): number[][] {
-  const period = style.dash + style.gap;
-  return Array.from({ length: style.steps }, (_, step) => shiftedDash(style.dash, style.gap, (period * step) / style.steps));
+type LineFeature = { properties?: Record<string, unknown> | null; geometry?: { type?: string; coordinates?: unknown } | null };
+
+/** The lifts in a resort's piste GeoJSON that have something to move. */
+export function liftPaths(data: unknown): LiftPath[] {
+  const features = (data as { features?: LineFeature[] } | null)?.features ?? [];
+  const paths: LiftPath[] = [];
+  for (const feature of features) {
+    if (feature.properties?.kind !== "lift") continue;
+    const aerialway = feature.properties.aerialway;
+    const kind = liftKind(typeof aerialway === "string" ? aerialway : null);
+    if (kind !== "cable_car" && !LIFT_FLOW[kind]) continue;
+    const geometry = feature.geometry;
+    const lines =
+      geometry?.type === "LineString" ? [geometry.coordinates] : geometry?.type === "MultiLineString" ? (geometry.coordinates as unknown[]) : [];
+    for (const line of lines) {
+      if (!Array.isArray(line)) continue;
+      const coords = line.filter(isLngLat).map((point): [number, number] => [point[0], point[1]]);
+      if (coords.length < 2) continue;
+      const along = [0];
+      for (let i = 1; i < coords.length; i++) along.push(along[i - 1] + metres(coords[i - 1], coords[i]));
+      const length = along[along.length - 1];
+      if (length > 0) paths.push({ kind, coords, along, length });
+    }
+  }
+  return paths;
 }
 
-function round(value: number): number {
-  return Math.round(value * 1000) / 1000;
+function isLngLat(point: unknown): point is [number, number] {
+  return Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1]);
+}
+
+const RAD = Math.PI / 180;
+
+/** Short lift segments, so a flat approximation is plenty. */
+function metres(a: [number, number], b: [number, number]): number {
+  const x = (b[0] - a[0]) * RAD * Math.cos(((a[1] + b[1]) / 2) * RAD);
+  const y = (b[1] - a[1]) * RAD;
+  return Math.hypot(x, y) * 6371008.8;
+}
+
+/** Ground metres per screen pixel, for the 512 px tiles both map libraries use. */
+export function metresPerPixel(zoom: number, lat: number): number {
+  return (2 * Math.PI * 6378137 * Math.cos(lat * RAD)) / (512 * 2 ** zoom);
+}
+
+function pointAt(path: LiftPath, distance: number): { lngLat: [number, number]; bearing: number } {
+  let lo = 0;
+  let hi = path.along.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (path.along[mid] <= distance) lo = mid;
+    else hi = mid;
+  }
+  const a = path.coords[lo];
+  const b = path.coords[hi];
+  const span = path.along[hi] - path.along[lo];
+  const t = span > 0 ? Math.min(1, Math.max(0, (distance - path.along[lo]) / span)) : 0;
+  const bearing = Math.atan2((b[0] - a[0]) * Math.cos(a[1] * RAD), b[1] - a[1]) / RAD;
+  return { lngLat: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], bearing };
+}
+
+export interface LiftCarFeature {
+  type: "Feature";
+  geometry: { type: "Point"; coordinates: [number, number] };
+  /** `rotate` turns a chevron along its belt: the glyph points east, so it is the bearing less 90°. */
+  properties: { car: CarKind; rotate: number };
+}
+
+/** Where every car is `seconds` into the motion, at `metresPerPx` ground metres per screen pixel. */
+export function liftCars(paths: LiftPath[], seconds: number, metresPerPx: number): LiftCarFeature[] {
+  const cars: LiftCarFeature[] = [];
+  const add = (path: LiftPath, distance: number, car: CarKind) => {
+    const { lngLat, bearing } = pointAt(path, distance);
+    cars.push({ type: "Feature", geometry: { type: "Point", coordinates: lngLat }, properties: { car, rotate: car === "chevron" ? bearing - 90 : 0 } });
+  };
+  for (const path of paths) {
+    if (cars.length >= MAX_CARS) break;
+    if (path.kind === "cable_car") {
+      // The cabins meet halfway and rest a moment at the stations, where the cosine turns.
+      const up = 0.5 - 0.5 * Math.cos((2 * Math.PI * seconds) / SHUTTLE_SECONDS);
+      add(path, up * path.length, "cabin");
+      add(path, (1 - up) * path.length, "cabin");
+      continue;
+    }
+    const flow = LIFT_FLOW[path.kind];
+    const spacing = flow ? flow.spacingPx * metresPerPx : 0;
+    if (!flow || !(spacing > 0)) continue;
+    const travelled = (seconds * flow.speedPx) / flow.spacingPx;
+    const phase = travelled - Math.floor(travelled);
+    // A car keeps its place in the order as it moves up one slot per spacing travelled.
+    const turns = Math.floor(travelled);
+    const count = flow.cars.length;
+    for (let k = 0; cars.length < MAX_CARS; k++) {
+      const distance = (phase + k) * spacing;
+      if (distance > path.length) break;
+      add(path, distance, flow.cars[(((k - turns) % count) + count) % count]);
+    }
+  }
+  return cars;
 }
 
 /** The map surface the motion needs; both map libraries have these. */
 export interface LiftMotionMap {
-  getLayer(id: string): unknown;
   getZoom(): number;
-  setPaintProperty(layer: string, name: string, value: unknown): void;
+  getCenter(): { lat: number };
+  getSource(id: string): { setData?: (data: unknown) => void } | undefined;
 }
 
+const EMPTY = { type: "FeatureCollection", features: [] };
+
 /**
- * Steps every lift layer on a timer and returns a stop function. Missing layers are skipped, so a
- * style swap in the middle is harmless: the layers come back with the pistes and move again.
+ * Moves the cars on a timer and returns a stop function that clears them. The source is looked up
+ * every tick, so a style swap in the middle is harmless: it comes back with the pistes.
  */
-export function startLiftMotion(map: LiftMotionMap, env: { hidden: () => boolean } = { hidden: () => document.hidden }): () => void {
-  const cycles = Object.fromEntries(LIFT_CLASSES.map((cls) => [cls, dashCycle(LIFT_MOTION[cls])])) as Record<LiftClass, number[][]>;
-  let tick = 0;
-  const timer = setInterval(() => {
-    if (env.hidden() || map.getZoom() < LIFT_MOTION_MINZOOM) return;
-    tick += 1;
-    for (const cls of LIFT_CLASSES) {
-      const { every } = LIFT_MOTION[cls];
-      if (tick % every !== 0) continue;
-      const id = liftLayerId(cls);
-      if (!map.getLayer(id)) continue;
-      const cycle = cycles[cls];
-      map.setPaintProperty(id, "line-dasharray", cycle[(tick / every) % cycle.length]);
-    }
-  }, LIFT_TICK_MS);
-  return () => clearInterval(timer);
+export function startLiftMotion(
+  map: LiftMotionMap,
+  paths: LiftPath[],
+  env: { hidden: () => boolean; now: () => number } = { hidden: () => document.hidden, now: () => performance.now() },
+): () => void {
+  const tick = () => {
+    const zoom = map.getZoom();
+    if (env.hidden() || zoom < LIFT_MOTION_MINZOOM) return;
+    const features = liftCars(paths, env.now() / 1000, metresPerPixel(zoom, map.getCenter().lat));
+    map.getSource(LIFT_CARS_SOURCE)?.setData?.({ type: "FeatureCollection", features });
+  };
+  tick();
+  const timer = setInterval(tick, LIFT_TICK_MS);
+  return () => {
+    clearInterval(timer);
+    map.getSource(LIFT_CARS_SOURCE)?.setData?.(EMPTY);
+  };
 }

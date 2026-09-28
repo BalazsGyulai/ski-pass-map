@@ -25,6 +25,7 @@ import { onMapConsentChange } from "@/lib/map-consent";
 import type { MapAppearance, MapProviderId } from "@/lib/map-styles";
 import {
   PISTE_SOURCE_ID,
+  addLiftImages,
   clusterExpansionZoom,
   createVectorMap,
   firstLabelLayer,
@@ -33,22 +34,25 @@ import {
   loadMapLibrary,
   motionDuration,
   padLngLatBounds,
+  liftCarLayers,
+  liftSignLayer,
   pisteLayer,
   pisteLayerIds,
   pisteLayerSpecs,
   pisteTip,
+  resortRunLayerIds,
   type MapLib,
   type RenderedFeature,
   type VectorMap,
 } from "@/lib/vector-map";
 import { attachMapProbe } from "@/lib/map-canvas-probe";
-import { flyToResort, readSheetVisible, resortCameraPadding } from "@/lib/map-camera";
+import { flyToResort, readPanelInset, readSheetVisible, resortCameraPadding, visibleBounds } from "@/lib/map-camera";
 import { RESORT_PITCH, applyTerrain } from "@/lib/terrain";
 import { SHEET_EVENT } from "@/lib/sheet";
-import { startLiftMotion } from "@/lib/lift-motion";
+import { LIFT_CARS_SOURCE, liftPaths, startLiftMotion } from "@/lib/lift-motion";
+import { LIFT_KINDS, LIFT_KIND_LABEL, liftKind, type LiftKind } from "@/lib/lift-icons";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
-import { prefersReducedMotion } from "./useNarrow";
 
 const SNOW_SOURCE = "opensnow-pistes";
 const SNOW_LAYER = "opensnow-pistes";
@@ -59,7 +63,8 @@ export default function MapView() {
   const libRef = useRef<MapLib | null>(null);
   const appliedStyle = useRef<string | null>(null);
   const pisteData = useRef<unknown>(null);
-  const { share, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, offline, searchThisArea, terrain3d } = useApp();
+  const { share, highlightId, selectResort, t, theme, resortDays, reportMapBounds, mapApi, offline, searchThisArea, terrain3d, liftMotion, setLiftKinds } =
+    useApp();
   const { filtered } = useResortLists();
   const [choice, setChoice] = useState<MapProviderId | null>(null);
   const [override, setOverride] = useState<MapProviderId | null>(null);
@@ -254,13 +259,16 @@ export default function MapView() {
       try {
         clearPistes(map);
         if (!data) return true;
+        addLiftImages(map, darkRef.current);
         map.addSource(PISTE_SOURCE_ID, { type: "geojson", data });
+        map.addSource(LIFT_CARS_SOURCE, { type: "geojson", data: { type: "FeatureCollection", features: [] } });
         const before = firstLabelLayer(map);
-        for (const spec of pisteLayerSpecs(darkRef.current)) {
-          const layer = pisteLayer(spec);
+        for (const layer of [...pisteLayerSpecs(darkRef.current).map(pisteLayer), ...liftCarLayers()]) {
           if (before) map.addLayer(layer, before);
           else map.addLayer(layer);
         }
+        // Signs go on top, so a place name gives way to a lift sign rather than the other way round.
+        map.addLayer(liftSignLayer());
         return true;
       } catch {
         return false;
@@ -268,6 +276,7 @@ export default function MapView() {
     };
     pisteData.current = null;
     apply(null);
+    setLiftKinds([]);
     const load = () => {
       if (!share.resort || share.hideRuns) {
         setPisteNote("idle");
@@ -283,6 +292,7 @@ export default function MapView() {
           const count = data?.features?.length ?? 0;
           if (data && count > 0) {
             pisteData.current = data;
+            setLiftKinds(liftKindsIn(data));
             if (apply(data)) setPisteNote("ready");
             return;
           }
@@ -302,14 +312,16 @@ export default function MapView() {
       cancelled = true;
       map.off("style.load", onStyle);
     };
-  }, [ready, share.resort, share.hideRuns]);
+  }, [ready, share.resort, share.hideRuns, setLiftKinds]);
 
-  // Lifts run while a resort's runs are on the map, unless the visitor asks for less motion.
+  // Cars run along the lifts while a resort's runs are on the map and moving lifts are on.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !ready || pisteNote !== "ready" || prefersReducedMotion()) return;
-    return startLiftMotion(map);
-  }, [ready, pisteNote]);
+    if (!map || !ready || pisteNote !== "ready" || !liftMotion) return;
+    const paths = liftPaths(pisteData.current);
+    if (paths.length === 0) return;
+    return startLiftMotion(map, paths);
+  }, [ready, pisteNote, liftMotion]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -383,8 +395,7 @@ export default function MapView() {
     if (!map || !ready) return;
     const report = () => {
       if (!hasMapSize(map)) return;
-      const bounds = map.getBounds();
-      reportMapBounds({ south: bounds.getSouth(), west: bounds.getWest(), north: bounds.getNorth(), east: bounds.getEast() });
+      reportMapBounds(visibleBounds(map, readPanelInset(map.getContainer())));
     };
     const frame = requestAnimationFrame(report);
     map.on("moveend", report);
@@ -450,6 +461,7 @@ export default function MapView() {
       advanced: t("pisteAdvanced"),
       freeride: t("pisteFreeride"),
       other: t("pisteOther"),
+      lifts: Object.fromEntries(LIFT_KINDS.map((kind) => [kind, t(LIFT_KIND_LABEL[kind])])) as Record<LiftKind, string>,
     };
     const showTip = (properties: Record<string, unknown> | null | undefined, lngLat: { lng: number; lat: number }) => {
       const text = pisteTip(properties, labels);
@@ -529,6 +541,27 @@ export default function MapView() {
     return () => observer.disconnect();
   }, [ready]);
 
+  // On desktop the side panel floats over the map's left edge. The map keeps it as padding, so
+  // centring, fitting and cluster zooms aim at the part you can see.
+  useEffect(() => {
+    const map = mapRef.current;
+    const el = containerRef.current;
+    if (!map || !el || !ready) return;
+    let applied = -1;
+    const sync = () => {
+      const inset = readPanelInset(el);
+      if (inset === applied) return;
+      applied = inset;
+      map.setPadding({ ...map.getPadding(), left: inset });
+    };
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(el);
+    const host = document.querySelector(".sheet-host");
+    if (host) observer.observe(host);
+    return () => observer.disconnect();
+  }, [ready]);
+
   const terrainRef = useRef(terrain3d);
   terrainRef.current = terrain3d;
 
@@ -542,8 +575,9 @@ export default function MapView() {
       const narrow = window.matchMedia("(max-width: 899px)").matches;
       const height = map.getContainer().clientHeight;
       const padding = resortCameraPadding({ narrow, sheetPx: readSheetVisible(), height });
+      const panelPx = readPanelInset(map.getContainer());
       // In 3D the camera tilts so the mountain and its runs stand up.
-      flyToResort(map, resort.lon, resort.lat, { duration, padding, pitch: terrainRef.current ? RESORT_PITCH : undefined });
+      flyToResort(map, resort.lon, resort.lat, { duration, padding, panelPx, pitch: terrainRef.current ? RESORT_PITCH : undefined });
     };
     // One frame lets the sheet publish its height. The camera moves at once; tiles fill in on the way.
     const frame = requestAnimationFrame(() => fly(motionDuration(700)));
@@ -609,10 +643,22 @@ function compactMapAttribution(container: HTMLElement): void {
 }
 
 function clearPistes(map: VectorMap) {
-  for (const id of pisteLayerIds()) {
+  for (const id of resortRunLayerIds()) {
     if (map.getLayer(id)) map.removeLayer(id);
   }
+  if (map.getSource(LIFT_CARS_SOURCE)) map.removeSource(LIFT_CARS_SOURCE);
   if (map.getSource(PISTE_SOURCE_ID)) map.removeSource(PISTE_SOURCE_ID);
+}
+
+/** Lift types in a resort's piste data, in legend order. */
+function liftKindsIn(data: { features?: unknown[] }): LiftKind[] {
+  const found = new Set<LiftKind>();
+  for (const feature of data.features ?? []) {
+    const properties = (feature as { properties?: Record<string, unknown> | null }).properties;
+    if (properties?.kind !== "lift") continue;
+    found.add(liftKind(typeof properties.aerialway === "string" ? properties.aerialway : null));
+  }
+  return LIFT_KINDS.filter((kind) => found.has(kind));
 }
 
 function syncSnow(map: VectorMap, show: boolean) {

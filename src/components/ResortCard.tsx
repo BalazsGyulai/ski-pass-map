@@ -10,10 +10,12 @@ import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { adultBracket, dayTicketIsEstimate, nextPriceChange, pricesOnDate, resolveForViewer, type ResolvedPrice } from "@/lib/pricing";
 import type { FactRef, Pass, Resort } from "@/lib/schema";
 import { snapFromKey, type SheetSnap } from "@/lib/sheet";
+import { LIFT_KIND_LABEL } from "@/lib/lift-icons";
 import { formatAttributionLine } from "@/lib/portal/attribution";
 import { mergeResortWithOverrides } from "@/lib/portal/overrides";
 import { useRuntimeOverrides } from "@/lib/runtime-overrides-client";
 import { IconClose, IconHeart } from "./icons";
+import { LiftSign } from "./LiftSign";
 import { SourceLine } from "./SourceLine";
 import { useBottomSheet } from "./useBottomSheet";
 import { prefersReducedMotion } from "./useNarrow";
@@ -278,7 +280,7 @@ function PassRow({ pass, price, day, cheapest }: { pass: Pass; price: ResolvedPr
 }
 
 function FactGrid({ resort, day }: { resort: Resort; day: number | null }) {
-  const { t, lang, share, updateShare } = useApp();
+  const { t, lang, share, updateShare, liftMotion, setLiftMotion, liftKinds } = useApp();
   const top = finiteOrBlank(resort.top_elevation_m);
   const base = finiteOrBlank(resort.base_elevation_m);
   const drop = top != null && base != null ? top - base : null;
@@ -352,6 +354,22 @@ function FactGrid({ resort, day }: { resort: Resort; day: number | null }) {
         <input type="checkbox" checked={!share.hideRuns} onChange={() => updateShare({ hideRuns: !share.hideRuns })} />
         <span>{t("showRuns")}</span>
       </label>
+      {!share.hideRuns ? (
+        <label className="check">
+          <input type="checkbox" checked={liftMotion} onChange={() => setLiftMotion(!liftMotion)} />
+          <span>{t("liftMotion")}</span>
+        </label>
+      ) : null}
+      {!share.hideRuns && liftKinds.length > 0 ? (
+        <ul className="lift-legend" aria-label={t("liftLegend")}>
+          {liftKinds.map((kind) => (
+            <li key={kind}>
+              <LiftSign kind={kind} />
+              {t(LIFT_KIND_LABEL[kind])}
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </>
   );
 }

@@ -16,6 +16,7 @@ import { shareHistoryStep } from "@/lib/history-step";
 import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type ShareState } from "@/lib/url-state";
 import { markFirstVisitDone, resetSupportReminders as clearSupportReminders } from "@/lib/support/storage";
 import { defaultTerrain3d } from "@/lib/terrain";
+import type { LiftKind } from "@/lib/lift-icons";
 
 type ThemeChoice = "system" | "light" | "dark";
 
@@ -82,6 +83,12 @@ interface AppContextValue {
   setPisteOverlayDefault: (on: boolean) => void;
   terrain3d: boolean;
   setTerrain3d: (on: boolean) => void;
+  /** Cars run along the lifts. The lift signs show either way. */
+  liftMotion: boolean;
+  setLiftMotion: (on: boolean) => void;
+  /** Lift types on the map for the open resort, for its legend. */
+  liftKinds: LiftKind[];
+  setLiftKinds: (kinds: LiftKind[]) => void;
   exportSavedData: () => boolean;
   importSavedData: (json: string) => boolean;
   clearAllSavedData: () => void;
@@ -120,6 +127,8 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
   const [distanceUnits, setDistanceUnitsState] = useState<DistanceUnits>("km");
   const [pisteOverlayDefault, setPisteOverlayDefaultState] = useState(false);
   const [terrain3d, setTerrain3d] = useState(true);
+  const [liftMotion, setLiftMotion] = useState(true);
+  const [liftKinds, setLiftKinds] = useState<LiftKind[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const areaRef = useRef<MapBounds | null>(null);
   const liveRef = useRef<MapBounds | null>(null);
@@ -180,8 +189,11 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       if (stored.distanceUnits === "km" || stored.distanceUnits === "mi") setDistanceUnitsState(stored.distanceUnits);
       if (stored.pisteOverlayDefault) setPisteOverlayDefaultState(true);
       if (stored.terrain3d === false) setTerrain3d(false);
+      if (stored.liftMotion === false) setLiftMotion(false);
     }
     if (stored?.terrain3d == null && !defaultTerrain3d(deviceHints())) setTerrain3d(false);
+    // Moving lifts start off for visitors who ask for less motion, until they turn them on.
+    if (stored?.liftMotion == null && window.matchMedia("(prefers-reduced-motion: reduce)").matches) setLiftMotion(false);
     const fromUrl = parsePlan(params.get("plan"));
     if (Object.keys(fromUrl).length > 0) setResortDays(fromUrl);
     const bought = params.get("on");
@@ -226,9 +238,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       distanceUnits,
       pisteOverlayDefault,
       terrain3d,
+      liftMotion,
       version: 4,
     });
-  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault, terrain3d]);
+  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault, terrain3d, liftMotion]);
 
   const onMap = isMapPath(pathname, lang);
   const pushedResort = useRef(false);
@@ -433,6 +446,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       distanceUnits,
       pisteOverlayDefault,
       terrain3d,
+      liftMotion,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -464,6 +478,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
         if (parsed.pisteOverlayDefault) setShare((current) => ({ ...current, showPistes: true }));
       }
       if (typeof parsed.terrain3d === "boolean") setTerrain3d(parsed.terrain3d);
+      if (typeof parsed.liftMotion === "boolean") setLiftMotion(parsed.liftMotion);
       return true;
     } catch {
       return false;
@@ -645,6 +660,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     setPisteOverlayDefault,
     terrain3d,
     setTerrain3d,
+    liftMotion,
+    setLiftMotion,
+    liftKinds,
+    setLiftKinds,
     exportSavedData,
     importSavedData,
     clearAllSavedData,

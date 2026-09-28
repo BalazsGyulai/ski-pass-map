@@ -18,7 +18,7 @@ const sortKey = {
 } as const;
 
 export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: SheetSnap) => void }) {
-  const { share, updateShare, t, ready, resetFilters, mapApi, areaStale, searchThisArea } = useApp();
+  const { share, updateShare, t, ready, resetFilters, mapApi, areaStale, searchThisArea, searchAsMove, setSearchAsMove } = useApp();
   const { sorted, filtered, relaxed } = useResortLists();
   const sheet = useBottomSheet({ kind: "list", snap, setSnap });
 
@@ -51,6 +51,10 @@ export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: 
         <div>
           <h2>{t("inThisArea", { n: sorted.length })}</h2>
           <p className="hint">{t("sortedBy", { sort: t(sortKey[share.sort]) })}</p>
+          <label className="move-toggle">
+            <input type="checkbox" checked={searchAsMove} onChange={(event) => setSearchAsMove(event.target.checked)} />
+            <span>{t("searchAsMove")}</span>
+          </label>
         </div>
         <StyledSelect
           ariaLabel={t("sort")}
