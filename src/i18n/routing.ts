@@ -36,11 +36,15 @@ export function parseLangPath(pathname: string): { lang: Lang | null; rest: stri
   return { lang: first, rest };
 }
 
-export function pathWithLang(lang: Lang, rest: string): string {
+/** `/en/plan/` style path for next/link and the router, which add the base path themselves. */
+export function langPath(lang: Lang, rest: string): string {
   const normalized = rest === "/" || rest === "" ? "" : rest.startsWith("/") ? rest : `/${rest}`;
-  const core = normalized === "" ? `/${lang}/` : `/${lang}${normalized.endsWith("/") ? normalized : `${normalized}/`}`;
-  if (!BASE_PATH) return core;
-  return `${BASE_PATH}${core}`;
+  return normalized === "" ? `/${lang}/` : `/${lang}${normalized.endsWith("/") ? normalized : `${normalized}/`}`;
+}
+
+/** The same path with the base path, for plain anchors, window.location and absolute URLs. */
+export function pathWithLang(lang: Lang, rest: string): string {
+  return `${BASE_PATH}${langPath(lang, rest)}`;
 }
 
 export function isMapPath(pathname: string, lang: Lang): boolean {

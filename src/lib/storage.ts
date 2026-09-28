@@ -17,6 +17,8 @@ export interface StoredPrefs {
   pisteOverlayDefault?: boolean;
   /** 3D terrain and a tilted camera on resorts. On unless turned off. */
   terrain3d?: boolean;
+  /** Cars moving along the lifts. On unless turned off, or unless the system asks for reduced motion. */
+  liftMotion?: boolean;
   /** Reference places. Never copied into the URL. */
   places?: SavedPlace[];
   activePlaceId?: string | null;
@@ -35,6 +37,7 @@ export interface ExportedUserData {
   distanceUnits: DistanceUnits;
   pisteOverlayDefault: boolean;
   terrain3d?: boolean;
+  liftMotion?: boolean;
 }
 
 export function readStorage(): StoredPrefs | null {

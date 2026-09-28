@@ -10,7 +10,19 @@ import {
   type MapProviderId,
 } from "./map-styles";
 import { pisteStyle, type PisteDifficulty } from "./pistes";
-import { LIFT_CLASSES, LIFT_MOTION, LIFT_MOTION_MINZOOM, LIFT_TYPES, dashCycle, liftLayerId } from "./lift-motion";
+import { LIFT_CARS_SOURCE, LIFT_MOTION_MINZOOM } from "./lift-motion";
+import {
+  CAR_KINDS,
+  LIFT_ICON_PIXEL_RATIO,
+  LIFT_KINDS,
+  drawLiftCar,
+  drawLiftSign,
+  liftCarImageId,
+  liftKind,
+  liftKindExpression,
+  liftSignImageId,
+  type LiftKind,
+} from "./lift-icons";
 
 export interface MapEvent {
   lngLat?: { lng: number; lat: number };
@@ -42,6 +54,9 @@ export interface VectorMap {
     bearing?: number;
   }): void;
   easeTo(options: { center?: [number, number]; zoom?: number; duration?: number; pitch?: number; bearing?: number }): void;
+  /** The inset the camera keeps between moves. fitBounds fits inside it; flyTo with padding replaces it. */
+  setPadding(padding: { top: number; bottom: number; left: number; right: number }): void;
+  getPadding(): { top: number; bottom: number; left: number; right: number };
   getPitch(): number;
   getBearing(): number;
   /** Both libraries have these; the terrain module calls them. */
@@ -49,6 +64,10 @@ export interface VectorMap {
   setSky?(sky: Record<string, unknown>): unknown;
   setFog?(fog: Record<string, unknown> | null): unknown;
   project(lngLat: [number, number]): { x: number; y: number };
+  getCenter(): { lng: number; lat: number };
+  addImage(id: string, image: { width: number; height: number; data: Uint8ClampedArray }, options?: { pixelRatio?: number }): void;
+  hasImage(id: string): boolean;
+  unproject(point: [number, number]): { lng: number; lat: number };
   addSource(id: string, source: unknown): void;
   getSource(id: string): VectorGeoJsonSource | undefined;
   removeSource(id: string): void;
@@ -324,22 +343,78 @@ export function pisteLayerSpecs(dark: boolean): PisteLayerSpec[] {
     width: pisteStyle("unknown", "piste").weight,
   });
   const liftColor = dark ? "#e5e7eb" : pisteStyle(null, "lift").color;
-  // The cable: every lift, thin and solid. Tips and taps land on it.
-  specs.push({ id: "piste-lift", filter: ["==", ["get", "kind"], "lift"], color: liftColor, width: 1.25, opacity: 0.7 });
-  // Cabins, chairs and hangers on the cable, one layer per lift type. lift-motion moves them.
-  for (const cls of LIFT_CLASSES) {
-    const motion = LIFT_MOTION[cls];
-    specs.push({
-      id: liftLayerId(cls),
-      filter: ["all", ["==", ["get", "kind"], "lift"], ["in", ["coalesce", ["get", "aerialway"], ""], ["literal", [...LIFT_TYPES[cls]]]]],
-      color: liftColor,
-      width: motion.width,
-      dash: dashCycle(motion)[0],
-      cap: "butt",
-      minzoom: LIFT_MOTION_MINZOOM,
-    });
-  }
+  // The cable: every lift, thin and solid. Tips and taps land on it. Cars and signs sit on top.
+  specs.push({ id: "piste-lift", filter: ["==", ["get", "kind"], "lift"], color: liftColor, width: 1.5, opacity: 0.8 });
   return specs;
+}
+
+export const LIFT_SIGN_LAYER = "lift-signs";
+export const LIFT_CAR_LAYER = "lift-cars";
+export const LIFT_BELT_LAYER = "lift-belts";
+
+/**
+ * Upright signs on each lift line: one near the valley station and more along a long lift, so a sign
+ * is in view wherever you look. Signs give way to each other, not to place names.
+ */
+export function liftSignLayer(): Record<string, unknown> {
+  return {
+    id: LIFT_SIGN_LAYER,
+    type: "symbol",
+    source: PISTE_SOURCE_ID,
+    minzoom: 11,
+    filter: ["==", ["get", "kind"], "lift"],
+    layout: {
+      "symbol-placement": "line",
+      "symbol-spacing": 360,
+      "icon-image": ["concat", "lift-sign-", liftKindExpression()],
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.66, 15, 1, 17, 1.15],
+      "icon-rotation-alignment": "viewport",
+      "icon-pitch-alignment": "viewport",
+      "icon-padding": 2,
+    },
+  };
+}
+
+/** Cars hang under the cable and face the viewer; chevrons lie flat and point along the belt. */
+export function liftCarLayers(): Array<Record<string, unknown>> {
+  const layout = {
+    "icon-image": ["concat", "lift-car-", ["get", "car"]],
+    "icon-size": ["interpolate", ["linear"], ["zoom"], LIFT_MOTION_MINZOOM, 0.6, 16, 1],
+    "icon-allow-overlap": true,
+    "icon-ignore-placement": true,
+  };
+  return [
+    {
+      id: LIFT_CAR_LAYER,
+      type: "symbol",
+      source: LIFT_CARS_SOURCE,
+      minzoom: LIFT_MOTION_MINZOOM,
+      filter: ["!=", ["get", "car"], "chevron"],
+      layout: { ...layout, "icon-anchor": "top", "icon-rotation-alignment": "viewport", "icon-pitch-alignment": "viewport" },
+    },
+    {
+      id: LIFT_BELT_LAYER,
+      type: "symbol",
+      source: LIFT_CARS_SOURCE,
+      minzoom: LIFT_MOTION_MINZOOM,
+      filter: ["==", ["get", "car"], "chevron"],
+      layout: { ...layout, "icon-rotate": ["get", "rotate"], "icon-rotation-alignment": "map", "icon-pitch-alignment": "map" },
+    },
+  ];
+}
+
+/** Sign and car images. A style swap drops them with the style, so this runs again after style.load. */
+export function addLiftImages(map: VectorMap, dark: boolean): void {
+  for (const kind of LIFT_KINDS) {
+    const id = liftSignImageId(kind);
+    const image = map.hasImage(id) ? null : drawLiftSign(kind);
+    if (image) map.addImage(id, image, { pixelRatio: LIFT_ICON_PIXEL_RATIO });
+  }
+  for (const car of CAR_KINDS) {
+    const id = liftCarImageId(car);
+    const image = map.hasImage(id) ? null : drawLiftCar(car, dark);
+    if (image) map.addImage(id, image, { pixelRatio: LIFT_ICON_PIXEL_RATIO });
+  }
 }
 
 /** A piste or lift spec as a line layer on the resort's piste source. */
@@ -360,8 +435,14 @@ export function pisteLayer(spec: PisteLayerSpec): Record<string, unknown> {
   };
 }
 
+/** Line layers and lift signs: what tips and taps can land on. */
 export function pisteLayerIds(): string[] {
-  return pisteLayerSpecs(false).map((spec) => spec.id);
+  return [...pisteLayerSpecs(false).map((spec) => spec.id), LIFT_SIGN_LAYER];
+}
+
+/** Every layer on the resort's piste and car sources, top first, for removing them. */
+export function resortRunLayerIds(): string[] {
+  return [LIFT_SIGN_LAYER, LIFT_BELT_LAYER, LIFT_CAR_LAYER, ...pisteLayerSpecs(false).map((spec) => spec.id)];
 }
 
 export function firstLabelLayer(map: VectorMap): string | undefined {
@@ -370,7 +451,17 @@ export function firstLabelLayer(map: VectorMap): string | undefined {
 
 export function pisteTip(
   properties: Record<string, unknown> | null | undefined,
-  labels: { lift: string; novice: string; easy: string; intermediate: string; advanced: string; freeride: string; other: string },
+  labels: {
+    lift: string;
+    novice: string;
+    easy: string;
+    intermediate: string;
+    advanced: string;
+    freeride: string;
+    other: string;
+    /** Names for each lift type; without them a lift shows its raw OSM type. */
+    lifts?: Record<LiftKind, string>;
+  },
 ): string {
   if (!properties) return "";
   const kind = properties.kind === "lift" ? "lift" : "piste";
@@ -391,5 +482,6 @@ export function pisteTip(
               : difficulty === "freeride"
                 ? labels.freeride
                 : labels.other;
-  return [name, kind === "lift" ? aerialway || difficultyLabel : difficultyLabel].filter(Boolean).join(" · ");
+  const liftLabel = labels.lifts ? labels.lifts[liftKind(typeof properties.aerialway === "string" ? properties.aerialway : null)] : aerialway;
+  return [name, kind === "lift" ? liftLabel || difficultyLabel : difficultyLabel].filter(Boolean).join(" · ");
 }

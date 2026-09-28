@@ -19,7 +19,7 @@ import { useApp } from "./AppState";
 import { useNarrow } from "./useNarrow";
 
 export function ExplorerFrame() {
-  const { share, selectResort, t, offline, searchAsMove, setSearchAsMove, areaStale, searchThisArea, resortDays, copyLink } = useApp();
+  const { share, selectResort, t, offline, areaStale, searchThisArea, resortDays, copyLink } = useApp();
   const href = useLocalizedPath();
   const narrow = useNarrow();
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -104,10 +104,6 @@ export function ExplorerFrame() {
             {t("searchThisArea")}
           </button>
         ) : null}
-        <label className="move-toggle">
-          <input type="checkbox" checked={searchAsMove} onChange={(event) => setSearchAsMove(event.target.checked)} />
-          <span>{t("searchAsMove")}</span>
-        </label>
         <PlanPill />
       </div>
       <div className="sheet-host" id="sheet-host">

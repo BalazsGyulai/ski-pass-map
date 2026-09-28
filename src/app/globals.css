@@ -70,6 +70,8 @@
   --shadow-2: 0 1px 2px rgba(13, 19, 33, 0.04), 0 10px 28px -6px rgba(13, 19, 33, 0.14);
   --shadow-3: 0 -1px 0 rgba(13, 19, 33, 0.04), 0 -10px 36px -10px rgba(13, 19, 33, 0.18);
   --shadow-float: 0 0 0 1px var(--glass-edge), 0 2px 4px rgba(13, 19, 33, 0.04), 0 12px 32px -8px rgba(13, 19, 33, 0.2);
+  /* Chips sit in a scrolling row that clips anything below it, so their shadow stays within a few pixels. */
+  --shadow-chip: 0 0 0 1px var(--glass-edge), 0 1px 2px rgba(13, 19, 33, 0.06), 0 2px 6px -1px rgba(13, 19, 33, 0.14);
   --shadow: var(--shadow-2);
   --sheet-shadow: var(--shadow-3);
   --tab-bar-height: 56px;
@@ -114,6 +116,7 @@
     --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -6px rgba(0, 0, 0, 0.5);
     --shadow-3: 0 -1px 0 rgba(255, 255, 255, 0.04), 0 -12px 40px -10px rgba(0, 0, 0, 0.6);
     --shadow-float: 0 0 0 1px var(--glass-edge), 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+    --shadow-chip: 0 0 0 1px var(--glass-edge), 0 2px 6px -1px rgba(0, 0, 0, 0.55);
     color-scheme: dark;
   }
 }
@@ -151,6 +154,7 @@
   --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -6px rgba(0, 0, 0, 0.5);
   --shadow-3: 0 -1px 0 rgba(255, 255, 255, 0.04), 0 -12px 40px -10px rgba(0, 0, 0, 0.6);
   --shadow-float: 0 0 0 1px var(--glass-edge), 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+  --shadow-chip: 0 0 0 1px var(--glass-edge), 0 2px 6px -1px rgba(0, 0, 0, 0.55);
   color-scheme: dark;
 }
 
@@ -371,6 +375,8 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   flex-direction: column;
   justify-content: center;
 }
+/* Matches the filter icon's distance from the right end of the pill. */
+.search-pill > .pill-copy:first-child { padding-left: 15px; }
 .pill-title { font-weight: 600; font-size: var(--text-md); line-height: 1.25; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pill-summary { color: var(--ink-3); font-size: var(--text-xs); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .count-badge {
@@ -749,7 +755,7 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
   background: var(--glass-strong);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
-  box-shadow: var(--shadow-float);
+  box-shadow: var(--shadow-chip);
   color: var(--ink);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -760,9 +766,9 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
 .chip-dot { width: 10px; height: 10px; border-radius: var(--radius-pill); background: var(--pass); box-shadow: 0 0 0 2px color-mix(in srgb, var(--surface) 80%, transparent); }
 .chip[aria-pressed="true"] {
   background: color-mix(in srgb, var(--pass) 16%, var(--surface));
-  box-shadow: inset 0 0 0 2px var(--pass), var(--shadow-float);
+  box-shadow: inset 0 0 0 2px var(--pass), var(--shadow-chip);
 }
-.chip:first-child[aria-pressed="true"] { background: var(--ink); color: var(--on-accent); box-shadow: var(--shadow-float); }
+.chip:first-child[aria-pressed="true"] { background: var(--ink); color: var(--on-accent); box-shadow: var(--shadow-chip); }
 .desk-only { display: none; }
 @media (min-width: 900px) { .desk-only { display: flex; } }
 
@@ -983,7 +989,11 @@ legend { padding: 0 4px; font-weight: 600; }
 .piste-legend li { display: flex; align-items: center; gap: 8px; min-height: 28px; font-size: 14px; }
 .piste-swatch { width: 18px; height: 4px; border-radius: 999px; background: #111827; }
 .piste-swatch.dashed { background: repeating-linear-gradient(90deg, #ea7a1a 0 5px, transparent 5px 8px); }
-.piste-swatch.lift { background: repeating-linear-gradient(90deg, #1f2937 0 2px, transparent 2px 5px); }
+.piste-swatch.lift { height: 2px; background: var(--ink-2); }
+/* The same signs as on the map, so a sign can be looked up at a glance. */
+.lift-legend { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; }
+.lift-legend li { display: flex; align-items: center; gap: 8px; min-height: 28px; min-width: 0; font-size: var(--text-sm); line-height: 1.25; }
+.lift-sign { flex: none; filter: drop-shadow(0 1px 1.5px rgba(13, 19, 33, 0.28)); }
 .piste-float {
   position: absolute;
   z-index: 20;
@@ -1168,57 +1178,62 @@ legend { padding: 0 4px; font-weight: 600; }
   .topbar-links a:hover, .topbar-links button:hover { background: var(--surface-2); color: var(--ink); }
   .search-pill { max-width: 560px; height: 48px; flex: 1; }
   .pill-btn { width: 44px; height: 44px; }
-  .stage { top: 64px; left: 400px; right: 0; }
+  /* The side panel floats over the map's left edge. MapView keeps --panel-space as camera padding. */
+  .explorer { --panel-gap: 12px; --panel-width: 400px; --panel-space: calc(var(--panel-gap) + var(--panel-width)); }
+  .stage { top: 64px; left: 0; right: 0; }
   .sheet-host {
-    top: 64px;
-    bottom: 0;
-    width: 400px;
+    top: calc(64px + var(--panel-gap));
+    left: var(--panel-gap);
+    bottom: var(--panel-gap);
+    width: var(--panel-width);
     right: auto;
     pointer-events: auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
   }
-  .site-tabs.site-map .sheet-host { bottom: 0; }
+  .site-tabs.site-map .sheet-host { bottom: var(--panel-gap); }
   .list-sheet, .resort-card {
     height: 100%;
     min-height: 0;
     flex: 1;
-    border-radius: 0;
-    box-shadow: none;
-    border-right: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-float);
   }
+  :root[data-theme="dark"] :is(.list-sheet, .resort-card) { box-shadow: var(--shadow-float), inset 0 1px 0 var(--glass-edge); }
   .sheet-grab { display: none; }
-  .plan-pill { left: 16px; bottom: 32px; }
+  /* No drag handle above the heading here, so the heading and its corner buttons get their own room. */
+  .sheet-head { padding-top: 16px; }
+  .resort-head-actions { top: 12px; right: 12px; }
+  /* Desktop-sized buttons for a 400 px panel: 13 px labels on one line instead of 44 px phone targets. */
+  .sheet-host :is(.primary, .ghost, .link-buttons a) { min-height: 38px; padding: 0 14px; font-size: var(--text-sm); }
+  .sheet-host :is(.action-bar .icon-btn, .stepper button) { width: 38px; height: 38px; min-height: 38px; font-size: 17px; }
+  .sheet-head .styled-select select { font-size: var(--text-sm); }
+  .plan-pill { left: calc(var(--panel-space) + 16px); bottom: 32px; }
   .map-tools { top: 16px; }
-  .area-btn { top: 116px; }
+  /* Centred on the map you can see, not on the part under the panel. */
+  .area-btn { top: 68px; left: calc(var(--panel-space) + (100% - var(--panel-space)) / 2); }
   .layers-panel { top: 16px; right: 72px; }
-  .pass-chips { top: 12px; left: 0; right: 76px; padding: 4px 16px 8px; }
+  .pass-chips { top: 12px; left: var(--panel-space); right: 76px; padding: 4px 16px 8px; }
   .explorer[data-panel="resort"] .pass-chips { display: flex; }
+  .piste-float { left: calc(var(--panel-space) + 16px); }
   .move-toggle {
-    display: flex;
-    position: absolute;
-    z-index: 34;
-    top: 64px;
-    left: 50%;
-    transform: translateX(-50%);
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 44px;
-    padding: 0 12px;
-    border-radius: var(--radius-pill);
-    background: var(--glass-strong);
-    -webkit-backdrop-filter: var(--glass-blur);
-    backdrop-filter: var(--glass-blur);
-    box-shadow: var(--shadow-float);
+    margin-top: 10px;
+    color: var(--ink-2);
     font-size: var(--text-sm);
     font-weight: 600;
+    cursor: pointer;
   }
+  .move-toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--ink); cursor: pointer; }
   .explorer :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
   .explorer[data-snap="peek"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
   .explorer[data-snap="half"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
   .explorer[data-snap="full"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right),
   .explorer[data-panel="resort"] :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right, .mapboxgl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-right) { bottom: 0; display: block; }
+  .explorer :is(.maplibregl-ctrl-bottom-left, .mapboxgl-ctrl-bottom-left) { left: var(--panel-space); }
   .explorer[data-snap="full"] .map-tools,
   .explorer[data-snap="full"] .piste-float { display: flex; }
   .explorer :is(.maplibregl-ctrl-top-right, .mapboxgl-ctrl-top-right) { top: 128px; }
@@ -1237,7 +1252,7 @@ legend { padding: 0 4px; font-weight: 600; }
   }
   .scrim-filter .scrim-hit { background: transparent; }
   .plan-layout { grid-template-columns: 1fr 1fr; align-items: start; }
-  .offline-banner { top: 76px; left: 412px; }
+  .offline-banner { top: 76px; left: calc(var(--panel-space) + 12px); }
 }
 
 .lang-switch {
