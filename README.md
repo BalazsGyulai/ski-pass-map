@@ -24,7 +24,7 @@ Do not create a Cloudflare project from this repository's scripts. When you conn
 
 | Setting | Value |
 | --- | --- |
-| Build command | `npm ci && npm run build` |
+| Build command | `npm install -g npm@11.6.2 && npm ci && npm run build` |
 | Output directory | `out` |
 | Environment variable | `NEXT_PUBLIC_BASE_PATH` |
 
@@ -57,7 +57,7 @@ Consent lives in `localStorage` under `skimap-map-consent` and defaults to off. 
 3. Set `MAP_LOAD_HASH_SALT` in the Pages environment to a long random string. It is not a personal identifier and it does not belong in git.
 4. Optionally set `MAPBOX_MONTHLY_LIMIT` (default `45000`) and `MAP_LOAD_ALLOWED_ORIGINS` (comma-separated extra origins; the site's own origin is always allowed).
 5. Create a Mapbox **public** token. Before launch, restrict it by URL to the production site. Set `NEXT_PUBLIC_MAPBOX_TOKEN` on the Cloudflare Pages build only. Leave it unset for GitHub Pages. `.env.example` stays empty.
-6. Build command and output directory stay `npm ci && npm run build` and `out`.
+6. Build command and output directory stay `npm install -g npm@11.6.2 && npm ci && npm run build` and `out`. Paste that command into the Cloudflare Pages project settings. The repository cannot change the dashboard by itself.
 
 Styles: OpenFreeMap [Positron](https://tiles.openfreemap.org/styles/positron) (light, with Natural Earth shaded relief at low zoom) and Mapbox `light-v11`. Dark mode uses OpenFreeMap Dark and Mapbox `dark-v11`. Attribution for OpenStreetMap (ODbL), OpenSkiMap, OpenFreeMap, OpenMapTiles, and Mapbox stays on the map. The OpenSnowMap piste overlay is unchanged.
 
