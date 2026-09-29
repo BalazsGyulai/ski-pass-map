@@ -159,6 +159,7 @@
   "otherTariffs": "Otras tarifas",
   "yes": "Sí",
   "plannedBadge": "{n} días previstos",
+  "plannedDays": "días previstos",
   "uncoveredTicket": "Forfaits de día para los días no cubiertos",
   "estimate": "estimación",
   "ageNotBirthYear": "El precio de este forfait depende de la edad en el momento de la compra, no del año de nacimiento. Los precios de adulto y de niño aparecen por separado.",

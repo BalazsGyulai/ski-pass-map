@@ -159,6 +159,7 @@
   "otherTariffs": "Altres tarifes",
   "yes": "Sí",
   "plannedBadge": "{n} dies previstos",
+  "plannedDays": "dies previstos",
   "uncoveredTicket": "Forfets de dia per als dies no coberts",
   "estimate": "estimació",
   "ageNotBirthYear": "El preu d'aquest forfet depèn de l'edat en el moment de la compra, no de l'any de naixement. Els preus d'adult i d'infant apareixen per separat.",

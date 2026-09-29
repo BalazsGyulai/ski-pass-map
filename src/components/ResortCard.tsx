@@ -206,7 +206,10 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
             <button type="button" aria-label={t("decreaseDays")} onClick={() => setResortDaysCount(resort.id, days - 1)}>
               −
             </button>
-            <span className="num">{t("plannedBadge", { n: days })}</span>
+            <span className="stepper-count">
+              <span className="num">{days}</span>
+              <span className="stepper-bubble">{t("plannedDays")}</span>
+            </span>
             <button type="button" aria-label={t("increaseDays")} onClick={() => setResortDaysCount(resort.id, days + 1)}>
               +
             </button>

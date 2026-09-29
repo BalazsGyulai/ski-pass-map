@@ -159,6 +159,7 @@
   "otherTariffs": "Andra priser",
   "yes": "Ja",
   "plannedBadge": "{n} dagar planerade",
+  "plannedDays": "dagar planerade",
   "uncoveredTicket": "Dagkort för dagar som inte täcks",
   "estimate": "uppskattning",
   "ageNotBirthYear": "Priset för det här liftkortet beror på åldern vid köpet, inte på födelseåret. Priserna för vuxna och barn visas separat.",

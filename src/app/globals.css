@@ -684,14 +684,21 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   display: flex;
   gap: 8px;
   align-items: center;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
   background: var(--glass-strong);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   flex: none;
 }
-.action-bar .primary, .action-bar .stepper { flex: 1; }
+.action-bar .primary { flex: 1; }
+.action-bar .website-btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 /* Resort card: one scroll, passes first. */
 .resort-head-actions { position: absolute; top: 0; right: 12px; display: flex; gap: 8px; }
 .resort-head-actions .icon-btn { width: 36px; height: 36px; min-height: 36px; }
@@ -914,27 +921,39 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
 }
 .stepper button:hover { background: var(--surface-3); }
 /* Resort footer: one compact capsule, not a row stretched across the bar. */
-.action-bar .stepper { justify-content: center; gap: 4px; min-width: 0; }
+.action-bar .stepper { flex: 0 0 auto; justify-content: center; gap: 6px; min-width: max-content; }
 .action-bar .stepper button {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  min-height: 32px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
   flex: none;
   padding: 0;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   display: grid;
   place-items: center;
+  background: var(--ink);
+  color: var(--on-accent);
+  border-color: var(--ink);
 }
-.action-bar .stepper .num {
-  min-width: 0;
-  overflow: hidden;
-  font-size: 12px;
-  font-weight: 600;
+.action-bar .stepper button:hover { background: color-mix(in srgb, var(--ink) 86%, var(--surface)); }
+.action-bar .stepper-count { display: grid; justify-items: center; gap: 3px; min-width: max-content; }
+.action-bar .stepper-count .num {
+  overflow: visible;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+.action-bar .stepper-bubble {
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--ink-2);
+  font-size: 10px;
+  font-weight: 650;
   line-height: 1.2;
   white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .link-list, .plan-list, .option-list, .source-list { list-style: none; margin: 0; padding: 0; }
@@ -1366,7 +1385,7 @@ legend { padding: 0 4px; font-weight: 600; }
   .search-pill { max-width: 560px; height: 48px; flex: 1; }
   .pill-btn { width: 44px; height: 44px; }
   /* The side panel floats over the map's left edge. MapView keeps --panel-space as camera padding. */
-  .explorer { --panel-gap: 12px; --panel-width: 400px; --panel-space: calc(var(--panel-gap) + var(--panel-width)); }
+  .explorer { --panel-gap: 12px; --panel-width: 440px; --panel-space: calc(var(--panel-gap) + var(--panel-width)); }
   .stage { top: 64px; left: 0; right: 0; }
   .sheet-host {
     top: calc(64px + var(--panel-gap));

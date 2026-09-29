@@ -159,6 +159,7 @@
   "otherTariffs": "Andre priser",
   "yes": "Ja",
   "plannedBadge": "{n} dager planlagt",
+  "plannedDays": "dager planlagt",
   "uncoveredTicket": "Dagskort for dager som ikke dekkes",
   "estimate": "anslag",
   "ageNotBirthYear": "Prisen på dette heiskortet avhenger av alderen ved kjøp, ikke av fødselsåret. Prisene for voksne og barn står hver for seg.",

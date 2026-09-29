@@ -159,6 +159,7 @@
   "otherTariffs": "Kiti tarifai",
   "yes": "Taip",
   "plannedBadge": "Suplanuota dienų: {n}",
+  "plannedDays": "Suplanuota dienų",
   "uncoveredTicket": "Dienos bilietai nedengtoms dienoms",
   "estimate": "įvertis",
   "ageNotBirthYear": "Šio abonemento kaina priklauso nuo amžiaus pirkimo dieną, o ne nuo gimimo metų. Suaugusiųjų ir vaikų kainos pateikiamos atskirai.",

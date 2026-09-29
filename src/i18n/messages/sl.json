@@ -159,6 +159,7 @@
   "otherTariffs": "Druge tarife",
   "yes": "Da",
   "plannedBadge": "Načrtovani dnevi: {n}",
+  "plannedDays": "Načrtovani dnevi",
   "uncoveredTicket": "Dnevne vozovnice za nepokrite dneve",
   "estimate": "ocena",
   "ageNotBirthYear": "Cena te vozovnice je odvisna od starosti ob nakupu, ne od leta rojstva. Cene za odrasle in otroke so navedene ločeno.",

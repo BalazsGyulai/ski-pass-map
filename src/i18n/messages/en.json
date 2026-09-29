@@ -159,6 +159,7 @@
   "otherTariffs": "Other tariffs",
   "yes": "Yes",
   "plannedBadge": "{n} days planned",
+  "plannedDays": "days planned",
   "uncoveredTicket": "Day tickets for uncovered days",
   "estimate": "estimate",
   "ageNotBirthYear": "This pass is priced by age at purchase, not birth year. The adult and child prices are listed separately.",

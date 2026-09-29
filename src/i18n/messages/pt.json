@@ -159,6 +159,7 @@
   "otherTariffs": "Outras tarifas",
   "yes": "Sim",
   "plannedBadge": "{n} dias planeados",
+  "plannedDays": "dias planeados",
   "uncoveredTicket": "Bilhetes diários para os dias não cobertos",
   "estimate": "estimativa",
   "ageNotBirthYear": "O preço deste passe depende da idade no momento da compra, não do ano de nascimento. Os preços de adulto e de criança aparecem em separado.",

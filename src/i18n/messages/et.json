@@ -159,6 +159,7 @@
   "otherTariffs": "Muud hinnad",
   "yes": "Jah",
   "plannedBadge": "Planeeritud päevi: {n}",
+  "plannedDays": "Planeeritud päevi",
   "uncoveredTicket": "Päevapiletid katmata päevadeks",
   "estimate": "hinnang",
   "ageNotBirthYear": "Selle pileti hind sõltub vanusest ostu hetkel, mitte sünniaastast. Täiskasvanu ja lapse hinnad on eraldi.",

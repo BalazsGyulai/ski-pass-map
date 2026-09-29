@@ -159,6 +159,7 @@
   "otherTariffs": "Andre priser",
   "yes": "Ja",
   "plannedBadge": "{n} dage planlagt",
+  "plannedDays": "dage planlagt",
   "uncoveredTicket": "Dagskort til dage, der ikke dækkes",
   "estimate": "skøn",
   "ageNotBirthYear": "Prisen på dette liftkort afhænger af alderen ved købet, ikke af fødselsåret. Priserne for voksne og børn står hver for sig.",

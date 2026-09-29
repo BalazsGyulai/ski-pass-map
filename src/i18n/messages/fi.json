@@ -159,6 +159,7 @@
   "otherTariffs": "Muut hinnat",
   "yes": "Kyllä",
   "plannedBadge": "Suunniteltuja päiviä: {n}",
+  "plannedDays": "Suunniteltuja päiviä",
   "uncoveredTicket": "Päiväliput kattamattomille päiville",
   "estimate": "arvio",
   "ageNotBirthYear": "Tämän kausikortin hinta määräytyy iän mukaan ostohetkellä, ei syntymävuoden mukaan. Aikuisten ja lasten hinnat näkyvät erikseen.",
