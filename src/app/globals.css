@@ -913,6 +913,29 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
   transition: background-color var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
 }
 .stepper button:hover { background: var(--surface-3); }
+/* Resort footer: one compact capsule, not a row stretched across the bar. */
+.action-bar .stepper { justify-content: center; gap: 4px; min-width: 0; }
+.action-bar .stepper button {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  flex: none;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+.action-bar .stepper .num {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 
 .link-list, .plan-list, .option-list, .source-list { list-style: none; margin: 0; padding: 0; }
 .pass-short { font-size: var(--text-lg); line-height: 22px; font-weight: 700; letter-spacing: -0.015em; }
@@ -1371,7 +1394,7 @@ legend { padding: 0 4px; font-weight: 600; }
   .resort-head-actions { top: 12px; right: 12px; }
   /* Desktop-sized buttons for a 400 px panel: 13 px labels on one line instead of 44 px phone targets. */
   .sheet-host :is(.primary, .ghost, .link-buttons a) { min-height: 38px; padding: 0 14px; font-size: var(--text-sm); }
-  .sheet-host :is(.action-bar .icon-btn, .stepper button) { width: 38px; height: 38px; min-height: 38px; font-size: 17px; }
+  .sheet-host .action-bar .icon-btn { width: 38px; height: 38px; min-height: 38px; font-size: 17px; }
   .sheet-head .styled-select select { font-size: var(--text-sm); }
   .plan-pill { left: calc(var(--panel-space) + 16px); bottom: 32px; }
   .map-tools { top: 16px; }
