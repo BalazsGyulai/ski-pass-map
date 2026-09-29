@@ -603,7 +603,31 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
 .meta { margin: 6px 0 0; color: var(--ink-2); font-size: var(--text-sm); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .close-card { position: absolute; top: 0; right: 12px; width: 36px; height: 36px; min-height: 36px; }
 .sheet-scroll, .filter-body { overscroll-behavior: contain; }
+.scroll-fade {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
 .sheet-scroll { flex: 1; min-height: 0; overflow: auto; padding: 0 0 12px; }
+.scroll-fade > .sheet-scroll { padding-bottom: 40px; }
+.scroll-fade > .resort-scroll { padding-bottom: 48px; }
+/* The last card dissolves into the panel instead of ending on a hard cut. The strip does not take clicks. */
+.scroll-fade::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--surface));
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000);
+  mask-image: linear-gradient(to bottom, transparent, #000);
+}
 .sort-label select { min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); padding: 0 8px; }
 
 .resort-list { list-style: none; margin: 0; padding: 0 var(--space-4) var(--space-2); display: grid; gap: var(--space-2); }
@@ -817,6 +841,31 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   pointer-events: auto;
+  --chip-fade-start: 20px;
+  --chip-fade-end: 28px;
+  mask-image: linear-gradient(to right, #0000, #000 var(--chip-fade-start), #000 calc(100% - var(--chip-fade-end)), #0000);
+}
+@property --chip-fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 20px;
+}
+@property --chip-fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 28px;
+}
+@supports (animation-timeline: scroll()) {
+  .pass-chips {
+    --chip-fade-start: 0px;
+    animation: chip-row-fade linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+@keyframes chip-row-fade {
+  0% { --chip-fade-start: 0px; --chip-fade-end: 28px; }
+  8%, 92% { --chip-fade-start: 20px; --chip-fade-end: 28px; }
+  100% { --chip-fade-start: 20px; --chip-fade-end: 0px; }
 }
 .pass-chips::-webkit-scrollbar { display: none; }
 .explorer[data-panel="resort"] .pass-chips { display: none; }

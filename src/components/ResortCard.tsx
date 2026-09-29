@@ -145,6 +145,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         </div>
       </header>
 
+      <div className="scroll-fade">
       <div className="resort-scroll">
         {!visible ? <p className="hint warn">{t("hiddenByFilters")}</p> : null}
         {resort.portalAttribution ? (
@@ -190,6 +191,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         <SnowSection resort={resort} />
         <TravelSection resort={resort} />
         <LinksSection resort={resort} />
+      </div>
       </div>
 
       <footer className="action-bar">

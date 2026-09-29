@@ -63,6 +63,7 @@ export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: 
           onChange={(sort) => updateShare({ sort, dir: sort === "elevation" || sort === "slope" ? "desc" : "asc" })}
         />
       </header>
+      <div className="scroll-fade">
       <div className="sheet-scroll">
         {!ready ? (
           <div role="status" aria-label={t("loadingList")}>
@@ -100,6 +101,7 @@ export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: 
           <ResortList items={sorted} />
         )}
         <p className="disclaimer sheet-disclaimer">{t("globalDisclaimer")}</p>
+      </div>
       </div>
     </section>
   );
