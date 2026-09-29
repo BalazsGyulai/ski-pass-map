@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "node .cursor/hooks/agent-loop.mjs edited",
+        "timeout": 15
+      }
+    ],
+    "stop": [
+      {
+        "command": "node .cursor/hooks/agent-loop.mjs stop",
+        "timeout": 900,
+        "loop_limit": 5
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "node .cursor/hooks/guard-shell.mjs",
+        "timeout": 15,
+        "matcher": "\\bgit\\s+(push|reset\\s+--hard|clean\\s+-[a-zA-Z]*f)|\\bwrangler\\b.*(\\b(deploy|publish|secret|delete|create)\\b|--remote\\b)|\\bnpm\\s+publish\\b|\\bgh\\s+(pr\\s+merge|release|repo\\s+delete)\\b|\\brm\\s+-[a-zA-Z]*r[a-zA-Z]*\\s+(/|~/?|\\*)(\\s|$)"
+      }
+    ]
+  }
+}
