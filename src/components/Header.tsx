@@ -9,33 +9,31 @@ import { SettingsLink } from "./SettingsLink";
 import { useApp } from "./AppState";
 import { isCurrentTab, primaryTabs } from "./nav-links";
 
+/** The map's desktop bar, without the search field. Map sits left of Passes. */
 export function Header() {
   const pathname = usePathname();
-  const { t } = useApp();
+  const { t, resortDays } = useApp();
   const href = useLocalizedPath();
   const { rest } = parseLangPath(pathname);
-  const onSettings = rest === "/settings" || rest.startsWith("/settings/");
+  const days = Object.values(resortDays).reduce((sum, value) => sum + value, 0);
   return (
     <header className="site-header">
       <a className="skip" href="#main">
         {t("skip")}
       </a>
-      <div className="bar">
-        <Link href={href("/")} className="brand">
+      <div className="topbar">
+        <Link href={href("/")} className="brand desk-brand">
           <span>{SITE_NAME}</span>
-          <small>{t("season")}</small>
         </Link>
-        <nav className="primary-nav" aria-label={t("title")}>
+        <nav className="topbar-links" aria-label={t("title")}>
           {primaryTabs.map((link) => (
             <Link key={link.rest} href={href(link.rest)} aria-current={isCurrentTab(rest, link.rest) ? "page" : undefined}>
-              {t(link.key)}
+              {link.rest === "/plan" && days > 0 ? t("myPlanPillPlain", { days }) : t(link.key)}
             </Link>
           ))}
-        </nav>
-        <div className="bar-tools">
-          {onSettings ? null : <LanguageSwitcher compact />}
+          <LanguageSwitcher compact />
           <SettingsLink className="icon-btn" />
-        </div>
+        </nav>
       </div>
     </header>
   );

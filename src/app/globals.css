@@ -232,6 +232,54 @@ p { text-wrap: pretty; }
   backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--line);
 }
+/* Same strip as the map, without the search field. Not the floating phone bar. */
+.site-header .topbar {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  z-index: auto;
+  height: 64px;
+  padding: 0 16px;
+  background: transparent;
+  border-bottom: 0;
+  pointer-events: auto;
+  gap: 16px;
+}
+.site-header .desk-brand,
+.site-header .topbar-links { display: flex; }
+.site-header .desk-brand {
+  align-items: center;
+  align-self: center;
+  min-height: 0;
+  font-weight: 700;
+  font-size: var(--text-lg);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+.site-header .desk-brand span { line-height: 1; }
+.site-header .topbar-links { align-items: center; gap: 4px; margin-left: auto; }
+.site-header .topbar-links a,
+.site-header .topbar-links button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+}
+.site-header .topbar-links a:hover,
+.site-header .topbar-links button:hover { background: var(--surface-2); color: var(--ink); }
+.site-header .topbar-links a[aria-current="page"],
+.site-header .topbar-links .icon-btn[aria-current="page"] { background: var(--ink); color: var(--on-accent); }
+.site-header .topbar-links .icon-btn { width: 40px; height: 40px; min-height: 40px; padding: 0; }
 .bar {
   display: flex;
   align-items: center;
@@ -1372,7 +1420,8 @@ legend { padding: 0 4px; font-weight: 600; }
   .desk-brand { font-weight: 700; font-size: var(--text-lg); letter-spacing: -0.03em; text-decoration: none; }
   .topbar-gear { display: none; }
   .topbar-links .icon-btn { width: 40px; height: 40px; min-height: 40px; padding: 0; color: var(--ink); background: var(--surface-2); }
-  .topbar-links .icon-btn[aria-current="page"] { background: var(--ink); color: var(--on-accent); }
+  .topbar-links .icon-btn[aria-current="page"],
+  .topbar-links a[aria-current="page"] { background: var(--ink); color: var(--on-accent); }
   .topbar .search-pill { box-shadow: none; background: var(--surface-2); border: 1px solid var(--line); -webkit-backdrop-filter: none; backdrop-filter: none; }
   .desk-brand { display: flex; }
   .topbar-links { display: flex; align-items: center; gap: 4px; margin-left: auto; }
