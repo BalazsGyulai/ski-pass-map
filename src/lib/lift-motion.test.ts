@@ -69,6 +69,29 @@ describe("liftPaths", () => {
     expect(paths[2].length).toBeCloseTo(paths[1].length / 2, 0);
     expect(liftPaths(null)).toEqual([]);
   });
+
+  it("keeps one rope of cars when two lifts of the same kind run side by side", () => {
+    const beside = 0.00025;
+    const paths = liftPaths({
+      features: [lift("chair_lift"), lift("chair_lift", [[beside, 0], [beside, 0.009]])],
+    });
+    expect(paths).toHaveLength(1);
+  });
+
+  it("keeps lifts that are far apart, a different kind, or much shorter", () => {
+    const far = liftPaths({
+      features: [lift("chair_lift"), lift("chair_lift", [[0.01, 0], [0.01, 0.009]])],
+    });
+    expect(far).toHaveLength(2);
+    const otherKind = liftPaths({
+      features: [lift("chair_lift"), lift("gondola", [[0.0001, 0], [0.0001, 0.009]])],
+    });
+    expect(otherKind).toHaveLength(2);
+    const short = liftPaths({
+      features: [lift("platter"), lift("platter", [[0.0001, 0], [0.0001, 0.001]])],
+    });
+    expect(short).toHaveLength(2);
+  });
 });
 
 describe("liftCars", () => {

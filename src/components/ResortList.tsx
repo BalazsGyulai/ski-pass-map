@@ -8,6 +8,7 @@ import { regionLabel } from "@/lib/i18n";
 import { dayTicketIsEstimate } from "@/lib/pricing";
 import type { Resort } from "@/lib/schema";
 import { useApp } from "./AppState";
+import { IconHeart } from "./icons";
 
 export function ResortList({ items }: { items: Resort[] }) {
   const { share, favourites, toggleFavourite, selectResort, setHighlightId, home, t, lang, resortDays, messages } = useApp();
@@ -63,12 +64,12 @@ export function ResortList({ items }: { items: Resort[] }) {
             </button>
             <button
               type="button"
-              className={fav ? "star is-on" : "star"}
+              className={fav ? "star heart-btn is-on" : "star heart-btn"}
               aria-pressed={fav}
               aria-label={fav ? t("favouriteRemove") : t("favouriteAdd")}
               onClick={() => toggleFavourite(resort.id)}
             >
-              ★
+              <IconHeart />
             </button>
           </li>
         );

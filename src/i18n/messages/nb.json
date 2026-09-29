@@ -304,7 +304,7 @@
   "openFilters": "Åpne filtre",
   "filterCountBadge": "{n} filtre aktive",
   "listHandle": "Endre størrelse på listen. Pil opp gjør den større, pil ned mindre.",
-  "resortHandle": "Endre størrelse på skistedkortet. Pil opp gjør det større, pil ned mindre; fra det lille kortet lukker pil ned det.",
+  "resortHandle": "Endre størrelse på skistedkortet. Pil opp gjør det større, pil ned mindre, til navnet og deretter til håndtaket.",
   "backToList": "Tilbake til resultatene",
   "dash": "—",
   "siteFooter": "Nettsted",

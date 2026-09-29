@@ -304,7 +304,7 @@
   "openFilters": "Otvori filtre",
   "filterCountBadge": "Aktivni filtri: {n}",
   "listHandle": "Promijeni veličinu popisa. Strelica gore ga povećava, strelica dolje smanjuje.",
-  "resortHandle": "Promijeni veličinu kartice skijališta. Strelica gore je povećava, strelica dolje smanjuje; na maloj kartici strelica dolje je zatvara.",
+  "resortHandle": "Promijeni veličinu kartice skijališta. Strelica gore je povećava, strelica dolje smanjuje na ime, pa na ručku.",
   "backToList": "Natrag na rezultate",
   "dash": "—",
   "siteFooter": "Web-mjesto",

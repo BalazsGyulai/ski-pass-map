@@ -54,6 +54,7 @@
   --warn-bg: #fffaeb;
   --danger: #b42318;
   --danger-bg: #fef3f2;
+  --heart: #e5484d;
   --open-bg: #ecfdf3;
   --open-ink: #067647;
   --no-pass: #98a2b3;
@@ -103,6 +104,7 @@
     --amber-text: #fdb022;
     --danger: #f97066;
     --danger-bg: #2d1515;
+    --heart: #ff6b6e;
     --open-bg: #10261c;
     --open-ink: #75e0a7;
     --no-pass: #667085;
@@ -141,6 +143,7 @@
   --amber-text: #fdb022;
   --danger: #f97066;
   --danger-bg: #2d1515;
+  --heart: #ff6b6e;
   --open-bg: #10261c;
   --open-ink: #75e0a7;
   --no-pass: #667085;
@@ -611,8 +614,8 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   .list-sheet[data-dragging], .resort-card[data-dragging] { transition: none; }
   [data-sheet-handle] { touch-action: none; }
   /* Until the sheet is full, vertical drags on the content move the sheet; sideways swipes still page. */
-  .list-sheet:is([data-snap="peek"], [data-snap="half"]) .sheet-scroll,
-  .resort-card:is([data-snap="peek"], [data-snap="half"]) .resort-scroll {
+  .list-sheet:is([data-snap="shut"], [data-snap="bar"], [data-snap="peek"], [data-snap="half"]) .sheet-scroll,
+  .resort-card:is([data-snap="shut"], [data-snap="bar"], [data-snap="peek"], [data-snap="half"]) .resort-scroll {
     touch-action: pan-x;
     overflow-y: hidden;
   }
@@ -624,6 +627,12 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
     z-index: 2;
   }
   .resort-card[data-dragging] .action-bar { transition: none; }
+  /* The name bar and the handle leave the map clear. The action row would sit on top of that name. */
+  :is(.list-sheet, .resort-card):is([data-snap="bar"], [data-snap="shut"]) .action-bar { display: none; }
+  :is(.list-sheet, .resort-card):is([data-snap="bar"], [data-snap="shut"]) .scroll-fade { visibility: hidden; }
+  .resort-card[data-snap="bar"] :is(.eyebrow, .meta) { display: none; }
+  .list-sheet[data-snap="bar"] :is(.hint, .move-toggle, .styled-select) { display: none; }
+  :is(.list-sheet, .resort-card)[data-snap="shut"] .sheet-head { visibility: hidden; }
 }
 
 .sheet-grab {
@@ -712,9 +721,12 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   background: transparent;
   color: var(--ink-3);
   cursor: pointer;
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.star.is-on { color: var(--amber); }
+:is(.resort-head-actions .heart-btn, .star, .saved-row .heart-btn).is-on { color: var(--heart); }
+:is(.resort-head-actions .heart-btn, .star, .saved-row .heart-btn).is-on svg path { fill: currentColor; }
 .pass-dots { display: inline-flex; align-items: center; }
 .pass-dot {
   width: 10px;
@@ -761,8 +773,6 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
 .resort-head-actions { position: absolute; top: 0; right: 12px; display: flex; gap: 8px; }
 .resort-head-actions .icon-btn { width: 36px; height: 36px; min-height: 36px; }
 .resort-head-actions .close-card { position: static; }
-.resort-head-actions .icon-btn.is-on { color: #e5484d; }
-.resort-head-actions .icon-btn.is-on svg path { fill: currentColor; }
 .resort-head { padding-right: calc(var(--space-4) + 92px); }
 .resort-scroll { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px var(--space-4) var(--space-5); }
 .resort-scroll > .hint { margin: 8px 0; }
@@ -1402,14 +1412,6 @@ legend { padding: 0 4px; font-weight: 600; }
 }
 @media (max-width: 899px) {
   .move-toggle { display: none !important; }
-  .topbar-lang .lang-switch { max-width: 100%; }
-  .topbar-lang .lang-switch-trigger {
-    border: 0;
-    background: var(--glass-strong);
-    box-shadow: var(--shadow-float);
-    min-height: 44px;
-    height: 44px;
-  }
 }
 
 @media (min-width: 900px) {
@@ -1735,10 +1737,6 @@ html[data-bottom-overlay] .site-footer {
 .mobile-top .brand { min-height: 40px; }
 .bar-tools { display: flex; align-items: center; gap: 8px; margin-left: 8px; }
 .topbar-gear { flex: none; }
-.topbar-lang { display: none; flex: none; min-width: 0; }
-@media (max-width: 899px) {
-  .topbar-lang { display: block; max-width: 7.5rem; }
-}
 .mobile-top .bar-tools { min-width: 0; }
 .mobile-top .lang-switch { min-width: 0; max-width: 8.5rem; }
 .mobile-top .lang-switch-trigger { border: 0; background: var(--surface-2); }

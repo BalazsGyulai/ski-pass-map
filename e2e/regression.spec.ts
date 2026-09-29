@@ -45,7 +45,7 @@ test("language redirect and switcher (hu, en, de)", async ({ page, baseURL }) =>
   await page.goto("/");
   await page.waitForURL(/\/(hu|en|de)\//, { timeout: 15_000 });
   await page.goto("/de/");
-  // The map bar has one switcher for desktop and one for phones. Only one is shown.
+  // Phones use the language control in Settings. This page shows the desktop one.
   const trigger = page.locator(".lang-switch-trigger:visible");
   await trigger.click();
   // Opening moves focus into the list, which sits at the end of the page.
@@ -650,7 +650,7 @@ test("accessibility: no serious axe violations on main pages", async ({ page }) 
 test.describe("phone bottom sheet", () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
-  test("follows a drag, settles on a snap, and a pull down closes a resort", async ({ page, context, baseURL }) => {
+  test("follows a drag, settles on a snap, and a pull down leaves the resort open", async ({ page, context, baseURL }) => {
     const origin = originFromBase(baseURL);
     const problems = attachOriginGuards(page, origin);
     await dismissConsent(page, "rejected");
@@ -674,7 +674,8 @@ test.describe("phone bottom sheet", () => {
     await drag(".list-sheet .sheet-head", -320);
     await expect(list).toHaveAttribute("data-snap", /half|full/);
     await drag(".list-sheet .sheet-head", 600);
-    await expect(list).toHaveAttribute("data-snap", "peek");
+    await expect(list).toHaveAttribute("data-snap", /bar|shut/);
+    await expect(list).toBeVisible();
 
     await page.goto(`/en/?resort=${RESORT_ID}`);
     await page.waitForSelector("#resort-title", { timeout: 30_000 });
@@ -682,6 +683,9 @@ test.describe("phone bottom sheet", () => {
     await expect(card).toHaveAttribute("data-snap", "half");
     await expect(card).toHaveAttribute("data-sheet-live", "true");
     await drag(".resort-card .resort-head", 700);
+    await expect(card).toHaveAttribute("data-snap", /bar|shut/);
+    await expect(page).toHaveURL(new RegExp(`resort=${RESORT_ID}`));
+    await page.keyboard.press("Escape");
     await expect(page.locator("#resort-title")).toHaveCount(0, { timeout: 10_000 });
     await expect(page).not.toHaveURL(/resort=/);
     expect(problems, problems.join("\n")).toEqual([]);

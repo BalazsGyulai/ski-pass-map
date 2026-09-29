@@ -24,38 +24,74 @@ A static map of Austrian ski resorts and the multi-resort season passes that cov
 | `config/*.json` | Site name, base path, pass colours and labels, legal, affiliates |
 | `scripts/` | Build helpers, importers, e2e runners, `check-lockfile.mjs` |
 | `e2e/regression.spec.ts` | Playwright suite against `wrangler pages dev` |
+| `docs/security-review.md` | Security findings, and which ones are already fixed |
+| `DESIGN.md` | Design guide: tokens, layout, components, accessibility (WCAG 2.2 AA), motion, text length |
+| `.cursor/skills/*/SKILL.md` | Research guides for the Research step (table below) |
+
+### Research guides
+
+Each guide holds the researched, project-specific answers for one area: the sizes, helpers, and traps of this repo, with the sources they came from. Read the ones the change touches during Research. Cursor also offers them automatically by their description; in Claude Code, open them by path.
+
+| Guide | Read it when the change touches |
+| --- | --- |
+| `DESIGN.md` | Anything a visitor sees: layout, styling, components, text on screen |
+| `.cursor/skills/data-structures-algorithms/SKILL.md` | Searching, filtering, sorting, grouping, caching, distances, dates, prices |
+| `.cursor/skills/security-privacy/SKILL.md` | Input, import, storage, location, CSP, hosts, auth, functions, D1, secrets, dependencies |
+| `.cursor/skills/web-performance/SKILL.md` | The map, first load, bundle, re-renders, animations, handlers on move or on each location fix |
+| `.cursor/skills/bug-hunting/SKILL.md` | Every bug fix, every flaky or failing test, and the edge-case list for every plan |
+| `.cursor/skills/map-libraries/SKILL.md` | Any MapLibre or Mapbox call, camera, source, layer, style, terrain, or map upgrade |
+
+A guide is a starting point: the code and its tests win when they disagree, and the guide gets fixed in the same change.
 
 ## Commands
 
 | Command | When |
 | --- | --- |
 | `npm ci` | Install. Do not use `npm install` just to install: it rewrites `package-lock.json` |
-| `npm run dev` | Dev server at http://localhost:3000/ski-pass-map/ |
+| `npm run dev` | Dev server at http://localhost:3000/ski-pass-map/. If 3000 is taken, Next prints the next port; open that host with the same `/ski-pass-map/` path |
 | `npm run lint`, `npm run typecheck`, `npm test` | After every change. About 10 seconds together |
 | `npm run build` | Before finishing anything that touches app code, config, or data. Runs `validate`, `next build`, and the static checks |
 | `npm run check:lockfile` | After any change to `package.json` or `package-lock.json` |
 | `npm run validate` | After any change under `data/` or `config/` (the build runs it too) |
-| `npm run test:e2e` | Map, navigation, or layout changes a unit test cannot cover. Builds an e2e variant and serves it locally with `wrangler pages dev`. Tests run in order and stop at the first failure; run one with `npm run test:e2e -- -g "part of its name"`. Needs Playwright Chromium. Takes minutes |
+| `npm run test:e2e` | Map, navigation, or layout changes a unit test cannot cover. Builds an e2e variant and serves it locally with `wrangler pages dev`. Tests run in order and stop at the first failure; run one with `npm run test:e2e -- -g "part of its name"`. Needs Playwright Chromium. If launch says the executable is missing under `cursor-sandbox-cache`, rerun with `PLAYWRIGHT_BROWSERS_PATH="$HOME/Library/Caches/ms-playwright"`. Takes minutes |
 
 ## How to work
 
-Do these in order. Never skip Verify.
+On every task you build, do these in order. Never skip Research, and never skip Verify. A question that only explains the code stops after Understand.
 
 1. **Understand.** Restate the request in one sentence. Read the files you will touch and their tests. Run `git status` and `git log --oneline -5`: the owner may have work in progress, never overwrite it.
-2. **Plan.** For anything bigger than a one-line fix, write a short numbered plan before editing: goal, files, risks, how you will verify. Use the todo list or Plan mode when the tool has one. Ask only when the choice belongs to the owner (product decisions, anything destructive or public). Otherwise pick the conventional option and say which one you picked.
-3. **Build in small steps.** Put logic in `src/lib/` as pure functions with tests, and keep components thin. Match the code around you: names, short comments that say why, no new dependency without a reason.
-4. **Verify.** Run lint, typecheck, and tests. Every bug fix and behaviour change gets a test; write the failing test first when you can. Run `npm run build` before you finish. For UI changes, run the app and look at it: desktop (1440×900) and phone (390×844), light and dark.
-5. **Review your diff** (`git diff`) like a strict reviewer: correctness, edge cases (empty, null, offline, permission denied), privacy, keyboard and screen-reader use, all 26 languages, both map libraries, no leftover debug code.
-6. **Commit** each finished, verified change locally in the house style below. Do not push, deploy, or touch remote resources unless the owner asked in this conversation.
-7. **Learn.** Do the [Learn](#learn) step.
-8. **Report** in plain language: what changed for the visitor, how you verified it, and anything left open or not verified.
+2. **Research.** Before the plan is final, decide the engineering questions this change can get wrong. Walk every item below. For each one, record the decision you will follow, or one sentence on why it does not apply. When an item applies and this repo does not already decide it, look it up online before you choose. Put those decisions in the plan. Only then start building.
 
-In Cursor, a hook (`.cursor/hooks.json`) runs the step 4 checks each time you stop and sends any failure back to you. Fix the cause; never skip or weaken a check to get green. The hook also asks for the Learn step once per conversation.
+   Sources, in this order. Stop at the first one that decides it:
+
+   1. This repo: the code, its tests, the [research guides](#research-guides), `docs/security-review.md`, and Lessons.
+   2. The docs for the version in `package.json` (Next.js, React, MapLibre GL, Mapbox GL, Zod, Playwright, Vitest, Cloudflare). Use the Context7 MCP tools (`resolve-library-id`, then `query-docs`) when they are available, or the installed `.d.ts` in `node_modules`.
+   3. A standard, when one exists: OWASP Top 10:2025 for security, WCAG 2.2 for accessibility, MDN and web.dev for the web platform.
+   4. A web search, for anything the three above do not answer.
+
+   Do not adopt a pattern from a blog, a forum, or a generic "best algorithm" article when a source above already decides it. Do not add a dependency because a search result uses one. When research finds something a guide lacks or gets wrong, fix the guide in the same change.
+
+   - **Data structures and algorithms** (`data-structures-algorithms`). If the change searches, filters, sorts, caches, groups, or reshapes data: pick the structure for the real size of the data (396 resorts, not millions of rows). Prefer a clear scan over an index, cache, or tree unless you measured a problem.
+   - **Security and privacy** (`security-privacy`). If it touches input, HTML, storage, location, cookies, headers, CSP, auth, webhooks, rate limits, or any host that is not this site: read `docs/security-review.md` and [Privacy and safety](#privacy-and-safety). No new trust in client input, no secret in git, no new external host without both CSP files.
+   - **Performance** (`web-performance`). If it touches the map, first load, the bundle, a list render, or a path that runs on every move or every location fix: name what gets slower and why that is acceptable. Do not add a network call, watcher, or library to save a few lines.
+   - **Bug hunting** (`bug-hunting`). Before coding, list the cases that will break it from the guide's list (data nulls, dates and seasons, location, settings, URL, both map libraries, layout, languages, offline). The plan names which of these this change can hit.
+   - **API correctness** (`map-libraries` for the map). If you call a library, confirm the method for the installed version in its docs or `.d.ts`. MapLibre and Mapbox are not the same API.
+   - **Design** (`DESIGN.md`). If a visitor will see the change: tokens, layout, accessibility, and text length.
+3. **Plan.** For anything bigger than a one-line fix, write a short numbered plan before editing: goal, the Research decisions (what you chose, what you set aside, and why), files, risks, how you will verify. A one-line fix still gets the Research checklist; it needs a numbered plan only when a decision is not obvious. Use the todo list or Plan mode when the tool has one. Ask only when the choice belongs to the owner (product decisions, anything destructive or public). Otherwise pick the conventional option and say which one you picked.
+4. **Build in small steps.** Put logic in `src/lib/` as pure functions with tests, and keep components thin. Match the code around you: names, short comments that say why, no new dependency without a reason.
+5. **Verify.** Run lint, typecheck, and tests. Every bug fix and behaviour change gets a test; write the failing test first when you can. Run `npm run build` before you finish. For UI changes, run the app and look at it: desktop (1440×900) and phone (390×844), light and dark, then the rest of "Before you finish a UI change" in `DESIGN.md`.
+6. **Review your diff** (`git diff`) like a strict reviewer: correctness, edge cases (empty, null, offline, permission denied), privacy, keyboard and screen-reader use, all 26 languages, both map libraries, no leftover debug code.
+7. **Commit** each finished, verified change locally in the house style below. Do not push, deploy, or touch remote resources unless the owner asked in this conversation.
+8. **Learn.** Do the [Learn](#learn) step.
+9. **Report** in plain language: what changed for the visitor, how you verified it, and anything left open or not verified.
+
+In Cursor, a hook (`.cursor/hooks.json`) runs the Verify checks each time you stop and sends any failure back to you. Fix the cause; never skip or weaken a check to get green. The hook also asks for the Learn step once per conversation.
 
 Habits that save the most time:
 
 - Read before you write. Search the code for an existing helper before adding one.
 - Prove it, don't assume it: run the code, read the library source, check the data.
+- Research decides the plan. Do not pick an approach and then go looking for a quote that supports it.
 - Change only what the task needs. Note unrelated problems in your report instead of fixing them silently.
 - After two failed attempts at the same thing, stop and re-plan from what you learned. After three, ask.
 - Say plainly what you did not verify.
@@ -125,3 +161,4 @@ If all three answers are no, change nothing. Otherwise edit this file in the sam
 - 2026-09-29 · e2e · When a component renders once per breakpoint, select the visible one (`:visible`) in Playwright. Why: two language switchers on the map page broke a strict locator in `e2e/regression.spec.ts`.
 - 2026-09-29 · e2e · After map or UI changes, run `npm run test:e2e` to the end, not only unit tests. Why: five failures sat unnoticed for days: a removed layer still tested (`lift-chair`), missing test glyphs hiding every dot on Mapbox, a scroll-driven animation that never "finishes", a screenshot folder that exists only on Cursor's cloud machines, and the page-view rate limit tripping on a fast run.
 - 2026-09-29 · a11y · Moving lifts follow `prefers-reduced-motion` until the visitor chooses (`storedLiftMotionChoice`). Why: the saved default "on" kept lifts moving for visitors who later asked for less motion.
+- 2026-09-29 · tooling · In the Cursor sandbox, run `npm run validate`, `npm run build`, and `npm run import:austria` with full permissions, and a one-off TypeScript script with `node --import tsx file.ts`. Why: the `tsx` command opens an IPC pipe in the temp folder, the sandbox refused it (`listen EPERM`), and `validate` exited 1 there while it passed outside ("OK: 396 resorts").

@@ -304,7 +304,7 @@
   "openFilters": "Deschideți filtrele",
   "filterCountBadge": "Filtre active: {n}",
   "listHandle": "Redimensionați lista. Săgeata sus o mărește, săgeata jos o micșorează.",
-  "resortHandle": "Redimensionați fișa domeniului. Săgeata sus o mărește, săgeata jos o micșorează; din fișa mică, săgeata jos o închide.",
+  "resortHandle": "Redimensionați fișa domeniului. Săgeata sus o mărește, săgeata jos o micșorează la nume, apoi la mâner.",
   "backToList": "Înapoi la rezultate",
   "dash": "—",
   "siteFooter": "Site",

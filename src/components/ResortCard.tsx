@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import Link from "next/link";
 import { generated, passById, resortById, resorts as allResorts } from "@/lib/data";
 import { distanceKm } from "@/lib/distance";
@@ -9,7 +9,7 @@ import { countryLabel, priceReasonText, regionLabel } from "@/lib/i18n";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { adultBracket, dayTicketIsEstimate, nextPriceChange, pricesOnDate, resolveForViewer, type ResolvedPrice } from "@/lib/pricing";
 import type { FactRef, Pass, Resort } from "@/lib/schema";
-import { snapFromKey, type SheetSnap } from "@/lib/sheet";
+import { SHEET_SNAP_MAX, nextSheetSnap, sheetSnapValue, snapFromKey, type SheetSnap } from "@/lib/sheet";
 import { LIFT_KIND_LABEL } from "@/lib/lift-icons";
 import { formatAttributionLine } from "@/lib/portal/attribution";
 import { mergeResortWithOverrides } from "@/lib/portal/overrides";
@@ -39,8 +39,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
   const baseResort = share.resort ? resortById.get(share.resort) : undefined;
   const resort = baseResort ? mergeResortWithOverrides(baseResort, baseResort.id, overrides) : undefined;
   const { sortedAll, filtered } = useResortLists();
-  const closeCard = useCallback(() => selectResort(null), [selectResort]);
-  const sheet = useBottomSheet({ kind: "resort", snap, setSnap, onClose: closeCard });
+  const sheet = useBottomSheet({ kind: "resort", snap, setSnap });
   const titleRef = useRef<HTMLHeadingElement>(null);
   const sheetRef = sheet.ref;
   const shownResort = useRef<string | null>(null);
@@ -80,8 +79,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
     const nextSnap = snapFromKey(snap, event.key);
     if (nextSnap == null || nextSnap === snap) return;
     event.preventDefault();
-    if (nextSnap === "close") selectResort(null);
-    else setSnap(nextSnap);
+    setSnap(nextSnap);
   }
 
   const km = slopeKmDisplay(resort.slope_km_display ?? resort.slope_km);
@@ -101,10 +99,14 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         aria-orientation="horizontal"
         aria-label={t("resortHandle")}
         aria-valuemin={0}
-        aria-valuemax={2}
-        aria-valuenow={snap === "peek" ? 0 : snap === "half" ? 1 : 2}
+        aria-valuemax={SHEET_SNAP_MAX}
+        aria-valuenow={sheetSnapValue(snap)}
         aria-valuetext={snap}
         onKeyDown={onHandleKey}
+        onClick={() => {
+          const next = nextSheetSnap(snap, "up");
+          if (next !== snap) setSnap(next);
+        }}
       >
         <span className="grab-bar" />
       </div>
@@ -125,7 +127,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         <div className="resort-head-actions">
           <button
             type="button"
-            className={favourite ? "icon-btn is-on" : "icon-btn"}
+            className={favourite ? "icon-btn heart-btn is-on" : "icon-btn heart-btn"}
             aria-pressed={favourite}
             aria-label={favourite ? t("favouriteRemove") : t("favouriteAdd")}
             onClick={(event) => {

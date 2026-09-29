@@ -304,7 +304,7 @@
   "openFilters": "Otevřít filtry",
   "filterCountBadge": "Aktivní filtry: {n}",
   "listHandle": "Změnit velikost seznamu. Šipka nahoru ho zvětší, šipka dolů zmenší.",
-  "resortHandle": "Změnit velikost karty areálu. Šipka nahoru ji zvětší, šipka dolů zmenší; z malé karty ji šipka dolů zavře.",
+  "resortHandle": "Změnit velikost karty areálu. Šipka nahoru ji zvětší, šipka dolů zmenší na název a pak na úchyt.",
   "backToList": "Zpět na výsledky",
   "dash": "—",
   "siteFooter": "Web",

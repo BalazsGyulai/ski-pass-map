@@ -304,7 +304,7 @@
   "openFilters": "Odpri filtre",
   "filterCountBadge": "Aktivni filtri: {n}",
   "listHandle": "Spremeni velikost seznama. Puščica gor ga poveča, puščica dol zmanjša.",
-  "resortHandle": "Spremeni velikost kartice smučišča. Puščica gor jo poveča, puščica dol zmanjša; na majhni kartici jo puščica dol zapre.",
+  "resortHandle": "Spremeni velikost kartice smučišča. Puščica gor jo poveča, puščica dol zmanjša na ime in nato na ročaj.",
   "backToList": "Nazaj na rezultate",
   "dash": "—",
   "siteFooter": "Spletno mesto",

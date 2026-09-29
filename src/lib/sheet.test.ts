@@ -1,25 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { SHEET_TOP_GAP, nextListSnap, nextSheetSnap, rubberBand, settleDuration, settleSnap, sheetMetrics, snapFromKey } from "./sheet";
+import { SHEET_SNAP_MAX, SHEET_TOP_GAP, nextListSnap, nextSheetSnap, rubberBand, settleDuration, settleSnap, sheetMetrics, sheetSnapValue, snapFromKey } from "./sheet";
 
 describe("nextSheetSnap", () => {
-  it("expands peek to half to full", () => {
+  it("expands from the handle up to full, one step at a time", () => {
+    expect(nextSheetSnap("shut", "up")).toBe("bar");
+    expect(nextSheetSnap("bar", "up")).toBe("peek");
     expect(nextSheetSnap("peek", "up")).toBe("half");
     expect(nextSheetSnap("half", "up")).toBe("full");
     expect(nextSheetSnap("full", "up")).toBe("full");
   });
 
-  it("collapses full to half to peek, then closes", () => {
+  it("shortens from full down to the handle and stays there", () => {
     expect(nextSheetSnap("full", "down")).toBe("half");
     expect(nextSheetSnap("half", "down")).toBe("peek");
-    expect(nextSheetSnap("peek", "down")).toBe("close");
+    expect(nextSheetSnap("peek", "down")).toBe("bar");
+    expect(nextSheetSnap("bar", "down")).toBe("shut");
+    expect(nextSheetSnap("shut", "down")).toBe("shut");
   });
 });
 
 describe("nextListSnap", () => {
-  it("stops at peek instead of closing the list", () => {
-    expect(nextListSnap("peek", "down")).toBe("peek");
-    expect(nextListSnap("half", "down")).toBe("peek");
-    expect(nextListSnap("peek", "up")).toBe("half");
+  it("stops at the handle instead of removing the list", () => {
+    expect(nextListSnap("peek", "down")).toBe("bar");
+    expect(nextListSnap("bar", "down")).toBe("shut");
+    expect(nextListSnap("shut", "down")).toBe("shut");
+    expect(nextListSnap("shut", "up")).toBe("bar");
   });
 });
 
@@ -27,10 +32,12 @@ describe("snapFromKey", () => {
   it("maps arrows, Home, and End onto the same snaps", () => {
     expect(snapFromKey("peek", "ArrowUp")).toBe("half");
     expect(snapFromKey("half", "ArrowDown")).toBe("peek");
-    expect(snapFromKey("peek", "ArrowDown")).toBe("close");
-    expect(snapFromKey("full", "Home")).toBe("peek");
+    expect(snapFromKey("shut", "ArrowDown")).toBe("shut");
+    expect(snapFromKey("full", "Home")).toBe("shut");
     expect(snapFromKey("peek", "End")).toBe("full");
     expect(snapFromKey("half", "Enter")).toBeNull();
+    expect(sheetSnapValue("shut")).toBe(0);
+    expect(sheetSnapValue("full")).toBe(SHEET_SNAP_MAX);
   });
 });
 
@@ -39,28 +46,34 @@ describe("sheet physics", () => {
 
   it("sizes snaps from the space available", () => {
     expect(metrics.full).toBe(760 - SHEET_TOP_GAP);
+    expect(metrics.shut).toBe(44);
+    expect(metrics.bar).toBe(120);
     expect(metrics.peek).toBe(196);
     expect(metrics.half).toBe(Math.round(760 * 0.52));
+    const resort = sheetMetrics("resort", 760);
+    expect(resort.bar).toBe(156);
+    expect(resort.peek).toBe(300);
     const small = sheetMetrics("resort", 400);
+    expect(small.shut).toBeLessThanOrEqual(small.bar);
+    expect(small.bar).toBeLessThanOrEqual(small.peek);
     expect(small.peek).toBeLessThanOrEqual(small.half);
     expect(small.half).toBeLessThanOrEqual(small.full);
   });
 
   it("settles on the nearest snap when released slowly", () => {
-    expect(settleSnap({ visible: metrics.half + 30, velocity: 0, metrics, closable: false })).toBe("half");
-    expect(settleSnap({ visible: metrics.full - 20, velocity: 0, metrics, closable: false })).toBe("full");
+    expect(settleSnap({ visible: metrics.half + 30, velocity: 0, metrics })).toBe("half");
+    expect(settleSnap({ visible: metrics.full - 20, velocity: 0, metrics })).toBe("full");
+    expect(settleSnap({ visible: metrics.bar + 4, velocity: 0, metrics })).toBe("bar");
   });
 
   it("follows a flick past the nearest snap", () => {
-    expect(settleSnap({ visible: metrics.half, velocity: -1.4, metrics, closable: false })).toBe("full");
-    expect(settleSnap({ visible: metrics.half, velocity: 1.2, metrics, closable: false })).toBe("peek");
+    expect(settleSnap({ visible: metrics.half, velocity: -1.4, metrics })).toBe("full");
+    expect(settleSnap({ visible: metrics.half, velocity: 1.2, metrics })).toBe("bar");
   });
 
-  it("only closes a resort sheet on a clear pull down", () => {
-    expect(settleSnap({ visible: metrics.peek - 20, velocity: 0.2, metrics, closable: true })).toBe("peek");
-    expect(settleSnap({ visible: metrics.peek * 0.4, velocity: 0.3, metrics, closable: true })).toBe("close");
-    expect(settleSnap({ visible: metrics.peek, velocity: 1.6, metrics, closable: true })).toBe("close");
-    expect(settleSnap({ visible: 40, velocity: 0, metrics, closable: false })).toBe("peek");
+  it("settles on the handle when pulled down past the name", () => {
+    expect(settleSnap({ visible: metrics.bar * 0.35, velocity: 0.2, metrics })).toBe("shut");
+    expect(settleSnap({ visible: 20, velocity: 0, metrics })).toBe("shut");
   });
 
   it("resists past the ends and keeps settle times short", () => {

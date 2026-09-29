@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { resortById } from "@/lib/data";
 import { SITE_NAME } from "@/lib/site";
-import type { SheetSnap } from "@/lib/sheet";
+import { nextSheetSnap, type SheetSnap } from "@/lib/sheet";
 import { FilterSheet } from "./FilterSheet";
 import { LayersPanel, MapTools } from "./MapTools";
 import { ListSheet } from "./ListSheet";
@@ -61,8 +61,10 @@ export function ExplorerFrame() {
         if (layersOpen) setLayersOpen(false);
         else if (filtersOpen) setFiltersOpen(false);
         else if (share.resort) selectResort(null);
-        else if (listSnap === "full") setListSnap("half");
-        else if (listSnap === "half") setListSnap("peek");
+        else {
+          const next = nextSheetSnap(listSnap, "down");
+          if (next !== listSnap) setListSnap(next);
+        }
       }
       if (event.key === "/" && !typing) {
         event.preventDefault();
@@ -92,9 +94,6 @@ export function ExplorerFrame() {
           <LanguageSwitcher compact />
           <SettingsLink className="icon-btn" />
         </nav>
-        <div className="topbar-lang">
-          <LanguageSwitcher compact />
-        </div>
         <SettingsLink className="tool-btn topbar-gear" />
       </header>
       <div className="stage">

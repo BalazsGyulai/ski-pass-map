@@ -22,6 +22,8 @@ export interface StoredPrefs {
    * choice they run unless the system asks for reduced motion.
    */
   liftMotion?: boolean;
+  /** The list follows the map as it moves. Off until the visitor turns it on. */
+  searchAsMove?: boolean;
   /** Reference places. Never copied into the URL. */
   places?: SavedPlace[];
   activePlaceId?: string | null;
@@ -41,6 +43,8 @@ export interface ExportedUserData {
   pisteOverlayDefault: boolean;
   terrain3d?: boolean;
   liftMotion?: boolean;
+  /** The list follows the map as it moves. Off until the visitor turns it on. */
+  searchAsMove?: boolean;
 }
 
 /** Version 5 saves moving lifts only once the visitor chooses. */

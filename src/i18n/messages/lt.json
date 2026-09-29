@@ -304,7 +304,7 @@
   "openFilters": "Atverti filtrus",
   "filterCountBadge": "Aktyvūs filtrai: {n}",
   "listHandle": "Keisti sąrašo dydį. Rodyklė aukštyn padidina, rodyklė žemyn sumažina.",
-  "resortHandle": "Keisti centro kortelės dydį. Rodyklė aukštyn padidina, rodyklė žemyn sumažina; mažoje kortelėje rodyklė žemyn ją užveria.",
+  "resortHandle": "Keisti centro kortelės dydį. Rodyklė aukštyn padidina, rodyklė žemyn sumažina iki pavadinimo, tada iki rankenėlės.",
   "backToList": "Atgal į rezultatus",
   "dash": "—",
   "siteFooter": "Svetainė",

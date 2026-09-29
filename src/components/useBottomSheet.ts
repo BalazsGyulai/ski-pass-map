@@ -17,9 +17,8 @@ export function useBottomSheet(options: {
   kind: "list" | "resort";
   snap: SheetSnap;
   setSnap: (snap: SheetSnap) => void;
-  onClose?: () => void;
 }) {
-  const { kind, snap, setSnap, onClose } = options;
+  const { kind, snap, setSnap } = options;
   const ref = useRef<HTMLElement | null>(null);
   const narrow = useNarrow();
   const [available, setAvailable] = useState<number | null>(null);
@@ -79,8 +78,8 @@ export function useBottomSheet(options: {
     [],
   );
 
-  const latest = useRef({ metrics, snap, setSnap, onClose, kind });
-  latest.current = { metrics, snap, setSnap, onClose, kind };
+  const latest = useRef({ metrics, snap, setSnap });
+  latest.current = { metrics, snap, setSnap };
 
   const place = useCallback((shown: number, transition: string | null) => {
     const el = ref.current;
@@ -109,6 +108,8 @@ export function useBottomSheet(options: {
     };
     let drag: Drag | null = null;
     let settleTimer = 0;
+    let swallowTimer = 0;
+    let stopClick: ((event: Event) => void) | null = null;
 
     const shownNow = () => {
       const m = latest.current.metrics;
@@ -155,11 +156,9 @@ export function useBottomSheet(options: {
         el.dataset.dragging = "true";
       }
       const raw = drag.startShown - dy;
-      const closable = latest.current.kind === "resort";
       let shown = raw;
       if (raw > m.full) shown = m.full + rubberBand(raw - m.full, 60);
-      else if (raw < m.peek && !closable) shown = m.peek - rubberBand(m.peek - raw, 80);
-      else if (raw < 0) shown = 0;
+      else if (raw < 0) shown = -rubberBand(-raw, 48);
       drag.shown = shown;
       place(shown, null);
       const now = performance.now();
@@ -178,17 +177,29 @@ export function useBottomSheet(options: {
       const last = current.samples[current.samples.length - 1];
       const elapsed = last.t - first.t;
       const velocity = elapsed > 8 ? (last.y - first.y) / elapsed : 0;
-      const closable = latest.current.kind === "resort";
-      const target = settleSnap({ visible: current.shown, velocity, metrics: m, closable });
-      const goal = target === "close" ? 0 : m[target];
+      const target = settleSnap({ visible: current.shown, velocity, metrics: m });
+      const goal = m[target];
       const duration = settleDuration(goal - current.shown, velocity);
       place(goal, `transform ${duration}ms var(--ease-sheet)`);
       settleTimer = window.setTimeout(() => {
         el.style.transition = "";
         el.style.removeProperty("--sheet-transition");
-        if (target === "close") latest.current.onClose?.();
       }, duration);
-      if (target !== "close" && target !== latest.current.snap) latest.current.setSnap(target);
+      if (target !== latest.current.snap) latest.current.setSnap(target);
+      // A drag ends with a click. Swallow it so the handle's tap-to-expand does not also fire.
+      if (stopClick) el.removeEventListener("click", stopClick, true);
+      stopClick = (event: Event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (stopClick) el.removeEventListener("click", stopClick, true);
+        stopClick = null;
+      };
+      el.addEventListener("click", stopClick, true);
+      window.clearTimeout(swallowTimer);
+      swallowTimer = window.setTimeout(() => {
+        if (stopClick) el.removeEventListener("click", stopClick, true);
+        stopClick = null;
+      }, 500);
     };
 
     const onPointerDown = (event: PointerEvent) => {
@@ -231,6 +242,8 @@ export function useBottomSheet(options: {
     el.addEventListener("touchcancel", onTouchEnd);
     return () => {
       window.clearTimeout(settleTimer);
+      window.clearTimeout(swallowTimer);
+      if (stopClick) el.removeEventListener("click", stopClick, true);
       el.removeEventListener("pointerdown", onPointerDown);
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);

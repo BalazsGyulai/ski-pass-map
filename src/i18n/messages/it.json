@@ -304,7 +304,7 @@
   "openFilters": "Apri i filtri",
   "filterCountBadge": "{n} filtri attivi",
   "listHandle": "Ridimensiona l'elenco. Freccia su lo ingrandisce, freccia giù lo riduce.",
-  "resortHandle": "Ridimensiona la scheda del comprensorio. Freccia su la ingrandisce, freccia giù la riduce; dalla scheda ridotta, freccia giù la chiude.",
+  "resortHandle": "Ridimensiona la scheda del comprensorio. Freccia su la ingrandisce, freccia giù la riduce al nome, poi alla maniglia.",
   "backToList": "Torna ai risultati",
   "dash": "—",
   "siteFooter": "Sito",

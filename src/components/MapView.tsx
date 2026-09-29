@@ -49,7 +49,7 @@ import {
 } from "@/lib/vector-map";
 import { attachMapProbe } from "@/lib/map-canvas-probe";
 import { accuracyCircle, type GeoFix } from "@/lib/geolocate";
-import { fitResortBounds, flyToResort, flyToUser, readPanelInset, readSheetVisible, resortCameraPadding, visibleBounds } from "@/lib/map-camera";
+import { clampMapPadding, fitResortBounds, flyToResort, flyToUser, readPanelInset, readSheetVisible, resortCameraPadding, visibleBounds } from "@/lib/map-camera";
 import { RESORT_PITCH, applyTerrain } from "@/lib/terrain";
 import { SHEET_EVENT } from "@/lib/sheet";
 import { LIFT_CARS_SOURCE, liftPaths, startLiftMotion } from "@/lib/lift-motion";
@@ -698,7 +698,8 @@ export default function MapView() {
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         if (cancelled) return;
-        const next = boundsOfGeoJson(data);
+        // A 0.02° pad is about 2 km, so a small hill never reached the close zoom.
+        const next = boundsOfGeoJson(data, { ratio: 0.08, minPad: 0.0012 });
         if (!next) return;
         bounds = next;
         frameCamera(motionDuration(700));
@@ -848,7 +849,11 @@ async function expandCluster(map: VectorMap, hit: Extract<ResortHit, { kind: "cl
   const current = map.getZoom();
   const zoom = await clusterExpansionZoom(map.getSource(RESORT_SOURCE), hit.clusterId);
   const target = Math.min(14, Math.max(current + 1, (zoom ?? current + 2) + 0.25));
-  map.easeTo({ center: hit.lngLat, zoom: target, duration: motionDuration(550) });
+  const narrow = window.matchMedia("(max-width: 899px)").matches;
+  const height = map.getContainer().clientHeight;
+  const panelPx = readPanelInset(map.getContainer());
+  const padding = clampMapPadding(map, resortCameraPadding({ narrow, sheetPx: readSheetVisible(), height }), panelPx);
+  map.easeTo({ center: hit.lngLat, zoom: target, padding, duration: motionDuration(550) });
 }
 
 /** Adds the resort sources and layers once per style. Later updates only swap the data. */

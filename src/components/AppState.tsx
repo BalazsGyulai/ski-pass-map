@@ -206,6 +206,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       if (stored.distanceUnits === "km" || stored.distanceUnits === "mi") setDistanceUnitsState(stored.distanceUnits);
       if (stored.pisteOverlayDefault) setPisteOverlayDefaultState(true);
       if (stored.terrain3d === false) setTerrain3d(false);
+      if (stored.searchAsMove === true) {
+        moveRef.current = true;
+        setSearchAsMoveState(true);
+      }
       setLiftMotionChoice(storedLiftMotionChoice(stored));
     }
     if (stored?.terrain3d == null && !defaultTerrain3d(deviceHints())) setTerrain3d(false);
@@ -254,9 +258,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       pisteOverlayDefault,
       terrain3d,
       liftMotion: liftMotionChoice ?? undefined,
+      searchAsMove,
       version: STORAGE_VERSION,
     });
-  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault, terrain3d, liftMotionChoice]);
+  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault, terrain3d, liftMotionChoice, searchAsMove]);
 
   // Moving lifts start off for visitors who ask for less motion, and follow that setting until they choose.
   useEffect(() => {
@@ -471,6 +476,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       pisteOverlayDefault,
       terrain3d,
       liftMotion: liftMotionChoice ?? undefined,
+      searchAsMove,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -505,6 +511,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       }
       if (typeof parsed.terrain3d === "boolean") setTerrain3d(parsed.terrain3d);
       if (typeof parsed.liftMotion === "boolean") setLiftMotionChoice(parsed.liftMotion);
+      if (typeof parsed.searchAsMove === "boolean") {
+        moveRef.current = parsed.searchAsMove;
+        setSearchAsMoveState(parsed.searchAsMove);
+      }
       return true;
     } catch {
       return false;

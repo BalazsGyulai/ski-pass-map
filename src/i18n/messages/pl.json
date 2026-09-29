@@ -304,7 +304,7 @@
   "openFilters": "Otwórz filtry",
   "filterCountBadge": "Aktywne filtry: {n}",
   "listHandle": "Zmień rozmiar listy. Strzałka w górę ją powiększa, strzałka w dół zmniejsza.",
-  "resortHandle": "Zmień rozmiar karty ośrodka. Strzałka w górę ją powiększa, strzałka w dół zmniejsza; na małej karcie strzałka w dół ją zamyka.",
+  "resortHandle": "Zmień rozmiar karty ośrodka. Strzałka w górę ją powiększa, strzałka w dół zmniejsza do nazwy, a potem do uchwytu.",
   "backToList": "Wróć do wyników",
   "dash": "—",
   "siteFooter": "Serwis",

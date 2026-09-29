@@ -304,7 +304,7 @@
   "openFilters": "Filters openen",
   "filterCountBadge": "{n} filters actief",
   "listHandle": "Formaat van de lijst. Pijl omhoog vergroot, pijl omlaag verkleint.",
-  "resortHandle": "Formaat van de skigebiedkaart. Pijl omhoog vergroot, pijl omlaag verkleint; vanaf de kleine kaart sluit pijl omlaag hem.",
+  "resortHandle": "Formaat van de skigebiedkaart. Pijl omhoog vergroot, pijl omlaag verkleint tot de naam en dan tot de greep.",
   "backToList": "Terug naar resultaten",
   "dash": "—",
   "siteFooter": "Website",

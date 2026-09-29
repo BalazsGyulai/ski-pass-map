@@ -304,7 +304,7 @@
   "openFilters": "Abrir filtros",
   "filterCountBadge": "{n} filtros activos",
   "listHandle": "Cambia el tamaño de la lista. Flecha arriba la amplía, flecha abajo la reduce.",
-  "resortHandle": "Cambia el tamaño de la ficha de la estación. Flecha arriba la amplía, flecha abajo la reduce; desde la ficha reducida, flecha abajo la cierra.",
+  "resortHandle": "Cambia el tamaño de la ficha de la estación. Flecha arriba la amplía, flecha abajo la reduce al nombre y luego al asa.",
   "backToList": "Volver a los resultados",
   "dash": "—",
   "siteFooter": "Sitio web",

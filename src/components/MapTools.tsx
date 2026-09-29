@@ -53,7 +53,7 @@ export function MapTools({ onLayers, layersOpen }: { onLayers: () => void; layer
 }
 
 export function LayersPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t, share, updateShare, terrain3d, setTerrain3d, liftMotion, setLiftMotion } = useApp();
+  const { t, share, updateShare, terrain3d, setTerrain3d, liftMotion, setLiftMotion, searchAsMove, setSearchAsMove } = useApp();
   if (!open) return null;
   return (
     <div id="map-layers" className="layers-panel" role="dialog" aria-label={t("layersTitle")}>
@@ -73,6 +73,10 @@ export function LayersPanel({ open, onClose }: { open: boolean; onClose: () => v
         <span>{t("liftMotion")}</span>
       </label>
       <p className="hint">{t("liftMotionHint")}</p>
+      <label className="check">
+        <input type="checkbox" checked={searchAsMove} onChange={() => setSearchAsMove(!searchAsMove)} />
+        <span>{t("searchAsMove")}</span>
+      </label>
       <label className="check">
         <input type="checkbox" checked={share.showPistes} onChange={() => updateShare({ showPistes: !share.showPistes })} />
         <span>{t("showAllPistes")}</span>

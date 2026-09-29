@@ -20,16 +20,22 @@ interface Flow {
   speedPx: number;
 }
 
-/** Continuous lifts. A gondola runs faster and wider spaced than a chair; a magic carpet crawls. */
+/**
+ * Continuous lifts. Spacing is in screen pixels and wide enough that the glyphs do not touch.
+ * A gondola runs faster and wider spaced than a chair; a magic carpet crawls.
+ */
 export const LIFT_FLOW: Partial<Record<LiftKind, Flow>> = {
-  gondola: { cars: ["cabin"], spacingPx: 46, speedPx: 20 },
-  mixed: { cars: ["cabin", "chair"], spacingPx: 30, speedPx: 18 },
-  chair: { cars: ["chair"], spacingPx: 26, speedPx: 16 },
-  drag: { cars: ["tbar"], spacingPx: 22, speedPx: 11 },
-  platter: { cars: ["platter"], spacingPx: 22, speedPx: 11 },
-  rope_tow: { cars: ["grip"], spacingPx: 16, speedPx: 9 },
-  carpet: { cars: ["chevron"], spacingPx: 12, speedPx: 6 },
+  gondola: { cars: ["cabin"], spacingPx: 80, speedPx: 20 },
+  mixed: { cars: ["cabin", "chair"], spacingPx: 72, speedPx: 18 },
+  chair: { cars: ["chair"], spacingPx: 64, speedPx: 16 },
+  drag: { cars: ["tbar"], spacingPx: 56, speedPx: 11 },
+  platter: { cars: ["platter"], spacingPx: 56, speedPx: 11 },
+  rope_tow: { cars: ["grip"], spacingPx: 48, speedPx: 9 },
+  carpet: { cars: ["chevron"], spacingPx: 36, speedPx: 6 },
 };
+
+/** Two lifts closer than this, of the same kind and similar length, share one rope of cars. */
+export const LIFT_TWIN_METRES = 40;
 
 /** A cable car's cabins take this long to go up and come back down. */
 export const SHUTTLE_SECONDS = 24;
@@ -68,7 +74,48 @@ export function liftPaths(data: unknown): LiftPath[] {
       if (length > 0) paths.push({ kind, coords, along, length });
     }
   }
-  return paths;
+  return dedupeLiftPaths(paths);
+}
+
+/**
+ * OSM often draws both tracks of one lift a few metres apart. Two ropes of cars then read as a
+ * doubled lift. The cables stay; only the motion keeps one of them.
+ */
+function dedupeLiftPaths(paths: LiftPath[]): LiftPath[] {
+  const kept: LiftPath[] = [];
+  for (const path of paths) {
+    if (kept.some((other) => liftsAreTwins(path, other))) continue;
+    kept.push(path);
+  }
+  return kept;
+}
+
+function liftsAreTwins(a: LiftPath, b: LiftPath): boolean {
+  if (a.kind !== b.kind) return false;
+  const ratio = a.length / b.length;
+  if (ratio < 0.6 || ratio > 1.65) return false;
+  const samples = [0.15, 0.35, 0.5, 0.65, 0.85];
+  let sum = 0;
+  for (const t of samples) sum += distanceToPath(pointAt(a, t * a.length).lngLat, b);
+  return sum / samples.length < LIFT_TWIN_METRES;
+}
+
+function distanceToPath(point: [number, number], path: LiftPath): number {
+  let best = Infinity;
+  for (let i = 1; i < path.coords.length; i++) best = Math.min(best, distanceToSegment(point, path.coords[i - 1], path.coords[i]));
+  return best;
+}
+
+function distanceToSegment(point: [number, number], a: [number, number], b: [number, number]): number {
+  const cos = Math.cos(a[1] * RAD);
+  const bx = (b[0] - a[0]) * RAD * cos * 6371008.8;
+  const by = (b[1] - a[1]) * RAD * 6371008.8;
+  const px = (point[0] - a[0]) * RAD * cos * 6371008.8;
+  const py = (point[1] - a[1]) * RAD * 6371008.8;
+  const len2 = bx * bx + by * by;
+  if (len2 === 0) return Math.hypot(px, py);
+  const t = Math.min(1, Math.max(0, (px * bx + py * by) / len2));
+  return Math.hypot(px - bx * t, py - by * t);
 }
 
 function isLngLat(point: unknown): point is [number, number] {

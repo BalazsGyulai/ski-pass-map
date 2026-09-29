@@ -18,11 +18,21 @@ export function clampMapPadding(map: VectorMap, padding: Padding, panelPx = 0): 
   const w = map.getContainer().clientWidth - panelPx;
   const h = map.getContainer().clientHeight;
   if (w < 2 || h < 2) return { ...padding, left: padding.left + panelPx };
-  const maxVertical = Math.max(24, Math.floor(h * 0.42));
   const maxHorizontal = Math.max(16, Math.floor(w * 0.32));
+  // Keep the bottom (the sheet) and give up the top first, so the resort stays in the strip you can see.
+  const minVisible = 120;
+  let top = padding.top;
+  let bottom = padding.bottom;
+  const overflow = top + bottom - (h - minVisible);
+  if (overflow > 0) {
+    const shrinkTop = Math.min(top, overflow);
+    top -= shrinkTop;
+    const still = overflow - shrinkTop;
+    if (still > 0) bottom = Math.max(0, bottom - still);
+  }
   return {
-    top: Math.min(padding.top, maxVertical),
-    bottom: Math.min(padding.bottom, maxVertical),
+    top,
+    bottom,
     left: panelPx + Math.min(padding.left, maxHorizontal),
     right: Math.min(padding.right, maxHorizontal),
   };
@@ -30,8 +40,9 @@ export function clampMapPadding(map: VectorMap, padding: Padding, panelPx = 0): 
 
 /**
  * Camera padding that keeps the selected resort in the part of the map you can see.
- * On phones `sheetPx` is the visible height of the bottom sheet. A full sheet leaves only a strip,
- * so the padding is capped at half the map. The desktop side panel is added by clampMapPadding.
+ * On phones `sheetPx` is the visible height of the bottom sheet. The bottom padding matches that
+ * sheet, and shrinks only when a full sheet would leave no map. The desktop side panel is added
+ * by clampMapPadding.
  */
 export function resortCameraPadding(options: {
   narrow: boolean;
@@ -41,9 +52,10 @@ export function resortCameraPadding(options: {
   if (!options.narrow) {
     return { top: 72, bottom: 48, left: 32, right: 32 };
   }
+  const top = 88;
   const sheet = options.sheetPx ?? Math.round(options.height * 0.5);
-  const bottom = Math.min(Math.round(options.height * 0.5), sheet + 16);
-  return { top: 88, bottom, left: 24, right: 24 };
+  const bottom = Math.min(sheet + 16, Math.max(24, options.height - 140 - top));
+  return { top, bottom, left: 24, right: 24 };
 }
 
 /** Visible height of the mobile sheet in px, published by useBottomSheet. */
@@ -138,7 +150,12 @@ export function fitResortBounds(
     return;
   }
   // Mapbox replaces the map padding with this one, so the side panel has to be in it or the
-  // resort is centred on the whole screen. MapLibre already counts the map's own padding.
+  // resort is centred on the whole screen. MapLibre adds the map's own padding on top of this
+  // one. A previous flyTo or easeTo stores the sheet there, which would count the sheet twice
+  // and leave the resort too far out. Keep only the desktop panel on the map before fitting.
+  if (!options.replacePadding) {
+    map.setPadding({ top: 0, right: 0, bottom: 0, left: options.panelPx ?? 0 });
+  }
   const padding = clampMapPadding(map, options.padding, options.replacePadding ? (options.panelPx ?? 0) : 0);
   map.fitBounds(bounds, {
     padding,

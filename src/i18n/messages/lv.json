@@ -304,7 +304,7 @@
   "openFilters": "Atvērt filtrus",
   "filterCountBadge": "Aktīvie filtri: {n}",
   "listHandle": "Mainīt saraksta izmēru. Bultiņa augšup to palielina, bultiņa lejup samazina.",
-  "resortHandle": "Mainīt kūrorta kartītes izmēru. Bultiņa augšup to palielina, bultiņa lejup samazina; no mazās kartītes bultiņa lejup to aizver.",
+  "resortHandle": "Mainīt kūrorta kartītes izmēru. Bultiņa augšup to palielina, bultiņa lejup samazina līdz nosaukumam un tad līdz rokturim.",
   "backToList": "Atpakaļ uz rezultātiem",
   "dash": "—",
   "siteFooter": "Vietne",

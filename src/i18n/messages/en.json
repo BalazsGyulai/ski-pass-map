@@ -304,7 +304,7 @@
   "openFilters": "Open filters",
   "filterCountBadge": "{n} filters active",
   "listHandle": "Resize the list. Arrow up expands it, arrow down shortens it.",
-  "resortHandle": "Resize the resort card. Arrow up expands it, arrow down shortens it, and arrow down from the short card closes it.",
+  "resortHandle": "Resize the resort card. Arrow up expands it, arrow down shortens it to the name, then to the handle.",
   "backToList": "Back to results",
   "dash": "—",
   "siteFooter": "Site",

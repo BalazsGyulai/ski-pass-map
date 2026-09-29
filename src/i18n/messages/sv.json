@@ -304,7 +304,7 @@
   "openFilters": "Öppna filter",
   "filterCountBadge": "{n} filter aktiva",
   "listHandle": "Ändra storlek på listan. Pil upp förstorar, pil ned förminskar.",
-  "resortHandle": "Ändra storlek på skidortskortet. Pil upp förstorar, pil ned förminskar; från det lilla kortet stänger pil ned det.",
+  "resortHandle": "Ändra storlek på skidortskortet. Pil upp förstorar, pil ned förminskar till namnet och sedan till handtaget.",
   "backToList": "Tillbaka till resultaten",
   "dash": "—",
   "siteFooter": "Webbplats",

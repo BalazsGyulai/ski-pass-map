@@ -304,7 +304,7 @@
   "openFilters": "Otvoriť filtre",
   "filterCountBadge": "Aktívne filtre: {n}",
   "listHandle": "Zmeniť veľkosť zoznamu. Šípka hore ho zväčší, šípka dole zmenší.",
-  "resortHandle": "Zmeniť veľkosť karty strediska. Šípka hore ju zväčší, šípka dole zmenší; z malej karty ju šípka dole zavrie.",
+  "resortHandle": "Zmeniť veľkosť karty strediska. Šípka hore ju zväčší, šípka dole zmenší na názov a potom na úchyt.",
   "backToList": "Späť na výsledky",
   "dash": "—",
   "siteFooter": "Web",

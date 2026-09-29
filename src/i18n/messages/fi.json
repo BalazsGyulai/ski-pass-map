@@ -304,7 +304,7 @@
   "openFilters": "Avaa suodattimet",
   "filterCountBadge": "Suodattimia käytössä: {n}",
   "listHandle": "Muuta listan kokoa. Nuoli ylös suurentaa, nuoli alas pienentää.",
-  "resortHandle": "Muuta hiihtokeskuskortin kokoa. Nuoli ylös suurentaa, nuoli alas pienentää; pienestä kortista nuoli alas sulkee sen.",
+  "resortHandle": "Muuta hiihtokeskuskortin kokoa. Nuoli ylös suurentaa, nuoli alas pienentää nimeen ja sitten kahvaan.",
   "backToList": "Takaisin tuloksiin",
   "dash": "—",
   "siteFooter": "Sivusto",

@@ -304,7 +304,7 @@
   "openFilters": "Szűrők megnyitása",
   "filterCountBadge": "{n} aktív szűrő",
   "listHandle": "A lista mérete. A fel nyíl növeli, a le nyíl csökkenti.",
-  "resortHandle": "A síterepkártya mérete. A fel nyíl növeli, a le nyíl csökkenti, a rövid kártyán a le nyíl bezárja.",
+  "resortHandle": "A síterepkártya mérete. A fel nyíl növeli, a le nyíl a névig, majd a fogantyúig csökkenti.",
   "backToList": "Vissza a találatokhoz",
   "dash": "—",
   "siteFooter": "Weboldal",

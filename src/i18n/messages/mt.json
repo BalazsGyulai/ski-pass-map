@@ -304,7 +304,7 @@
   "openFilters": "Iftaħ il-filtri",
   "filterCountBadge": "Filtri attivi: {n}",
   "listHandle": "Ibdel id-daqs tal-lista. Il-vleġġa 'l fuq tkabbarha, il-vleġġa 'l isfel iċċekkinha.",
-  "resortHandle": "Ibdel id-daqs tal-karta tar-resort. Il-vleġġa 'l fuq tkabbarha, il-vleġġa 'l isfel iċċekkinha; mill-karta ż-żgħira, il-vleġġa 'l isfel tagħlaqha.",
+  "resortHandle": "Ibdel id-daqs tal-karta tar-resort. Il-vleġġa 'l fuq tkabbarha, il-vleġġa 'l isfel iċċekkinha sal-isem, imbagħad sal-manku.",
   "backToList": "Lura għar-riżultati",
   "dash": "—",
   "siteFooter": "Sit",

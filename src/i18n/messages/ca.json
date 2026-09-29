@@ -304,7 +304,7 @@
   "openFilters": "Obre els filtres",
   "filterCountBadge": "{n} filtres actius",
   "listHandle": "Canvia la mida de la llista. La fletxa amunt l'amplia, la fletxa avall la redueix.",
-  "resortHandle": "Canvia la mida de la fitxa de l'estació. La fletxa amunt l'amplia, la fletxa avall la redueix; des de la fitxa reduïda, la fletxa avall la tanca.",
+  "resortHandle": "Canvia la mida de la fitxa de l'estació. La fletxa amunt l'amplia, la fletxa avall la redueix al nom i després a la nansa.",
   "backToList": "Torna als resultats",
   "dash": "—",
   "siteFooter": "Lloc web",

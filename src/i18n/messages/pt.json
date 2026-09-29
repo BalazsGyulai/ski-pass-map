@@ -304,7 +304,7 @@
   "openFilters": "Abrir filtros",
   "filterCountBadge": "{n} filtros ativos",
   "listHandle": "Redimensionar a lista. Seta para cima aumenta, seta para baixo reduz.",
-  "resortHandle": "Redimensionar a ficha da estância. Seta para cima aumenta, seta para baixo reduz; na ficha reduzida, seta para baixo fecha.",
+  "resortHandle": "Redimensionar a ficha da estância. Seta para cima aumenta, seta para baixo reduz ao nome e depois à pega.",
   "backToList": "Voltar aos resultados",
   "dash": "—",
   "siteFooter": "Site",

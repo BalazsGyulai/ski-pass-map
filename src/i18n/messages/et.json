@@ -304,7 +304,7 @@
   "openFilters": "Ava filtrid",
   "filterCountBadge": "Aktiivseid filtreid: {n}",
   "listHandle": "Muuda loendi suurust. Nool üles suurendab, nool alla vähendab.",
-  "resortHandle": "Muuda suusakeskuse kaardi suurust. Nool üles suurendab, nool alla vähendab; väikselt kaardilt sulgeb nool alla selle.",
+  "resortHandle": "Muuda suusakeskuse kaardi suurust. Nool üles suurendab, nool alla vähendab nimeni ja siis käepidemeni.",
   "backToList": "Tagasi tulemuste juurde",
   "dash": "—",
   "siteFooter": "Veebisait",

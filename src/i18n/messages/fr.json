@@ -304,7 +304,7 @@
   "openFilters": "Ouvrir les filtres",
   "filterCountBadge": "{n} filtres actifs",
   "listHandle": "Redimensionner la liste. Flèche haut pour l'agrandir, flèche bas pour la réduire.",
-  "resortHandle": "Redimensionner la fiche de la station. Flèche haut pour l'agrandir, flèche bas pour la réduire ; depuis la fiche réduite, flèche bas pour la fermer.",
+  "resortHandle": "Redimensionner la fiche de la station. Flèche haut pour l'agrandir, flèche bas pour la réduire au nom, puis à la poignée.",
   "backToList": "Retour aux résultats",
   "dash": "—",
   "siteFooter": "Site",

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { resortById } from "@/lib/data";
 import { useLocalizedPath } from "./LanguageSwitcher";
+import { IconHeart } from "./icons";
 import { useApp } from "./AppState";
 
 /** Favourite resorts. Shown inside My plan; /saved redirects there. */
@@ -24,8 +25,8 @@ export function SavedView() {
                 <strong>{resort.name}</strong>
                 <span className="hint">{t("savedOpenOnMap")}</span>
               </Link>
-              <button type="button" className="icon-btn" aria-pressed="true" aria-label={t("favouriteRemove")} onClick={() => toggleFavourite(resort.id)}>
-                ♥
+              <button type="button" className="icon-btn heart-btn is-on" aria-pressed="true" aria-label={t("favouriteRemove")} onClick={() => toggleFavourite(resort.id)}>
+                <IconHeart />
               </button>
             </li>
           ))}

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { MAPBOX_STYLE_LIGHT, OPENFREEMAP_STYLE_LIGHT, OPENSKIMAP_ATTRIBUTION } from "./map-styles";
-import { createVectorMap, loadMapLibrary, maplibreWorkerUrl, pisteLayerSpecs, pisteTip, type MapEvent, type MapLib } from "./vector-map";
+import { boundsOfGeoJson, createVectorMap, loadMapLibrary, maplibreWorkerUrl, pisteLayerSpecs, pisteTip, type MapEvent, type MapLib } from "./vector-map";
 
 const { setWorkerUrl } = vi.hoisted(() => ({ setWorkerUrl: vi.fn() }));
 
@@ -130,5 +130,25 @@ describe("maplibre worker", () => {
     expect(setWorkerUrl).not.toHaveBeenCalled();
     expect(boxed.token).toBeNull();
     expect(JSON.stringify(boxed)).not.toMatch(/pk\./);
+  });
+});
+
+describe("boundsOfGeoJson", () => {
+  const hill = {
+    features: [{ geometry: { coordinates: [[13, 47], [13.001, 47.001]] } }],
+  };
+
+  it("frames a small hill tightly enough to reach a close zoom", () => {
+    const bounds = boundsOfGeoJson(hill, { ratio: 0.08, minPad: 0.0012 });
+    expect(bounds).not.toBeNull();
+    const [[west, south], [east, north]] = bounds!;
+    expect(east - west).toBeLessThan(0.006);
+    expect(north - south).toBeLessThan(0.006);
+  });
+
+  it("keeps a wide margin when fitting many resorts", () => {
+    const bounds = boundsOfGeoJson(hill);
+    const [[west], [east]] = bounds!;
+    expect(east - west).toBeGreaterThan(0.04);
   });
 });

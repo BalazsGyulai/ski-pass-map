@@ -53,7 +53,15 @@ export interface VectorMap {
     pitch?: number;
     bearing?: number;
   }): void;
-  easeTo(options: { center?: [number, number]; zoom?: number; duration?: number; pitch?: number; bearing?: number }): void;
+  easeTo(options: {
+    center?: [number, number];
+    zoom?: number;
+    duration?: number;
+    pitch?: number;
+    bearing?: number;
+    /** Shifts the point off centre. Both libraries store it as the map padding afterwards. */
+    padding?: { top: number; bottom: number; left: number; right: number };
+  }): void;
   /** The inset the camera keeps between moves. fitBounds fits inside it; flyTo with padding replaces it. */
   setPadding(padding: { top: number; bottom: number; left: number; right: number }): void;
   getPadding(): { top: number; bottom: number; left: number; right: number };
@@ -254,6 +262,7 @@ export function glFitPadding(height: number): { top: number; bottom: number; lef
 export function padLngLatBounds(
   points: Array<[number, number]>,
   ratio: number,
+  minPad = 0.02,
 ): [[number, number], [number, number]] | null {
   if (points.length === 0) return null;
   let west = Infinity;
@@ -266,15 +275,15 @@ export function padLngLatBounds(
     south = Math.min(south, lat);
     north = Math.max(north, lat);
   }
-  const lonPad = Math.max(0.02, (east - west) * ratio);
-  const latPad = Math.max(0.02, (north - south) * ratio);
+  const lonPad = Math.max(minPad, (east - west) * ratio);
+  const latPad = Math.max(minPad, (north - south) * ratio);
   return [
     [west - lonPad, south - latPad],
     [east + lonPad, north + latPad],
   ];
 }
 
-export function boundsOfGeoJson(data: unknown): [[number, number], [number, number]] | null {
+export function boundsOfGeoJson(data: unknown, options: { ratio?: number; minPad?: number } = {}): [[number, number], [number, number]] | null {
   const points: Array<[number, number]> = [];
   const visit = (value: unknown) => {
     if (!Array.isArray(value)) return;
@@ -289,7 +298,7 @@ export function boundsOfGeoJson(data: unknown): [[number, number], [number, numb
   if (!data || typeof data !== "object" || !("features" in data)) return null;
   const features = (data as { features?: Array<{ geometry?: { coordinates?: unknown } }> }).features ?? [];
   for (const feature of features) visit(feature.geometry?.coordinates);
-  return padLngLatBounds(points, 0.2);
+  return padLngLatBounds(points, options.ratio ?? 0.2, options.minPad ?? 0.02);
 }
 
 export function motionDuration(preferredMs: number): number {

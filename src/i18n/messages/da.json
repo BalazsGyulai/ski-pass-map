@@ -304,7 +304,7 @@
   "openFilters": "Åbn filtre",
   "filterCountBadge": "{n} filtre aktive",
   "listHandle": "Ændr størrelsen på listen. Pil op gør den større, pil ned mindre.",
-  "resortHandle": "Ændr størrelsen på kortet for skisportsstedet. Pil op gør det større, pil ned mindre; fra det lille kort lukker pil ned det.",
+  "resortHandle": "Ændr størrelsen på kortet for skisportsstedet. Pil op gør det større, pil ned mindre, til navnet og derefter til grebet.",
   "backToList": "Tilbage til resultaterne",
   "dash": "—",
   "siteFooter": "Websted",

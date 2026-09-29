@@ -304,7 +304,7 @@
   "openFilters": "Oscail na scagairí",
   "filterCountBadge": "Scagairí gníomhacha: {n}",
   "listHandle": "Athraigh méid an liosta. Méadaíonn saighead suas é, laghdaíonn saighead síos é.",
-  "resortHandle": "Athraigh méid chárta an ionaid. Méadaíonn saighead suas é, laghdaíonn saighead síos é; ón gcárta beag, dúnann saighead síos é.",
+  "resortHandle": "Athraigh méid chárta an ionaid. Méadaíonn saighead suas é, laghdaíonn saighead síos é go dtí an t-ainm, ansin go dtí an láimhseáil.",
   "backToList": "Ar ais chuig na torthaí",
   "dash": "—",
   "siteFooter": "Suíomh gréasáin",

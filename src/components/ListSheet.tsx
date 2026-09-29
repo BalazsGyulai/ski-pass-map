@@ -1,6 +1,6 @@
 "use client";
 
-import { snapFromKey, type SheetSnap } from "@/lib/sheet";
+import { SHEET_SNAP_MAX, nextSheetSnap, sheetSnapValue, snapFromKey, type SheetSnap } from "@/lib/sheet";
 import type { SortKey } from "@/lib/filter";
 import { ResortList } from "./ResortList";
 import { useBottomSheet } from "./useBottomSheet";
@@ -27,7 +27,7 @@ export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: 
     const next = snapFromKey(snap, event.key);
     if (next == null || next === snap) return;
     event.preventDefault();
-    setSnap(next === "close" ? "peek" : next);
+    setSnap(next);
   }
 
   return (
@@ -40,10 +40,14 @@ export function ListSheet({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap: 
         aria-orientation="horizontal"
         aria-label={t("listHandle")}
         aria-valuemin={0}
-        aria-valuemax={2}
-        aria-valuenow={snap === "peek" ? 0 : snap === "half" ? 1 : 2}
+        aria-valuemax={SHEET_SNAP_MAX}
+        aria-valuenow={sheetSnapValue(snap)}
         aria-valuetext={snap}
         onKeyDown={onKey}
+        onClick={() => {
+          const next = nextSheetSnap(snap, "up");
+          if (next !== snap) setSnap(next);
+        }}
       >
         <span className="grab-bar" />
       </div>

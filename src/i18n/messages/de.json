@@ -304,7 +304,7 @@
   "openFilters": "Filter öffnen",
   "filterCountBadge": "{n} Filter aktiv",
   "listHandle": "Listengröße: Pfeil hoch vergrößert, Pfeil runter verkleinert.",
-  "resortHandle": "Kartengröße: Pfeil hoch vergrößert, Pfeil runter verkleinert; vom kurzen Blatt schließt Pfeil runter.",
+  "resortHandle": "Kartengröße: Pfeil hoch vergrößert, Pfeil runter verkleinert bis zum Namen, dann bis zum Griff.",
   "backToList": "Zurück zu Ergebnissen",
   "dash": "—",
   "siteFooter": "Website",
