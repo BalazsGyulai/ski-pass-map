@@ -24,9 +24,11 @@ Do not create a Cloudflare project from this repository's scripts. When you conn
 
 | Setting | Value |
 | --- | --- |
-| Build command | `npm install -g npm@11.6.2 && npm ci && npm run build` |
+| Build command | `npm ci && npm run build` |
 | Output directory | `out` |
 | Environment variable | `NEXT_PUBLIC_BASE_PATH` |
+
+Cloudflare installs the dependencies with its own npm (10.9.2 on build image v3) before the build command runs, so installing another npm inside the build command does not help. `package-lock.json` has to satisfy that npm. After any change to the lockfile, run `npm run check:lockfile`. It checks npm 10.9.2 and 11.6.2 and prints the command that repairs the lockfile. CI runs the same check.
 
 `NEXT_PUBLIC_BASE_PATH` sets the path prefix:
 
@@ -57,7 +59,7 @@ Consent lives in `localStorage` under `skimap-map-consent` and defaults to off. 
 3. Set `MAP_LOAD_HASH_SALT` in the Pages environment to a long random string. It is not a personal identifier and it does not belong in git.
 4. Optionally set `MAPBOX_MONTHLY_LIMIT` (default `45000`) and `MAP_LOAD_ALLOWED_ORIGINS` (comma-separated extra origins; the site's own origin is always allowed).
 5. Create a Mapbox **public** token. Before launch, restrict it by URL to the production site. Set `NEXT_PUBLIC_MAPBOX_TOKEN` on the Cloudflare Pages build only. Leave it unset for GitHub Pages. `.env.example` stays empty.
-6. Build command and output directory stay `npm install -g npm@11.6.2 && npm ci && npm run build` and `out`. Paste that command into the Cloudflare Pages project settings. The repository cannot change the dashboard by itself.
+6. Build command and output directory stay `npm ci && npm run build` and `out`.
 
 Styles: OpenFreeMap [Positron](https://tiles.openfreemap.org/styles/positron) (light, with Natural Earth shaded relief at low zoom) and Mapbox `light-v11`. Dark mode uses OpenFreeMap Dark and Mapbox `dark-v11`. Attribution for OpenStreetMap (ODbL), OpenSkiMap, OpenFreeMap, OpenMapTiles, and Mapbox stays on the map. The OpenSnowMap piste overlay is unchanged.
 
@@ -109,7 +111,8 @@ Resort facts, pass prices, and OpenStreetMap geometry are separate files:
 A resort with `"verification": "unverified"` stays in the file and off the map. The app does not hard-code the resort list.
 
 ```bash
-npm install
+npm ci             # installs package-lock.json as is; npm install may rewrite it
+npm run check:lockfile   # after any dependency change: Cloudflare's npm must accept the lockfile
 npm run validate   # schema, site name, base path, and a ban on portal URLs
 npm test           # pricing, filters, and the data-rights check
 npm run lint

@@ -24,8 +24,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Pin npm
-        run: npm install -g npm@11.6.2
+      # Cloudflare Pages runs npm ci with its own npm before the build command. Fail here first.
+      - name: Lockfile works with Cloudflare's npm
+        run: npm run check:lockfile
       - name: Install
         run: npm ci
       - name: Lint
