@@ -1,3 +1,4 @@
+import type { MessageKey } from "./i18n";
 import type { SavedPlace } from "./places";
 import { distanceKm } from "./distance";
 
@@ -11,6 +12,13 @@ export const GEO_PLACE_ID = "geo:me";
 export const GEO_WAIT_MS = 20_000;
 
 export type GeoFailure = "denied" | "timeout" | "unsupported";
+
+/** A timeout is not a block: the browser may be allowed and the device's location service off. */
+export const GEO_FAILURE_MESSAGE = {
+  denied: "geoDenied",
+  timeout: "geoTimeout",
+  unsupported: "geoUnsupported",
+} as const satisfies Record<GeoFailure, MessageKey>;
 
 export class GeoLocateError extends Error {
   readonly reason: GeoFailure;
@@ -120,9 +128,9 @@ export function watchGeoPermission(permissions: GeoPermissionSource | undefined,
   };
 }
 
-export interface ReadDeviceLocationOptions {
+export interface FollowOptions {
   waitMs?: number;
-  /** When this reports `denied`, no fix is read and nothing is returned to save. */
+  /** A fix that arrives while this reports `denied` is dropped, and the watch stops. */
   permissions?: GeoPermissionSource;
 }
 
@@ -134,58 +142,6 @@ function permissionState(permissions: GeoPermissionSource | undefined): Promise<
   );
 }
 
-/**
- * Watch until the browser shares a fresh fix, the visitor refuses, or the wait runs out.
- * A timeout or an unavailable reading does not stop the watch: those often fire while the
- * permission prompt is open, and a fix follows the Allow click.
- * The watch always runs, including when permission was already denied, so the browser can ask again.
- * A reading is dropped when permission is still denied, so a cached fix cannot come back.
- */
-export function readDeviceLocation(geolocation: Geolocation, options?: ReadDeviceLocationOptions): Promise<GeoFix> {
-  const waitMs = options?.waitMs ?? GEO_WAIT_MS;
-  return watchFreshFix(geolocation, waitMs, options?.permissions);
-}
-
-function watchFreshFix(geolocation: Geolocation, waitMs: number, permissions: GeoPermissionSource | undefined): Promise<GeoFix> {
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    let watchId = 0;
-    const stop = () => {
-      clearTimeout(timer);
-      try {
-        geolocation.clearWatch(watchId);
-      } catch {
-        // The watch was already cleared.
-      }
-    };
-    const finish = (run: () => void) => {
-      if (settled) return;
-      settled = true;
-      stop();
-      run();
-    };
-    const timer = setTimeout(() => finish(() => reject(new GeoLocateError("timeout"))), waitMs);
-    try {
-      watchId = geolocation.watchPosition(
-        (position) => {
-          const fix = parseFix(position);
-          if (!fix) return;
-          void permissionState(permissions).then((state) => {
-            if (state === "denied") finish(() => reject(new GeoLocateError("denied")));
-            else finish(() => resolve(fix));
-          });
-        },
-        (error) => {
-          if (error.code === error.PERMISSION_DENIED) finish(() => reject(new GeoLocateError("denied")));
-        },
-        { enableHighAccuracy: false, maximumAge: 0, timeout: waitMs },
-      );
-    } catch {
-      finish(() => reject(new GeoLocateError("unsupported")));
-    }
-  });
-}
-
 export interface FollowHandlers {
   onFix: (fix: GeoFix) => void;
   onError: (error: GeoLocateError) => void;
@@ -193,11 +149,15 @@ export interface FollowHandlers {
 
 /**
  * One open watch. The first fix and every later fix are reported. The caller stops it.
- * A denial stops the watch. The wait only applies until the first fix, so a prompt can finish.
+ * The watch starts even when permission was already denied, so the browser can ask again.
+ * A timeout or an unavailable reading does not stop it: those often fire while the permission
+ * prompt is open, and a fix follows the Allow click. The wait only applies until the first fix.
+ * A denial stops the watch, and a reading that arrives while permission is denied is dropped,
+ * so a cached fix cannot come back.
  */
 export function followDeviceLocation(
   geolocation: Geolocation,
-  options: ReadDeviceLocationOptions | undefined,
+  options: FollowOptions | undefined,
   handlers: FollowHandlers,
 ): () => void {
   const waitMs = options?.waitMs ?? GEO_WAIT_MS;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { GEO_FAILURE_MESSAGE, type GeoFailure } from "@/lib/geolocate";
 import { LIFT_KINDS, LIFT_KIND_LABEL } from "@/lib/lift-icons";
 import { IconLayers, IconLocate } from "./icons";
 import { LiftSign } from "./LiftSign";
@@ -9,7 +10,7 @@ import { useApp } from "./AppState";
 export function MapTools({ onLayers, layersOpen }: { onLayers: () => void; layersOpen: boolean }) {
   const { t, locate, locating, geoError, home } = useApp();
   const located = home?.kind === "geo";
-  const [note, setNote] = useState<"denied" | "unsupported" | null>(geoError);
+  const [note, setNote] = useState<GeoFailure | null>(geoError);
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export function MapTools({ onLayers, layersOpen }: { onLayers: () => void; layer
       </button>
       {note ? (
         <p className={leaving ? "map-tool-note is-leaving" : "map-tool-note"} role="status">
-          {t(note === "unsupported" ? "geoUnsupported" : "geoDenied")}
+          {t(GEO_FAILURE_MESSAGE[note])}
         </p>
       ) : null}
     </div>

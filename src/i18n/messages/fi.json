@@ -35,6 +35,7 @@
   "locating": "Haetaan sijaintia…",
   "geoDenied": "Sijainti on estetty. Salli se osoitepalkin lukosta ja yritä uudelleen.",
   "geoUnsupported": "Tässä selaimessa ei ole sijaintipalvelua.",
+  "geoTimeout": "Sijaintiasi ei löytynyt. Ota sijaintipalvelut käyttöön tässä laitteessa ja yritä uudelleen.",
   "straightLine": "Etäisyydet ovat linnuntietä, eivät ajoaikaa tai aikataulua.",
   "sort": "Järjestä",
   "sortDistance": "Etäisyys",

@@ -35,6 +35,7 @@
   "locating": "Nustatoma vieta…",
   "geoDenied": "Vieta užblokuota. Leiskite ją adreso juostos spyna ir bandykite dar kartą.",
   "geoUnsupported": "Ši naršyklė neturi vietos nustatymo paslaugos.",
+  "geoTimeout": "Jūsų vietos nepavyko nustatyti. Įjunkite vietos nustatymo paslaugas šiame įrenginyje ir bandykite dar kartą.",
   "straightLine": "Atstumai – tiesia linija, o ne kelionės laikas ar tvarkaraštis.",
   "sort": "Rikiuoti",
   "sortDistance": "Atstumas",

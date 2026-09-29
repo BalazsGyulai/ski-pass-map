@@ -35,6 +35,7 @@
   "locating": "Qed insibu l-post…",
   "geoDenied": "Il-post huwa mblukkat. Ħallih mill-katnazz tal-bar tal-indirizz, imbagħad erġa' pprova.",
   "geoUnsupported": "Dan il-browser m'għandux servizz tal-post.",
+  "geoTimeout": "Il-post tiegħek ma nstabx. Ixgħel is-servizzi tal-lokalità fuq dan it-tagħmir, imbagħad erġa' pprova.",
   "straightLine": "Id-distanzi huma f'linja dritta, mhux ħin tas-sewqan jew skeda.",
   "sort": "Issortja",
   "sortDistance": "Distanza",

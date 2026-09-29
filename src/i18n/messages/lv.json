@@ -35,6 +35,7 @@
   "locating": "Nosaka atrašanās vietu…",
   "geoDenied": "Atrašanās vieta ir bloķēta. Atļaujiet to adreses joslas slēdzenē un mēģiniet vēlreiz.",
   "geoUnsupported": "Šim pārlūkam nav atrašanās vietas pakalpojuma.",
+  "geoTimeout": "Jūsu atrašanās vietu neizdevās noteikt. Ieslēdziet atrašanās vietas pakalpojumus šajā ierīcē un mēģiniet vēlreiz.",
   "straightLine": "Attālumi ir taisnā līnijā, nevis brauciena laiks vai saraksts.",
   "sort": "Kārtot",
   "sortDistance": "Attālums",

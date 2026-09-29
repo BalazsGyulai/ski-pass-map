@@ -35,6 +35,7 @@
   "locating": "Zjišťuji polohu…",
   "geoDenied": "Poloha je zablokovaná. Povolte ji zámkem v adresním řádku a zkuste to znovu.",
   "geoUnsupported": "Tento prohlížeč nemá službu určování polohy.",
+  "geoTimeout": "Vaši polohu se nepodařilo zjistit. Zapněte na tomto zařízení polohové služby a zkuste to znovu.",
   "straightLine": "Vzdálenosti jsou vzdušnou čarou, ne doba jízdy ani jízdní řád.",
   "sort": "Řadit",
   "sortDistance": "Vzdálenost",

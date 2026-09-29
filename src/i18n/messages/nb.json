@@ -35,6 +35,7 @@
   "locating": "Finner posisjon…",
   "geoDenied": "Posisjon er blokkert. Tillat den via hengelåsen i adressefeltet, og prøv igjen.",
   "geoUnsupported": "Denne nettleseren har ingen posisjonstjeneste.",
+  "geoTimeout": "Posisjonen din ble ikke funnet. Slå på posisjonstjenester på denne enheten, og prøv igjen.",
   "straightLine": "Avstandene er i luftlinje, ikke kjøretid eller rutetabell.",
   "sort": "Sorter",
   "sortDistance": "Avstand",

@@ -35,6 +35,7 @@
   "locating": "Ricerca posizione…",
   "geoDenied": "La posizione è bloccata. Consenti dal lucchetto nella barra degli indirizzi, poi riprova.",
   "geoUnsupported": "Questo browser non ha un servizio di localizzazione.",
+  "geoTimeout": "Impossibile trovare la tua posizione. Attiva i servizi di localizzazione su questo dispositivo, poi riprova.",
   "straightLine": "Le distanze sono in linea d'aria, non tempi di viaggio né orari.",
   "sort": "Ordina",
   "sortDistance": "Distanza",

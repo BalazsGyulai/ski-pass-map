@@ -35,6 +35,7 @@
   "locating": "Iskanje lokacije…",
   "geoDenied": "Lokacija je blokirana. Dovolite jo s ključavnico v naslovni vrstici in poskusite znova.",
   "geoUnsupported": "Ta brskalnik nima storitve za določanje lokacije.",
+  "geoTimeout": "Vaše lokacije ni bilo mogoče najti. Vklopite lokacijske storitve v tej napravi in poskusite znova.",
   "straightLine": "Razdalje so zračne, ne čas vožnje ali vozni red.",
   "sort": "Razvrsti",
   "sortDistance": "Razdalja",

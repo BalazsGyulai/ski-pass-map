@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GEO_FAILURE_MESSAGE } from "@/lib/geolocate";
 import { matchReferenceCities } from "@/lib/places";
 import { useApp } from "./AppState";
 
@@ -66,8 +67,7 @@ export function PlacePicker() {
       <button type="button" className="ghost wide" onClick={locate} disabled={locating}>
         {locating ? t("locating") : t("useMyLocation")}
       </button>
-      {geoError === "denied" ? <p className="hint warn">{t("geoDenied")}</p> : null}
-      {geoError === "unsupported" ? <p className="hint warn">{t("geoUnsupported")}</p> : null}
+      {geoError ? <p className="hint warn">{t(GEO_FAILURE_MESSAGE[geoError])}</p> : null}
     </fieldset>
   );
 }

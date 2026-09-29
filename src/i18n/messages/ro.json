@@ -35,6 +35,7 @@
   "locating": "Se determină locația…",
   "geoDenied": "Locația este blocată. Permiteți-o din lacătul barei de adrese, apoi încercați din nou.",
   "geoUnsupported": "Acest browser nu are serviciu de localizare.",
+  "geoTimeout": "Locația dvs. nu a putut fi găsită. Activați serviciile de localizare pe acest dispozitiv, apoi încercați din nou.",
   "straightLine": "Distanțele sunt în linie dreaptă, nu timp de călătorie sau orar.",
   "sort": "Sortați",
   "sortDistance": "Distanță",

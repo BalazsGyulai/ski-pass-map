@@ -35,6 +35,7 @@
   "locating": "Standort wird ermittelt…",
   "geoDenied": "Standort blockiert. Erlaube ihn über das Schloss in der Adressleiste und versuche es erneut.",
   "geoUnsupported": "Dieser Browser hat keine Standortfunktion.",
+  "geoTimeout": "Dein Standort wurde nicht gefunden. Schalte die Ortungsdienste auf diesem Gerät ein und versuche es erneut.",
   "straightLine": "Entfernungen sind Luftlinie, keine Fahrzeit und kein Fahrplan.",
   "sort": "Sortierung",
   "sortDistance": "Entfernung",

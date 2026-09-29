@@ -1,9 +1,22 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { GEO_PLACE_ID, GeoLocateError, accuracyCircle, dropDevicePlaces, followDeviceLocation, isDevicePlaceId, parseFix, readDeviceLocation, shouldStoreFix, upsertDevicePlace, watchGeoPermission, type GeoPermissionSource } from "./geolocate";
+import { GEO_FAILURE_MESSAGE, GEO_PLACE_ID, GeoLocateError, accuracyCircle, dropDevicePlaces, followDeviceLocation, isDevicePlaceId, parseFix, shouldStoreFix, upsertDevicePlace, watchGeoPermission, type FollowOptions, type GeoFix, type GeoPermissionSource } from "./geolocate";
 import { sanitizeActivePlaceId, sanitizePlaces, type SavedPlace } from "./places";
 
 function position(lat: number, lon: number): GeolocationPosition {
   return { coords: { latitude: lat, longitude: lon } } as GeolocationPosition;
+}
+
+/** The first fix from a watch, or its error. The watch stops after the first fix. */
+function firstFix(geolocation: Geolocation, options?: FollowOptions): Promise<GeoFix> {
+  return new Promise((resolve, reject) => {
+    const stop = followDeviceLocation(geolocation, options, {
+      onFix(fix) {
+        stop();
+        resolve(fix);
+      },
+      onError: reject,
+    });
+  });
 }
 
 function error(code: number): GeolocationPositionError {
@@ -85,13 +98,13 @@ function permissions(read: () => PermissionState): GeoPermissionSource {
   };
 }
 
-describe("readDeviceLocation", () => {
+describe("followDeviceLocation until the first fix", () => {
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it("resolves when a fix arrives after an unavailable reading", async () => {
-    const fix = readDeviceLocation(
+  it("reports a fix that arrives after an unavailable reading", async () => {
+    const fix = firstFix(
       geo((success, fail) => {
         fail(error(2));
         success(position(48.208, 16.373));
@@ -101,8 +114,8 @@ describe("readDeviceLocation", () => {
     await expect(fix).resolves.toEqual({ lat: 48.208, lon: 16.373, accuracy: null, heading: null });
   });
 
-  it("rejects when the visitor refuses", async () => {
-    const fix = readDeviceLocation(
+  it("reports a refusal", async () => {
+    const fix = firstFix(
       geo((_success, fail) => {
         fail(error(1));
       }),
@@ -112,9 +125,9 @@ describe("readDeviceLocation", () => {
     await expect(fix).rejects.toBeInstanceOf(GeoLocateError);
   });
 
-  it("rejects when the wait runs out with no fix", async () => {
+  it("reports a timeout when the wait runs out with no fix", async () => {
     vi.useFakeTimers();
-    const fix = readDeviceLocation(
+    const fix = firstFix(
       geo(() => {
         // The prompt is still open.
       }),
@@ -125,7 +138,32 @@ describe("readDeviceLocation", () => {
     await rejected;
   });
 
-  it("rejects when the browser has no watch", async () => {
+  it("keeps watching past the wait once a fix has arrived", async () => {
+    vi.useFakeTimers();
+    let success: PositionCallback = () => {};
+    const events: string[] = [];
+    const stop = followDeviceLocation(
+      {
+        watchPosition(next) {
+          success = next;
+          return 5;
+        },
+        clearWatch() {},
+        getCurrentPosition() {},
+      },
+      { waitMs: 1_000 },
+      { onFix: (fix) => events.push(`fix ${fix.lat}`), onError: (failure) => events.push(failure.reason) },
+    );
+    success(position(47, 11));
+    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(5_000);
+    success(position(47.2, 11));
+    await Promise.resolve();
+    expect(events).toEqual(["fix 47", "fix 47.2"]);
+    stop();
+  });
+
+  it("reports unsupported when the browser has no watch", async () => {
     const broken = {
       watchPosition() {
         throw new Error("insecure");
@@ -133,7 +171,7 @@ describe("readDeviceLocation", () => {
       clearWatch() {},
       getCurrentPosition() {},
     } as Geolocation;
-    await expect(readDeviceLocation(broken, { waitMs: 1_000 })).rejects.toMatchObject({ reason: "unsupported" });
+    await expect(firstFix(broken, { waitMs: 1_000 })).rejects.toMatchObject({ reason: "unsupported" });
   });
 
   it("asks again when permission is already denied", async () => {
@@ -146,7 +184,7 @@ describe("readDeviceLocation", () => {
       clearWatch() {},
       getCurrentPosition() {},
     } as Geolocation;
-    await expect(readDeviceLocation(blocked, { permissions: permissions(() => "denied") })).rejects.toMatchObject({ reason: "denied" });
+    await expect(firstFix(blocked, { permissions: permissions(() => "denied") })).rejects.toMatchObject({ reason: "denied" });
     expect(watch).toHaveBeenCalled();
   });
 
@@ -161,11 +199,11 @@ describe("readDeviceLocation", () => {
       clearWatch() {},
       getCurrentPosition() {},
     } as Geolocation;
-    await expect(readDeviceLocation(allowed, { permissions: permissions(() => "granted") })).resolves.toEqual({ lat: 47.26, lon: 11.4, accuracy: null, heading: null });
+    await expect(firstFix(allowed, { permissions: permissions(() => "granted") })).resolves.toEqual({ lat: 47.26, lon: 11.4, accuracy: null, heading: null });
     expect(options?.maximumAge).toBe(0);
   });
 
-  it("rejects a cached fix when permission is denied by the time it arrives", async () => {
+  it("drops a cached fix when permission is denied by the time it arrives", async () => {
     let state: PermissionState = "granted";
     const cached = {
       watchPosition(success: PositionCallback) {
@@ -176,7 +214,15 @@ describe("readDeviceLocation", () => {
       clearWatch() {},
       getCurrentPosition() {},
     } as Geolocation;
-    await expect(readDeviceLocation(cached, { permissions: permissions(() => state) })).rejects.toMatchObject({ reason: "denied" });
+    await expect(firstFix(cached, { permissions: permissions(() => state) })).rejects.toMatchObject({ reason: "denied" });
+  });
+});
+
+describe("GEO_FAILURE_MESSAGE", () => {
+  it("does not call a timeout a block", () => {
+    expect(GEO_FAILURE_MESSAGE.timeout).toBe("geoTimeout");
+    expect(GEO_FAILURE_MESSAGE.denied).toBe("geoDenied");
+    expect(GEO_FAILURE_MESSAGE.unsupported).toBe("geoUnsupported");
   });
 });
 

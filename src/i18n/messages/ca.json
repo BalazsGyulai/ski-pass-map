@@ -35,6 +35,7 @@
   "locating": "S'està localitzant…",
   "geoDenied": "La ubicació està bloquejada. Permeteu-la des del cadenat de la barra d'adreces i torneu-ho a provar.",
   "geoUnsupported": "Aquest navegador no té servei d'ubicació.",
+  "geoTimeout": "No s'ha pogut trobar la vostra ubicació. Activeu els serveis d'ubicació en aquest dispositiu i torneu-ho a provar.",
   "straightLine": "Les distàncies són en línia recta, no temps de viatge ni horaris.",
   "sort": "Ordena",
   "sortDistance": "Distància",

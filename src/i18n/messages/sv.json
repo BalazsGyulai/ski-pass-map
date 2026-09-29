@@ -35,6 +35,7 @@
   "locating": "Hämtar plats…",
   "geoDenied": "Platsen är blockerad. Tillåt den via hänglåset i adressfältet och försök igen.",
   "geoUnsupported": "Den här webbläsaren saknar platstjänst.",
+  "geoTimeout": "Din plats kunde inte hittas. Slå på platstjänster på den här enheten och försök igen.",
   "straightLine": "Avstånden är fågelvägen, inte restid eller tidtabell.",
   "sort": "Sortera",
   "sortDistance": "Avstånd",

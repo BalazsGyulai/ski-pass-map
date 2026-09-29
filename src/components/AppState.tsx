@@ -8,7 +8,7 @@ import type { Lang } from "@/i18n/languages";
 import { isLang, persistLangChoice } from "@/i18n/languages";
 import { isMapPath } from "@/i18n/routing";
 import { translate, type MessageKey, type Messages } from "@/lib/i18n";
-import { GEO_PLACE_ID, GeoLocateError, dropDevicePlaces, followDeviceLocation, isDevicePlaceId, shouldStoreFix, upsertDevicePlace, watchGeoPermission, type GeoFix } from "@/lib/geolocate";
+import { GEO_PLACE_ID, dropDevicePlaces, followDeviceLocation, isDevicePlaceId, shouldStoreFix, upsertDevicePlace, watchGeoPermission, type GeoFailure, type GeoFix } from "@/lib/geolocate";
 import { cityPlaceId, sanitizeActivePlaceId, sanitizePlaces, type ReferenceCity, type SavedPlace } from "@/lib/places";
 import type { DistanceUnits, ExportedUserData } from "@/lib/storage";
 import { readStorage, writeStorage } from "@/lib/storage";
@@ -55,7 +55,7 @@ interface AppContextValue {
   clearResortDays: () => void;
   highlightId: string | null;
   setHighlightId: (id: string | null) => void;
-  geoError: "denied" | "unsupported" | null;
+  geoError: GeoFailure | null;
   locating: boolean;
   locate: () => void;
   /** Increments each time the visitor asks for a device fix, so the map flies only then. */
@@ -126,7 +126,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
   const [today, setToday] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [highlightId, setHighlightId] = useState<string | null>(null);
-  const [geoError, setGeoError] = useState<"denied" | "unsupported" | null>(null);
+  const [geoError, setGeoError] = useState<GeoFailure | null>(null);
   const [locating, setLocating] = useState(false);
   const [locationSeq, setLocationSeq] = useState(0);
   const [deviceFix, setDeviceFix] = useState<GeoFix | null>(null);
@@ -479,6 +479,8 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       if (Array.isArray(parsed.favourites)) setFavourites(parsed.favourites.filter((id) => typeof id === "string"));
       if (parsed.resortDays && typeof parsed.resortDays === "object") setResortDays(parsed.resortDays);
       if (Array.isArray(parsed.places)) {
+        // A running watch would put the device place back over the imported ones within seconds.
+        clearDeviceLocation();
         const savedPlaces = sanitizePlaces(parsed.places);
         setPlaces(savedPlaces);
         setActivePlaceId(sanitizeActivePlaceId(parsed.activePlaceId ?? null, savedPlaces));
@@ -500,6 +502,8 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
   }
 
   function clearAllSavedData() {
+    // Stop the watch first, or the next fix saves the location again.
+    clearDeviceLocation();
     setFavourites([]);
     setResortDays({});
     setPlaces([]);
@@ -541,6 +545,11 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
   }
 
   function removePlace(id: string) {
+    // Removing the device place turns location off. A running watch would save it again.
+    if (isDevicePlaceId(id)) {
+      clearDeviceLocation();
+      return;
+    }
     setPlaces((current) => current.filter((place) => place.id !== id));
     setActivePlaceId((current) => (current === id ? null : current));
   }
@@ -549,6 +558,8 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     watchStop.current?.();
     watchStop.current = null;
     storedFix.current = null;
+    // A stopped watch never reports back, so a pending request must not stay "Locating…".
+    setLocating(false);
     setFollowing(false);
     setDeviceFix(null);
     setPlaces((current) => dropDevicePlaces(current));
@@ -612,11 +623,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       },
       onError(error) {
         setLocating(false);
-        if (error instanceof GeoLocateError && error.reason === "unsupported") {
-          setGeoError("unsupported");
-          return;
-        }
-        setGeoError("denied");
+        setGeoError(error.reason);
         if (error.reason === "denied") clearDeviceLocation();
       },
     });

@@ -35,6 +35,7 @@
   "locating": "Locating…",
   "geoDenied": "Location is blocked. Allow it from the address-bar lock, then try again.",
   "geoUnsupported": "This browser has no location service.",
+  "geoTimeout": "Your location could not be found. Turn on location services on this device, then try again.",
   "straightLine": "Distances are straight-line, not drive time or a timetable.",
   "sort": "Sort",
   "sortDistance": "Distance",

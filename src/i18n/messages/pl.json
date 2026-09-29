@@ -35,6 +35,7 @@
   "locating": "Ustalanie lokalizacji…",
   "geoDenied": "Lokalizacja jest zablokowana. Zezwól przez kłódkę na pasku adresu i spróbuj ponownie.",
   "geoUnsupported": "Ta przeglądarka nie obsługuje lokalizacji.",
+  "geoTimeout": "Nie udało się ustalić Twojej lokalizacji. Włącz usługi lokalizacji na tym urządzeniu i spróbuj ponownie.",
   "straightLine": "Odległości są w linii prostej, to nie czas dojazdu ani rozkład.",
   "sort": "Sortuj",
   "sortDistance": "Odległość",

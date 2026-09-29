@@ -35,6 +35,7 @@
   "locating": "Do shuíomh á aimsiú…",
   "geoDenied": "Tá an suíomh blocáilte. Ceadaigh é ón nglas sa bharra seolta, ansin bain triail eile as.",
   "geoUnsupported": "Níl seirbhís suímh ag an mbrabhsálaí seo.",
+  "geoTimeout": "Níorbh fhéidir do shuíomh a aimsiú. Cas air seirbhísí suímh ar an ngléas seo, ansin bain triail eile as.",
   "straightLine": "Is fad díreach iad na faid, ní am taistil ná amchlár.",
   "sort": "Sórtáil",
   "sortDistance": "Fad",

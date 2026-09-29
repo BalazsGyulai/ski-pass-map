@@ -35,6 +35,7 @@
   "locating": "Asukoha määramine…",
   "geoDenied": "Asukoht on blokeeritud. Luba see aadressiriba lukust ja proovi uuesti.",
   "geoUnsupported": "Selles brauseris pole asukohateenust.",
+  "geoTimeout": "Sinu asukohta ei leitud. Lülita selles seadmes asukohateenused sisse ja proovi uuesti.",
   "straightLine": "Kaugused on linnulennult, mitte sõiduaeg ega sõiduplaan.",
   "sort": "Järjesta",
   "sortDistance": "Kaugus",

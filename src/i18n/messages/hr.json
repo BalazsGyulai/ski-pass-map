@@ -35,6 +35,7 @@
   "locating": "Određivanje lokacije…",
   "geoDenied": "Lokacija je blokirana. Dopustite je lokotom u adresnoj traci i pokušajte ponovno.",
   "geoUnsupported": "Ovaj preglednik nema uslugu lokacije.",
+  "geoTimeout": "Vaša lokacija nije pronađena. Uključite usluge lokacije na ovom uređaju i pokušajte ponovno.",
   "straightLine": "Udaljenosti su zračne, a ne vrijeme vožnje ili vozni red.",
   "sort": "Poredaj",
   "sortDistance": "Udaljenost",

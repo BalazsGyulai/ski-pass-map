@@ -35,6 +35,7 @@
   "locating": "Locatie bepalen…",
   "geoDenied": "Locatie is geblokkeerd. Sta toe via het slot in de adresbalk en probeer opnieuw.",
   "geoUnsupported": "Deze browser heeft geen locatievoorziening.",
+  "geoTimeout": "Je locatie kon niet worden bepaald. Zet locatievoorzieningen aan op dit apparaat en probeer opnieuw.",
   "straightLine": "Afstanden zijn hemelsbreed, geen reistijd of dienstregeling.",
   "sort": "Sorteren",
   "sortDistance": "Afstand",

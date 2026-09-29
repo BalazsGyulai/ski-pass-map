@@ -35,6 +35,7 @@
   "locating": "Localisation…",
   "geoDenied": "La position est bloquée. Autorisez-la via le cadenas de la barre d'adresse, puis réessayez.",
   "geoUnsupported": "Ce navigateur ne propose pas de localisation.",
+  "geoTimeout": "Votre position est introuvable. Activez les services de localisation sur cet appareil, puis réessayez.",
   "straightLine": "Les distances sont à vol d'oiseau, pas en temps de trajet ni selon un horaire.",
   "sort": "Trier",
   "sortDistance": "Distance",

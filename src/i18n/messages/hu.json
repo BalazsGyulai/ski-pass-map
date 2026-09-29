@@ -35,6 +35,7 @@
   "locating": "Helymeghatározás…",
   "geoDenied": "A helymeghatározás le van tiltva. Engedélyezd a címsor lakatjánál, majd próbáld újra.",
   "geoUnsupported": "Ebben a böngészőben nincs helymeghatározás.",
+  "geoTimeout": "Nem sikerült meghatározni a helyzetedet. Kapcsold be a helymeghatározást ezen az eszközön, majd próbáld újra.",
   "straightLine": "A távolság légvonal, nem autóút és nem menetrend.",
   "sort": "Rendezés",
   "sortDistance": "Távolság",
