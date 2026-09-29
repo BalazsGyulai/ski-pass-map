@@ -92,6 +92,9 @@ export function ExplorerFrame() {
           <LanguageSwitcher compact />
           <SettingsLink className="icon-btn" />
         </nav>
+        <div className="topbar-lang">
+          <LanguageSwitcher compact />
+        </div>
         <SettingsLink className="tool-btn topbar-gear" />
       </header>
       <div className="stage">
