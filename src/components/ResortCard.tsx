@@ -198,7 +198,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
         {resort.website ? (
           <a className="ghost website-btn" href={resort.website} target="_blank" rel="noopener noreferrer">
             {t("openWebsite")}
-            <span aria-hidden="true"> ↗</span>
+            <span className="website-arrow" aria-hidden="true">↗</span>
           </a>
         ) : null}
         {days > 0 ? (
