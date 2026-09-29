@@ -45,10 +45,18 @@ test("language redirect and switcher (hu, en, de)", async ({ page, baseURL }) =>
   await page.goto("/");
   await page.waitForURL(/\/(hu|en|de)\//, { timeout: 15_000 });
   await page.goto("/de/");
-  await page.locator(".lang-switch-trigger").click();
+  // The map bar has one switcher for desktop and one for phones. Only one is shown.
+  const trigger = page.locator(".lang-switch-trigger:visible");
+  await trigger.click();
+  // Opening moves focus into the list, which sits at the end of the page.
+  await expect(page.locator(".lang-switch-item.is-active")).toBeFocused();
   await page.locator(".lang-switch-item", { hasText: "Magyar" }).click();
   await expect(page).toHaveURL(/\/hu\//);
-  await page.locator(".lang-switch-trigger").click();
+  await trigger.click();
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".lang-switch-list")).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  await trigger.click();
   await page.locator(".lang-switch-item", { hasText: "English" }).click();
   await expect(page).toHaveURL(/\/en\//);
   expect(problems, problems.join("\n")).toEqual([]);

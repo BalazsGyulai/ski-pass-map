@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { LANGS, LANG_NATIVE } from "@/i18n/languages";
 import { langPath, switchLangHref } from "@/i18n/routing";
@@ -27,6 +27,9 @@ export function LanguageSwitcher({ compact }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [place, setPlace] = useState<MenuPlace | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const listId = useId();
+  const shown = open && place !== null;
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -41,6 +44,7 @@ export function LanguageSwitcher({ compact }: { compact?: boolean }) {
       event.preventDefault();
       event.stopImmediatePropagation();
       setOpen(false);
+      triggerRef.current?.focus();
     }
     window.addEventListener("keydown", onKey, true);
     return () => {
@@ -50,15 +54,27 @@ export function LanguageSwitcher({ compact }: { compact?: boolean }) {
     };
   }, [open]);
 
+  // The list lives at the end of the page, so Tab from the trigger would never reach it.
+  // Opening moves focus to the current language, once: scrolling the list moves `place` too.
+  useEffect(() => {
+    if (!shown) return;
+    const list = listRef.current;
+    const target = list?.querySelector<HTMLElement>('[aria-current="true"]') ?? list?.querySelector<HTMLElement>("a");
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: "nearest" });
+  }, [shown]);
+
   const currentLabel = LANG_NATIVE[lang];
   const menu =
-    open && place && typeof document !== "undefined"
+    shown && typeof document !== "undefined"
       ? createPortal(
           <>
-            <button type="button" className="lang-switch-scrim" aria-label={t("close")} onClick={() => setOpen(false)} />
+            {/* For pointers. Keyboards close with Escape or by leaving the list. */}
+            <button type="button" className="lang-switch-scrim" tabIndex={-1} aria-label={t("close")} onClick={() => setOpen(false)} />
             <ul
+              ref={listRef}
+              id={listId}
               className="lang-switch-list"
-              role="listbox"
               aria-label={t("langLabel")}
               style={{
                 left: place.left,
@@ -67,17 +83,24 @@ export function LanguageSwitcher({ compact }: { compact?: boolean }) {
                 top: place.top,
                 bottom: place.bottom,
               }}
+              onBlur={(event) => {
+                const next = event.relatedTarget;
+                if (!(next instanceof Node)) return;
+                if (listRef.current?.contains(next) || triggerRef.current?.contains(next)) return;
+                setOpen(false);
+              }}
             >
               {LANGS.map((code) => {
                 const href = switchLangHref(pathname, search, code);
                 const selected = code === lang;
                 return (
-                  <li key={code} role="option" aria-selected={selected}>
+                  <li key={code}>
                     <a
                       className={selected ? "lang-switch-item is-active" : "lang-switch-item"}
                       href={href}
                       hrefLang={code}
                       lang={code}
+                      aria-current={selected ? "true" : undefined}
                       onClick={() => setOpen(false)}
                     >
                       {LANG_NATIVE[code]}
@@ -97,8 +120,8 @@ export function LanguageSwitcher({ compact }: { compact?: boolean }) {
         ref={triggerRef}
         type="button"
         className="lang-switch-trigger"
-        aria-haspopup="listbox"
         aria-expanded={open}
+        aria-controls={shown ? listId : undefined}
         aria-label={t("langLabel")}
         onClick={() => setOpen((value) => !value)}
       >
