@@ -26,6 +26,7 @@ import type { MapAppearance, MapProviderId } from "@/lib/map-styles";
 import {
   PISTE_SOURCE_ID,
   addLiftImages,
+  boundsOfGeoJson,
   clusterExpansionZoom,
   createVectorMap,
   firstLabelLayer,
@@ -48,7 +49,7 @@ import {
 } from "@/lib/vector-map";
 import { attachMapProbe } from "@/lib/map-canvas-probe";
 import { accuracyCircle, type GeoFix } from "@/lib/geolocate";
-import { flyToResort, flyToUser, readPanelInset, readSheetVisible, resortCameraPadding, visibleBounds } from "@/lib/map-camera";
+import { fitResortBounds, flyToResort, flyToUser, readPanelInset, readSheetVisible, resortCameraPadding, visibleBounds } from "@/lib/map-camera";
 import { RESORT_PITCH, applyTerrain } from "@/lib/terrain";
 import { SHEET_EVENT } from "@/lib/sheet";
 import { LIFT_CARS_SOURCE, liftPaths, startLiftMotion } from "@/lib/lift-motion";
@@ -677,25 +678,41 @@ export default function MapView() {
     if (!map || !ready || !share.resort) return;
     const resort = resortById.get(share.resort);
     if (!resort) return;
-    const fly = (duration: number) => {
-      if (!hasMapSize(map)) return;
+    let cancelled = false;
+    let bounds: [[number, number], [number, number]] | null = null;
+    const frameCamera = (duration: number) => {
+      if (cancelled || !hasMapSize(map)) return;
       const narrow = window.matchMedia("(max-width: 899px)").matches;
       const height = map.getContainer().clientHeight;
       const padding = resortCameraPadding({ narrow, sheetPx: readSheetVisible(), height });
       const panelPx = readPanelInset(map.getContainer());
-      // In 3D the camera tilts so the mountain and its runs stand up.
-      flyToResort(map, resort.lon, resort.lat, { duration, padding, panelPx, pitch: terrainRef.current ? RESORT_PITCH : undefined });
+      const pitch = terrainRef.current ? RESORT_PITCH : undefined;
+      if (bounds) fitResortBounds(map, bounds, { duration, padding, panelPx, pitch, replacePadding: provider === "mapbox" });
+      else flyToResort(map, resort.lon, resort.lat, { duration, padding, panelPx, pitch });
     };
-    // One frame lets the sheet publish its height. The camera moves at once; tiles fill in on the way.
-    const frame = requestAnimationFrame(() => fly(motionDuration(700)));
+    // Move at once. If the runs arrive, they replace this with a frame of this resort.
+    const frame = requestAnimationFrame(() => {
+      if (!bounds) frameCamera(motionDuration(700));
+    });
+    void fetch(`${BASE_PATH}/pistes/${resort.id}.geojson`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (cancelled) return;
+        const next = boundsOfGeoJson(data);
+        if (!next) return;
+        bounds = next;
+        frameCamera(motionDuration(700));
+      })
+      .catch(() => {});
     // When the sheet settles at another height, keep the resort in the visible part of the map.
-    const onSheet = () => fly(motionDuration(320));
+    const onSheet = () => frameCamera(motionDuration(320));
     window.addEventListener(SHEET_EVENT, onSheet);
     return () => {
+      cancelled = true;
       cancelAnimationFrame(frame);
       window.removeEventListener(SHEET_EVENT, onSheet);
     };
-  }, [ready, share.resort]);
+  }, [ready, share.resort, provider]);
 
   // Closing a resort levels the camera again for the overview.
   const hadResort = useRef(false);

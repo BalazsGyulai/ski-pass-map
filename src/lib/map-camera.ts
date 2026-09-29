@@ -1,7 +1,10 @@
 import type { VectorMap } from "./vector-map";
 import { hasMapSize } from "./vector-map";
 
-export const RESORT_MAX_ZOOM = 13;
+/** How close a resort's runs may fill the screen. The map itself allows 16. */
+export const RESORT_MAX_ZOOM = 15;
+/** A resort with no runs. Closer than the old overview step of 10. */
+export const RESORT_POINT_ZOOM = 14;
 /** Close enough to see the device dot against streets, without diving past a zoom the visitor already chose. */
 export const USER_LOCATION_ZOOM = 12;
 
@@ -93,7 +96,8 @@ export function flyToResort(
   options: { duration: number; padding: Padding; pitch?: number; panelPx?: number },
 ): void {
   if (!hasMapSize(map) || !Number.isFinite(lon) || !Number.isFinite(lat)) return;
-  const zoom = Math.min(RESORT_MAX_ZOOM, Math.max(map.getZoom(), 10));
+  // No runs to frame: come in to the point zoom, and leave a closer view alone.
+  const zoom = Math.max(map.getZoom(), RESORT_POINT_ZOOM);
   // flyTo's padding replaces the map's own, so the side panel goes in here too.
   const padding = clampMapPadding(map, options.padding, options.panelPx ?? 0);
   map.flyTo({
@@ -124,7 +128,7 @@ export function flyToUser(
 export function fitResortBounds(
   map: VectorMap,
   bounds: [[number, number], [number, number]],
-  options: { duration: number; padding: Padding; panelPx?: number },
+  options: { duration: number; padding: Padding; panelPx?: number; pitch?: number; replacePadding?: boolean },
 ): void {
   if (!hasMapSize(map)) return;
   const [[west, south], [east, north]] = bounds;
@@ -133,10 +137,13 @@ export function fitResortBounds(
     flyToResort(map, west, south, options);
     return;
   }
-  // fitBounds fits inside the map's own padding, which already holds the side panel.
+  // Mapbox replaces the map padding with this one, so the side panel has to be in it or the
+  // resort is centred on the whole screen. MapLibre already counts the map's own padding.
+  const padding = clampMapPadding(map, options.padding, options.replacePadding ? (options.panelPx ?? 0) : 0);
   map.fitBounds(bounds, {
-    padding: clampMapPadding(map, options.padding),
+    padding,
     maxZoom: RESORT_MAX_ZOOM,
     duration: options.duration,
+    ...(options.pitch != null ? { pitch: options.pitch } : {}),
   });
 }

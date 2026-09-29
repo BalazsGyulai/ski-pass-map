@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { RESORT_MAX_ZOOM, USER_LOCATION_ZOOM, clampMapPadding, flyToUser, resortCameraPadding, visibleBounds } from "./map-camera";
+import { RESORT_MAX_ZOOM, RESORT_POINT_ZOOM, USER_LOCATION_ZOOM, clampMapPadding, fitResortBounds, flyToResort, flyToUser, resortCameraPadding, visibleBounds } from "./map-camera";
 import type { VectorMap } from "./vector-map";
 
 function mockMap(width: number, height: number): VectorMap {
@@ -65,8 +65,49 @@ describe("visibleBounds", () => {
 });
 
 describe("RESORT_MAX_ZOOM", () => {
-  it("caps resort fly-to zoom for sandbox tile reach", () => {
-    expect(RESORT_MAX_ZOOM).toBe(13);
+  it("lets a resort's runs fill the view up to zoom 15", () => {
+    expect(RESORT_MAX_ZOOM).toBe(15);
+    expect(RESORT_POINT_ZOOM).toBe(14);
+  });
+});
+
+describe("flyToResort", () => {
+  function camera(zoom: number) {
+    const flyTo = vi.fn();
+    const map = {
+      getContainer: () => ({ clientWidth: 800, clientHeight: 600 }),
+      getZoom: () => zoom,
+      flyTo,
+    } as unknown as VectorMap;
+    return { map, flyTo };
+  }
+
+  it("comes in to the point zoom and leaves a closer view alone", () => {
+    const overview = camera(7);
+    const padding = { top: 0, bottom: 0, left: 0, right: 0 };
+    flyToResort(overview.map, 15, 47, { duration: 0, padding });
+    expect(overview.flyTo).toHaveBeenCalledWith(expect.objectContaining({ center: [15, 47], zoom: RESORT_POINT_ZOOM }));
+
+    const close = camera(16);
+    flyToResort(close.map, 15, 47, { duration: 0, padding });
+    expect(close.flyTo).toHaveBeenCalledWith(expect.objectContaining({ zoom: 16 }));
+  });
+});
+
+describe("fitResortBounds", () => {
+  it("includes the side panel when the library replaces the map padding", () => {
+    const fitBounds = vi.fn();
+    const map = {
+      getContainer: () => ({ clientWidth: 1440, clientHeight: 900 }),
+      fitBounds,
+    } as unknown as VectorMap;
+    const padding = { top: 72, bottom: 48, left: 32, right: 32 };
+    fitResortBounds(map, [[15, 47], [15.2, 47.2]], { duration: 0, padding, panelPx: 440, replacePadding: true });
+    expect(fitBounds.mock.calls[0][1].padding.left).toBeGreaterThanOrEqual(440);
+
+    fitBounds.mockClear();
+    fitResortBounds(map, [[15, 47], [15.2, 47.2]], { duration: 0, padding, panelPx: 440 });
+    expect(fitBounds.mock.calls[0][1].padding.left).toBe(32);
   });
 });
 
