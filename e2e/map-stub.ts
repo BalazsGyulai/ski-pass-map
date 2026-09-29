@@ -30,14 +30,18 @@ function stubStyle(dark: boolean, host: "openfreemap" | "mapbox" = "openfreemap"
   };
 }
 
-function readGlyph(range: string): Buffer | null {
+/**
+ * Glyphs from E2E_GLYPHS_DIR, or an empty glyph set. Mapbox GL drops a whole GeoJSON tile, dots
+ * included, when a label's glyph request fails, so a 404 would hide every resort on the Mapbox map.
+ */
+function readGlyph(range: string): Buffer {
   const dir = process.env.E2E_GLYPHS_DIR;
-  if (!dir) return null;
+  if (!dir) return Buffer.alloc(0);
   const plain = path.join(dir, `${range}.pbf`);
   if (fs.existsSync(plain)) return fs.readFileSync(plain);
   const gz = `${plain}.gz`;
   if (fs.existsSync(gz)) return zlib.gunzipSync(fs.readFileSync(gz));
-  return null;
+  return Buffer.alloc(0);
 }
 
 async function fulfillDem(route: Route, tilePath: string): Promise<void> {
@@ -58,9 +62,7 @@ async function handle(route: Route): Promise<void> {
   }
   if (url.startsWith("https://tiles.openfreemap.org/fonts/")) {
     const range = decodeURIComponent(url.split("/").pop() ?? "").replace(/\.pbf$/, "");
-    const glyph = readGlyph(range);
-    if (glyph) await route.fulfill({ status: 200, contentType: "application/x-protobuf", body: glyph });
-    else await route.fulfill({ status: 404, body: "" });
+    await route.fulfill({ status: 200, contentType: "application/x-protobuf", body: readGlyph(range) });
     return;
   }
   await route.fulfill({ status: 404, body: "" });
@@ -79,9 +81,7 @@ async function handleMapbox(route: Route): Promise<void> {
   }
   if (url.pathname.startsWith("/fonts/v1/")) {
     const range = decodeURIComponent(url.pathname.split("/").pop() ?? "").replace(/\.pbf$/, "");
-    const glyph = readGlyph(range);
-    if (glyph) await route.fulfill({ status: 200, contentType: "application/x-protobuf", body: glyph });
-    else await route.fulfill({ status: 404, body: "" });
+    await route.fulfill({ status: 200, contentType: "application/x-protobuf", body: readGlyph(range) });
     return;
   }
   await route.fulfill({ status: 204, body: "" });

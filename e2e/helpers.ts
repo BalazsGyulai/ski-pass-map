@@ -3,7 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 export const RESORT_ID = "skimap-12357";
-export const ARTIFACTS_DIR = "/opt/cursor/artifacts/screenshots/part10";
+/** Cursor's cloud machines show files under /opt/cursor/artifacts. Elsewhere the shots go to test-results/, which git ignores. */
+export const ARTIFACTS_DIR =
+  process.env.E2E_ARTIFACTS_DIR ??
+  (fs.existsSync("/opt/cursor") ? "/opt/cursor/artifacts/screenshots/part10" : path.join(process.cwd(), "test-results", "screenshots", "part10"));
 
 let shotsTaken = 0;
 const MAX_SHOTS = 6;
@@ -16,12 +19,16 @@ export function originFromBase(baseURL: string | undefined): string {
 
 export function attachOriginGuards(page: Page, origin: string): string[] {
   const problems: string[] = [];
+  // The page-view counter allows 60 hits a minute per address, and the whole suite runs from one
+  // address. Its beacon ignores the answer, so a 429 there is expected, not a failure.
+  const isStat = (url: string) => url.includes("/api/stat");
   page.on("console", (msg) => {
     if (msg.type() === "error") {
       const text = msg.text();
       if (text.includes("favicon")) return;
       if (text.includes("frame-ancestors") && text.includes("<meta>")) return;
       if (text.includes("404") && text.includes("Not Found")) return;
+      if (text.includes("429") && isStat(msg.location().url)) return;
       problems.push(`console: ${text}`);
     }
   });
@@ -39,6 +46,7 @@ export function attachOriginGuards(page: Page, origin: string): string[] {
   page.on("response", (res) => {
     const url = res.url();
     if (!url.startsWith(origin)) return;
+    if (res.status() === 429 && isStat(url)) return;
     if (res.status() >= 400 && !url.includes("/api/map-load") && !url.includes("does-not-exist")) {
       problems.push(`http ${res.status()}: ${url}`);
     }
@@ -46,13 +54,16 @@ export function attachOriginGuards(page: Page, origin: string): string[] {
   return problems;
 }
 
-/** Waits for entrance animations to end. Endless ones (loading shimmer) are left running. */
+/**
+ * Waits for entrance animations to end. Endless ones (loading shimmer) are left running, and so are
+ * scroll-driven ones (the pass-chip fade): they follow the scroll position and never finish.
+ */
 export async function settleAnimations(page: Page): Promise<void> {
   await page.evaluate(() =>
     Promise.all(
       document
         .getAnimations()
-        .filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
+        .filter((animation) => animation.timeline === document.timeline && animation.effect?.getComputedTiming().iterations !== Infinity)
         .map((animation) => animation.finished.catch(() => undefined)),
     ),
   );

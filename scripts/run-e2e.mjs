@@ -1,4 +1,4 @@
-import { execSync, spawn } from "node:child_process";
+import { execFileSync, execSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -102,7 +102,8 @@ async function main() {
   }
 
   try {
-    execSync("npx playwright test e2e/regression.spec.ts", {
+    // Extra arguments go to Playwright, e.g. `npm run test:e2e -- -g "Mapbox access"`.
+    execFileSync("npx", ["playwright", "test", "e2e/regression.spec.ts", ...process.argv.slice(2)], {
       stdio: "inherit",
       env: { ...process.env, E2E_ORIGIN: ORIGIN, E2E_MAPBOX_STUB_TOKEN: "1" },
     });

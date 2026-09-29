@@ -419,31 +419,45 @@ test("lifts move uphill on an open resort and stand still for reduced motion", a
   const origin = originFromBase(baseURL);
   const problems = attachOriginGuards(page, origin);
   await dismissConsent(page, "rejected");
-  const chairPattern = () =>
+  // The cars are points on the lift-cars source, moved every tick while the map is close enough.
+  const cars = () =>
     page.evaluate(() => {
-      const map = window.__skiMapProbe as { getLayer(id: string): unknown; getPaintProperty(id: string, name: string): unknown } | undefined;
-      return map?.getLayer("lift-chair") ? JSON.stringify(map.getPaintProperty("lift-chair", "line-dasharray")) : null;
+      const map = window.__skiMapProbe as
+        | { getLayer(id: string): unknown; queryRenderedFeatures(options: { layers: string[] }): Array<{ geometry: { coordinates: unknown } }> }
+        | undefined;
+      if (!map?.getLayer("lift-cars")) return null;
+      return JSON.stringify(map.queryRenderedFeatures({ layers: ["lift-cars", "lift-belts"] }).map((feature) => feature.geometry.coordinates));
     });
-  // Opening a resort keeps the regional view; the lifts come alive once you zoom in.
-  const zoomIn = () => page.evaluate(() => (window.__skiMapProbe as { jumpTo(options: { zoom: number }): void } | undefined)?.jumpTo({ zoom: 13 }));
+  const moving = async () => {
+    const before = await cars();
+    await page.waitForTimeout(300);
+    const after = await cars();
+    return Boolean(before && after && before !== "[]" && after !== "[]" && before !== after);
+  };
+  const jumpTo = (zoom: number) =>
+    page.evaluate((next) => (window.__skiMapProbe as { jumpTo(options: { zoom: number }): void } | undefined)?.jumpTo({ zoom: next }), zoom);
 
   await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
   await page.waitForSelector("#resort-title", { timeout: 30_000 });
-  await expect.poll(chairPattern, { timeout: 30_000 }).not.toBeNull();
-  const first = await chairPattern();
+  await expect.poll(cars, { timeout: 30_000 }).not.toBeNull();
+  // Zoomed out, the cars are not drawn and nothing moves.
+  await jumpTo(10);
+  await page.waitForTimeout(500);
+  const resting = await cars();
   await page.waitForTimeout(1000);
-  expect(await chairPattern(), "no motion in the regional view").toBe(first);
-  await zoomIn();
-  await expect.poll(chairPattern, { timeout: 15_000 }).not.toBe(first);
+  expect(await cars(), "no motion when zoomed out").toBe(resting);
+  // Close up, they run.
+  await jumpTo(14);
+  await expect.poll(moving, { timeout: 15_000 }).toBe(true);
 
+  // Nobody chose, so the system's reduced-motion setting wins, also after a visit that saved settings.
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`/en/?resort=${MULTI_PASS_RESORT}`);
   await page.waitForSelector("#resort-title", { timeout: 30_000 });
-  await expect.poll(chairPattern, { timeout: 30_000 }).not.toBeNull();
-  await zoomIn();
-  const still = await chairPattern();
+  await expect.poll(cars, { timeout: 30_000 }).not.toBeNull();
+  await jumpTo(14);
   await page.waitForTimeout(1500);
-  expect(await chairPattern()).toBe(still);
+  expect(await cars(), "no cars run under reduced motion").toBe("[]");
   expect(problems, problems.join("\n")).toEqual([]);
 });
 

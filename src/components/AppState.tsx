@@ -11,7 +11,7 @@ import { translate, type MessageKey, type Messages } from "@/lib/i18n";
 import { GEO_PLACE_ID, dropDevicePlaces, followDeviceLocation, isDevicePlaceId, shouldStoreFix, upsertDevicePlace, watchGeoPermission, type GeoFailure, type GeoFix } from "@/lib/geolocate";
 import { cityPlaceId, sanitizeActivePlaceId, sanitizePlaces, type ReferenceCity, type SavedPlace } from "@/lib/places";
 import type { DistanceUnits, ExportedUserData } from "@/lib/storage";
-import { readStorage, writeStorage } from "@/lib/storage";
+import { STORAGE_VERSION, readStorage, storedLiftMotionChoice, writeStorage } from "@/lib/storage";
 import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
 import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type ShareState } from "@/lib/url-state";
@@ -139,7 +139,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
   const [distanceUnits, setDistanceUnitsState] = useState<DistanceUnits>("km");
   const [pisteOverlayDefault, setPisteOverlayDefaultState] = useState(false);
   const [terrain3d, setTerrain3d] = useState(true);
-  const [liftMotion, setLiftMotion] = useState(true);
+  /** Null until the visitor turns moving lifts on or off. Until then they follow the system's reduced-motion setting. */
+  const [liftMotionChoice, setLiftMotionChoice] = useState<boolean | null>(null);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const liftMotion = liftMotionChoice ?? !reduceMotion;
   const [liftKinds, setLiftKinds] = useState<LiftKind[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const areaRef = useRef<MapBounds | null>(null);
@@ -203,11 +206,9 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       if (stored.distanceUnits === "km" || stored.distanceUnits === "mi") setDistanceUnitsState(stored.distanceUnits);
       if (stored.pisteOverlayDefault) setPisteOverlayDefaultState(true);
       if (stored.terrain3d === false) setTerrain3d(false);
-      if (stored.liftMotion === false) setLiftMotion(false);
+      setLiftMotionChoice(storedLiftMotionChoice(stored));
     }
     if (stored?.terrain3d == null && !defaultTerrain3d(deviceHints())) setTerrain3d(false);
-    // Moving lifts start off for visitors who ask for less motion, until they turn them on.
-    if (stored?.liftMotion == null && window.matchMedia("(prefers-reduced-motion: reduce)").matches) setLiftMotion(false);
     const fromUrl = parsePlan(params.get("plan"));
     if (Object.keys(fromUrl).length > 0) setResortDays(fromUrl);
     const bought = params.get("on");
@@ -252,10 +253,19 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       distanceUnits,
       pisteOverlayDefault,
       terrain3d,
-      liftMotion,
-      version: 4,
+      liftMotion: liftMotionChoice ?? undefined,
+      version: STORAGE_VERSION,
     });
-  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault, terrain3d, liftMotion]);
+  }, [ready, theme, favourites, birthYear, purchaseDate, resortDays, places, activePlaceId, distanceUnits, pisteOverlayDefault, terrain3d, liftMotionChoice]);
+
+  // Moving lifts start off for visitors who ask for less motion, and follow that setting until they choose.
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   const onMap = isMapPath(pathname, lang);
   const pushedResort = useRef(false);
@@ -460,7 +470,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       distanceUnits,
       pisteOverlayDefault,
       terrain3d,
-      liftMotion,
+      liftMotion: liftMotionChoice ?? undefined,
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -494,7 +504,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
         if (parsed.pisteOverlayDefault) setShare((current) => ({ ...current, showPistes: true }));
       }
       if (typeof parsed.terrain3d === "boolean") setTerrain3d(parsed.terrain3d);
-      if (typeof parsed.liftMotion === "boolean") setLiftMotion(parsed.liftMotion);
+      if (typeof parsed.liftMotion === "boolean") setLiftMotionChoice(parsed.liftMotion);
       return true;
     } catch {
       return false;
@@ -734,7 +744,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
     terrain3d,
     setTerrain3d,
     liftMotion,
-    setLiftMotion,
+    setLiftMotion: setLiftMotionChoice,
     liftKinds,
     setLiftKinds,
     exportSavedData,

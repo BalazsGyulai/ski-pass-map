@@ -199,7 +199,7 @@ npx wrangler d1 migrations apply skimap-app --remote   # production (owner only)
 5. Backups: private repo, `BACKUP_ENABLED=true`, GitHub secrets/vars as above.
 6. Apply `npm run db:migrate:local` / remote `0003_support.sql` before using Ko-fi or stats.
 
-**Tests:** `npm test`, `npm run test:part8-e2e` (Playwright screenshots under `/opt/cursor/artifacts/screenshots/part8/`), and `npm run test:e2e` (full regression suite in `e2e/regression.spec.ts` against local `wrangler pages dev`).
+**Tests:** `npm test`, `npm run test:part8-e2e` (Playwright screenshots under `/opt/cursor/artifacts/screenshots/part8/`), and `npm run test:e2e` (full regression suite in `e2e/regression.spec.ts` against local `wrangler pages dev`). Options after `--` go to Playwright, for example `npm run test:e2e -- -g "Mapbox access"` runs one test.
 
 ## Part 9 — security review and regression
 
