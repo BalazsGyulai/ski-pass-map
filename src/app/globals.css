@@ -620,12 +620,48 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
     overflow-y: hidden;
   }
   /* The action bar stays on the visible bottom edge while the sheet moves. */
-  .resort-card .action-bar {
+    .resort-card .action-bar {
     transform: translate3d(0, calc(-1 * var(--sheet-offset, 0px)), 0);
     transition: var(--sheet-transition, transform var(--dur-slow) var(--ease-sheet));
     position: relative;
     z-index: 2;
   }
+  .resort-card .action-bar :is(.primary, .ghost, .website-btn) {
+    min-height: 40px;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .resort-card .action-bar .icon-btn {
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+  }
+  /* The day count needs its own row. Squeezed beside the website button, the label wraps under the number. */
+  .resort-card .action-bar.is-planned {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "stepper stepper"
+      "website nav";
+  }
+  .resort-card .action-bar.is-planned .stepper {
+    grid-area: stepper;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .resort-card .action-bar.is-planned .stepper-count {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+  }
+  .resort-card .action-bar.is-planned .stepper-count .num,
+  .resort-card .action-bar.is-planned .stepper-bubble { line-height: 1; }
+  .resort-card .action-bar.is-planned .website-btn { grid-area: website; }
+  .resort-card .action-bar.is-planned .resort-nav { grid-area: nav; margin-left: 0; }
+  .resort-card .action-bar.is-planned .stepper-bubble { white-space: nowrap; }
   .resort-card[data-dragging] .action-bar { transition: none; }
   /* The name bar and the handle leave the map clear. The action row would sit on top of that name. */
   :is(.list-sheet, .resort-card):is([data-snap="bar"], [data-snap="shut"]) .action-bar { display: none; }
@@ -654,10 +690,10 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   padding-right: calc(var(--space-4) + 48px);
   max-width: 100%;
 }
-.resort-head h2 { margin: 2px 0 0; font-size: var(--text-2xl); line-height: 1.15; font-weight: 700; max-width: 100%; overflow-wrap: anywhere; }
+.resort-head h2 { margin: var(--space-1) 0 0; font-size: var(--text-2xl); line-height: 1.15; font-weight: 700; max-width: 100%; overflow-wrap: anywhere; }
 .resort-head .meta { max-width: 100%; }
-.eyebrow { margin: 0; color: var(--ink-3); font-size: 11px; line-height: 16px; font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; }
-.meta { margin: 6px 0 0; color: var(--ink-2); font-size: var(--text-sm); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.eyebrow { margin: 0; color: var(--ink-3); font-size: var(--text-xs); line-height: 1.2; font-weight: 600; letter-spacing: var(--tracking-caps); text-transform: uppercase; }
+.meta { margin: var(--space-1) 0 0; color: var(--ink-2); font-size: var(--text-sm); line-height: 1.45; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 .close-card { position: absolute; top: 0; right: 12px; width: 36px; height: 36px; min-height: 36px; }
 .sheet-scroll, .filter-body { overscroll-behavior: contain; }
 .scroll-fade {
@@ -668,22 +704,27 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   flex-direction: column;
 }
 .sheet-scroll { flex: 1; min-height: 0; overflow: auto; padding: 0 0 12px; }
-.scroll-fade > .sheet-scroll { padding-bottom: 40px; }
-.scroll-fade > .resort-scroll { padding-bottom: 48px; }
-/* The last card dissolves into the panel instead of ending on a hard cut. The strip does not take clicks. */
+.scroll-fade > .sheet-scroll { padding-bottom: 72px; }
+.scroll-fade > .resort-scroll { padding-bottom: 80px; }
+/* The blur and the panel colour ramp in together, so the strip has no hard edge. */
 .scroll-fade::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 40px;
+  height: 72px;
   pointer-events: none;
-  background: linear-gradient(to bottom, transparent, var(--surface));
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000);
-  mask-image: linear-gradient(to bottom, transparent, #000);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--surface) 30%, transparent) 46%,
+    var(--surface) 100%
+  );
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.12) 22%, rgba(0, 0, 0, 0.55) 58%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.12) 22%, rgba(0, 0, 0, 0.55) 58%, #000 100%);
 }
 .sort-label select { min-height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); padding: 0 8px; }
 
@@ -742,25 +783,47 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
 
 .action-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: var(--space-2);
   align-items: center;
-  padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--line);
+  position: relative;
+  padding: var(--space-2) var(--space-3);
   background: var(--glass-strong);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   flex: none;
 }
-.action-bar .primary { flex: 0 1 auto; white-space: nowrap; }
+/* The bar is glass. Content above it fades in, including while the phone sheet is only partly open. */
+.resort-card .action-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 56px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--glass-strong) 45%, transparent) 55%,
+    var(--glass-strong) 100%
+  );
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.2) 35%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.2) 35%, #000 100%);
+}
+.resort-card .scroll-fade::after { content: none; }
+.action-bar .primary { flex: 1 1 auto; min-width: 0; white-space: normal; text-wrap: balance; }
 .action-bar .website-btn {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
   justify-content: center;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-1);
   overflow: visible;
-  white-space: nowrap;
+  white-space: normal;
+  text-wrap: balance;
 }
 .website-arrow {
   display: inline-flex;
@@ -774,19 +837,26 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
 .resort-head-actions .icon-btn { width: 36px; height: 36px; min-height: 36px; }
 .resort-head-actions .close-card { position: static; }
 .resort-head { padding-right: calc(var(--space-4) + 92px); }
-.resort-scroll { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px var(--space-4) var(--space-5); }
-.resort-scroll > .hint { margin: 8px 0; }
-.resort-section { padding: 16px 0 18px; border-top: 1px solid var(--line); }
-.resort-section:first-of-type { border-top: 0; padding-top: 8px; }
+.resort-scroll { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: var(--space-1) var(--space-4) var(--space-4); }
+.resort-scroll > .hint { margin: var(--space-2) 0; }
+.resort-section { padding: var(--space-4) 0; border-top: 1px solid var(--line); }
+.resort-section:first-of-type { border-top: 0; padding-top: var(--space-2); }
 .resort-section h3 {
-  margin: 0 0 10px;
+  margin: 0 0 var(--space-2);
   color: var(--ink-3);
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 600;
+  line-height: 1.2;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
 }
-.pass-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.pass-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.resort-card .pass-row { padding: var(--space-3); }
+.resort-card .pass-short { font-size: var(--text-md); font-weight: 600; line-height: 1.2; }
+.resort-card .price-lg { font-size: var(--text-lg); font-weight: 700; line-height: 1.1; }
+.resort-card .bracket-list { gap: var(--space-1); margin-top: var(--space-2); }
+.resort-card .bracket-list li { font-size: var(--text-sm); line-height: 1.45; }
+.resort-card .pass-row > .hint { margin: var(--space-2) 0 0; }
 .pass-row {
   --pass: var(--ink-3);
   border: 1px solid var(--line);
@@ -834,11 +904,11 @@ details.tariffs summary::-webkit-details-marker { display: none; }
 details.tariffs summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; rotate: 45deg; translate: 0 -2px; transition: rotate var(--dur) var(--ease-out); }
 details.tariffs[open] summary::after { rotate: 225deg; translate: 0 2px; }
 details.tariffs .bracket-list li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 8px; border-radius: var(--radius-xs); }
-.fact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.fact { display: grid; gap: 2px; align-content: start; padding: 12px 14px; border-radius: var(--radius-md); background: var(--surface-2); }
+.fact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.fact { display: grid; gap: 2px; align-content: start; padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface-2); }
 .fact-wide { grid-column: 1 / -1; }
-.fact-label { color: var(--ink-3); font-size: var(--text-xs); font-weight: 500; }
-.fact-value { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
+.fact-label { color: var(--ink-3); font-size: var(--text-xs); font-weight: 500; line-height: 1.2; }
+.fact-value { font-size: var(--text-lg); font-weight: 600; line-height: 1.2; }
 .season-range { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35em; }
 .fact-sub { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; color: var(--ink-2); font-size: var(--text-sm); }
 .source-row { display: flex; flex-wrap: wrap; gap: 2px 12px; margin: 10px 0 4px; }
@@ -1105,7 +1175,7 @@ a.ext.ghost, a.ext.primary, .link-buttons a.ext { justify-content: space-between
 .desk-only { display: none; }
 @media (min-width: 900px) { .desk-only { display: flex; } }
 
-.resort-nav { display: flex; gap: 8px; }
+.resort-nav { display: flex; gap: var(--space-1); margin-left: auto; flex: none; }
 .stepper { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .stepper button {
   width: 44px;
@@ -1120,15 +1190,16 @@ a.ext.ghost, a.ext.primary, .link-buttons a.ext { justify-content: space-between
 }
 .stepper button:hover { background: var(--surface-3); }
 /* Resort footer: one compact capsule, not a row stretched across the bar. */
-.action-bar .stepper { flex: 0 0 auto; justify-content: center; gap: 6px; min-width: max-content; }
+.action-bar .stepper { flex: 1 1 auto; justify-content: flex-start; gap: var(--space-1); min-width: 0; }
 .action-bar .stepper button {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  min-height: 38px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   flex: none;
   padding: 0;
-  font-size: 18px;
+  font-size: var(--text-lg);
+  font-weight: 500;
   line-height: 1;
   display: grid;
   place-items: center;
@@ -1137,22 +1208,22 @@ a.ext.ghost, a.ext.primary, .link-buttons a.ext { justify-content: space-between
   border-color: var(--ink);
 }
 .action-bar .stepper button:hover { background: color-mix(in srgb, var(--ink) 86%, var(--surface)); }
-.action-bar .stepper-count { display: grid; justify-items: center; gap: 3px; min-width: max-content; }
+.action-bar .stepper-count { display: flex; align-items: baseline; gap: var(--space-1); min-width: 0; }
 .action-bar .stepper-count .num {
   overflow: visible;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.1;
 }
 .action-bar .stepper-bubble {
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-3);
+  padding: 0;
+  border-radius: 0;
+  background: none;
   color: var(--ink-2);
-  font-size: 10px;
-  font-weight: 650;
+  font-size: var(--text-xs);
+  font-weight: 500;
   line-height: 1.2;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .link-list, .plan-list, .option-list, .source-list { list-style: none; margin: 0; padding: 0; }
@@ -1344,35 +1415,42 @@ a.ext.ghost, a.ext.primary, .link-buttons a.ext { justify-content: space-between
   position: absolute;
   left: 0;
   right: 0;
-  height: 40px;
+  height: 72px;
   pointer-events: none;
   z-index: 2;
   opacity: 0;
   transition: opacity var(--dur-fast) var(--ease-out);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
 .filter-scroll.fade-top::before,
 .filter-scroll.fade-bottom::after { opacity: 1; }
 .filter-scroll::before {
   top: 0;
-  background: linear-gradient(to top, transparent, var(--surface));
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  -webkit-mask-image: linear-gradient(to top, transparent, #000);
-  mask-image: linear-gradient(to top, transparent, #000);
+  background: linear-gradient(
+    to top,
+    transparent 0%,
+    color-mix(in srgb, var(--surface) 30%, transparent) 46%,
+    var(--surface) 100%
+  );
+  -webkit-mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.12) 22%, rgba(0, 0, 0, 0.55) 58%, #000 100%);
+  mask-image: linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.12) 22%, rgba(0, 0, 0, 0.55) 58%, #000 100%);
 }
 .filter-scroll::after {
   bottom: 0;
-  background: linear-gradient(to bottom, transparent, var(--surface));
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000);
-  mask-image: linear-gradient(to bottom, transparent, #000);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--surface) 30%, transparent) 46%,
+    var(--surface) 100%
+  );
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.12) 22%, rgba(0, 0, 0, 0.55) 58%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.12) 22%, rgba(0, 0, 0, 0.55) 58%, #000 100%);
 }
 .filter-footer {
   display: flex;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--line);
   background: var(--surface);
 }
 .filter-footer > * { flex: 1; justify-content: center; }

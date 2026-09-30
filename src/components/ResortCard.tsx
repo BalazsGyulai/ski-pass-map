@@ -197,7 +197,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
       </div>
       </div>
 
-      <footer className="action-bar">
+      <footer className={days > 0 ? "action-bar is-planned" : "action-bar"}>
         {resort.website ? (
           <ExternalSiteLink className="ghost website-btn" href={resort.website}>
             {t("openWebsite")}
@@ -221,7 +221,7 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
             {t("addToPlan")}
           </button>
         )}
-        <div className="resort-nav desk-only">
+        <div className="resort-nav">
           <button type="button" className="icon-btn" disabled={!previous} aria-label={previous ? t("prevResort", { name: previous.name }) : t("noPrevResort")} onClick={() => previous && selectResort(previous.id)}>
             ‹
           </button>
