@@ -2,6 +2,7 @@
 
 import { SUPPORT_CONFIG } from "@/lib/config/support";
 import { useApp } from "./AppState";
+import { ExternalSiteLink } from "./ExternalSiteLink";
 
 /** The Support page: what supporting gives you, and the Ko-fi link once config/support.json has one. */
 export function SupportView() {
@@ -18,9 +19,9 @@ export function SupportView() {
       </ul>
       {kofiUrl ? (
         <p>
-          <a href={kofiUrl} target="_blank" rel="noopener noreferrer" className="primary">
+          <ExternalSiteLink href={kofiUrl} className="primary">
             {t("supportPromptKofi")}
-          </a>
+          </ExternalSiteLink>
         </p>
       ) : (
         <p className="hint">{t("supportNotOpen")}</p>

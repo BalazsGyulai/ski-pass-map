@@ -23,6 +23,7 @@ import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
 import { AffiliateLinksBlock } from "./AffiliateLinks";
+import { ExternalSiteLink } from "./ExternalSiteLink";
 
 /**
  * One scrolling card per resort: name and key facts, the passes that cover it with your price
@@ -198,10 +199,9 @@ export function ResortCard({ snap, setSnap }: { snap: SheetSnap; setSnap: (snap:
 
       <footer className="action-bar">
         {resort.website ? (
-          <a className="ghost website-btn" href={resort.website} target="_blank" rel="noopener noreferrer">
+          <ExternalSiteLink className="ghost website-btn" href={resort.website}>
             {t("openWebsite")}
-            <span className="website-arrow" aria-hidden="true">↗</span>
-          </a>
+          </ExternalSiteLink>
         ) : null}
         {days > 0 ? (
           <div className="stepper">
@@ -436,14 +436,10 @@ function SnowSection({ resort }: { resort: Resort }) {
       {resort.snow_report || resort.webcam ? (
         <div className="link-buttons">
           {resort.snow_report ? (
-            <a href={resort.snow_report} target="_blank" rel="noopener noreferrer">
-              {t("snowReport")}
-            </a>
+            <ExternalSiteLink href={resort.snow_report}>{t("snowReport")}</ExternalSiteLink>
           ) : null}
           {resort.webcam ? (
-            <a href={resort.webcam} target="_blank" rel="noopener noreferrer">
-              {t("webcams")}
-            </a>
+            <ExternalSiteLink href={resort.webcam}>{t("webcams")}</ExternalSiteLink>
           ) : null}
         </div>
       ) : null}
@@ -473,12 +469,8 @@ function TravelSection({ resort }: { resort: Resort }) {
         </p>
       ) : null}
       <div className="link-buttons">
-        <a href={google} target="_blank" rel="noopener noreferrer">
-          {t("directions")}
-        </a>
-        <a href={apple} target="_blank" rel="noopener noreferrer">
-          {t("directionsApple")}
-        </a>
+        <ExternalSiteLink href={google}>{t("directions")}</ExternalSiteLink>
+        <ExternalSiteLink href={apple}>{t("directionsApple")}</ExternalSiteLink>
       </div>
       {resort.public_transport ? (
         <p>
@@ -499,9 +491,9 @@ function LinksSection({ resort }: { resort: Resort }) {
       <h3 id="resort-links">{t("tabLinks")}</h3>
       {resort.website ? (
         <p>
-          <a className="text-link" href={resort.website} target="_blank" rel="noopener noreferrer">
-            {t("openWebsite")} ↗
-          </a>
+          <ExternalSiteLink className="text-link" href={resort.website}>
+            {t("openWebsite")}
+          </ExternalSiteLink>
           <SourceLine source={resort.sources.website} t={t} lang={lang} tourism={resort.via_tourism_site} />
         </p>
       ) : null}
@@ -510,9 +502,7 @@ function LinksSection({ resort }: { resort: Resort }) {
           {covered.map((pass) => (
             <li key={pass.id}>
               <span className="swatch" style={{ background: pass.color }} />
-              <a href={pass.url} target="_blank" rel="noopener noreferrer">
-                {passShortName(pass)} ↗
-              </a>
+              <ExternalSiteLink href={pass.url}>{passShortName(pass)}</ExternalSiteLink>
             </li>
           ))}
         </ul>

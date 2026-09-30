@@ -12,6 +12,7 @@ import { GEO_PLACE_ID, dropDevicePlaces, followDeviceLocation, isDevicePlaceId, 
 import { cityPlaceId, sanitizeActivePlaceId, sanitizePlaces, type ReferenceCity, type SavedPlace } from "@/lib/places";
 import type { DistanceUnits, ExportedUserData } from "@/lib/storage";
 import { STORAGE_VERSION, readStorage, storedLiftMotionChoice, writeStorage } from "@/lib/storage";
+import { BIRTH_YEAR_MIN, clampBirthYear } from "@/lib/birth-year-draft";
 import { todayISO } from "@/lib/format";
 import { shareHistoryStep } from "@/lib/history-step";
 import { bareResortUrl, defaultShareState, parsePlan, parseShareState, serializePlan, serializeShareState, shareableSearch, type ShareState } from "@/lib/url-state";
@@ -194,7 +195,9 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       setActivePlaceId(sanitizeActivePlaceId(stored.activePlaceId, savedPlaces));
       if (stored.theme === "light" || stored.theme === "dark" || stored.theme === "system") setTheme(stored.theme);
       if (Array.isArray(stored.favourites)) setFavourites(stored.favourites.filter((id) => typeof id === "string"));
-      if (typeof stored.birthYear === "number") setBirthYearState(stored.birthYear);
+      if (typeof stored.birthYear === "number" && Number.isInteger(stored.birthYear) && stored.birthYear >= BIRTH_YEAR_MIN) {
+        setBirthYearState(clampBirthYear(stored.birthYear));
+      }
       if (typeof stored.purchaseDate === "string") setPurchaseDate(stored.purchaseDate);
       if (stored.resortDays && typeof stored.resortDays === "object") {
         const days: Record<string, number> = {};
@@ -501,7 +504,10 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
         setPlaces(savedPlaces);
         setActivePlaceId(sanitizeActivePlaceId(parsed.activePlaceId ?? null, savedPlaces));
       }
-      if (typeof parsed.birthYear === "number" || parsed.birthYear === null) setBirthYearState(parsed.birthYear ?? null);
+      if (parsed.birthYear === null) setBirthYearState(null);
+      else if (typeof parsed.birthYear === "number" && Number.isInteger(parsed.birthYear) && parsed.birthYear >= BIRTH_YEAR_MIN) {
+        setBirthYearState(clampBirthYear(parsed.birthYear));
+      }
       if (typeof parsed.purchaseDate === "string" || parsed.purchaseDate === null) setPurchaseDate(parsed.purchaseDate ?? null);
       if (parsed.theme === "light" || parsed.theme === "dark" || parsed.theme === "system") setTheme(parsed.theme);
       if (parsed.distanceUnits === "km" || parsed.distanceUnits === "mi") setDistanceUnitsState(parsed.distanceUnits);
@@ -547,7 +553,7 @@ export function AppProvider({ lang, messages, children }: { lang: Lang; messages
       setBirthYearState(null);
       return;
     }
-    setBirthYearState(Math.min(2026, Math.max(1920, year)));
+    setBirthYearState(clampBirthYear(year));
   }
 
   function saveCity(city: ReferenceCity) {

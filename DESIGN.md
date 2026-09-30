@@ -19,7 +19,7 @@ Use the custom properties on `:root`. Never write a raw hex colour, pixel shadow
 | --- | --- | --- |
 | Spacing | `--space-1` … `--space-7` (4, 8, 12, 16, 24, 32, 48 px) | Stay on the scale. Gaps inside a control use 1–3, between groups 4–6 |
 | Corners | `--radius-xs` … `--radius-lg`, `--radius-pill` | Pills and chips are `--radius-pill`; cards and sheets `--radius-md` / `--radius-lg` |
-| Type | `--text-xs` (12) … `--text-3xl` (34), Inter via `next/font` | Body text is `--text-md` (15). Nothing a visitor must read goes below `--text-xs` |
+| Type | `--text-xs` (12) … `--text-3xl` (34), Inter via `next/font` | Body text is `--text-md` (15). Nothing a visitor must read goes below `--text-xs`. Sizes, line height, and how grouped text is spaced: `.cursor/skills/typography/SKILL.md` |
 | Colour | `--ink`, `--ink-2`, `--ink-3`, `--surface*`, `--bg`, `--line*`, status pairs (`--save`/`--save-bg`, `--warn`, `--danger`, `--amber-*`), `--heart` | Status colour always comes as a text + background pair, and always with words; colour alone never carries meaning. `--heart` is the filled save icon |
 | Glass | `--glass`, `--glass-strong`, `--glass-edge`, `--glass-blur` | Only for surfaces that float over the map |
 | Elevation | `--shadow-1`, `-2`, `-3`, `-float`, `-chip` | Chips use `--shadow-chip`: their row clips anything larger |
@@ -46,6 +46,7 @@ Dark mode is defined twice: under `@media (prefers-color-scheme: dark)` for `:ro
 - **Pills and chips.** One line, never wrap. The row scrolls sideways; the active chip must stay fully visible when focused. A pass in the filter list is a whole-row button: the pass colour is the stripe and, when selected, a light tint and border. A check mark shows the selection, so colour is not the only signal.
 - **Glass panels.** Text on glass must still meet contrast over the busiest map area (a dark forest or a white glacier). Check both themes on a real map tile, not on a blank background.
 - **Forms and toggles.** One ink control style everywhere (see the comment above the checkbox rules). A label is always visible; a placeholder is never the only label.
+- **Leaving the site.** A control that opens another site uses `ExternalSiteLink`: a globe before the label and an arrow up and to the right after it. Both icons use `currentColor`.
 - **Consent and support card.** One compact card, rising from the bottom on phones. It must never hide the focused element (see Focus below).
 - **Map markers.** Built as HTML strings: every text goes through `escapeHtml` (`src/lib/html.ts`).
 

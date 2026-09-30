@@ -742,6 +742,7 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
 
 .action-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
@@ -751,16 +752,15 @@ button:disabled { cursor: not-allowed; opacity: 0.45; }
   backdrop-filter: var(--glass-blur);
   flex: none;
 }
-.action-bar .primary { flex: 1; }
+.action-bar .primary { flex: 0 1 auto; white-space: nowrap; }
 .action-bar .website-btn {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   justify-content: center;
   align-items: center;
-  gap: 4px;
-  overflow: hidden;
+  gap: 6px;
+  overflow: visible;
   white-space: nowrap;
-  text-overflow: ellipsis;
 }
 .website-arrow {
   display: inline-flex;
@@ -845,46 +845,157 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
 .source-row .fact-source { margin: 0; }
 .resort-section .check { margin-top: 6px; }
 .text-link { font-weight: 600; }
+a.ext { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+a.ext svg { flex: none; }
+a.ext .ext-label { min-width: 0; }
+a.ext.ghost, a.ext.primary, .link-buttons a.ext { justify-content: space-between; }
 .website-btn { flex: none; }
 /* Passes tab */
 .page-head { margin: 8px 0 16px; }
 .page-head h1 { margin: 0 0 6px; }
 .lede { margin: 0; color: var(--ink-2); font-size: var(--text-md); max-width: 60ch; }
+/* Passes type follows a 16px minor-third scale: body 16, secondary 14, headings tighter. */
+.passes-page .page-head { margin: 0 0 24px; }
+.page.passes-page h1 {
+  font-size: 1.875rem;
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+.passes-page .lede {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+  max-width: 65ch;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .page.passes-page h1,
+  :root:not([data-theme="light"]) .passes-page .pass-short { font-weight: 600; }
+}
+:root[data-theme="dark"] .page.passes-page h1,
+:root[data-theme="dark"] .passes-page .pass-short { font-weight: 600; }
 .passes-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 16px;
   align-items: flex-end;
-  padding: 14px 16px;
-  margin: 0 0 8px;
+  gap: 10px 12px;
+  width: 100%;
+  max-width: 100%;
+  padding: 12px;
+  margin: 0 0 24px;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow-1);
+}
+.passes-controls .field { margin: 0; }
+.passes-controls .compact-field:not(.passes-sort):not(.passes-days) { width: 10.5rem; max-width: 100%; }
+.passes-controls .passes-days { width: 5.5rem; }
+.passes-controls .field { gap: 6px; }
+.passes-controls .compact-field > span {
+  font-size: 0.875rem;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+.passes-controls .compact-field input,
+.passes-controls .birth-year-input { width: 100%; min-width: 0; font-size: 1rem; line-height: 1.2; }
+.passes-controls input::placeholder { color: var(--ink-3); opacity: 1; }
+@media (max-width: 899px) {
+  .passes-controls .compact-field:not(.passes-sort):not(.passes-days) { width: auto; flex: 1 1 calc(50% - 12px); }
+  /* Ski days grows. Sort stays as wide as its labels and sits on the right edge. */
+  .passes-controls .passes-days { flex: 1 1 auto; width: auto; min-width: 5.5rem; }
+  .passes-controls .passes-sort { flex: 0 0 auto; margin-left: auto; }
+}
+@media (min-width: 900px) {
+  .passes-controls { flex-wrap: nowrap; }
+  .passes-controls .compact-field:not(.passes-sort):not(.passes-days) { flex: 1 1 0; width: auto; }
+  .passes-controls .passes-days { flex: 0 0 7rem; width: 7rem; }
+  .passes-controls .passes-sort { flex: 0 0 auto; margin-left: auto; }
 }
 .compact-field { margin: 0; min-width: 0; }
 .compact-field > span { color: var(--ink-3); font-size: var(--text-xs); font-weight: 600; }
 .compact-field input { min-height: 40px; }
 .compact-field .birth-year-input { width: 9rem; }
-.pass-cards { list-style: none; margin: 16px 0; padding: 0; display: grid; gap: 12px; }
-@media (min-width: 900px) { .pass-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.pass-board { margin: 16px 0 0; }
+.pass-col { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* One column on a phone, in price order. Two independent columns on a wide screen, so opening one card only moves the cards under it. */
+@media (max-width: 899px) {
+  .pass-board { display: flex; flex-direction: column; gap: 12px; }
+  .pass-col { display: contents; }
+  .pass-card { order: var(--order); }
+}
+@media (min-width: 900px) {
+  .pass-board { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+}
 .pass-card {
   --pass: var(--ink-3);
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 18px 18px 14px;
+  padding: var(--space-4);
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow-1);
 }
-.pass-card .pass-actions { margin-top: auto; padding-top: 10px; }
-.pass-card h2.pass-short { margin: 0; font-size: var(--text-xl); line-height: 1.2; }
-.pass-card .pass-mark { min-height: 44px; }
-.pass-note { margin: 10px 0 0 18px; font-size: var(--text-sm); }
-.pass-card details.tariffs, .pass-card .pass-actions, .pass-card > .fact-source { margin-left: 18px; }
-.days-calc { margin: 14px 0 4px 18px; padding: 12px 14px; border-radius: var(--radius-md); background: var(--surface-2); display: grid; gap: 8px; }
+.pass-card-top { display: flex; gap: var(--space-3); align-items: flex-start; }
+.pass-card-main { flex: 1; min-width: 0; display: grid; gap: 4px; align-content: start; }
+.pass-card-price { display: grid; justify-items: end; align-content: start; gap: 4px; text-align: right; flex: none; max-width: 42%; }
+@media (max-width: 899px) {
+  .pass-card-price { max-width: 7.75rem; }
+  .pass-card .until-chip { white-space: normal; text-align: right; }
+}
+.pass-card-price .price-lg { margin: 0; font-size: 1.5rem; line-height: 1.15; font-weight: 650; letter-spacing: -0.02em; }
+.pass-price-note { font-size: 0.875rem; font-weight: 600; line-height: 1.4; letter-spacing: 0.01em; }
+.pass-where { margin: 12px 0 0; color: var(--ink-2); font-size: 0.875rem; line-height: 1.4; letter-spacing: 0.01em; }
+.pass-card .pass-actions { margin-top: var(--space-2); padding-top: 0; }
+.pass-card h2.pass-short { margin: 0; font-size: 1.25rem; line-height: 1.2; font-weight: 650; letter-spacing: -0.02em; text-wrap: wrap; }
+.pass-card .pass-official { font-size: 0.875rem; line-height: 1.4; letter-spacing: 0.01em; }
+.pass-card .pass-meta { font-size: 0.875rem; line-height: 1.4; letter-spacing: 0.01em; }
+.pass-card .pass-mark { width: 8px; min-height: 36px; }
+.pass-note { margin: 8px 0 0; font-size: 0.9375rem; line-height: 1.45; }
+.pass-save { margin: 8px 0 0; font-size: 0.9375rem; line-height: 1.45; }
+.pass-card details.tariffs { margin: 0; }
+.pass-more { margin-top: 0; }
+.pass-card .pass-more > summary {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.pass-card .pass-more > summary::marker { content: none; }
+.pass-card .pass-more > summary::-webkit-details-marker { display: none; }
+.pass-card details.tariffs > summary::after { content: none; border: 0; }
+.pass-chevron {
+  margin-left: auto;
+  flex: none;
+  color: var(--ink-3);
+  transition: transform var(--dur) var(--ease-in-out);
+}
+.pass-card details[open] > summary .pass-chevron { transform: rotate(90deg); }
+.pass-card details.tariffs[open] { margin-bottom: 20px; }
+.pass-card .bracket-list { user-select: none; -webkit-tap-highlight-color: transparent; margin: 2px 0 0; gap: 0; font-size: 0.875rem; line-height: 1.35; }
+.pass-card details.tariffs .bracket-list li { padding: 2px 0; }
+.pass-card .bracket-list li.is-match { background: none; }
+.pass-card .pass-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pass-card .pass-actions .primary { grid-column: 1 / -1; min-height: 40px; width: 100%; }
+.pass-card .pass-actions .ghost { min-height: 36px; width: 100%; padding: 0 10px; font-size: 0.875rem; line-height: 1.2; gap: 6px; }
+.pass-card .pass-actions .primary { font-size: 1rem; line-height: 1.2; letter-spacing: -0.01em; }
+.pass-card .until-chip { font-size: 0.75rem; letter-spacing: 0.02em; line-height: 1.3; }
+.pass-card .pass-actions .ghost svg { flex: none; }
+.days-calc { margin: 0 0 var(--space-2); padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface-2); display: grid; gap: 8px; }
 .days-calc p { margin: 0; }
 .days-calc-head { display: grid; gap: 2px; }
 .days-slider { display: grid; gap: 4px; font-size: var(--text-sm); font-weight: 600; }
@@ -895,13 +1006,33 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
 .compare-bar .meter > span { display: block; height: 100%; border-radius: inherit; background: var(--ink-3); transition: width var(--dur) var(--ease-out); }
 .pass-actions { margin-top: 10px; }
 .passes-controls .compact-field input,
+.passes-controls .birth-year-input,
 .passes-controls .seg-control {
   box-sizing: border-box;
   height: 40px;
   min-height: 40px;
 }
-.passes-controls .seg-control { display: flex; align-items: stretch; }
-.passes-controls .seg-control button { min-height: 0; height: auto; }
+.passes-controls .seg-control {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  align-items: stretch;
+  padding: 2px;
+  gap: 2px;
+}
+.passes-controls .seg-control button {
+  flex: 0 0 auto;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  margin: 0;
+  padding: 0 12px;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  box-shadow: none;
+}
+.passes-controls .seg-control button.is-on { box-shadow: none; }
 .pass-chips {
   position: absolute;
   z-index: 32;

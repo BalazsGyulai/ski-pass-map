@@ -5,7 +5,7 @@ import { nextBirthYearDraft } from "@/lib/birth-year-draft";
 import { useApp } from "./AppState";
 
 /** Text field so a year can be deleted and retyped. A finished year is saved; a half-typed one is not. */
-export function BirthYearInput() {
+export function BirthYearInput({ placeholder }: { placeholder?: string }) {
   const { birthYear, setBirthYear } = useApp();
   const saved = birthYear == null ? "" : String(birthYear);
   const [draft, setDraft] = useState(saved);
@@ -24,6 +24,7 @@ export function BirthYearInput() {
       inputMode="numeric"
       autoComplete="bday-year"
       maxLength={4}
+      placeholder={placeholder}
       value={draft}
       onFocus={() => setFocused(true)}
       onChange={(event) => {

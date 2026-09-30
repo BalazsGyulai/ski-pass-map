@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getAffiliateLinks, hasAffiliateLinks } from "@/lib/affiliates";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
+import { ExternalSiteLink } from "./ExternalSiteLink";
 
 export function AffiliateLinksBlock() {
   const { t } = useApp();
@@ -17,7 +18,7 @@ export function AffiliateLinksBlock() {
         {links.map((item) => (
           <li key={`${item.category}-${item.url}`}>
             <span className="affiliate-label">{t("affiliateAdLabel")}</span>
-            <a href={item.url} target="_blank" rel="sponsored noopener noreferrer">{item.label}</a>
+            <ExternalSiteLink href={item.url} rel="sponsored noopener noreferrer">{item.label}</ExternalSiteLink>
           </li>
         ))}
       </ul>

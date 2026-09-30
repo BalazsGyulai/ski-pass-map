@@ -4,6 +4,7 @@ import { generated, passes, resorts, unverifiedResortIds } from "@/lib/data";
 import { SITE_NAME } from "@/lib/site";
 import { formatDate } from "@/lib/format";
 import { useApp } from "./AppState";
+import { ExternalSiteLink } from "./ExternalSiteLink";
 
 export function AboutView() {
   const { t, lang } = useApp();
@@ -38,9 +39,7 @@ export function AboutView() {
               <div>
                 <strong>{pass.name}</strong>
                 <p>
-                  <a href={pass.url} target="_blank" rel="noopener noreferrer">
-                    {t("officialSite")}
-                  </a>
+                  <ExternalSiteLink href={pass.url}>{t("officialSite")}</ExternalSiteLink>
                 </p>
                 <p>
                   <em>{t("sourceNote")}. </em>
@@ -65,9 +64,9 @@ export function AboutView() {
         <p>{t("creditsTerrain")}</p>
         <p>{t("creditsPasses")}</p>
         <p>
-          <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">
+          <ExternalSiteLink href="https://www.openstreetmap.org/fixthemap">
             {t("reportMapIssue")}
-          </a>
+          </ExternalSiteLink>
         </p>
         <p>{t("creditsCode", { name: SITE_NAME })}</p>
       </section>

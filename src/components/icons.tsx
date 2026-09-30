@@ -1,3 +1,23 @@
+/** A globe. Sits before the label of a link that leaves this site. */
+export function IconGlobe() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
+      <circle cx="12" cy="12" r="8.25" fill="none" stroke="currentColor" strokeWidth="2" />
+      <ellipse cx="12" cy="12" rx="3.75" ry="8.25" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="M3.75 12h16.5" fill="none" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
+/** Arrow at 45 degrees, up and to the right. Sits after that label. */
+export function IconArrowUpRight() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16">
+      <path d="M7 17 17 7M9 7h8v8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export function IconMenu() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" width="22" height="22">

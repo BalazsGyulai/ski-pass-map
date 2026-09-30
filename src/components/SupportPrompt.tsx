@@ -15,6 +15,7 @@ import { overlayClearance, setBottomOverlay } from "@/lib/overlay-layout";
 import { BASE_PATH } from "@/lib/site";
 import { useApp } from "./AppState";
 import { IconClose, IconHeart } from "./icons";
+import { ExternalSiteLink } from "./ExternalSiteLink";
 
 let rewardedProvider: RewardedAdsProvider = stubRewardedAds;
 
@@ -156,9 +157,9 @@ export function SupportPrompt({ signal }: { signal: number }) {
           {kofiUrl || rewardedReady ? (
             <div className="support-prompt-actions">
               {kofiUrl ? (
-                <a href={kofiUrl} target="_blank" rel="noopener noreferrer" className="primary">
+                <ExternalSiteLink href={kofiUrl} className="primary">
                   {t("supportPromptKofi")}
-                </a>
+                </ExternalSiteLink>
               ) : null}
               {rewardedReady ? (
                 <button type="button" className="ghost" onClick={onRewarded}>
