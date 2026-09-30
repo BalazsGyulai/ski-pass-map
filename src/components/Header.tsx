@@ -15,6 +15,7 @@ export function Header() {
   const { t, resortDays } = useApp();
   const href = useLocalizedPath();
   const { rest } = parseLangPath(pathname);
+  const onSettings = rest === "/settings" || rest.startsWith("/settings/");
   const days = Object.values(resortDays).reduce((sum, value) => sum + value, 0);
   return (
     <header className="site-header">
@@ -31,7 +32,7 @@ export function Header() {
               {link.rest === "/plan" && days > 0 ? t("myPlanPillPlain", { days }) : t(link.key)}
             </Link>
           ))}
-          <LanguageSwitcher compact />
+          {onSettings ? null : <LanguageSwitcher compact />}
           <SettingsLink className="icon-btn" />
         </nav>
       </div>

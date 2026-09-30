@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
 import { passes, resorts } from "@/lib/data";
 import { fold } from "@/lib/filter";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { matchReferenceCities } from "@/lib/places";
 import { regionLabel } from "@/lib/i18n";
+import { safeColor } from "@/lib/resort-layers";
 import { IconClose } from "./icons";
 import { PlacePicker } from "./PlacePicker";
 import { useApp } from "./AppState";
@@ -61,14 +62,8 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
           onClose();
         }}
       >
-        <div className="drawer-head">
-          <h2>{t("filters")}</h2>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label={t("closeFilters")}>
-            <IconClose />
-          </button>
-        </div>
-        <div className="filter-body">
-          <label className="field">
+        <div className="filter-top">
+          <label className="field filter-search">
             <span className="sr-only">{t("searchLabel")}</span>
             <input
               ref={searchRef}
@@ -79,7 +74,12 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
               onChange={(event) => updateShare({ q: event.target.value })}
             />
           </label>
-
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={t("closeFilters")}>
+            <IconClose />
+          </button>
+        </div>
+        <h2 className="filter-title">{t("filters")}</h2>
+        <div className="filter-body">
           {groups ? (
             <div className="typeahead">
               <Group title={t("groupResorts")}>
@@ -139,36 +139,31 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
             </div>
           ) : null}
 
-          <fieldset>
-            <legend>{t("passFilter")}</legend>
-            {passes.map((pass) => {
-              const on = share.passes.includes(pass.id);
-              return (
-                <label key={pass.id} className="check">
-                  <input
-                    type="checkbox"
-                    checked={on}
-                    onChange={() => {
+          <section className="pass-picks" aria-label={t("passFilter")}>
+            <h3>{t("passFilter")}</h3>
+            <div className="pass-pick-list">
+              {passes.map((pass) => {
+                const on = share.passes.includes(pass.id);
+                const count = passCounts.get(pass.id) ?? 0;
+                return (
+                  <PassPick
+                    key={pass.id}
+                    on={on}
+                    color={safeColor(pass.color)}
+                    name={passShortName(pass)}
+                    official={passHasShortName(pass) ? pass.name : null}
+                    count={t("resortCount", { n: count })}
+                    onToggle={() =>
                       updateShare({
                         passes: on ? share.passes.filter((id) => id !== pass.id) : [...share.passes, pass.id],
                         noPass: false,
-                      });
-                    }}
+                      })
+                    }
                   />
-                    <span className="swatch" style={{ background: pass.color }} />
-                  <span>
-                    <strong>{passShortName(pass)}</strong>
-                    {passHasShortName(pass) ? <span className="pass-official"> {pass.name}</span> : null}{" "}
-                    <span className="hint">{t("resortCount", { n: passCounts.get(pass.id) ?? 0 })}</span>
-                  </span>
-                </label>
-              );
-            })}
-            <label className="check">
-              <input type="checkbox" checked={share.noPass} onChange={() => updateShare({ noPass: !share.noPass, passes: [] })} />
-              <span className="swatch swatch-grey" />
-              <span>{t("noPass")}</span>
-            </label>
+                );
+              })}
+              <PassPick on={share.noPass} name={t("noPass")} onToggle={() => updateShare({ noPass: !share.noPass, passes: [] })} />
+            </div>
             <label className="field">
               <span>{t("matchMode")}</span>
               <select value={share.passMatch} onChange={(event) => updateShare({ passMatch: event.target.value === "all" ? "all" : "any" })}>
@@ -176,7 +171,7 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
                 <option value="all">{t("passMatchAll")}</option>
               </select>
             </label>
-          </fieldset>
+          </section>
 
           <fieldset>
             <legend>{t("passPrice")}</legend>
@@ -287,6 +282,44 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
         </div>
       </form>
     </div>
+  );
+}
+
+function PassPick({
+  on,
+  color,
+  name,
+  official,
+  count,
+  onToggle,
+}: {
+  on: boolean;
+  color?: string;
+  name: string;
+  official?: string | null;
+  count?: string;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={on ? "pass-pick is-on" : "pass-pick"}
+      aria-pressed={on}
+      style={color ? ({ "--pass": color } as CSSProperties) : undefined}
+      onClick={onToggle}
+    >
+      <span className="pass-pick-bar" aria-hidden="true" />
+      <span className="pass-pick-copy">
+        <strong>{name}</strong>
+        {official ? <span className="pass-official">{official}</span> : null}
+      </span>
+      {count ? <span className="pass-pick-count">{count}</span> : null}
+      <span className="pass-pick-tick" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <path d="m5 13 4 4 10-10" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+    </button>
   );
 }
 

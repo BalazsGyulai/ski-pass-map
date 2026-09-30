@@ -1,3 +1,93 @@
+# Theme
+
+No Tailwind. All tokens are custom properties in `src/app/globals.css`. The human guide is `DESIGN.md`. Font is Inter from `next/font` in `src/app/DocumentShell.tsx` (latin and latin-ext, optical size axis).
+
+## Compact tokens (light)
+
+| Token | Value |
+| --- | --- |
+| `--space-1` | 4px |
+| `--space-2` | 8px |
+| `--space-3` | 12px |
+| `--space-4` | 16px |
+| `--space-5` | 24px |
+| `--space-6` | 32px |
+| `--space-7` | 48px |
+| `--radius-xs` | 8px |
+| `--radius-sm` | 12px |
+| `--radius-md` | 16px |
+| `--radius-lg` | 24px |
+| `--radius-pill` | 999px |
+| `--text-xs` | 12px |
+| `--text-sm` | 13px |
+| `--text-md` | 15px |
+| `--text-lg` | 17px |
+| `--text-xl` | 20px |
+| `--text-2xl` | 26px |
+| `--text-3xl` | 34px |
+| `--tracking-tight` | -0.022em |
+| `--tracking-caps` | 0.06em |
+| `--ease-out` | cubic-bezier(0.22, 1, 0.36, 1) |
+| `--ease-sheet` | cubic-bezier(0.32, 0.72, 0, 1) |
+| `--ease-in-out` | cubic-bezier(0.65, 0, 0.35, 1) |
+| `--dur-fast` | 140ms |
+| `--dur` | 220ms |
+| `--dur-slow` | 360ms |
+| `--ink` | #0d1321 |
+| `--ink-2` | #4b5565 |
+| `--ink-3` | #667085 |
+| `--line` | #e6e8ec |
+| `--line-strong` | #d0d5dd |
+| `--surface` | #ffffff |
+| `--surface-2` | #f5f6f8 |
+| `--surface-3` | #eceef2 |
+| `--bg` | #f4f5f7 |
+| `--bg-elev` | var(--surface) |
+| `--panel` | var(--surface) |
+| `--accent` | var(--ink) |
+| `--on-accent` | #ffffff |
+| `--amber` | #f79009 |
+| `--amber-ink` | #1f1300 |
+| `--amber-bg` | #fef0c7 |
+| `--amber-text` | #93370d |
+| `--save` | #067647 |
+| `--save-bg` | #ecfdf3 |
+| `--warn` | #b54708 |
+| `--warn-bg` | #fffaeb |
+| `--danger` | #b42318 |
+| `--danger-bg` | #fef3f2 |
+| `--heart` | #e5484d |
+| `--open-bg` | #ecfdf3 |
+| `--open-ink` | #067647 |
+| `--no-pass` | #98a2b3 |
+| `--glass` | rgba(255, 255, 255, 0.82) |
+| `--glass-strong` | rgba(255, 255, 255, 0.94) |
+| `--glass-edge` | rgba(13, 19, 33, 0.06) |
+| `--glass-blur` | saturate(180%) blur(18px) |
+| `--scrim` | rgba(13, 19, 33, 0.36) |
+| `--map-bg` | #eef1f4 |
+| `--focus-ring` | color-mix(in srgb, var(--ink) 55%, transparent) |
+| `--muted` | var(--ink-2) |
+| `--shadow-1` | 0 1px 2px rgba(13, 19, 33, 0.05), 0 1px 3px rgba(13, 19, 33, 0.06) |
+| `--shadow-2` | 0 1px 2px rgba(13, 19, 33, 0.04), 0 10px 28px -6px rgba(13, 19, 33, 0.14) |
+| `--shadow-3` | 0 -1px 0 rgba(13, 19, 33, 0.04), 0 -10px 36px -10px rgba(13, 19, 33, 0.18) |
+| `--shadow-float` | 0 0 0 1px var(--glass-edge), 0 2px 4px rgba(13, 19, 33, 0.04), 0 12px 32px -8px rgba(13, 19, 33, 0.2) |
+| `--shadow-chip` | 0 0 0 1px var(--glass-edge), 0 1px 2px rgba(13, 19, 33, 0.06), 0 2px 6px -1px rgba(13, 19, 33, 0.14) |
+| `--shadow` | var(--shadow-2) |
+| `--sheet-shadow` | var(--shadow-3) |
+| `--tab-bar-height` | 56px |
+
+Dark mode repeats the colour tokens under `@media (prefers-color-scheme: dark)` for `:root:not([data-theme="light"])` and again under `:root[data-theme="dark"]`. A new colour must be added in all three places.
+
+Breakpoints: phone below 900px, desktop from 900px. Buttons are at least 44px tall. Pass colours are data, never UI chrome.
+
+## Raw source
+
+There is no `tailwind.config`. The full stylesheet follows.
+
+### `src/app/globals.css`
+
+```css
 :root {
   /* Spacing */
   --space-1: 4px;
@@ -1138,49 +1228,6 @@ details.tariffs .bracket-list li { display: flex; justify-content: space-between
   box-shadow: var(--shadow);
 }
 .filter-sheet { inset: 0; z-index: 1; animation: float-in var(--dur-slow) var(--ease-sheet); }
-.filter-top {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-3) 0 var(--space-4);
-}
-.filter-search { flex: 1; min-width: 0; margin: 0; }
-.filter-title { margin: var(--space-3) var(--space-4) 0; font-size: var(--text-lg); line-height: 1.2; font-weight: 700; }
-.pass-picks h3 { margin: var(--space-4) 0 var(--space-2); font-size: var(--text-md); font-weight: 650; }
-.pass-pick-list { display: grid; gap: var(--space-2); }
-.pass-pick {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  min-height: 44px;
-  padding: var(--space-2) var(--space-3);
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  color: var(--ink);
-  text-align: left;
-  cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
-}
-.pass-pick-bar {
-  width: 8px;
-  align-self: stretch;
-  min-height: 28px;
-  border-radius: var(--radius-pill);
-  background: var(--pass, var(--no-pass));
-  flex: none;
-}
-.pass-pick-copy { flex: 1; min-width: 0; display: grid; gap: 2px; }
-.pass-pick-copy strong { font-size: var(--text-md); font-weight: 650; }
-.pass-pick .pass-official { color: var(--ink-3); font-size: var(--text-sm); }
-.pass-pick-count { color: var(--ink-3); font-size: var(--text-sm); text-align: right; flex: none; max-width: 42%; }
-.pass-pick-tick { width: 18px; height: 18px; flex: none; color: var(--ink); opacity: 0; }
-.pass-pick.is-on {
-  border-color: var(--pass, var(--ink));
-  background: color-mix(in srgb, var(--pass, var(--no-pass)) 16%, var(--surface));
-}
-.pass-pick.is-on .pass-pick-tick { opacity: 1; }
 .filter-sheet .drawer-head { padding: 4px 8px 0 16px; }
 .filter-body { flex: 1; overflow: auto; padding: 0 16px 16px; }
 .filter-footer {
@@ -1783,8 +1830,6 @@ html[data-bottom-overlay] .site-footer {
 .mobile-top .bar-tools { min-width: 0; }
 .mobile-top .lang-switch { min-width: 0; max-width: 8.5rem; }
 .mobile-top .lang-switch-trigger { border: 0; background: var(--surface-2); }
-/* Same rounded square as the map gear. No second blur on this already glassy bar. */
-.mobile-top .tool-btn { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
 .saved-block { margin-top: 20px; }
 .bottom-tab-bar a:active svg { scale: 0.88; }
 .bottom-tab-bar a.is-current { color: var(--ink); }
@@ -2247,3 +2292,5 @@ button.toggle-switch.is-on .toggle-knob { translate: 20px 0; }
     animation: none !important;
   }
 }
+```
+

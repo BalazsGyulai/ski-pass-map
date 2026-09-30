@@ -43,7 +43,7 @@ Dark mode is defined twice: under `@media (prefers-color-scheme: dark)` for `:ro
 ## Components and their rules
 
 - **Bottom sheet.** Persistent, no scrim: the map stays usable behind it. The handle (`.sheet-grab`) is focusable and changes snap with the keyboard (`snapFromKey`). Every sheet that can be dismissed also has a visible close button: a drag is never the only way (WCAG 2.5.7). Browser Back closes an open card before it leaves the page.
-- **Pills and chips.** One line, never wrap. The row scrolls sideways; the active chip must stay fully visible when focused.
+- **Pills and chips.** One line, never wrap. The row scrolls sideways; the active chip must stay fully visible when focused. A pass in the filter list is a whole-row button: the pass colour is the stripe and, when selected, a light tint and border. A check mark shows the selection, so colour is not the only signal.
 - **Glass panels.** Text on glass must still meet contrast over the busiest map area (a dark forest or a white glacier). Check both themes on a real map tile, not on a blank background.
 - **Forms and toggles.** One ink control style everywhere (see the comment above the checkbox rules). A label is always visible; a placeholder is never the only label.
 - **Consent and support card.** One compact card, rising from the bottom on phones. It must never hide the focused element (see Focus below).
@@ -89,6 +89,7 @@ Use free, primary sources. A pattern from them is a starting point; this file an
 - **Forms and plain language:** [GOV.UK Design System](https://design-system.service.gov.uk/) (error messages, labels, question pages).
 - **Map apps to compare against:** Google Maps and Apple Maps (sheet over map), Komoot and Strava (outdoor map with filters). Describe the pattern you borrow in the plan; never copy their assets or icons.
 - **Real app screens, free:** [Lazyweb](https://www.lazyweb.com/screens) (free browsing; public MCP at `https://www.lazyweb.com/mcp/public`, no account), [Banani references](https://www.banani.co/references). Mobbin needs a paid plan.
+- **Superdesign canvas:** only when the task is to improve or explore how a page or component looks. The extracted context is in `.superdesign/init/`. Use the canvas for directions to compare, then build the chosen one with the tokens in this file. Do not open it for copy, logic, data, or a fix that does not change the look. A canvas draft does not ship by itself.
 
 ## Before you finish a UI change
 

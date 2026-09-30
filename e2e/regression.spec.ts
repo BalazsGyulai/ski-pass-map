@@ -138,6 +138,10 @@ test("three tabs, the settings gear, and old addresses", async ({ page, baseURL 
   await expect(page).toHaveURL(/\/en\/passes\/$/);
   await page.locator(".mobile-top a[aria-label='Settings']").click();
   await expect(page).toHaveURL(/\/en\/settings\/$/);
+  await expect(page.locator(".mobile-top .lang-switch")).toHaveCount(0);
+  await expect(page.locator(".settings-page .lang-switch")).toBeVisible();
+  await page.locator(".mobile-top a[aria-label='Back to the map']").click();
+  await expect(page).toHaveURL(/\/en\/$/);
   await page.goto("/en/compare/?birth=1");
   await expect(page).toHaveURL(/\/en\/passes\/\?birth=1$/);
   await page.goto("/en/saved/");
@@ -147,6 +151,9 @@ test("three tabs, the settings gear, and old addresses", async ({ page, baseURL 
   await page.goto("/en/");
   await page.locator(".topbar-links a[aria-label='Settings']").click();
   await expect(page).toHaveURL(/\/en\/settings\/$/);
+  await expect(page.locator(".topbar-links .lang-switch")).toHaveCount(0);
+  await page.locator(".topbar-links a[aria-label='Back to the map']").click();
+  await expect(page).toHaveURL(/\/en\/$/);
   expect(problems, problems.join("\n")).toEqual([]);
 });
 

@@ -1,0 +1,848 @@
+# Pages
+
+Each tree is the local files that page imports, plus the shared chrome from `src/app/[lang]/layout.tsx` (not repeated on every page). Node modules are skipped. A file is listed once per page.
+
+Chrome for all of these: `src/components/Chrome.tsx` (header or phone bar, footer, tab bar).
+
+## /{lang}/ (map)
+
+The map, search, pass chips, and the resort sheet.
+
+Entry: `src/app/[lang]/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/page.tsx
+  - src/components/ExplorerFrame.tsx
+    - src/lib/data.ts
+      - data/osm.json
+      - data/passes.json
+      - data/resorts.json
+      - config/pass-colors.json
+      - src/lib/schema.ts
+    - src/lib/site.ts
+      - config/site.json
+    - src/lib/sheet.ts
+    - src/components/FilterSheet.tsx
+      - src/lib/data.ts
+      - src/lib/filter.ts
+        - src/lib/distance.ts
+        - src/lib/schema.ts
+      - src/lib/pass-label.ts
+        - config/pass-labels.json
+      - src/lib/places.ts
+        - config/reference-cities.json
+        - src/lib/filter.ts
+      - src/lib/i18n.ts
+        - src/i18n/messages/en.json
+        - src/lib/format.ts
+          - src/i18n/formats.ts
+            - src/i18n/languages.ts
+          - src/i18n/languages.ts
+        - src/i18n/languages.ts
+        - src/lib/pricing.ts
+          - src/lib/filter.ts
+          - src/lib/schema.ts
+      - src/components/icons.tsx
+      - src/components/PlacePicker.tsx
+        - src/lib/geolocate.ts
+          - src/lib/i18n.ts
+          - src/lib/places.ts
+          - src/lib/distance.ts
+        - src/lib/places.ts
+        - src/components/AppState.tsx
+          - src/lib/bounds.ts
+          - src/lib/filter.ts
+          - src/i18n/languages.ts
+          - src/i18n/languages.ts
+          - src/i18n/routing.ts
+            - src/lib/site.ts
+            - src/i18n/languages.ts
+            - src/i18n/languages.ts
+          - src/lib/i18n.ts
+          - src/lib/geolocate.ts
+          - src/lib/places.ts
+          - src/lib/storage.ts
+            - src/lib/places.ts
+            - src/i18n/languages.ts
+          - src/lib/storage.ts
+          - src/lib/format.ts
+          - src/lib/history-step.ts
+          - src/lib/url-state.ts
+            - src/i18n/languages.ts
+            - src/lib/filter.ts
+          - src/lib/support/storage.ts
+          - src/lib/terrain.ts
+            - src/lib/map-styles.ts
+          - src/lib/lift-icons.ts
+      - src/components/AppState.tsx
+      - src/components/useResorts.ts
+        - src/lib/bounds.ts
+        - src/lib/data.ts
+        - src/lib/distance.ts
+        - src/lib/filter.ts
+        - src/lib/portal/overrides.ts
+          - src/lib/schema.ts
+          - src/lib/portal/listing.ts
+          - src/lib/portal/listing.ts
+          - src/lib/portal/attribution.ts
+        - src/lib/portal/listing.ts
+        - src/lib/pricing.ts
+        - src/lib/schema.ts
+        - src/lib/runtime-overrides-client.ts
+          - src/lib/site.ts
+          - src/lib/portal/overrides.ts
+          - src/lib/portal/overrides.ts
+        - src/components/AppState.tsx
+      - src/lib/format.ts
+    - src/components/MapTools.tsx
+      - src/lib/geolocate.ts
+      - src/lib/lift-icons.ts
+      - src/components/icons.tsx
+      - src/components/LiftSign.tsx
+        - src/lib/lift-icons.ts
+      - src/components/AppState.tsx
+    - src/components/ListSheet.tsx
+      - src/lib/sheet.ts
+      - src/lib/filter.ts
+      - src/components/ResortList.tsx
+        - src/lib/data.ts
+        - src/lib/pass-label.ts
+        - src/lib/distance.ts
+        - src/lib/format.ts
+        - src/lib/i18n.ts
+        - src/lib/pricing.ts
+        - src/lib/schema.ts
+        - src/components/AppState.tsx
+        - src/components/icons.tsx
+      - src/components/useBottomSheet.ts
+        - src/lib/sheet.ts
+        - src/components/useNarrow.ts
+      - src/components/AppState.tsx
+      - src/components/useResorts.ts
+      - src/components/ui/SettingsControls.tsx
+    - src/components/LanguageSwitcher.tsx
+      - src/i18n/languages.ts
+      - src/i18n/routing.ts
+      - src/lib/language-menu.ts
+      - src/components/AppState.tsx
+    - src/components/PassChips.tsx
+      - src/lib/data.ts
+      - src/lib/pass-chips.ts
+        - src/lib/bounds.ts
+        - src/lib/distance.ts
+      - src/lib/pass-label.ts
+      - src/components/AppState.tsx
+    - src/components/PlanPill.tsx
+      - src/lib/format.ts
+      - src/lib/plan-quotes.ts
+        - src/lib/data.ts
+        - src/lib/pass-label.ts
+        - src/lib/pricing.ts
+      - src/components/LanguageSwitcher.tsx
+      - src/components/AppState.tsx
+    - src/components/ResortCard.tsx
+      - src/lib/data.ts
+      - src/lib/distance.ts
+      - src/lib/format.ts
+      - src/lib/i18n.ts
+      - src/lib/pass-label.ts
+      - src/lib/pricing.ts
+      - src/lib/schema.ts
+      - src/lib/sheet.ts
+      - src/lib/lift-icons.ts
+      - src/lib/portal/attribution.ts
+      - src/lib/portal/overrides.ts
+      - src/lib/runtime-overrides-client.ts
+      - src/components/icons.tsx
+      - src/components/LiftSign.tsx
+      - src/components/SourceLine.tsx
+        - src/lib/format.ts
+        - src/lib/i18n.ts
+        - src/lib/schema.ts
+        - src/i18n/languages.ts
+      - src/components/useBottomSheet.ts
+      - src/components/useNarrow.ts
+      - src/components/LanguageSwitcher.tsx
+      - src/components/AppState.tsx
+      - src/components/useResorts.ts
+      - src/components/AffiliateLinks.tsx
+        - src/lib/affiliates.ts
+          - config/affiliates.json
+        - src/components/LanguageSwitcher.tsx
+        - src/components/AppState.tsx
+    - src/components/SearchPill.tsx
+      - src/lib/data.ts
+      - src/lib/format.ts
+      - src/lib/pass-label.ts
+      - src/lib/i18n.ts
+      - src/components/icons.tsx
+      - src/components/AppState.tsx
+    - src/components/SettingsLink.tsx
+      - src/i18n/routing.ts
+      - src/components/icons.tsx
+      - src/components/LanguageSwitcher.tsx
+      - src/components/AppState.tsx
+    - src/components/map/SkiMap.tsx
+      - src/components/AppState.tsx
+    - src/components/AppState.tsx
+    - src/components/useNarrow.ts
+  - src/i18n/languages.ts
+  - src/i18n/languages.ts
+  - src/i18n/metadata.ts
+    - src/i18n/languages.ts
+    - src/i18n/languages.ts
+    - src/i18n/load-messages.ts
+      - src/i18n/languages.ts
+      - src/lib/i18n.ts
+    - src/i18n/routing.ts
+    - src/lib/i18n.ts
+    - src/lib/i18n.ts
+    - src/lib/site.ts
+
+## /{lang}/passes/
+
+Season passes and what they cost.
+
+Entry: `src/app/[lang]/passes/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/passes/page.tsx
+  - src/components/PassesView.tsx
+    - src/lib/data.ts
+      - data/osm.json
+      - data/passes.json
+      - data/resorts.json
+      - config/pass-colors.json
+      - src/lib/schema.ts
+    - src/lib/format.ts
+      - src/i18n/formats.ts
+        - src/i18n/languages.ts
+      - src/i18n/languages.ts
+    - src/lib/i18n.ts
+      - src/i18n/messages/en.json
+      - src/lib/format.ts
+      - src/i18n/languages.ts
+      - src/lib/pricing.ts
+        - src/lib/filter.ts
+          - src/lib/distance.ts
+          - src/lib/schema.ts
+        - src/lib/schema.ts
+    - src/lib/pass-label.ts
+      - config/pass-labels.json
+    - src/lib/pass-economics.ts
+      - src/lib/schema.ts
+    - src/lib/pricing.ts
+    - src/lib/schema.ts
+    - src/components/BirthYearField.tsx
+      - src/lib/birth-year-draft.ts
+      - src/components/AppState.tsx
+        - src/lib/bounds.ts
+        - src/lib/filter.ts
+        - src/i18n/languages.ts
+        - src/i18n/languages.ts
+        - src/i18n/routing.ts
+          - src/lib/site.ts
+            - config/site.json
+          - src/i18n/languages.ts
+          - src/i18n/languages.ts
+        - src/lib/i18n.ts
+        - src/lib/geolocate.ts
+          - src/lib/i18n.ts
+          - src/lib/places.ts
+            - config/reference-cities.json
+            - src/lib/filter.ts
+          - src/lib/distance.ts
+        - src/lib/places.ts
+        - src/lib/storage.ts
+          - src/lib/places.ts
+          - src/i18n/languages.ts
+        - src/lib/storage.ts
+        - src/lib/format.ts
+        - src/lib/history-step.ts
+        - src/lib/url-state.ts
+          - src/i18n/languages.ts
+          - src/lib/filter.ts
+        - src/lib/support/storage.ts
+        - src/lib/terrain.ts
+          - src/lib/map-styles.ts
+        - src/lib/lift-icons.ts
+    - src/components/SourceLine.tsx
+      - src/lib/format.ts
+      - src/lib/i18n.ts
+      - src/lib/schema.ts
+      - src/i18n/languages.ts
+    - src/components/LanguageSwitcher.tsx
+      - src/i18n/languages.ts
+      - src/i18n/routing.ts
+      - src/lib/language-menu.ts
+      - src/components/AppState.tsx
+    - src/components/AppState.tsx
+    - src/components/countdown.ts
+      - src/lib/i18n.ts
+  - src/i18n/languages.ts
+  - src/i18n/languages.ts
+  - src/i18n/metadata.ts
+    - src/i18n/languages.ts
+    - src/i18n/languages.ts
+    - src/i18n/load-messages.ts
+      - src/i18n/languages.ts
+      - src/lib/i18n.ts
+    - src/i18n/routing.ts
+    - src/lib/i18n.ts
+    - src/lib/i18n.ts
+    - src/lib/site.ts
+
+## /{lang}/plan/
+
+Trip planner.
+
+Entry: `src/app/[lang]/plan/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/plan/page.tsx
+  - src/components/Planner.tsx
+    - src/lib/data.ts
+      - data/osm.json
+      - data/passes.json
+      - data/resorts.json
+      - config/pass-colors.json
+      - src/lib/schema.ts
+    - src/lib/filter.ts
+      - src/lib/distance.ts
+      - src/lib/schema.ts
+    - src/lib/format.ts
+      - src/i18n/formats.ts
+        - src/i18n/languages.ts
+      - src/i18n/languages.ts
+    - src/lib/i18n.ts
+      - src/i18n/messages/en.json
+      - src/lib/format.ts
+      - src/i18n/languages.ts
+      - src/lib/pricing.ts
+        - src/lib/filter.ts
+        - src/lib/schema.ts
+    - src/lib/pass-label.ts
+      - config/pass-labels.json
+    - src/lib/pricing.ts
+    - src/lib/plan-quotes.ts
+      - src/lib/data.ts
+      - src/lib/pass-label.ts
+      - src/lib/pricing.ts
+    - src/i18n/languages.ts
+    - src/i18n/routing.ts
+      - src/lib/site.ts
+        - config/site.json
+      - src/i18n/languages.ts
+      - src/i18n/languages.ts
+    - src/lib/url-state.ts
+      - src/i18n/languages.ts
+      - src/lib/filter.ts
+    - src/components/BirthYearField.tsx
+      - src/lib/birth-year-draft.ts
+      - src/components/AppState.tsx
+        - src/lib/bounds.ts
+        - src/lib/filter.ts
+        - src/i18n/languages.ts
+        - src/i18n/languages.ts
+        - src/i18n/routing.ts
+        - src/lib/i18n.ts
+        - src/lib/geolocate.ts
+          - src/lib/i18n.ts
+          - src/lib/places.ts
+            - config/reference-cities.json
+            - src/lib/filter.ts
+          - src/lib/distance.ts
+        - src/lib/places.ts
+        - src/lib/storage.ts
+          - src/lib/places.ts
+          - src/i18n/languages.ts
+        - src/lib/storage.ts
+        - src/lib/format.ts
+        - src/lib/history-step.ts
+        - src/lib/url-state.ts
+        - src/lib/support/storage.ts
+        - src/lib/terrain.ts
+          - src/lib/map-styles.ts
+        - src/lib/lift-icons.ts
+    - src/components/SavedView.tsx
+      - src/lib/data.ts
+      - src/components/LanguageSwitcher.tsx
+        - src/i18n/languages.ts
+        - src/i18n/routing.ts
+        - src/lib/language-menu.ts
+        - src/components/AppState.tsx
+      - src/components/icons.tsx
+      - src/components/AppState.tsx
+    - src/components/LanguageSwitcher.tsx
+    - src/components/AppState.tsx
+    - src/components/AffiliateLinks.tsx
+      - src/lib/affiliates.ts
+        - config/affiliates.json
+      - src/components/LanguageSwitcher.tsx
+      - src/components/AppState.tsx
+    - src/lib/support/storage.ts
+  - src/i18n/languages.ts
+  - src/i18n/languages.ts
+  - src/i18n/metadata.ts
+    - src/i18n/languages.ts
+    - src/i18n/languages.ts
+    - src/i18n/load-messages.ts
+      - src/i18n/languages.ts
+      - src/lib/i18n.ts
+    - src/i18n/routing.ts
+    - src/lib/i18n.ts
+    - src/lib/i18n.ts
+    - src/lib/site.ts
+
+## /{lang}/settings/
+
+Theme, location, birth year, saved data.
+
+Entry: `src/app/[lang]/settings/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/settings/page.tsx
+  - src/components/SettingsView.tsx
+    - src/lib/map-consent.ts
+    - src/components/BirthYearField.tsx
+      - src/lib/birth-year-draft.ts
+      - src/components/AppState.tsx
+        - src/lib/bounds.ts
+        - src/lib/filter.ts
+          - src/lib/distance.ts
+          - src/lib/schema.ts
+        - src/i18n/languages.ts
+        - src/i18n/languages.ts
+        - src/i18n/routing.ts
+          - src/lib/site.ts
+            - config/site.json
+          - src/i18n/languages.ts
+          - src/i18n/languages.ts
+        - src/lib/i18n.ts
+          - src/i18n/messages/en.json
+          - src/lib/format.ts
+            - src/i18n/formats.ts
+              - src/i18n/languages.ts
+            - src/i18n/languages.ts
+          - src/i18n/languages.ts
+          - src/lib/pricing.ts
+            - src/lib/filter.ts
+            - src/lib/schema.ts
+        - src/lib/geolocate.ts
+          - src/lib/i18n.ts
+          - src/lib/places.ts
+            - config/reference-cities.json
+            - src/lib/filter.ts
+          - src/lib/distance.ts
+        - src/lib/places.ts
+        - src/lib/storage.ts
+          - src/lib/places.ts
+          - src/i18n/languages.ts
+        - src/lib/storage.ts
+        - src/lib/format.ts
+        - src/lib/history-step.ts
+        - src/lib/url-state.ts
+          - src/i18n/languages.ts
+          - src/lib/filter.ts
+        - src/lib/support/storage.ts
+        - src/lib/terrain.ts
+          - src/lib/map-styles.ts
+        - src/lib/lift-icons.ts
+    - src/components/LanguageSwitcher.tsx
+      - src/i18n/languages.ts
+      - src/i18n/routing.ts
+      - src/lib/language-menu.ts
+      - src/components/AppState.tsx
+    - src/components/legal-links.ts
+    - src/components/LanguageSwitcher.tsx
+    - src/components/AppState.tsx
+    - src/lib/settings-map-status.ts
+      - src/lib/map-access.ts
+        - src/lib/support/storage.ts
+      - src/lib/i18n.ts
+    - src/lib/map-access.ts
+    - src/lib/config/support.ts
+      - config/support.json
+    - src/lib/format.ts
+    - src/components/ui/SettingsControls.tsx
+  - src/i18n/languages.ts
+  - src/i18n/languages.ts
+  - src/i18n/metadata.ts
+    - src/i18n/languages.ts
+    - src/i18n/languages.ts
+    - src/i18n/load-messages.ts
+      - src/i18n/languages.ts
+      - src/lib/i18n.ts
+    - src/i18n/routing.ts
+    - src/lib/i18n.ts
+    - src/lib/i18n.ts
+    - src/lib/site.ts
+
+## /{lang}/about/
+
+What the site is.
+
+Entry: `src/app/[lang]/about/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/about/page.tsx
+  - src/components/AboutView.tsx
+    - src/lib/data.ts
+      - data/osm.json
+      - data/passes.json
+      - data/resorts.json
+      - config/pass-colors.json
+      - src/lib/schema.ts
+    - src/lib/site.ts
+      - config/site.json
+    - src/lib/format.ts
+      - src/i18n/formats.ts
+        - src/i18n/languages.ts
+      - src/i18n/languages.ts
+    - src/components/AppState.tsx
+      - src/lib/bounds.ts
+      - src/lib/filter.ts
+        - src/lib/distance.ts
+        - src/lib/schema.ts
+      - src/i18n/languages.ts
+      - src/i18n/languages.ts
+      - src/i18n/routing.ts
+        - src/lib/site.ts
+        - src/i18n/languages.ts
+        - src/i18n/languages.ts
+      - src/lib/i18n.ts
+        - src/i18n/messages/en.json
+        - src/lib/format.ts
+        - src/i18n/languages.ts
+        - src/lib/pricing.ts
+          - src/lib/filter.ts
+          - src/lib/schema.ts
+      - src/lib/geolocate.ts
+        - src/lib/i18n.ts
+        - src/lib/places.ts
+          - config/reference-cities.json
+          - src/lib/filter.ts
+        - src/lib/distance.ts
+      - src/lib/places.ts
+      - src/lib/storage.ts
+        - src/lib/places.ts
+        - src/i18n/languages.ts
+      - src/lib/storage.ts
+      - src/lib/format.ts
+      - src/lib/history-step.ts
+      - src/lib/url-state.ts
+        - src/i18n/languages.ts
+        - src/lib/filter.ts
+      - src/lib/support/storage.ts
+      - src/lib/terrain.ts
+        - src/lib/map-styles.ts
+      - src/lib/lift-icons.ts
+  - src/i18n/languages.ts
+  - src/i18n/languages.ts
+  - src/i18n/metadata.ts
+    - src/i18n/languages.ts
+    - src/i18n/languages.ts
+    - src/i18n/load-messages.ts
+      - src/i18n/languages.ts
+      - src/lib/i18n.ts
+    - src/i18n/routing.ts
+    - src/lib/i18n.ts
+    - src/lib/i18n.ts
+    - src/lib/site.ts
+
+## /{lang}/contact/
+
+Contact form.
+
+Entry: `src/app/[lang]/contact/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/contact/page.tsx
+  - src/components/ContactForm.tsx
+    - src/lib/i18n.ts
+      - src/i18n/messages/en.json
+      - src/lib/format.ts
+        - src/i18n/formats.ts
+          - src/i18n/languages.ts
+        - src/i18n/languages.ts
+      - src/i18n/languages.ts
+      - src/lib/pricing.ts
+        - src/lib/filter.ts
+          - src/lib/distance.ts
+          - src/lib/schema.ts
+        - src/lib/schema.ts
+    - src/i18n/routing.ts
+      - src/lib/site.ts
+        - config/site.json
+      - src/i18n/languages.ts
+      - src/i18n/languages.ts
+    - src/lib/turnstile-public.ts
+      - config/turnstile.json
+      - src/lib/contact/turnstile.ts
+    - src/lib/site.ts
+    - src/components/AppState.tsx
+      - src/lib/bounds.ts
+      - src/lib/filter.ts
+      - src/i18n/languages.ts
+      - src/i18n/languages.ts
+      - src/i18n/routing.ts
+      - src/lib/i18n.ts
+      - src/lib/geolocate.ts
+        - src/lib/i18n.ts
+        - src/lib/places.ts
+          - config/reference-cities.json
+          - src/lib/filter.ts
+        - src/lib/distance.ts
+      - src/lib/places.ts
+      - src/lib/storage.ts
+        - src/lib/places.ts
+        - src/i18n/languages.ts
+      - src/lib/storage.ts
+      - src/lib/format.ts
+      - src/lib/history-step.ts
+      - src/lib/url-state.ts
+        - src/i18n/languages.ts
+        - src/lib/filter.ts
+      - src/lib/support/storage.ts
+      - src/lib/terrain.ts
+        - src/lib/map-styles.ts
+      - src/lib/lift-icons.ts
+  - src/i18n/languages.ts
+  - src/i18n/languages.ts
+  - src/i18n/metadata.ts
+    - src/i18n/languages.ts
+    - src/i18n/languages.ts
+    - src/i18n/load-messages.ts
+      - src/i18n/languages.ts
+      - src/lib/i18n.ts
+    - src/i18n/routing.ts
+    - src/lib/i18n.ts
+    - src/lib/i18n.ts
+    - src/lib/site.ts
+
+## /{lang}/support/
+
+Support the site.
+
+Entry: `src/app/[lang]/support/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/support/page.tsx
+  - src/components/SupportView.tsx
+    - src/lib/config/support.ts
+      - config/support.json
+    - src/components/AppState.tsx
+      - src/lib/bounds.ts
+      - src/lib/filter.ts
+        - src/lib/distance.ts
+        - src/lib/schema.ts
+      - src/i18n/languages.ts
+      - src/i18n/languages.ts
+      - src/i18n/routing.ts
+        - src/lib/site.ts
+          - config/site.json
+        - src/i18n/languages.ts
+        - src/i18n/languages.ts
+      - src/lib/i18n.ts
+        - src/i18n/messages/en.json
+        - src/lib/format.ts
+          - src/i18n/formats.ts
+            - src/i18n/languages.ts
+          - src/i18n/languages.ts
+        - src/i18n/languages.ts
+        - src/lib/pricing.ts
+          - src/lib/filter.ts
+          - src/lib/schema.ts
+      - src/lib/geolocate.ts
+        - src/lib/i18n.ts
+        - src/lib/places.ts
+          - config/reference-cities.json
+          - src/lib/filter.ts
+        - src/lib/distance.ts
+      - src/lib/places.ts
+      - src/lib/storage.ts
+        - src/lib/places.ts
+        - src/i18n/languages.ts
+      - src/lib/storage.ts
+      - src/lib/format.ts
+      - src/lib/history-step.ts
+      - src/lib/url-state.ts
+        - src/i18n/languages.ts
+        - src/lib/filter.ts
+      - src/lib/support/storage.ts
+      - src/lib/terrain.ts
+        - src/lib/map-styles.ts
+      - src/lib/lift-icons.ts
+  - src/i18n/languages.ts
+  - src/i18n/languages.ts
+  - src/i18n/metadata.ts
+    - src/i18n/languages.ts
+    - src/i18n/languages.ts
+    - src/i18n/load-messages.ts
+      - src/i18n/languages.ts
+      - src/lib/i18n.ts
+    - src/i18n/routing.ts
+    - src/lib/i18n.ts
+    - src/lib/i18n.ts
+    - src/lib/site.ts
+
+## /{lang}/for-resorts/
+
+Page for resort owners.
+
+Entry: `src/app/[lang]/for-resorts/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/for-resorts/page.tsx
+  - src/i18n/languages.ts
+
+## /{lang}/saved/
+
+Redirects; favourites live on the map.
+
+Entry: `src/app/[lang]/saved/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/saved/page.tsx
+  - src/components/LocalRedirect.tsx
+    - src/lib/i18n.ts
+      - src/i18n/messages/en.json
+      - src/lib/format.ts
+        - src/i18n/formats.ts
+          - src/i18n/languages.ts
+        - src/i18n/languages.ts
+      - src/i18n/languages.ts
+      - src/lib/pricing.ts
+        - src/lib/filter.ts
+          - src/lib/distance.ts
+          - src/lib/schema.ts
+        - src/lib/schema.ts
+    - src/components/LanguageSwitcher.tsx
+      - src/i18n/languages.ts
+      - src/i18n/routing.ts
+        - src/lib/site.ts
+          - config/site.json
+        - src/i18n/languages.ts
+        - src/i18n/languages.ts
+      - src/lib/language-menu.ts
+      - src/components/AppState.tsx
+        - src/lib/bounds.ts
+        - src/lib/filter.ts
+        - src/i18n/languages.ts
+        - src/i18n/languages.ts
+        - src/i18n/routing.ts
+        - src/lib/i18n.ts
+        - src/lib/geolocate.ts
+          - src/lib/i18n.ts
+          - src/lib/places.ts
+            - config/reference-cities.json
+            - src/lib/filter.ts
+          - src/lib/distance.ts
+        - src/lib/places.ts
+        - src/lib/storage.ts
+          - src/lib/places.ts
+          - src/i18n/languages.ts
+        - src/lib/storage.ts
+        - src/lib/format.ts
+        - src/lib/history-step.ts
+        - src/lib/url-state.ts
+          - src/i18n/languages.ts
+          - src/lib/filter.ts
+        - src/lib/support/storage.ts
+        - src/lib/terrain.ts
+          - src/lib/map-styles.ts
+        - src/lib/lift-icons.ts
+    - src/components/AppState.tsx
+  - src/i18n/languages.ts
+  - src/i18n/languages.ts
+  - src/i18n/metadata.ts
+    - src/i18n/languages.ts
+    - src/i18n/languages.ts
+    - src/i18n/load-messages.ts
+      - src/i18n/languages.ts
+      - src/lib/i18n.ts
+    - src/i18n/routing.ts
+    - src/lib/i18n.ts
+    - src/lib/i18n.ts
+    - src/lib/site.ts
+
+## /{lang}/compare/
+
+Redirects into the planner.
+
+Entry: `src/app/[lang]/compare/page.tsx`
+
+Dependencies:
+
+- src/app/[lang]/compare/page.tsx
+  - src/components/LocalRedirect.tsx
+    - src/lib/i18n.ts
+      - src/i18n/messages/en.json
+      - src/lib/format.ts
+        - src/i18n/formats.ts
+          - src/i18n/languages.ts
+        - src/i18n/languages.ts
+      - src/i18n/languages.ts
+      - src/lib/pricing.ts
+        - src/lib/filter.ts
+          - src/lib/distance.ts
+          - src/lib/schema.ts
+        - src/lib/schema.ts
+    - src/components/LanguageSwitcher.tsx
+      - src/i18n/languages.ts
+      - src/i18n/routing.ts
+        - src/lib/site.ts
+          - config/site.json
+        - src/i18n/languages.ts
+        - src/i18n/languages.ts
+      - src/lib/language-menu.ts
+      - src/components/AppState.tsx
+        - src/lib/bounds.ts
+        - src/lib/filter.ts
+        - src/i18n/languages.ts
+        - src/i18n/languages.ts
+        - src/i18n/routing.ts
+        - src/lib/i18n.ts
+        - src/lib/geolocate.ts
+          - src/lib/i18n.ts
+          - src/lib/places.ts
+            - config/reference-cities.json
+            - src/lib/filter.ts
+          - src/lib/distance.ts
+        - src/lib/places.ts
+        - src/lib/storage.ts
+          - src/lib/places.ts
+          - src/i18n/languages.ts
+        - src/lib/storage.ts
+        - src/lib/format.ts
+        - src/lib/history-step.ts
+        - src/lib/url-state.ts
+          - src/i18n/languages.ts
+          - src/lib/filter.ts
+        - src/lib/support/storage.ts
+        - src/lib/terrain.ts
+          - src/lib/map-styles.ts
+        - src/lib/lift-icons.ts
+    - src/components/AppState.tsx
+  - src/i18n/languages.ts
+  - src/i18n/languages.ts
+  - src/i18n/metadata.ts
+    - src/i18n/languages.ts
+    - src/i18n/languages.ts
+    - src/i18n/load-messages.ts
+      - src/i18n/languages.ts
+      - src/lib/i18n.ts
+    - src/i18n/routing.ts
+    - src/lib/i18n.ts
+    - src/lib/i18n.ts
+    - src/lib/site.ts
+

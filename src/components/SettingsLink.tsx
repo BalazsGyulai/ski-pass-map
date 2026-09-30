@@ -7,14 +7,15 @@ import { IconSettings } from "./icons";
 import { useLocalizedPath } from "./LanguageSwitcher";
 import { useApp } from "./AppState";
 
-/** The gear that opens Settings. It replaces the old Settings tab. */
+/** The gear that opens Settings, and returns to the map when Settings is already open. */
 export function SettingsLink({ className }: { className: string }) {
   const { t } = useApp();
   const href = useLocalizedPath();
   const { rest } = parseLangPath(usePathname());
-  const current = rest === "/settings" || rest.startsWith("/settings/");
+  const onSettings = rest === "/settings" || rest.startsWith("/settings/");
+  const label = onSettings ? t("backToMap") : t("navSettings");
   return (
-    <Link href={href("/settings")} className={className} aria-label={t("navSettings")} aria-current={current ? "page" : undefined} title={t("navSettings")}>
+    <Link href={onSettings ? href("/") : href("/settings")} className={className} aria-label={label} title={label}>
       <IconSettings />
     </Link>
   );
