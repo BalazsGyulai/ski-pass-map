@@ -52,6 +52,7 @@ export function useResortLists() {
       minSlope: null,
       maxKm: null,
       favouritesOnly: false,
+      minPassPrice: null,
       maxPassPrice: null,
     };
     return sortResorts(filterResorts(visibleResorts, loose, context), "distance", "asc", distanceOf).slice(0, 3);

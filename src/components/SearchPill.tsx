@@ -56,7 +56,10 @@ export function SearchPill({
     }
     else if (share.passes.length > 1) parts.push(t("passesSelected", { n: share.passes.length }));
     else parts.push(t("anyPass"));
-    if (share.maxPassPrice != null) parts.push(t("upToPrice", { price: formatEur(lang, share.maxPassPrice) }));
+    if (share.minPassPrice != null && share.maxPassPrice != null) {
+      parts.push(t("priceRange", { min: formatEur(lang, share.minPassPrice), max: formatEur(lang, share.maxPassPrice) }));
+    } else if (share.minPassPrice != null) parts.push(t("fromPrice", { price: formatEur(lang, share.minPassPrice) }));
+    else if (share.maxPassPrice != null) parts.push(t("upToPrice", { price: formatEur(lang, share.maxPassPrice) }));
     if (share.night) parts.push(t("nightSkiing"));
     if (share.park) parts.push(t("snowpark"));
     if (share.transit) parts.push(t("transportNote"));

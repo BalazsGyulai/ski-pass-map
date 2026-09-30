@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type SyntheticEvent, type UIEvent } from "react";
 import { passes, resorts } from "@/lib/data";
-import { fold } from "@/lib/filter";
+import { fold, measureFromField, PASS_PRICE_MAX, PASS_PRICE_MIN, PASS_PRICE_STEP, snapPassPrice } from "@/lib/filter";
 import { passHasShortName, passShortName } from "@/lib/pass-label";
 import { matchReferenceCities } from "@/lib/places";
 import { regionLabel } from "@/lib/i18n";
@@ -11,21 +11,90 @@ import { IconClose } from "./icons";
 import { PlacePicker } from "./PlacePicker";
 import { useApp } from "./AppState";
 import { useResortLists } from "./useResorts";
-import { formatEur } from "@/lib/format";
 
-/** The pass-price slider. The top end means any price. */
-const MIN_PASS_PRICE = 300;
-const MAX_PASS_PRICE = 1300;
+/** The region list opens under the summary, often below the fold. Keep the More row on screen. */
+function revealMoreFilters(event: SyntheticEvent<HTMLDetailsElement>) {
+  const details = event.currentTarget;
+  if (!details.open) return;
+  const body = details.closest(".filter-body");
+  if (!(body instanceof HTMLElement)) return;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  requestAnimationFrame(() => {
+    const summary = details.querySelector("summary");
+    if (!(summary instanceof HTMLElement)) return;
+    const delta = summary.getBoundingClientRect().top - (body.getBoundingClientRect().top + 8);
+    if (delta > 12) body.scrollBy({ top: delta, behavior: reduce ? "auto" : "smooth" });
+    syncFilterFade(body);
+  });
+}
+
+/** Fade the scroll edges only when content is actually hidden there. */
+function syncFilterFade(body: HTMLElement) {
+  const host = body.parentElement;
+  if (!host) return;
+  host.classList.toggle("fade-top", body.scrollTop > 8);
+  host.classList.toggle("fade-bottom", body.scrollHeight - body.scrollTop - body.clientHeight > 8);
+}
 
 export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { share, updateShare, resetFilters, selectResort, saveCity, home, t, messages, lang } = useApp();
+  const { share, updateShare, resetFilters, selectResort, saveCity, home, t, messages } = useApp();
   const { filtered } = useResortLists();
   const searchRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [minDraft, setMinDraft] = useState<string | null>(null);
+  const [maxDraft, setMaxDraft] = useState<string | null>(null);
+  const [elevDraft, setElevDraft] = useState<string | null>(null);
+  const [slopeDraft, setSlopeDraft] = useState<string | null>(null);
+  const [kmDraft, setKmDraft] = useState<string | null>(null);
+  const [rangeOnTop, setRangeOnTop] = useState<"min" | "max">("max");
   const query = fold(share.q.trim());
+  const minValue = share.minPassPrice ?? PASS_PRICE_MIN;
+  const maxValue = share.maxPassPrice ?? PASS_PRICE_MAX;
+  const minPercent = ((minValue - PASS_PRICE_MIN) / (PASS_PRICE_MAX - PASS_PRICE_MIN)) * 100;
+  const maxPercent = ((maxValue - PASS_PRICE_MIN) / (PASS_PRICE_MAX - PASS_PRICE_MIN)) * 100;
 
   useEffect(() => {
     if (open) searchRef.current?.focus();
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !bodyRef.current) return;
+    syncFilterFade(bodyRef.current);
+  }, [open, share]);
+
+  function onFilterScroll(event: UIEvent<HTMLDivElement>) {
+    syncFilterFade(event.currentTarget);
+  }
+
+  function commitPrice(raw: string, bound: "min" | "max", live: boolean) {
+    if (raw.trim() === "") {
+      if (bound === "min") setMinDraft(null);
+      else setMaxDraft(null);
+      updateShare(bound === "min" ? { minPassPrice: null } : { maxPassPrice: null });
+      return;
+    }
+    const value = Number(raw);
+    // A short number such as "8" is still being typed. Wait until it reaches the scale, or the field is left.
+    if (!Number.isFinite(value) || (live && value < PASS_PRICE_MIN)) {
+      if (bound === "min") setMinDraft(raw);
+      else setMaxDraft(raw);
+      return;
+    }
+    if (bound === "min") setMinDraft(null);
+    else setMaxDraft(null);
+    const next = snapPassPrice(value, bound === "min" ? maxValue : minValue, bound);
+    updateShare(bound === "min" ? { minPassPrice: next } : { maxPassPrice: next });
+  }
+
+  function editMeasure(raw: string, integer: boolean, setDraft: (value: string | null) => void, apply: (value: number | null) => void) {
+    const next = measureFromField(raw, integer);
+    if (next === undefined) {
+      if (!integer && /^\d+\.$/.test(raw)) setDraft(raw);
+      return;
+    }
+    setDraft(null);
+    apply(next);
+  }
 
   const regions = useMemo(() => [...new Set(resorts.map((resort) => resort.region))].sort((a, b) => a.localeCompare(b, "de")), []);
   const passCounts = useMemo(() => {
@@ -79,7 +148,8 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
           </button>
         </div>
         <h2 className="filter-title">{t("filters")}</h2>
-        <div className="filter-body">
+        <div className="filter-scroll">
+        <div className="filter-body" ref={bodyRef} onScroll={onFilterScroll}>
           {groups ? (
             <div className="typeahead">
               <Group title={t("groupResorts")}>
@@ -164,113 +234,243 @@ export function FilterSheet({ open, onClose }: { open: boolean; onClose: () => v
               })}
               <PassPick on={share.noPass} name={t("noPass")} onToggle={() => updateShare({ noPass: !share.noPass, passes: [] })} />
             </div>
-            <label className="field">
-              <span>{t("matchMode")}</span>
-              <select value={share.passMatch} onChange={(event) => updateShare({ passMatch: event.target.value === "all" ? "all" : "any" })}>
-                <option value="any">{t("passMatchAny")}</option>
-                <option value="all">{t("passMatchAll")}</option>
-              </select>
-            </label>
+            <fieldset className="match-mode">
+              <legend>{t("matchMode")}</legend>
+              <div className="match-options">
+                <label className="match-option">
+                  <input
+                    type="radio"
+                    name="pass-match"
+                    checked={share.passMatch !== "all"}
+                    onChange={() => updateShare({ passMatch: "any" })}
+                  />
+                  <span className="match-option-copy">
+                    <span className="match-option-title">{t("passMatchAny")}</span>
+                    <span className="match-option-hint">{t("passMatchAnyHint")}</span>
+                  </span>
+                </label>
+                <label className="match-option">
+                  <input
+                    type="radio"
+                    name="pass-match"
+                    checked={share.passMatch === "all"}
+                    onChange={() => updateShare({ passMatch: "all" })}
+                  />
+                  <span className="match-option-copy">
+                    <span className="match-option-title">{t("passMatchAll")}</span>
+                    <span className="match-option-hint">{t("passMatchAllHint")}</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
           </section>
 
-          <fieldset>
+          <fieldset className="price-band">
             <legend>{t("passPrice")}</legend>
-            <label className="days-slider">
-              <span className="num">{share.maxPassPrice == null ? t("anyPrice") : t("upToPrice", { price: formatEur(lang, share.maxPassPrice) })}</span>
+            <div className="price-fields">
+              <label className="field">
+                <span>{t("priceMin")}</span>
+                <span className="unit-field">
+                  <input
+                    className="num"
+                    inputMode="numeric"
+                    min={PASS_PRICE_MIN}
+                    max={maxValue}
+                    step={PASS_PRICE_STEP}
+                    value={minDraft ?? String(minValue)}
+                    onChange={(event) => commitPrice(event.target.value, "min", true)}
+                    onBlur={(event) => commitPrice(event.target.value, "min", false)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") event.currentTarget.blur();
+                    }}
+                  />
+                  <span className="unit">€</span>
+                </span>
+              </label>
+              <label className="field">
+                <span>{t("priceMax")}</span>
+                <span className="unit-field">
+                  <input
+                    className="num"
+                    inputMode="numeric"
+                    min={minValue}
+                    max={PASS_PRICE_MAX}
+                    step={PASS_PRICE_STEP}
+                    value={maxDraft ?? String(maxValue)}
+                    onChange={(event) => commitPrice(event.target.value, "max", true)}
+                    onBlur={(event) => commitPrice(event.target.value, "max", false)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") event.currentTarget.blur();
+                    }}
+                  />
+                  <span className="unit">€</span>
+                </span>
+              </label>
+            </div>
+            <div
+              className="range-pair"
+              style={{ "--lo": `${minPercent}%`, "--hi": `${maxPercent}%` } as CSSProperties}
+            >
               <input
                 type="range"
-                min={MIN_PASS_PRICE}
-                max={MAX_PASS_PRICE}
-                step={50}
-                value={share.maxPassPrice ?? MAX_PASS_PRICE}
+                aria-label={t("priceMin")}
+                min={PASS_PRICE_MIN}
+                max={PASS_PRICE_MAX}
+                step={PASS_PRICE_STEP}
+                value={minValue}
+                style={{ zIndex: rangeOnTop === "min" ? 2 : 1 }}
+                onPointerDown={() => setRangeOnTop("min")}
                 onChange={(event) => {
-                  const value = Number(event.target.value);
-                  updateShare({ maxPassPrice: value >= MAX_PASS_PRICE ? null : value });
+                  setMinDraft(null);
+                  const next = snapPassPrice(Number(event.target.value), maxValue, "min");
+                  updateShare({ minPassPrice: next });
                 }}
               />
-            </label>
+              <input
+                type="range"
+                aria-label={t("priceMax")}
+                min={PASS_PRICE_MIN}
+                max={PASS_PRICE_MAX}
+                step={PASS_PRICE_STEP}
+                value={maxValue}
+                style={{ zIndex: rangeOnTop === "max" ? 2 : 1 }}
+                onPointerDown={() => setRangeOnTop("max")}
+                onChange={(event) => {
+                  setMaxDraft(null);
+                  const next = snapPassPrice(Number(event.target.value), minValue, "max");
+                  updateShare({ maxPassPrice: next });
+                }}
+              />
+            </div>
             <p className="hint">{t("birthYearExact")}</p>
           </fieldset>
 
           <PlacePicker />
 
-          <label className="check">
-            <input type="checkbox" checked={share.night} onChange={() => updateShare({ night: !share.night })} />
-            <span>{t("nightSkiing")}</span>
-          </label>
-          <label className="check">
-            <input type="checkbox" checked={share.park} onChange={() => updateShare({ park: !share.park })} />
-            <span>{t("snowpark")}</span>
-          </label>
-          <label className="check">
-            <input type="checkbox" checked={share.showAbandoned} onChange={() => updateShare({ showAbandoned: !share.showAbandoned })} />
-            <span>{t("showClosed")}</span>
-          </label>
-          <p className="hint">{t("showClosedHint")}</p>
-
-          <details className="more-filters">
-            <summary>{t("moreFilters")}</summary>
-            <fieldset>
-              <legend>{t("region")}</legend>
-              {regions.map((region) => {
-                const on = share.regions.includes(region);
-                return (
-                  <label key={region} className="check">
-                    <input
-                      type="checkbox"
-                      checked={on}
-                      onChange={() =>
-                        updateShare({ regions: on ? share.regions.filter((item) => item !== region) : [...share.regions, region] })
-                      }
-                    />
-                    <span>{regionLabel(messages, region)}</span>
-                  </label>
-                );
-              })}
-            </fieldset>
-            {home ? (
-              <label className="field">
-                <span>{t("maxDistance")}</span>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  value={share.maxKm ?? ""}
-                  onChange={(event) => updateShare({ maxKm: event.target.value === "" ? null : Number(event.target.value) })}
-                />
+          <section className="filter-features">
+            <h3>{t("filterFeatures")}</h3>
+            <div className="filter-checks">
+              <label className="check">
+                <input type="checkbox" checked={share.night} onChange={() => updateShare({ night: !share.night })} />
+                <span className="check-copy">
+                  <span>{t("nightSkiing")}</span>
+                  <span className="hint">{t("nightSkiingHint")}</span>
+                </span>
               </label>
-            ) : null}
-            <label className="field">
-              <span>{t("minElev")}</span>
-              <input
-                type="number"
-                inputMode="numeric"
-                min={0}
-                value={share.minElev ?? ""}
-                onChange={(event) => updateShare({ minElev: event.target.value === "" ? null : Number(event.target.value) })}
-              />
-            </label>
-            <label className="field">
-              <span>{t("minSlope")}</span>
-              <input
-                type="number"
-                inputMode="decimal"
-                min={0}
-                value={share.minSlope ?? ""}
-                onChange={(event) => updateShare({ minSlope: event.target.value === "" ? null : Number(event.target.value) })}
-              />
-            </label>
-            <label className="check">
-              <input type="checkbox" checked={share.transit} onChange={() => updateShare({ transit: !share.transit })} />
-              <span>{t("klima")}</span>
-            </label>
-            <p className="hint">{t("klimaHint")}</p>
-            <label className="check">
-              <input type="checkbox" checked={share.favouritesOnly} onChange={() => updateShare({ favouritesOnly: !share.favouritesOnly })} />
-              <span>{t("favouritesOnly")}</span>
-            </label>
+              <label className="check">
+                <input type="checkbox" checked={share.park} onChange={() => updateShare({ park: !share.park })} />
+                <span className="check-copy">
+                  <span>{t("snowpark")}</span>
+                  <span className="hint">{t("snowparkHint")}</span>
+                </span>
+              </label>
+              <label className="check">
+                <input type="checkbox" checked={share.transit} onChange={() => updateShare({ transit: !share.transit })} />
+                <span className="check-copy">
+                  <span>{t("klima")}</span>
+                  <span className="hint">{t("klimaHint")}</span>
+                </span>
+              </label>
+              <label className="check">
+                <input type="checkbox" checked={share.favouritesOnly} onChange={() => updateShare({ favouritesOnly: !share.favouritesOnly })} />
+                <span className="check-copy">
+                  <span>{t("favouritesOnly")}</span>
+                  <span className="hint">{t("favouritesHint")}</span>
+                </span>
+              </label>
+              <label className="check">
+                <input type="checkbox" checked={share.showAbandoned} onChange={() => updateShare({ showAbandoned: !share.showAbandoned })} />
+                <span className="check-copy">
+                  <span>{t("showClosed")}</span>
+                  <span className="hint">{t("showClosedHint")}</span>
+                </span>
+              </label>
+            </div>
             <p className="hint">{t("unknownHidden")}</p>
+          </section>
+
+          <details className="more-filters" onToggle={revealMoreFilters}>
+            <summary>
+              <span className="more-filters-label">
+                <span className="more-filters-copy">
+                  <span className="more-filters-title">{t("moreFilters")}</span>
+                  <span className="more-filters-hint">{t("moreFiltersHint")}</span>
+                </span>
+                <span className="more-filters-chevron" aria-hidden="true" />
+              </span>
+            </summary>
+            <div className="more-filters-body">
+              <fieldset className="region-picks">
+                <legend>{t("region")}</legend>
+                {regions.map((region) => {
+                  const on = share.regions.includes(region);
+                  return (
+                    <label key={region} className="check">
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() =>
+                          updateShare({ regions: on ? share.regions.filter((item) => item !== region) : [...share.regions, region] })
+                        }
+                      />
+                      <span>{regionLabel(messages, region)}</span>
+                    </label>
+                  );
+                })}
+              </fieldset>
+              {home ? (
+                <label className="field">
+                  <span>{t("maxDistance")}</span>
+                  <span className="unit-field">
+                    <input
+                      className="num"
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      placeholder={t("anyAmount")}
+                      value={kmDraft ?? (share.maxKm ?? "")}
+                      onChange={(event) => editMeasure(event.target.value, false, setKmDraft, (maxKm) => updateShare({ maxKm }))}
+                      onBlur={() => setKmDraft(null)}
+                    />
+                    <span className="unit">km</span>
+                  </span>
+                </label>
+              ) : null}
+              <label className="field">
+                <span>{t("minElev")}</span>
+                <span className="unit-field">
+                  <input
+                    className="num"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    placeholder="0"
+                    value={elevDraft ?? (share.minElev ?? "")}
+                    onChange={(event) => editMeasure(event.target.value, true, setElevDraft, (minElev) => updateShare({ minElev }))}
+                    onBlur={() => setElevDraft(null)}
+                  />
+                  <span className="unit">m</span>
+                </span>
+              </label>
+              <label className="field">
+                <span>{t("minSlope")}</span>
+                <span className="unit-field">
+                  <input
+                    className="num"
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    placeholder="0"
+                    value={slopeDraft ?? (share.minSlope ?? "")}
+                    onChange={(event) => editMeasure(event.target.value, false, setSlopeDraft, (minSlope) => updateShare({ minSlope }))}
+                    onBlur={() => setSlopeDraft(null)}
+                  />
+                  <span className="unit">km</span>
+                </span>
+              </label>
+            </div>
           </details>
+        </div>
         </div>
         <div className="filter-footer">
           <button type="button" className="ghost" onClick={resetFilters}>

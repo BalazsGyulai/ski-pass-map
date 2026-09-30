@@ -32,6 +32,7 @@ export function defaultShareState(): ShareState {
     maxKm: null,
     favouritesOnly: false,
     showAbandoned: false,
+    minPassPrice: null,
     maxPassPrice: null,
     home: "",
     geoLat: null,
@@ -61,6 +62,7 @@ export function parseShareState(params: URLSearchParams): ShareState {
   state.maxKm = positiveOrNull(params.get("maxKm"));
   state.favouritesOnly = params.get("fav") === "1";
   state.showAbandoned = params.get("abandoned") === "1" || params.get("closed") === "1";
+  state.minPassPrice = positiveOrNull(params.get("minPrice"));
   state.maxPassPrice = positiveOrNull(params.get("maxPrice"));
   // Reference places stay in localStorage. A shared link never sets a city or a device location.
   state.home = "";
@@ -93,6 +95,7 @@ export function serializeShareState(state: ShareState): string {
   if (state.maxKm != null) params.set("maxKm", String(state.maxKm));
   if (state.favouritesOnly) params.set("fav", "1");
   if (state.showAbandoned) params.set("abandoned", "1");
+  if (state.minPassPrice != null) params.set("minPrice", String(state.minPassPrice));
   if (state.maxPassPrice != null) params.set("maxPrice", String(state.maxPassPrice));
   if (state.resort) params.set("resort", state.resort);
   if (state.view !== "map") params.set("view", state.view);

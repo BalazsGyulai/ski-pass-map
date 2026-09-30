@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { cities, passes, resorts } from "./data";
 import { distanceKm } from "./distance";
-import { filterResorts, sortResorts } from "./filter";
+import { filterResorts, measureFromField, snapPassPrice, sortResorts, PASS_PRICE_MAX, PASS_PRICE_MIN } from "./filter";
 import { parseShareState, serializeShareState } from "./url-state";
 
 const names = new Map(passes.map((pass) => [pass.id, pass.name]));
@@ -25,6 +25,7 @@ describe("filterResorts", () => {
       maxKm: null,
       favouritesOnly: false,
       showAbandoned: false,
+      minPassPrice: null,
       maxPassPrice: null,
     };
     const uncovered = filterResorts(resorts, { ...empty, noPass: true }, base);
@@ -83,6 +84,7 @@ describe("filterResorts", () => {
         maxKm: 30,
         favouritesOnly: false,
         showAbandoned: false,
+        minPassPrice: null,
         maxPassPrice: null,
       },
       { home: vienna, favourites: new Set(), passNames: names },
@@ -141,6 +143,39 @@ describe("pass price filter", () => {
     const state = parseShareState(new URLSearchParams("maxPrice=650"));
     expect(state.maxPassPrice).toBe(650);
     expect(serializeShareState(state)).toBe("maxPrice=650");
+  });
+
+  it("keeps a resort only when a pass sits between the minimum and the maximum", () => {
+    const inBand = filterResorts(resorts, { ...base, minPassPrice: 500, maxPassPrice: 700 }, { ...context, passPriceOf: priceOf });
+    expect(inBand).toEqual([]);
+    const wide = filterResorts(resorts, { ...base, minPassPrice: 250, maxPassPrice: 400 }, { ...context, passPriceOf: priceOf });
+    expect(wide.length).toBeGreaterThan(0);
+    expect(wide.every((resort) => resort.passes.includes(cheapPass))).toBe(true);
+    const state = parseShareState(new URLSearchParams("minPrice=500&maxPrice=800"));
+    expect(state.minPassPrice).toBe(500);
+    expect(state.maxPassPrice).toBe(800);
+    expect(serializeShareState(state)).toBe("minPrice=500&maxPrice=800");
+  });
+});
+
+describe("measureFromField", () => {
+  it("clears an empty field and refuses a negative elevation or slope", () => {
+    expect(measureFromField("", true)).toBeNull();
+    expect(measureFromField("-1", true)).toBeUndefined();
+    expect(measureFromField("-0.5", false)).toBeUndefined();
+    expect(measureFromField("1800", true)).toBe(1800);
+    expect(measureFromField("12.5", false)).toBe(12.5);
+    expect(measureFromField("12.", false)).toBeUndefined();
+  });
+});
+
+describe("snapPassPrice", () => {
+  it("snaps a typed price onto the slider and turns an end of the scale off", () => {
+    expect(snapPassPrice(475, PASS_PRICE_MAX, "min")).toBe(500);
+    expect(snapPassPrice(100, PASS_PRICE_MAX, "min")).toBeNull();
+    expect(snapPassPrice(2000, PASS_PRICE_MIN, "max")).toBeNull();
+    expect(snapPassPrice(900, 600, "min")).toBe(600);
+    expect(snapPassPrice(400, 700, "max")).toBe(700);
   });
 });
 

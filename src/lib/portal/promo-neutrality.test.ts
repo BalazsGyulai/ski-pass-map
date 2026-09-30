@@ -18,6 +18,7 @@ describe("promo ranking neutrality", () => {
       maxKm: null,
       favouritesOnly: false,
       showAbandoned: false,
+      minPassPrice: null,
       maxPassPrice: null,
     };
     const context = { home: null, favourites: new Set<string>(), passNames: new Map<string, string>() };

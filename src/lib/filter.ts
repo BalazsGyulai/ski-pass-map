@@ -18,8 +18,41 @@ export interface ResortFilters {
   maxKm: number | null;
   favouritesOnly: boolean;
   showAbandoned: boolean;
-  /** Keep resorts that a pass costing at most this much (for the viewer) covers. */
+  /** Keep resorts that a pass in this price band covers. Null is that end of the scale. */
+  minPassPrice: number | null;
   maxPassPrice: number | null;
+}
+
+/** The pass-price slider. Either end means that limit is off. */
+export const PASS_PRICE_MIN = 300;
+export const PASS_PRICE_MAX = 1300;
+export const PASS_PRICE_STEP = 50;
+
+/**
+ * A typed elevation or slope. Empty clears the filter. A minus, or any other
+ * non-number, is refused so the field can ignore that keystroke.
+ * `undefined` means "still typing a decimal" when the text ends with a dot.
+ */
+export function measureFromField(raw: string, integer: boolean): number | null | undefined {
+  if (raw === "") return null;
+  if (!(integer ? /^\d+$/ : /^\d*\.?\d*$/).test(raw)) return undefined;
+  if (!integer && (raw === "." || raw.endsWith("."))) return undefined;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0) return undefined;
+  return value;
+}
+
+/** Snap a typed price onto the slider scale, and keep it inside the other thumb. */
+export function snapPassPrice(value: number, other: number, bound: "min" | "max"): number | null {
+  if (!Number.isFinite(value)) return null;
+  const stepped = Math.round(value / PASS_PRICE_STEP) * PASS_PRICE_STEP;
+  const clamped = Math.min(PASS_PRICE_MAX, Math.max(PASS_PRICE_MIN, stepped));
+  if (bound === "min") {
+    const next = Math.min(clamped, other);
+    return next <= PASS_PRICE_MIN ? null : next;
+  }
+  const next = Math.max(clamped, other);
+  return next >= PASS_PRICE_MAX ? null : next;
 }
 
 export function countActiveFilters(filters: ResortFilters): number {
@@ -36,7 +69,7 @@ export function countActiveFilters(filters: ResortFilters): number {
   if (filters.maxKm != null) count += 1;
   if (filters.favouritesOnly) count += 1;
   if (filters.showAbandoned) count += 1;
-  if (filters.maxPassPrice != null) count += 1;
+  if (filters.minPassPrice != null || filters.maxPassPrice != null) count += 1;
   return count;
 }
 
@@ -47,7 +80,7 @@ export function filterResorts(
     home: LatLon | null;
     favourites: ReadonlySet<string>;
     passNames: ReadonlyMap<string, string>;
-    /** The viewer's price for a pass. Needed for maxPassPrice. */
+    /** The viewer's price for a pass. Needed for the price band. */
     passPriceOf?: (passId: string) => number | null;
   },
 ): Resort[] {
@@ -80,14 +113,18 @@ export function filterResorts(
     if (filters.minSlope != null && (resort.slope_km == null || resort.slope_km < filters.minSlope)) return false;
     if (filters.maxKm != null && context.home && distanceKm(context.home, resort) > filters.maxKm) return false;
     if (filters.favouritesOnly && !context.favourites.has(resort.id)) return false;
-    if (filters.maxPassPrice != null) {
-      const limit = filters.maxPassPrice;
+    if (filters.minPassPrice != null || filters.maxPassPrice != null) {
+      const low = filters.minPassPrice;
+      const high = filters.maxPassPrice;
       const candidates = filters.passes.length > 0 ? resort.passes.filter((id) => filters.passes.includes(id)) : resort.passes;
-      const affordable = candidates.some((id) => {
+      const inBand = candidates.some((id) => {
         const price = context.passPriceOf?.(id);
-        return price != null && price <= limit;
+        if (price == null) return false;
+        if (low != null && price < low) return false;
+        if (high != null && price > high) return false;
+        return true;
       });
-      if (!affordable) return false;
+      if (!inBand) return false;
     }
     return true;
   });

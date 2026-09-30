@@ -246,10 +246,31 @@ test("pass chips and the price filter narrow the map", async ({ page, baseURL })
   await page.locator(".pass-chips .chip").first().click();
   await expect(page).not.toHaveURL(/passes=/);
   await page.getByRole("button", { name: /open filters/i }).click();
-  await page.locator('.filter-sheet input[type="range"]').fill("500");
+  await page.getByRole("slider", { name: "Max" }).fill("500");
   await expect(page).toHaveURL(/maxPrice=500/);
   await page.keyboard.press("Escape");
   await expect(page.locator(".search-pill .pill-summary")).toContainText("Up to €500");
+  expect(problems, problems.join("\n")).toEqual([]);
+});
+
+test("pass combination is a full-size choice, and more filters open", async ({ page, baseURL }) => {
+  const origin = originFromBase(baseURL);
+  const problems = attachOriginGuards(page, origin);
+  await dismissConsent(page, "rejected");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/en/");
+  await page.getByRole("button", { name: /open filters/i }).click();
+  const choice = page.getByRole("radio", { name: "Any selected pass" });
+  await expect(choice).toBeVisible();
+  await expect(choice).toBeChecked();
+  const height = await choice.evaluate((el) => el.closest("label")?.getBoundingClientRect().height ?? 0);
+  expect(height).toBeGreaterThanOrEqual(52);
+  await page.getByRole("radio", { name: "Every selected pass" }).check();
+  await expect(page).toHaveURL(/match=all/);
+  const summary = page.locator(".more-filters summary");
+  await summary.scrollIntoViewIfNeeded();
+  await summary.click();
+  await expect(page.getByRole("group", { name: "Region" })).toBeVisible();
   expect(problems, problems.join("\n")).toEqual([]);
 });
 
